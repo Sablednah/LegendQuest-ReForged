@@ -1,0 +1,33 @@
+{
+  "name": "Ranger",
+  "chat_tag": "[R]",
+  "description": "At home in the wild, deadly at range.",
+  "size": 1.8,
+  "frequency": 350,
+  "health_mod": 1.0,
+  "health_per_level": 0.1,
+  "mana_bonus": 5.0,
+  "statmods": {
+    "dex": 2,
+    "wis": 1,
+    "chr": -1
+  },
+  "skill_points": 10,
+  "skill_points_per_level": 0.15,
+  "allowed_weapons": "#legendquest:ranger_weapons",
+  "allowed_armour": "#legendquest:ranger_armour",
+  "skills": {
+    "legendquest:leap": {
+      "level": 0,
+      "cost": 0
+    },
+    "legendquest:night_vision": {
+      "level": 5,
+      "cost": 0
+    },
+    "legendquest:summon_wolf": {
+      "level": 10,
+      "cost": 5
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "Blink",
+  "description": "Step through space to the block you are looking at.",
+  "type": "active",
+  "cooldown": 6000,
+  "delay": 500,
+  "mana_cost": 5,
+  "effects": [
+    { "type": "legendquest:teleport", "max_range": 24 }
+  ]
+}

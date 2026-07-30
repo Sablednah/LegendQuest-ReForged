@@ -1,0 +1,28 @@
+{
+  "name": "Fighter",
+  "chat_tag": "[F]",
+  "description": "Steel, sweat, and the front line.",
+  "size": 1.8,
+  "frequency": 400,
+  "health_mod": 4.0,
+  "health_per_level": 0.2,
+  "statmods": {
+    "str": 2,
+    "con": 1,
+    "int": -1
+  },
+  "skill_points": 10,
+  "skill_points_per_level": 0.1,
+  "allowed_weapons": "#legendquest:fighter_weapons",
+  "allowed_armour": "#legendquest:heavy_armour",
+  "skills": {
+    "legendquest:battle_fury": {
+      "level": 5,
+      "cost": 0
+    },
+    "legendquest:second_wind": {
+      "level": 10,
+      "cost": 5
+    }
+  }
+}

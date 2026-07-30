@@ -1,0 +1,34 @@
+# LegendQuest ReForged — neoforge.mods.toml (values are expanded from gradle.properties at build time).
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="${mod_license}"
+issueTrackerURL="https://github.com/Sablednah/LegendQuest-ReForged/issues"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+authors="${mod_authors}"
+description='''
+${mod_description}
+'''
+displayURL="https://github.com/Sablednah/LegendQuest-ReForged"
+logoFile="legendquest.png"
+logoBlur=false
+
+# The mod is server-authoritative: vanilla clients can join and play. The
+# optional client entrypoint adds the mana/skill HUD for modded clients.
+
+[[dependencies.${mod_id}]]
+    modId="neoforge"
+    type="required"
+    versionRange="[${neo_version},)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    type="required"
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"

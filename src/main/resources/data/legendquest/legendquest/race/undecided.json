@@ -1,0 +1,12 @@
+{
+  "_comment": "The starting race. Players may change away from it exactly once.",
+  "name": "Undecided",
+  "plural": "Undecided",
+  "size": 1.8,
+  "frequency": 0,
+  "default": true,
+  "base_health": 20.0,
+  "base_mana": 10.0,
+  "mana_per_second": 1.0,
+  "groups": []
+}

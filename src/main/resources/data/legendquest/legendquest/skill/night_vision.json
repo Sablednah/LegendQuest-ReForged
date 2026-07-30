@@ -1,0 +1,8 @@
+{
+  "name": "Night Vision",
+  "description": "The dark holds no secrets from you.",
+  "type": "passive",
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:night_vision", "duration": 15000 }
+  ]
+}

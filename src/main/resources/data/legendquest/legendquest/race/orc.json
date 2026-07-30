@@ -1,0 +1,18 @@
+{
+  "name": "Orc",
+  "plural": "Orcs",
+  "chat_tag": "[O]",
+  "description": "Brutal strength, short temper.",
+  "size": 2.0,
+  "frequency": 250,
+  "base_health": 26.0,
+  "base_mana": 4.0,
+  "mana_per_second": 0.5,
+  "statmods": { "str": 2, "con": 1, "int": -1, "wis": -1, "chr": -1 },
+  "groups": ["Humanoid", "Orcoid"],
+  "skill_points": 8,
+  "skill_points_per_level": 0.15,
+  "skills": {
+    "legendquest:battle_fury": { "level": 10, "cost": 0 }
+  }
+}

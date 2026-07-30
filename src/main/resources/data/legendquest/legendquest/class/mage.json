@@ -1,0 +1,39 @@
+{
+  "name": "Mage",
+  "chat_tag": "[M]",
+  "description": "Knowledge is power; mana is ammunition.",
+  "size": 1.8,
+  "frequency": 300,
+  "health_mod": -2.0,
+  "mana_bonus": 20.0,
+  "mana_per_level": 0.5,
+  "mana_per_second": 2.0,
+  "statmods": {
+    "wis": 2,
+    "int": 1,
+    "str": -1,
+    "con": -1
+  },
+  "allowed_groups": [
+    "Elvish",
+    "Humanoid"
+  ],
+  "skill_points": 10,
+  "skill_points_per_level": 0.2,
+  "allowed_weapons": "#legendquest:mage_weapons",
+  "allowed_armour": "#legendquest:mage_armour",
+  "skills": {
+    "legendquest:heal": {
+      "level": 0,
+      "cost": 0
+    },
+    "legendquest:blink": {
+      "level": 5,
+      "cost": 0
+    },
+    "legendquest:smite": {
+      "level": 15,
+      "cost": 5
+    }
+  }
+}

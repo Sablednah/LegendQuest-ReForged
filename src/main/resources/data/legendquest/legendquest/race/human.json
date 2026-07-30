@@ -1,0 +1,14 @@
+{
+  "name": "Human",
+  "plural": "Humans",
+  "chat_tag": "[H]",
+  "description": "Adaptable and ambitious.",
+  "size": 1.8,
+  "frequency": 500,
+  "base_health": 20.0,
+  "base_mana": 10.0,
+  "mana_per_second": 1.0,
+  "groups": ["Humanoid"],
+  "skill_points": 10,
+  "skill_points_per_level": 0.2
+}

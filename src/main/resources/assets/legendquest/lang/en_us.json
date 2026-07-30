@@ -1,0 +1,19 @@
+{
+  "legendquest.configuration.stats": "Character Stats",
+  "legendquest.configuration.statlineMode": "Statline Mode",
+  "legendquest.configuration.combat": "Combat",
+  "legendquest.configuration.useD20Combat": "Use d20 Combat",
+  "legendquest.configuration.useSizeInCombat": "Use Size In Combat",
+  "legendquest.configuration.xp": "Experience",
+  "legendquest.configuration.xpLevelBase": "XP Level Base",
+  "legendquest.configuration.maxLevel": "Max Level",
+  "legendquest.configuration.skills": "Skills",
+  "legendquest.configuration.passiveTickMs": "Passive Tick (ms)",
+  "legendquest.configuration.karma": "Karma",
+  "legendquest.configuration.killPlayer": "Karma: Kill Player",
+  "legendquest.configuration.killVillager": "Karma: Kill Villager",
+  "legendquest.configuration.killAnimal": "Karma: Kill Animal",
+  "legendquest.configuration.killMonster": "Karma: Kill Monster",
+  "legendquest.configuration.positiveNames": "Positive Karma Titles",
+  "legendquest.configuration.negativeNames": "Negative Karma Titles"
+}

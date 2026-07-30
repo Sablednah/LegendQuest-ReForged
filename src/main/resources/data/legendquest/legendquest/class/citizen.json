@@ -1,0 +1,8 @@
+{
+  "_comment": "The default class everyone starts with.",
+  "name": "Citizen",
+  "description": "An ordinary soul, yet to find a calling.",
+  "size": 1.8,
+  "frequency": 0,
+  "default": true
+}

@@ -1,0 +1,24 @@
+{
+  "name": "Summon Wolf",
+  "description": "Call a wolf from the wild to your side.",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 20,
+  "consumes": "minecraft:bone",
+  "consumes_qty": 2,
+  "effects": [
+    {
+      "type": "legendquest:summon",
+      "entity": "minecraft:wolf",
+      "count": 1,
+      "target": {
+        "kind": "looking_at",
+        "range": 8
+      }
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:entity.wolf.ambient"
+    }
+  ]
+}

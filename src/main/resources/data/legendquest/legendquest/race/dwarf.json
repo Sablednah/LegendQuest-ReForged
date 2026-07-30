@@ -1,0 +1,23 @@
+{
+  "name": "Dwarf",
+  "plural": "Dwarves",
+  "chat_tag": "[D]",
+  "description": "Stout mountain folk, born to stone and forge.",
+  "size": 1.2,
+  "frequency": 400,
+  "base_health": 24.0,
+  "base_mana": 5.0,
+  "mana_per_second": 1.0,
+  "base_speed": 0.19,
+  "statmods": { "str": 1, "con": 2, "dex": -1, "chr": -1 },
+  "groups": ["Humanoid", "Dwarven"],
+  "skill_points": 10,
+  "skill_points_per_level": 0.2,
+  "skills": {
+    "legendquest:second_wind": { "level": 5, "cost": 0 }
+  },
+  "levels": {
+    "10": { "hp": 2 },
+    "25": { "hp": 2, "stats": { "con": 1 } }
+  }
+}

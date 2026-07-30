@@ -1,0 +1,11 @@
+{
+  "name": "Second Wind",
+  "description": "When hurt, you sometimes find hidden reserves.",
+  "type": "triggered",
+  "cooldown": 15000,
+  "trigger": { "on": "hurt", "chance": 20.0 },
+  "effects": [
+    { "type": "legendquest:heal", "amount": 4.0, "target": { "kind": "self" } },
+    { "type": "legendquest:message", "text": "&aA second wind fills your lungs!" }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "name": "Hobbit",
+  "plural": "Hobbitses",
+  "chat_tag": "[Hb]",
+  "description": "Small, nimble, and fond of second breakfast.",
+  "size": 1.0,
+  "frequency": 200,
+  "base_health": 16.0,
+  "base_mana": 10.0,
+  "mana_per_second": 1.0,
+  "base_speed": 0.21,
+  "statmods": {
+    "dex": 2,
+    "str": -2,
+    "chr": 1
+  },
+  "groups": [
+    "Humanoid"
+  ],
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "skills": {
+    "legendquest:leap": {
+      "level": 3,
+      "cost": 0
+    }
+  },
+  "disallowed_armour": "#legendquest:boots"
+}
