@@ -37,6 +37,16 @@ import net.minecraft.world.item.ItemStack;
  */
 public final class SkillEngine {
 
+    /** Why a cast fired or fizzled — lets callers colour their feedback. */
+    public enum UseResult {
+        FIRED, NOT_KNOWN, NOT_LOADED, NOT_ACTIVE, LEVEL_LOCKED, NOT_PURCHASED,
+        NOT_READY, KARMA_BLOCKED, NO_MANA, NO_ITEM;
+
+        public boolean fired() {
+            return this == FIRED;
+        }
+    }
+
     /** A cast that has been paid for and is waiting out buildup + delay. */
     private record Pending(UUID player, Identifier skillId, long fireAtMs) {}
 
@@ -72,32 +82,32 @@ public final class SkillEngine {
 
     // --- active use ---
 
-    public static boolean use(ServerPlayer player, Identifier skillId) {
+    public static UseResult use(ServerPlayer player, Identifier skillId) {
         PlayerCharacter pc = CharacterService.data(player);
         SkillGrant grant = grants(player).get(skillId);
         if (grant == null) {
             Feedback.actionBar(player, "&cYou don't know that skill.");
-            return false;
+            return UseResult.NOT_KNOWN;
         }
         Optional<SkillDefinition> defOpt = definition(player, skillId);
         if (defOpt.isEmpty()) {
             Feedback.actionBar(player, "&cSkill '" + skillId + "' is not loaded — tell an admin.");
             LegendQuest.LOGGER.warn("Player {} has a grant for unknown skill {}", player.getName(), skillId);
-            return false;
+            return UseResult.NOT_LOADED;
         }
         SkillDefinition def = defOpt.get();
         if (def.type() != SkillType.ACTIVE) {
             Feedback.actionBar(player, "&e" + def.name() + " is " + def.type() + " — it works on its own.");
-            return false;
+            return UseResult.NOT_ACTIVE;
         }
         if (CharacterService.level(player) < grant.level()) {
             Feedback.actionBar(player, "&c" + def.name() + " unlocks at level " + grant.level() + ".");
-            return false;
+            return UseResult.LEVEL_LOCKED;
         }
         if (grant.cost() > 0 && !pc.hasPurchased(skillId)) {
             Feedback.actionBar(player, "&c" + def.name() + " must be bought first: /skill buy "
                     + skillId + " (" + grant.cost() + " points)");
-            return false;
+            return UseResult.NOT_PURCHASED;
         }
 
         long now = System.currentTimeMillis();
@@ -106,10 +116,11 @@ public final class SkillEngine {
             long waitMs = SkillPhase.remainingMs(now, pc.lastUse(skillId), def.timing());
             Feedback.actionBar(player, "&c" + def.name() + " is " + phase.name().toLowerCase()
                     + " — ready in " + (waitMs / 1000 + 1) + "s");
-            return false;
+            return UseResult.NOT_READY;
         }
 
-        if (!payCosts(player, pc, def.costs(), def.name())) return false;
+        UseResult paid = payCosts(player, pc, def.costs(), def.name());
+        if (paid != UseResult.FIRED) return paid;
 
         pc.stampUse(skillId, now);
         long fireAt = now + def.timing().buildupMs() + def.timing().delayMs();
@@ -121,24 +132,24 @@ public final class SkillEngine {
             }
             PENDING.add(new Pending(player.getUUID(), skillId, fireAt));
         }
-        return true;
+        return UseResult.FIRED;
     }
 
-    private static boolean payCosts(ServerPlayer player, PlayerCharacter pc, SkillCosts costs, String name) {
+    private static UseResult payCosts(ServerPlayer player, PlayerCharacter pc, SkillCosts costs, String name) {
         // Karma gate: positive required = must be at least this good;
         // negative = must be at least this evil (the old convention).
         if (costs.karmaRequired() > 0 && pc.karma() < costs.karmaRequired()) {
             Feedback.actionBar(player, "&cYou are not virtuous enough for " + name + ".");
-            return false;
+            return UseResult.KARMA_BLOCKED;
         }
         if (costs.karmaRequired() < 0 && pc.karma() > costs.karmaRequired()) {
             Feedback.actionBar(player, "&cYou are not wicked enough for " + name + ".");
-            return false;
+            return UseResult.KARMA_BLOCKED;
         }
         if (pc.mana() < costs.manaCost()) {
             Feedback.actionBar(player, "&9Not enough mana for " + name + " ("
                     + (int) pc.mana() + "/" + costs.manaCost() + ").");
-            return false;
+            return UseResult.NO_MANA;
         }
         if (costs.consumes().isPresent()) {
             ItemStack needed = new ItemStack(costs.consumes().get(), costs.consumesQty());
@@ -146,13 +157,13 @@ public final class SkillEngine {
             if (slot < 0 || player.getInventory().getItem(slot).getCount() < costs.consumesQty()) {
                 Feedback.actionBar(player, "&c" + name + " needs "
                         + costs.consumesQty() + "x " + needed.getHoverName().getString() + ".");
-                return false;
+                return UseResult.NO_ITEM;
             }
             player.getInventory().getItem(slot).shrink(costs.consumesQty());
         }
         pc.setMana(pc.mana() - costs.manaCost());
         pc.addKarma(costs.karmaReward() - costs.karmaCost());
-        return true;
+        return UseResult.FIRED;
     }
 
     private static void fire(ServerPlayer player, Identifier skillId, SkillDefinition def) {

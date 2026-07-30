@@ -223,9 +223,14 @@ public final class LQServerEvents {
             lastBindFire.put(player.getUUID(), now);
             if (isLoadoutItem && player.isShiftKeyDown()) {
                 pc.cycleLoadout();
-                Feedback.actionBar(player, loadoutBar(player, pc));
+                Feedback.actionBar(player, loadoutBar(player, pc, "&e"));
             } else if (bound.isPresent()) {
-                SkillEngine.use(player, bound.get());
+                var result = SkillEngine.use(player, bound.get());
+                if (isLoadoutItem) {
+                    // The bar is the feedback: selected skill coloured by
+                    // outcome (sent after use()'s message, so it wins).
+                    Feedback.actionBar(player, loadoutBar(player, pc, resultColour(result)));
+                }
             } else {
                 Feedback.actionBar(player, "&7Loadout is empty — /loadout add <skill>");
             }
@@ -233,16 +238,40 @@ public final class LQServerEvents {
         return true;
     }
 
-    /** "Heal &l◆Blink◆&r Smite" — the selected skill stands out. */
-    static String loadoutBar(ServerPlayer player, PlayerCharacter pc) {
+    private static String resultColour(SkillEngine.UseResult result) {
+        return switch (result) {
+            case FIRED -> "&a";                    // green: away it goes
+            case NO_MANA -> "&9";                  // blue: mana problem
+            case NO_ITEM -> "&b";                  // cyan: missing reagent
+            case NOT_READY -> "&c";                // red: cooldown/phase
+            default -> "&c";
+        };
+    }
+
+    /**
+     * "Heal  ◆Blink◆  Smite 3s" — the selected skill stands out in
+     * {@code selectedColour}, and anything not READY shows seconds left.
+     */
+    static String loadoutBar(ServerPlayer player, PlayerCharacter pc, String selectedColour) {
         StringBuilder sb = new StringBuilder("&6");
         var skills = pc.loadout();
+        long now = System.currentTimeMillis();
         for (int n = 0; n < skills.size(); n++) {
-            String name = SkillEngine.definition(player, skills.get(n))
-                    .map(d -> d.name()).orElse(skills.get(n).getPath());
+            Identifier id = skills.get(n);
+            var def = SkillEngine.definition(player, id);
+            String name = def.map(d -> d.name()).orElse(id.getPath());
+            String suffix = "";
+            if (def.isPresent()) {
+                long waitMs = com.sablednah.legendquest.core.SkillPhase.remainingMs(
+                        now, pc.lastUse(id), def.get().timing());
+                if (waitMs > 0) suffix = " " + (waitMs / 1000 + 1) + "s";
+            }
             if (n > 0) sb.append("  ");
-            if (n == pc.loadoutIndex()) sb.append("&e&l◆").append(name).append("◆&r&6");
-            else sb.append("&7").append(name).append("&6");
+            if (n == pc.loadoutIndex()) {
+                sb.append(selectedColour).append("&l◆").append(name).append(suffix).append("◆&r&6");
+            } else {
+                sb.append(suffix.isEmpty() ? "&7" : "&8").append(name).append(suffix).append("&6");
+            }
         }
         return sb.toString();
     }

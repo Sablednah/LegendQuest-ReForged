@@ -193,7 +193,7 @@ public final class LQCommands {
         }
         String item = pc.loadoutItem().map(Identifier::toString).orElse("&cno item bound — /loadout bind");
         Feedback.chat(player, "&6Loadout &7(" + item + "&7):");
-        Feedback.chat(player, LQServerEvents.loadoutBar(player, pc));
+        Feedback.chat(player, LQServerEvents.loadoutBar(player, pc, "&e"));
         return 1;
     }
 
@@ -478,7 +478,7 @@ public final class LQCommands {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         ResourceKey<?> key = ResourceKeyArgument.getRegistryKey(
                 ctx, "skill", LQRegistries.SKILL, ERROR_UNKNOWN_SKILL);
-        return SkillEngine.use(player, key.identifier()) ? 1 : 0;
+        return SkillEngine.use(player, key.identifier()).fired() ? 1 : 0;
     }
 
     private static int skillBuy(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
