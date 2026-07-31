@@ -45,6 +45,53 @@ public final class LQCommands {
             new DynamicCommandExceptionType(id -> Component.literal("Unknown class: " + id));
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_SKILL =
             new DynamicCommandExceptionType(id -> Component.literal("Unknown skill: " + id));
+    private static final DynamicCommandExceptionType ERROR_AMBIGUOUS =
+            new DynamicCommandExceptionType(ids -> Component.literal(
+                    "That short name matches more than one entry — use the full id: " + ids));
+
+    /**
+     * Resolve what the player typed, accepting the bare name: {@code dwarf}
+     * instead of {@code legendquest:dwarf}. An identifier with no namespace
+     * parses as {@code minecraft:<path>} — the signal the namespace was
+     * omitted — so we match on path across every namespace. An exact hit
+     * always wins, and two packs sharing a short name is reported, not
+     * guessed at. (Pattern from ZombieMod's command resolver.)
+     */
+    private static <T> Identifier resolve(CommandSourceStack source,
+            ResourceKey<Registry<T>> registry, ResourceKey<T> typedKey,
+            DynamicCommandExceptionType unknown) throws CommandSyntaxException {
+        var lookup = source.registryAccess().lookupOrThrow(registry);
+        if (lookup.get(typedKey).isPresent()) return typedKey.identifier();
+
+        Identifier typed = typedKey.identifier();
+        if (!typed.getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) {
+            throw unknown.create(typed);
+        }
+        var byPath = lookup.listElements()
+                .filter(h -> h.key().identifier().getPath().equals(typed.getPath()))
+                .toList();
+        return switch (byPath.size()) {
+            case 1 -> byPath.getFirst().key().identifier();
+            case 0 -> throw unknown.create(typed.getPath());
+            default -> throw ERROR_AMBIGUOUS.create(byPath.stream()
+                    .map(h -> h.key().identifier().toString())
+                    .collect(java.util.stream.Collectors.joining(", ")));
+        };
+    }
+
+    /** Suggest bare names where unambiguous, plus full ids for everything. */
+    private static java.util.List<String> friendlyIds(java.util.stream.Stream<Identifier> ids) {
+        var all = ids.toList();
+        var pathCounts = new java.util.HashMap<String, Integer>();
+        all.forEach(id -> pathCounts.merge(id.getPath(), 1, Integer::sum));
+        var out = new java.util.ArrayList<String>();
+        for (Identifier id : all) {
+            if (pathCounts.get(id.getPath()) == 1) out.add(id.getPath());
+            else out.add(id.toString());
+        }
+        java.util.Collections.sort(out);
+        return out;
+    }
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> race = Commands.literal("race")
@@ -168,9 +215,9 @@ public final class LQCommands {
 
     private static int bind(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        ResourceKey<?> key = ResourceKeyArgument.getRegistryKey(
-                ctx, "skill", LQRegistries.SKILL, ERROR_UNKNOWN_SKILL);
-        Identifier skillId = key.identifier();
+        Identifier skillId = resolve(ctx.getSource(), LQRegistries.SKILL,
+                ResourceKeyArgument.getRegistryKey(ctx, "skill", LQRegistries.SKILL, ERROR_UNKNOWN_SKILL),
+                ERROR_UNKNOWN_SKILL);
         var held = player.getMainHandItem();
         if (held.isEmpty()) {
             Feedback.chat(player, "&cHold the item you want to bind first.");
@@ -316,9 +363,9 @@ public final class LQCommands {
 
     private static int loadoutAdd(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        ResourceKey<?> key = ResourceKeyArgument.getRegistryKey(
-                ctx, "skill", LQRegistries.SKILL, ERROR_UNKNOWN_SKILL);
-        Identifier skillId = key.identifier();
+        Identifier skillId = resolve(ctx.getSource(), LQRegistries.SKILL,
+                ResourceKeyArgument.getRegistryKey(ctx, "skill", LQRegistries.SKILL, ERROR_UNKNOWN_SKILL),
+                ERROR_UNKNOWN_SKILL);
         if (!SkillEngine.grants(player).containsKey(skillId)) {
             Feedback.chat(player, "&cYou don't know that skill.");
             return 0;
@@ -342,10 +389,11 @@ public final class LQCommands {
 
     private static int loadoutRemove(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        ResourceKey<?> key = ResourceKeyArgument.getRegistryKey(
-                ctx, "skill", LQRegistries.SKILL, ERROR_UNKNOWN_SKILL);
+        Identifier skillId = resolve(ctx.getSource(), LQRegistries.SKILL,
+                ResourceKeyArgument.getRegistryKey(ctx, "skill", LQRegistries.SKILL, ERROR_UNKNOWN_SKILL),
+                ERROR_UNKNOWN_SKILL);
         PlayerCharacter pc = CharacterService.data(player);
-        if (pc.removeFromLoadout(key.identifier())) {
+        if (pc.removeFromLoadout(skillId)) {
             Feedback.chat(player, "&6Removed from the loadout.");
             return 1;
         }
@@ -408,23 +456,23 @@ public final class LQCommands {
 
     private static java.util.concurrent.CompletableFuture<com.mojang.brigadier.suggestion.Suggestions> suggestRaces(
             CommandContext<CommandSourceStack> ctx, com.mojang.brigadier.suggestion.SuggestionsBuilder builder) {
-        var ids = ctx.getSource().registryAccess().lookupOrThrow(LQRegistries.RACE)
-                .listElements().map(ref -> ref.key().identifier().toString()).toList();
-        return SharedSuggestionProvider.suggest(ids, builder);
+        return SharedSuggestionProvider.suggest(friendlyIds(
+                ctx.getSource().registryAccess().lookupOrThrow(LQRegistries.RACE)
+                        .listElements().map(ref -> ref.key().identifier())), builder);
     }
 
     private static java.util.concurrent.CompletableFuture<com.mojang.brigadier.suggestion.Suggestions> suggestClasses(
             CommandContext<CommandSourceStack> ctx, com.mojang.brigadier.suggestion.SuggestionsBuilder builder) {
-        var ids = ctx.getSource().registryAccess().lookupOrThrow(LQRegistries.CHAR_CLASS)
-                .listElements().map(ref -> ref.key().identifier().toString()).toList();
-        return SharedSuggestionProvider.suggest(ids, builder);
+        return SharedSuggestionProvider.suggest(friendlyIds(
+                ctx.getSource().registryAccess().lookupOrThrow(LQRegistries.CHAR_CLASS)
+                        .listElements().map(ref -> ref.key().identifier())), builder);
     }
 
     private static java.util.concurrent.CompletableFuture<com.mojang.brigadier.suggestion.Suggestions> suggestOwnedSkills(
             CommandContext<CommandSourceStack> ctx, com.mojang.brigadier.suggestion.SuggestionsBuilder builder) {
         if (ctx.getSource().getEntity() instanceof ServerPlayer player) {
-            var ids = SkillEngine.grants(player).keySet().stream().map(Identifier::toString).sorted().toList();
-            return SharedSuggestionProvider.suggest(ids, builder);
+            return SharedSuggestionProvider.suggest(
+                    friendlyIds(SkillEngine.grants(player).keySet().stream()), builder);
         }
         return builder.buildFuture();
     }
@@ -461,8 +509,10 @@ public final class LQCommands {
 
     private static int raceChoose(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        ResourceKey<Race> key = ResourceKeyArgument.getRegistryKey(
-                ctx, "race", LQRegistries.RACE, ERROR_UNKNOWN_RACE);
+        Identifier raceId = resolve(ctx.getSource(), LQRegistries.RACE,
+                ResourceKeyArgument.getRegistryKey(ctx, "race", LQRegistries.RACE, ERROR_UNKNOWN_RACE),
+                ERROR_UNKNOWN_RACE);
+        ResourceKey<Race> key = ResourceKey.create(LQRegistries.RACE, raceId);
         PlayerCharacter pc = CharacterService.data(player);
 
         boolean onDefault = CharacterService.race(player).map(Race::isDefault).orElse(true);
@@ -485,8 +535,10 @@ public final class LQCommands {
     private static int classChoose(CommandContext<CommandSourceStack> ctx, boolean asSub)
             throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        ResourceKey<CharClass> key = ResourceKeyArgument.getRegistryKey(
-                ctx, "class", LQRegistries.CHAR_CLASS, ERROR_UNKNOWN_CLASS);
+        Identifier classId = resolve(ctx.getSource(), LQRegistries.CHAR_CLASS,
+                ResourceKeyArgument.getRegistryKey(ctx, "class", LQRegistries.CHAR_CLASS, ERROR_UNKNOWN_CLASS),
+                ERROR_UNKNOWN_CLASS);
+        ResourceKey<CharClass> key = ResourceKey.create(LQRegistries.CHAR_CLASS, classId);
         CharClass target = ctx.getSource().registryAccess().lookupOrThrow(LQRegistries.CHAR_CLASS)
                 .get(key).map(r -> r.value()).orElseThrow();
         PlayerCharacter pc = CharacterService.data(player);
@@ -607,16 +659,17 @@ public final class LQCommands {
 
     private static int skillUse(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        ResourceKey<?> key = ResourceKeyArgument.getRegistryKey(
-                ctx, "skill", LQRegistries.SKILL, ERROR_UNKNOWN_SKILL);
-        return SkillEngine.use(player, key.identifier()).fired() ? 1 : 0;
+        Identifier skillId = resolve(ctx.getSource(), LQRegistries.SKILL,
+                ResourceKeyArgument.getRegistryKey(ctx, "skill", LQRegistries.SKILL, ERROR_UNKNOWN_SKILL),
+                ERROR_UNKNOWN_SKILL);
+        return SkillEngine.use(player, skillId).fired() ? 1 : 0;
     }
 
     private static int skillBuy(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
-        ResourceKey<?> key = ResourceKeyArgument.getRegistryKey(
-                ctx, "skill", LQRegistries.SKILL, ERROR_UNKNOWN_SKILL);
-        Identifier id = key.identifier();
+        Identifier id = resolve(ctx.getSource(), LQRegistries.SKILL,
+                ResourceKeyArgument.getRegistryKey(ctx, "skill", LQRegistries.SKILL, ERROR_UNKNOWN_SKILL),
+                ERROR_UNKNOWN_SKILL);
         PlayerCharacter pc = CharacterService.data(player);
         SkillGrant grant = SkillEngine.grants(player).get(id);
         if (grant == null) {
@@ -665,23 +718,25 @@ public final class LQCommands {
 
     private static int adminSetRace(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer target = EntityArgument.getPlayer(ctx, "player");
-        ResourceKey<Race> key = ResourceKeyArgument.getRegistryKey(
-                ctx, "race", LQRegistries.RACE, ERROR_UNKNOWN_RACE);
-        CharacterService.data(target).setRace(key.identifier(), false);
+        Identifier raceId = resolve(ctx.getSource(), LQRegistries.RACE,
+                ResourceKeyArgument.getRegistryKey(ctx, "race", LQRegistries.RACE, ERROR_UNKNOWN_RACE),
+                ERROR_UNKNOWN_RACE);
+        CharacterService.data(target).setRace(raceId, false);
         CharacterService.refresh(target);
         ctx.getSource().sendSuccess(() -> Component.literal(
-                "Set " + target.getName().getString() + "'s race to " + key.identifier()), true);
+                "Set " + target.getName().getString() + "'s race to " + raceId), true);
         return 1;
     }
 
     private static int adminSetClass(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer target = EntityArgument.getPlayer(ctx, "player");
-        ResourceKey<CharClass> key = ResourceKeyArgument.getRegistryKey(
-                ctx, "class", LQRegistries.CHAR_CLASS, ERROR_UNKNOWN_CLASS);
-        CharacterService.data(target).setMainClass(key.identifier());
+        Identifier classId = resolve(ctx.getSource(), LQRegistries.CHAR_CLASS,
+                ResourceKeyArgument.getRegistryKey(ctx, "class", LQRegistries.CHAR_CLASS, ERROR_UNKNOWN_CLASS),
+                ERROR_UNKNOWN_CLASS);
+        CharacterService.data(target).setMainClass(classId);
         CharacterService.refresh(target);
         ctx.getSource().sendSuccess(() -> Component.literal(
-                "Set " + target.getName().getString() + "'s class to " + key.identifier()), true);
+                "Set " + target.getName().getString() + "'s class to " + classId), true);
         return 1;
     }
 
