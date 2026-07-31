@@ -39,8 +39,9 @@ public class LegendQuest {
         LQAttachments.register(modEventBus);
         modEventBus.addListener(this::onAddPackFinders);
 
-        // Game bus: character lifecycle, combat, skills, commands.
+        // Game bus: character lifecycle, combat, skills, commands, permissions.
         NeoForge.EVENT_BUS.register(LQServerEvents.class);
+        NeoForge.EVENT_BUS.register(com.sablednah.legendquest.neoforge.LQPermissions.class);
         NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent event) ->
                 LQCommands.register(event.getDispatcher()));
     }

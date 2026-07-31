@@ -100,6 +100,18 @@ public final class LQCommands {
                 .then(Commands.literal("bind").executes(LQCommands::loadoutBind))
                 .then(Commands.literal("unbind").executes(LQCommands::loadoutUnbind));
 
+        LiteralArgumentBuilder<CommandSourceStack> party = Commands.literal("party")
+                .executes(LQCommands::partyInfo)
+                .then(Commands.literal("create")
+                        .then(Commands.argument("name", com.mojang.brigadier.arguments.StringArgumentType.word())
+                                .executes(LQCommands::partyCreate)))
+                .then(Commands.literal("invite")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(LQCommands::partyInvite)))
+                .then(Commands.literal("accept").executes(LQCommands::partyAccept))
+                .then(Commands.literal("decline").executes(LQCommands::partyDecline))
+                .then(Commands.literal("leave").executes(LQCommands::partyLeave));
+
         LiteralArgumentBuilder<CommandSourceStack> stats =
                 Commands.literal("stats").executes(LQCommands::stats);
         LiteralArgumentBuilder<CommandSourceStack> karma =
@@ -108,7 +120,9 @@ public final class LQCommands {
                 Commands.literal("roll").executes(LQCommands::roll);
 
         LiteralArgumentBuilder<CommandSourceStack> admin = Commands.literal("admin")
-                .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                // Vanilla op level OR the legendquest.admin node (LuckPerms etc).
+                .requires(src -> Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(src)
+                        || (src.getEntity() instanceof ServerPlayer sp && LQPermissions.isAdmin(sp)))
                 .then(Commands.literal("setrace")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("race", ResourceKeyArgument.key(LQRegistries.RACE))
@@ -131,7 +145,7 @@ public final class LQCommands {
         dispatcher.register(Commands.literal("lq")
                 .executes(LQCommands::stats)
                 .then(race).then(charClass).then(skill)
-                .then(bind).then(unbind).then(loadout)
+                .then(bind).then(unbind).then(loadout).then(party)
                 .then(stats).then(karma).then(roll).then(admin));
 
         // Classic shorthands.
@@ -146,6 +160,7 @@ public final class LQCommands {
         dispatcher.register(unbind);
         dispatcher.register(Commands.literal("unlink").executes(LQCommands::unbind));
         dispatcher.register(loadout);
+        dispatcher.register(party);
         dispatcher.register(stats);
         dispatcher.register(karma);
         dispatcher.register(roll);
@@ -179,6 +194,108 @@ public final class LQCommands {
         pc.bind(itemId, skillId);
         Feedback.chat(player, "&6Bound &l" + def.get().name() + "&r&6 to "
                 + held.getHoverName().getString() + " &7(right-click to use, /unbind to clear)");
+        return 1;
+    }
+
+    // --- party ---
+
+    private static int partyInfo(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        var parties = Parties.get(ctx.getSource().getServer());
+        var party = parties.partyOf(player.getUUID());
+        if (party.isEmpty()) {
+            var invite = parties.pendingInvite(player.getUUID());
+            if (invite.isPresent()) {
+                Feedback.chat(player, "&6You are invited to &l" + invite.get().name()
+                        + "&r&6 — /party accept or /party decline.");
+            } else {
+                Feedback.chat(player, "&7Not in a party. /party create <name> to start one.");
+            }
+            return 0;
+        }
+        var p = party.get();
+        StringBuilder sb = new StringBuilder("§6Party §l" + p.name() + "§r§6 — members:");
+        for (var memberId : p.members()) {
+            ServerPlayer online = ctx.getSource().getServer().getPlayerList().getPlayer(memberId);
+            String name = online != null ? online.getName().getString()
+                    : memberId.toString().substring(0, 8) + "… (offline)";
+            sb.append("\n §7-§r ").append(online != null ? "§a" : "§8").append(name);
+            if (memberId.equals(p.owner())) sb.append(" §6(leader)");
+        }
+        ctx.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
+        return 1;
+    }
+
+    private static int partyCreate(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        String name = com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "name");
+        var error = Parties.get(ctx.getSource().getServer()).create(name, player);
+        if (error.isPresent()) {
+            Feedback.chat(player, "&c" + error.get());
+            return 0;
+        }
+        Feedback.chat(player, "&6Party &l" + name + "&r&6 created. /party invite <player> to grow it.");
+        return 1;
+    }
+
+    private static int partyInvite(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        ServerPlayer invitee = EntityArgument.getPlayer(ctx, "player");
+        var parties = Parties.get(ctx.getSource().getServer());
+        var party = parties.partyOf(player.getUUID());
+        if (party.isEmpty()) {
+            Feedback.chat(player, "&cYou are not in a party. /party create <name> first.");
+            return 0;
+        }
+        if (invitee == player || party.get().isMember(invitee.getUUID())) {
+            Feedback.chat(player, "&7They are already in the party.");
+            return 0;
+        }
+        if (parties.partyOf(invitee.getUUID()).isPresent()) {
+            Feedback.chat(player, "&c" + invitee.getName().getString() + " is already in a party.");
+            return 0;
+        }
+        parties.invite(party.get(), invitee.getUUID());
+        Feedback.chat(player, "&6Invited " + invitee.getName().getString() + ".");
+        Feedback.chat(invitee, "&6" + player.getName().getString() + " invites you to party &l"
+                + party.get().name() + "&r&6 — /party accept or /party decline.");
+        return 1;
+    }
+
+    private static int partyAccept(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        var parties = Parties.get(ctx.getSource().getServer());
+        var joined = parties.accept(player.getUUID());
+        if (joined.isEmpty()) {
+            Feedback.chat(player, "&cNo open invitation (it may have expired with a restart).");
+            return 0;
+        }
+        Feedback.chat(player, "&6You joined &l" + joined.get().name() + "&r&6.");
+        for (var memberId : joined.get().members()) {
+            if (memberId.equals(player.getUUID())) continue;
+            ServerPlayer member = ctx.getSource().getServer().getPlayerList().getPlayer(memberId);
+            if (member != null) {
+                Feedback.chat(member, "&6" + player.getName().getString() + " joined the party.");
+            }
+        }
+        return 1;
+    }
+
+    private static int partyDecline(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        Parties.get(ctx.getSource().getServer()).decline(player.getUUID());
+        Feedback.chat(player, "&7Invitation declined.");
+        return 1;
+    }
+
+    private static int partyLeave(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        var left = Parties.get(ctx.getSource().getServer()).remove(player.getUUID());
+        if (left.isEmpty()) {
+            Feedback.chat(player, "&7You are not in a party.");
+            return 0;
+        }
+        Feedback.chat(player, "&6You left &l" + left.get().name() + "&r&6.");
         return 1;
     }
 
@@ -316,11 +433,17 @@ public final class LQCommands {
 
     private static int raceList(CommandContext<CommandSourceStack> ctx) {
         var lookup = ctx.getSource().registryAccess().lookupOrThrow(LQRegistries.RACE);
+        ServerPlayer viewer = ctx.getSource().getEntity() instanceof ServerPlayer sp ? sp : null;
         StringBuilder sb = new StringBuilder("§6Races:§r");
         lookup.listElements().sorted(Comparator.comparing(r -> r.key().identifier()))
-                .forEach(ref -> sb.append("\n §7-§r ").append(ref.value().name())
-                        .append(" §8(").append(ref.key().identifier()).append(")")
-                        .append(ref.value().isDefault() ? " §7[default]" : ""));
+                .forEach(ref -> {
+                    boolean locked = viewer != null
+                            && !LQPermissions.canSelectRace(viewer, ref.key().identifier());
+                    sb.append("\n §7-§r ").append(locked ? "§8" : "").append(ref.value().name())
+                            .append(" §8(").append(ref.key().identifier()).append(")")
+                            .append(ref.value().isDefault() ? " §7[default]" : "")
+                            .append(locked ? " §c[locked]" : "");
+                });
         ctx.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
         return 1;
     }
@@ -347,6 +470,10 @@ public final class LQCommands {
             Feedback.chat(player, "&cYour race is chosen for life. An admin can change it.");
             return 0;
         }
+        if (!LQPermissions.canSelectRace(player, key.identifier())) {
+            Feedback.chat(player, "&cThat race is not open to you.");
+            return 0;
+        }
         Race target = ctx.getSource().registryAccess().lookupOrThrow(LQRegistries.RACE)
                 .get(key).map(r -> r.value()).orElseThrow();
         pc.setRace(key.identifier(), !target.isDefault());
@@ -364,6 +491,10 @@ public final class LQCommands {
                 .get(key).map(r -> r.value()).orElseThrow();
         PlayerCharacter pc = CharacterService.data(player);
 
+        if (!LQPermissions.canSelectClass(player, key.identifier())) {
+            Feedback.chat(player, "&cThat class is not open to you.");
+            return 0;
+        }
         if (asSub && target.eligibility().mainOnly()) {
             Feedback.chat(player, "&c" + target.name() + " can only be a main class.");
             return 0;

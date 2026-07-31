@@ -7,6 +7,8 @@ import com.sablednah.legendquest.core.Stat;
 import com.sablednah.legendquest.data.ItemRules;
 import com.sablednah.legendquest.skills.TriggerSpec;
 
+import java.util.UUID;
+
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -108,22 +110,42 @@ public final class LQServerEvents {
     @SubscribeEvent
     static void onXpDrop(LivingExperienceDropEvent event) {
         if (event.getAttackingPlayer() instanceof ServerPlayer killer) {
-            PlayerCharacter pc = CharacterService.data(killer);
-            pc.mainClassId().ifPresent(cls -> {
-                double adjust = CharacterService.race(killer)
-                        .map(r -> r.progression().xpAdjustKill()).orElse(0.0D)
-                        + CharacterService.mainClass(killer)
-                                .map(c -> c.progression().xpAdjustKill()).orElse(0.0D);
-                long amount = Math.round(event.getDroppedExperience() * (1.0D + adjust / 100.0D));
-                int before = CharacterService.level(killer);
-                pc.addXp(cls, Math.max(0, amount));
-                int after = CharacterService.level(killer);
-                if (after > before) {
-                    CharacterService.refresh(killer);
-                    Feedback.chat(killer, "&6[LegendQuest]&a Level up! You are now level " + after + ".");
+            awardKillXp(killer, event.getDroppedExperience(), 100);
+
+            // Party XP share: nearby members get a cut, full price for the killer.
+            var parties = Parties.get(killer.level().getServer());
+            parties.partyOf(killer.getUUID()).ifPresent(party -> {
+                int share = LQConfig.PARTY_XP_SHARE.get();
+                if (share <= 0) return;
+                int range = LQConfig.PARTY_RANGE.get();
+                for (UUID memberId : party.members()) {
+                    if (memberId.equals(killer.getUUID())) continue;
+                    ServerPlayer member = killer.level().getServer().getPlayerList().getPlayer(memberId);
+                    if (member == null || member.level() != killer.level()) continue;
+                    if (member.distanceTo(killer) > range) continue;
+                    awardKillXp(member, event.getDroppedExperience(), share);
                 }
             });
         }
+    }
+
+    private static void awardKillXp(ServerPlayer player, int droppedXp, int percent) {
+        PlayerCharacter pc = CharacterService.data(player);
+        pc.mainClassId().ifPresent(cls -> {
+            double adjust = CharacterService.race(player)
+                    .map(r -> r.progression().xpAdjustKill()).orElse(0.0D)
+                    + CharacterService.mainClass(player)
+                            .map(c -> c.progression().xpAdjustKill()).orElse(0.0D);
+            long amount = Math.round(droppedXp * (1.0D + adjust / 100.0D) * percent / 100.0D);
+            if (amount <= 0) return;
+            int before = CharacterService.level(player);
+            pc.addXp(cls, amount);
+            int after = CharacterService.level(player);
+            if (after > before) {
+                CharacterService.refresh(player);
+                Feedback.chat(player, "&6[LegendQuest]&a Level up! You are now level " + after + ".");
+            }
+        });
     }
 
     // --- combat: d20 hit/dodge, weapon gate, triggers ---
@@ -132,6 +154,15 @@ public final class LQServerEvents {
     static void onIncomingDamage(LivingIncomingDamageEvent event) {
         LivingEntity victim = event.getEntity();
         var attacker = event.getSource().getEntity();
+
+        // No friendly fire inside a party.
+        if (LQConfig.BLOCK_PARTY_PVP.get()
+                && attacker instanceof ServerPlayer pa && victim instanceof ServerPlayer pv
+                && Parties.get(pa.level().getServer()).sameParty(pa.getUUID(), pv.getUUID())) {
+            event.setCanceled(true);
+            Feedback.actionBar(pa, "&7" + pv.getName().getString() + " is in your party.");
+            return;
+        }
 
         // Weapon gate: a disallowed weapon hits like a fist.
         if (attacker instanceof ServerPlayer playerAttacker) {

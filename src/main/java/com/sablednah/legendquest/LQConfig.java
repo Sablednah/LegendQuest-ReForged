@@ -30,6 +30,9 @@ public final class LQConfig {
     public static final ModConfigSpec.LongValue KARMA_KILL_MONSTER;
     public static final ModConfigSpec.ConfigValue<String> KARMA_POSITIVE_NAMES;
     public static final ModConfigSpec.ConfigValue<String> KARMA_NEGATIVE_NAMES;
+    public static final ModConfigSpec.IntValue PARTY_RANGE;
+    public static final ModConfigSpec.IntValue PARTY_XP_SHARE;
+    public static final ModConfigSpec.BooleanValue BLOCK_PARTY_PVP;
 
     static {
         BUILDER.comment("Character statline").push("stats");
@@ -75,6 +78,18 @@ public final class LQConfig {
         KARMA_NEGATIVE_NAMES = BUILDER
                 .comment("Comma-separated titles on the dark side of the log scale.")
                 .define("negativeNames", "Neutral,Rascal,Rogue,Villainous,Diabolic");
+        BUILDER.pop();
+
+        BUILDER.comment("Parties").push("party");
+        PARTY_RANGE = BUILDER
+                .comment("Members within this many blocks of a kill share its XP.")
+                .defineInRange("range", 32, 4, 256);
+        PARTY_XP_SHARE = BUILDER
+                .comment("Percent of kill XP each nearby party member also receives.")
+                .defineInRange("xpSharePercent", 50, 0, 100);
+        BLOCK_PARTY_PVP = BUILDER
+                .comment("Party members cannot damage each other.")
+                .define("blockPartyPvP", true);
         BUILDER.pop();
     }
 

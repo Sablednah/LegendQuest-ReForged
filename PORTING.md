@@ -99,7 +99,7 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 - [x] `/race list|info|choose`, `/class list|info|choose [sub]` with `ResourceKeyArgument` + bare-name resolution (ZombieMod's ambiguity-detection pattern)
 - [x] `/stats` — chat character sheet
 - [x] `/skill list|info|use <id>|buy <id>`, `/karma`, `/roll`
-- [ ] `PermissionNode`s: `legendquest.admin`, per-race/class selection gates honoured from data (`perm: true` fields)
+- [x] `PermissionNode`s: `legendquest.admin` (node or op), dynamic `legendquest.race.<id>` / `legendquest.class.<id>` nodes enumerated from the registries at gather; a `perm:` field in data flips the default to locked; `/race list` shows [locked]
 - [x] Race lock rule: default race may change once; others locked (admin override)
 
 ### Phase 6 — Combat & restrictions
@@ -119,7 +119,7 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 - [ ] Default D&D pack as **YAML** shipped in `config` defaults + mirrored JSON datapack: races (human, elf, dwarf, orc, hobbit, gnome, half-elf, half-orc, ender, wither, undecided), classes (citizen, fighter, mage, ranger, warlord), core skills re-expressed as data
 - [ ] Example skill-pack mod repo (`LegendQuest-SkillPack-Example`) proving third-party `SkillEffectTypes.register()`
 - [ ] Zombie-apocalypse pack (ties into ZombieMod genera + CityWorld)
-- [ ] Parties (`SavedData`, XP share, no-PvP)
+- [x] Parties — `/party create|invite|accept|decline|leave`, SavedData ledger on the overworld, XP share to nearby members (config %/range), friendly fire blocked
 
 ### Phase 9 — Verification
 - [x] `runServer` boot smoke test (clean boot 9s, all registries parsed, YAML race served) — in-game `/reload` cycle still to verify
