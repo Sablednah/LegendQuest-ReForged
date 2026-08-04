@@ -38,6 +38,7 @@ public class LegendQuest {
         modEventBus.addListener(LQRegistries::register);
         LQAttachments.register(modEventBus);
         modEventBus.addListener(this::onAddPackFinders);
+        modEventBus.addListener(com.sablednah.legendquest.network.LQNetwork::register);
 
         // Game bus: character lifecycle, combat, skills, commands, permissions.
         NeoForge.EVENT_BUS.register(LQServerEvents.class);

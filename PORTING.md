@@ -110,8 +110,8 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 - [x] Mana: regen tick (race/class/level rates), skill costs
 
 ### Phase 7 — Client & polish
-- [ ] Network payloads: character summary + mana sync (registrar `.optional()` so vanilla clients connect)
-- [ ] Client mod class (`dist=CLIENT`), mana bar + skill state HUD via `RenderGuiEvent.Post`
+- [x] Network payloads: character summary (race/class/level/karma/mana/stats/skills+cooldowns) pushed on login, character change, and 1/s; registrar `.optional()` so vanilla clients connect
+- [x] Client mod class (`dist=CLIENT`); inventory-screen character panel (LQ toggle button, stats, mana bar, skill list with cooldowns). Always-on HUD overlay via `RenderGuiEvent.Post` still open
 - [ ] Config screen (`IConfigScreenFactory` + lang keys for every option)
 - [ ] Action-bar feedback helpers (`&`-code translation, like ZombieMod `Announce`)
 

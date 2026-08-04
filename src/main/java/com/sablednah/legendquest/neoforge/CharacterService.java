@@ -222,6 +222,7 @@ public final class CharacterService {
      */
     public static void refresh(ServerPlayer player) {
         applyModifiers(player);
+        CharacterSync.send(player);
     }
 
     /** Push derived numbers onto the entity. Call via {@link #refresh}. */

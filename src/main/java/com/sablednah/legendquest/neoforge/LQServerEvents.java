@@ -67,6 +67,7 @@ public final class LQServerEvents {
                     pc.setMana(Math.min(max, pc.mana() + CharacterService.manaPerSecond(player)));
                 }
                 penaliseDisallowedArmour(player);
+                CharacterSync.send(player); // mana + cooldowns tick visibly on modded clients
             }
         }
     }
