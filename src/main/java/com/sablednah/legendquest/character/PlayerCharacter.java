@@ -218,4 +218,9 @@ public final class PlayerCharacter {
     public int loadoutIndex() {
         return loadoutIndex;
     }
+
+    /** Jump straight to a loadout slot (hotkeys); out-of-range is ignored. */
+    public void selectLoadout(int index) {
+        if (index >= 0 && index < loadout.size()) loadoutIndex = index;
+    }
 }

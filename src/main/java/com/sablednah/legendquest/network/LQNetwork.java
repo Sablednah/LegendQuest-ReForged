@@ -15,6 +15,18 @@ public final class LQNetwork {
         PayloadRegistrar registrar = event.registrar("1").optional();
         registrar.playToClient(CharacterSummaryPayload.TYPE, CharacterSummaryPayload.CODEC,
                 LQNetwork::handleSummary);
+        registrar.playToServer(SkillActionPayload.TYPE, SkillActionPayload.CODEC,
+                LQNetwork::handleSkillAction);
+    }
+
+    /** Server only (playToServer): hotkey skill actions from modded clients. */
+    private static void handleSkillAction(SkillActionPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (context.player() instanceof net.minecraft.server.level.ServerPlayer player) {
+                com.sablednah.legendquest.neoforge.SkillActions.handle(
+                        player, payload.action(), payload.slot());
+            }
+        });
     }
 
     /**

@@ -15,5 +15,14 @@
   "legendquest.configuration.killAnimal": "Karma: Kill Animal",
   "legendquest.configuration.killMonster": "Karma: Kill Monster",
   "legendquest.configuration.positiveNames": "Positive Karma Titles",
-  "legendquest.configuration.negativeNames": "Negative Karma Titles"
+  "legendquest.configuration.negativeNames": "Negative Karma Titles",
+  "key.category.legendquest.main": "LegendQuest",
+  "key.legendquest.character": "Open Character Sheet",
+  "key.legendquest.use_skill": "Use Selected Skill",
+  "key.legendquest.cycle_skill": "Cycle Loadout Skill",
+  "key.legendquest.slot_1": "Use Loadout Slot 1",
+  "key.legendquest.slot_2": "Use Loadout Slot 2",
+  "key.legendquest.slot_3": "Use Loadout Slot 3",
+  "key.legendquest.slot_4": "Use Loadout Slot 4",
+  "key.legendquest.slot_5": "Use Loadout Slot 5"
 }

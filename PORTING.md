@@ -111,7 +111,8 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 
 ### Phase 7 — Client & polish
 - [x] Network payloads: character summary (race/class/level/karma/mana/stats/skills+cooldowns) pushed on login, character change, and 1/s; registrar `.optional()` so vanilla clients connect
-- [x] Client mod class (`dist=CLIENT`); inventory-screen character panel (LQ toggle button, stats, mana bar, skill list with cooldowns). Always-on HUD overlay via `RenderGuiEvent.Post` still open
+- [x] Client mod class (`dist=CLIENT`); inventory-screen character panel: LQ button beside the recipe-book button, panel slides out LEFT recipe-book-style (same 147×166 footprint + `leftPos` shift maths), mutually exclusive with the recipe book. Always-on HUD overlay via `RenderGuiEvent.Post` still open
+- [x] Keybinds (Controls → LegendQuest): open sheet (K), use selected skill (R), cycle loadout (G), use loadout slot 1–5 (unbound — per-skill binds via loadout slots); serverbound `SkillActionPayload`, inert on vanilla servers
 - [ ] Config screen (`IConfigScreenFactory` + lang keys for every option)
 - [ ] Action-bar feedback helpers (`&`-code translation, like ZombieMod `Announce`)
 

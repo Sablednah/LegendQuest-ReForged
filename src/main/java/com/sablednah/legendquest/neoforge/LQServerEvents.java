@@ -270,7 +270,7 @@ public final class LQServerEvents {
         return true;
     }
 
-    private static String resultColour(SkillEngine.UseResult result) {
+    static String resultColour(SkillEngine.UseResult result) {
         return switch (result) {
             case FIRED -> "&a";                    // green: away it goes
             case NO_MANA -> "&9";                  // blue: mana problem
