@@ -33,5 +33,15 @@ public final class Mechanics {
         return d20(nextInt) + attackerMod >= d20(nextInt) + defenderMod;
     }
 
+    /** {@link #opposedTest} with the drama kept: a natural 20 is a CRIT. */
+    public enum AttackOutcome { MISS, HIT, CRIT }
+
+    public static AttackOutcome opposedAttack(IntUnaryOperator nextInt, int attackerMod, int defenderMod) {
+        int attackRoll = d20(nextInt);
+        if (attackRoll == 20) return AttackOutcome.CRIT;
+        return attackRoll + attackerMod >= d20(nextInt) + defenderMod
+                ? AttackOutcome.HIT : AttackOutcome.MISS;
+    }
+
     private Mechanics() {}
 }

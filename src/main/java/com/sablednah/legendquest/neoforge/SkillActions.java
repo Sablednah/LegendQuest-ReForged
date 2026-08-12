@@ -36,6 +36,32 @@ public final class SkillActions {
         }
     }
 
+    /** Drag & drop from the skills panel; re-syncs immediately so the GUI
+     *  never shows a stale loadout for the up-to-a-second between ticks. */
+    public static void handleLoadoutEdit(ServerPlayer player,
+            com.sablednah.legendquest.network.LoadoutEditPayload payload) {
+        PlayerCharacter pc = CharacterService.data(player);
+        var skillId = net.minecraft.resources.Identifier.tryParse(payload.skillId());
+        switch (payload.action()) {
+            case com.sablednah.legendquest.network.LoadoutEditPayload.ADD -> {
+                if (skillId == null) return;
+                if (CharacterActions.loadoutAdd(player, skillId) && payload.to() >= 0) {
+                    pc.moveLoadout(pc.loadout().size() - 1, Math.min(payload.to(), pc.loadout().size() - 1));
+                }
+            }
+            case com.sablednah.legendquest.network.LoadoutEditPayload.REMOVE -> {
+                if (skillId == null) return;
+                CharacterActions.loadoutRemove(player, skillId);
+            }
+            case com.sablednah.legendquest.network.LoadoutEditPayload.MOVE ->
+                    pc.moveLoadout(payload.from(), payload.to());
+            case com.sablednah.legendquest.network.LoadoutEditPayload.SELECT ->
+                    pc.selectLoadout(payload.to());
+            default -> { }
+        }
+        CharacterSync.send(player);
+    }
+
     private static void useSelected(ServerPlayer player, PlayerCharacter pc) {
         var selected = pc.selectedSkill();
         if (selected.isEmpty()) {

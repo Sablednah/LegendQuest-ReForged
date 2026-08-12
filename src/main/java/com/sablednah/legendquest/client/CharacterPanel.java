@@ -1,8 +1,14 @@
 package com.sablednah.legendquest.client;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.sablednah.legendquest.network.CharacterSummaryPayload;
+import com.sablednah.legendquest.network.ChoosePayload;
+import com.sablednah.legendquest.network.LoadoutEditPayload;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -14,21 +20,30 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.AbstractRecipeBookScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
- * The character sheet on the inventory screen. An "LQ" button sits beside the
- * vanilla recipe-book button; clicking it slides a panel out to the LEFT,
- * shifting the inventory right exactly the way the recipe book does (same
- * offset maths, same footprint: 147×166). The two are mutually exclusive —
- * opening one closes the other, recipe-book style tab switching.
+ * The character sheet on the inventory screen: two tab buttons beside the
+ * vanilla recipe-book button — "LQ" (stats) and "✦" (skills & loadout).
+ * Either slides a panel out to the LEFT, shifting the inventory right the
+ * way the recipe book does; recipe book and our tabs are mutually exclusive.
+ *
+ * <p>The skills tab is the loadout workbench: drag a skill onto the slot
+ * strip to add it, drag slots around to reorder, drag a slot off the strip
+ * to remove it, click a slot to select. Hovering anything explains itself.
+ * The stats tab grows race/class pickers while those choices are open.</p>
  *
  * <p>The screen's {@code leftPos} is vanilla's own re-centring knob (the
  * recipe book writes it too); we set it reflectively since there's no setter.
- * Draws from {@link ClientCharacterState} — on a vanilla server (no data)
- * the panel says so instead of pretending.</p>
+ * All edits go to the server as requests — the panel never mutates locally.</p>
  */
 public final class CharacterPanel {
 
@@ -36,13 +51,27 @@ public final class CharacterPanel {
     private static final int PANEL_WIDTH = 147;
     private static final int PANEL_HEIGHT = 166;
     private static final int GAP = 2;
+    private static final int SLOT_COUNT = 6;
+    private static final int SLOT_SIZE = 20;
+    private static final int ROW_HEIGHT = 18;
 
-    private static boolean open = false;
+    private enum Tab { NONE, STATS, SKILLS }
+
+    private static Tab tab = Tab.NONE;
     private static boolean openOnInit = false;
-    private static Button toggle;
+    private static Button statsButton;
+    private static Button skillsButton;
     private static ImageButton recipeButton;
 
-    /** Hotkey path: open the sheet as soon as the inventory screen inits. */
+    /** A drag in progress on the skills tab. {@code fromSlot < 0} = from the list. */
+    private record Drag(String skillId, int fromSlot, double pressX, double pressY) {}
+    private static Drag drag = null;
+    private static double mouseX;
+    private static double mouseY;
+
+    private static final Map<String, ItemStack> ICON_CACHE = new HashMap<>();
+
+    /** Hotkey path: open the stats tab as soon as the inventory screen inits. */
     public static void openOnNextInit() {
         openOnInit = true;
     }
@@ -82,8 +111,10 @@ public final class CharacterPanel {
 
     @SubscribeEvent
     static void onScreenInit(ScreenEvent.Init.Post event) {
-        toggle = null;
+        statsButton = null;
+        skillsButton = null;
         recipeButton = null;
+        drag = null;
         if (!(event.getScreen() instanceof InventoryScreen screen)) return;
 
         // The vanilla recipe-book button: the screen's only 20×18 ImageButton.
@@ -95,44 +126,49 @@ public final class CharacterPanel {
             }
         }
 
-        toggle = Button.builder(Component.literal("LQ"), b -> toggleSheet(screen))
-                .bounds(0, 0, 20, 18) // positioned every frame below
-                .tooltip(Tooltip.create(Component.literal("LegendQuest character sheet")))
+        statsButton = Button.builder(Component.literal("LQ"), b -> toggleTab(screen, Tab.STATS))
+                .bounds(0, 0, 20, 18)
+                .tooltip(Tooltip.create(Component.literal("Character sheet")))
                 .build();
-        event.addListener(toggle);
+        skillsButton = Button.builder(Component.literal("✦"), b -> toggleTab(screen, Tab.SKILLS))
+                .bounds(0, 0, 20, 18)
+                .tooltip(Tooltip.create(Component.literal("Skills & loadout")))
+                .build();
+        event.addListener(statsButton);
+        event.addListener(skillsButton);
 
         if (openOnInit) {
             openOnInit = false;
-            open = true;
+            tab = Tab.STATS;
             RecipeBookComponent<?> book = recipeBook(screen);
             if (book.isVisible()) book.toggleVisibility();
-        } else if (open && recipeBook(screen).isVisible()) {
-            open = false; // book state persists across screens; it was here first
+        } else if (tab != Tab.NONE && recipeBook(screen).isVisible()) {
+            tab = Tab.NONE; // book state persists across screens; it was here first
         }
         applyShift(screen);
         positionButtons(screen);
     }
 
-    private static void toggleSheet(InventoryScreen screen) {
-        open = !open;
-        if (open) {
+    private static void toggleTab(InventoryScreen screen, Tab which) {
+        tab = tab == which ? Tab.NONE : which;
+        drag = null;
+        if (tab != Tab.NONE) {
             RecipeBookComponent<?> book = recipeBook(screen);
-            if (book.isVisible()) book.toggleVisibility(); // tab switch: recipes → stats
+            if (book.isVisible()) book.toggleVisibility(); // tab switch: recipes → us
         }
         applyShift(screen);
         positionButtons(screen);
     }
 
     /**
-     * Re-centre the GUI. With the panel open we use the recipe book's own
-     * shift formula so the inventory sits exactly where players expect;
-     * otherwise we hand the decision back to the book (it knows whether IT
-     * is open). Narrow windows (<379px, vanilla's cutoff) don't shift —
-     * the panel overlays to the left instead, clamped on-screen.
+     * Re-centre the GUI. With a tab open we use the recipe book's own shift
+     * formula; otherwise the book decides (it knows whether IT is open).
+     * Narrow windows (<379px, vanilla's cutoff) don't shift — the panel
+     * overlays to the left instead, clamped on-screen.
      */
     private static void applyShift(InventoryScreen screen) {
         int leftPos;
-        if (open && screen.width >= 379) {
+        if (tab != Tab.NONE && screen.width >= 379) {
             leftPos = 177 + (screen.width - screen.getXSize() - 200) / 2;
         } else {
             leftPos = recipeBook(screen).updateScreenPosition(screen.width, screen.getXSize());
@@ -141,59 +177,183 @@ public final class CharacterPanel {
     }
 
     /**
-     * Both buttons chase {@code leftPos} every frame: vanilla only moves its
-     * recipe button inside its own click handler, so it goes stale whenever
-     * WE move the screen (and ours would go stale whenever IT does).
+     * All three buttons chase {@code leftPos} every frame: vanilla only moves
+     * its recipe button inside its own click handler, so it goes stale
+     * whenever WE move the screen (and ours would go stale whenever IT does).
      */
     private static void positionButtons(InventoryScreen screen) {
         int y = screen.height / 2 - 22;
         if (recipeButton != null) recipeButton.setPosition(screen.getGuiLeft() + 104, y);
-        if (toggle != null) toggle.setPosition(screen.getGuiLeft() + 126, y);
+        if (statsButton != null) statsButton.setPosition(screen.getGuiLeft() + 126, y);
+        if (skillsButton != null) skillsButton.setPosition(screen.getGuiLeft() + 148, y);
     }
 
     @SubscribeEvent
     static void onScreenRenderPre(ScreenEvent.Render.Pre event) {
         if (!(event.getScreen() instanceof InventoryScreen screen)) return;
-        if (open && recipeBook(screen).isVisible()) {
-            open = false; // recipe button was clicked: tab switch stats → recipes
+        if (tab != Tab.NONE && recipeBook(screen).isVisible()) {
+            tab = Tab.NONE; // recipe button was clicked: tab switch us → recipes
+            drag = null;
         }
         positionButtons(screen);
     }
 
-    /** Clicks on the open panel must not reach the screen — with an item on
-     *  the cursor, "outside the GUI" means "throw it on the floor". */
-    @SubscribeEvent
-    static void onMouseClick(ScreenEvent.MouseButtonPressed.Pre event) {
-        if (!open || !(event.getScreen() instanceof InventoryScreen screen)) return;
-        int x = panelX(screen);
-        int y = screen.getGuiTop();
-        if (event.getMouseX() >= x && event.getMouseX() < x + PANEL_WIDTH
-                && event.getMouseY() >= y && event.getMouseY() < y + panelHeight()) {
-            event.setCanceled(true);
-        }
-    }
+    // --- geometry (pure functions of the summary; used by render AND clicks) ---
 
     private static int panelX(InventoryScreen screen) {
         return Math.max(0, screen.getGuiLeft() - PANEL_WIDTH - GAP);
     }
 
+    /** Top of the panel: the GUI's top, but slid up if the content would
+     *  run off the bottom of the screen (both pickers open, long skill list). */
+    private static int panelY(InventoryScreen screen) {
+        return Math.max(2, Math.min(screen.getGuiTop(), screen.height - panelHeight() - 2));
+    }
+
+    private static CharacterSummaryPayload summary() {
+        return ClientCharacterState.summary();
+    }
+
+    private static boolean inPanel(InventoryScreen screen, double mx, double my) {
+        int x = panelX(screen);
+        int y = panelY(screen);
+        return mx >= x && mx < x + PANEL_WIDTH && my >= y && my < y + panelHeight();
+    }
+
     private static int panelHeight() {
-        CharacterSummaryPayload s = ClientCharacterState.summary();
+        CharacterSummaryPayload s = summary();
         if (s == null) return 32;
-        // pad + title + level + mana + stats + sp header, then the skill list.
-        return Math.max(PANEL_HEIGHT, 106 + s.skills().size() * 10 + 8);
+        int h;
+        if (tab == Tab.SKILLS) {
+            // pad + title + slots + hint + divider, then the list.
+            h = 8 + 12 + SLOT_SIZE + 4 + 12 + 6 + s.skills().size() * ROW_HEIGHT + 8;
+        } else {
+            h = 8 + 12 + 12 + 12 + 35 + 12 + 12; // core stats block
+            if (!s.raceChoices().isEmpty()) h += 13 + s.raceChoices().size() * 11 + 4;
+            if (!s.classChoices().isEmpty()) h += 13 + s.classChoices().size() * 11 + 4;
+        }
+        return Math.max(PANEL_HEIGHT, h);
+    }
+
+    /** Y of the loadout slot strip (skills tab). */
+    private static int slotsY(InventoryScreen screen) {
+        return panelY(screen) + 8 + 12;
+    }
+
+    /** Y of the first skill list row (skills tab). */
+    private static int listY(InventoryScreen screen) {
+        return slotsY(screen) + SLOT_SIZE + 4 + 12 + 6;
+    }
+
+    private static int slotAt(InventoryScreen screen, double mx, double my) {
+        int y = slotsY(screen);
+        if (my < y || my >= y + SLOT_SIZE) return -1;
+        int x0 = panelX(screen) + 8;
+        for (int i = 0; i < SLOT_COUNT; i++) {
+            int sx = x0 + i * (SLOT_SIZE + 1);
+            if (mx >= sx && mx < sx + SLOT_SIZE) return i;
+        }
+        return -1;
+    }
+
+    private static int listRowAt(InventoryScreen screen, double mx, double my) {
+        CharacterSummaryPayload s = summary();
+        if (s == null) return -1;
+        int y = listY(screen);
+        int x = panelX(screen);
+        if (mx < x + 4 || mx >= x + PANEL_WIDTH - 4) return -1;
+        int row = (int) ((my - y) / ROW_HEIGHT);
+        return my >= y && row >= 0 && row < s.skills().size() ? row : -1;
+    }
+
+    // --- mouse: clicks, drags, drops ---
+
+    @SubscribeEvent
+    static void onMouseClick(ScreenEvent.MouseButtonPressed.Pre event) {
+        if (tab == Tab.NONE || !(event.getScreen() instanceof InventoryScreen screen)) return;
+        double mx = event.getMouseX();
+        double my = event.getMouseY();
+        if (!inPanel(screen, mx, my)) return;
+        event.setCanceled(true); // never reaches the screen: no thrown items
+        CharacterSummaryPayload s = summary();
+        if (s == null) return;
+
+        if (tab == Tab.SKILLS) {
+            int slot = slotAt(screen, mx, my);
+            if (slot >= 0 && slot < s.loadout().size()) {
+                drag = new Drag(s.loadout().get(slot), slot, mx, my);
+                return;
+            }
+            int row = listRowAt(screen, mx, my);
+            if (row >= 0) {
+                var skill = s.skills().get(row);
+                if (skill.owned() && "ACTIVE".equals(skill.type())
+                        && !s.loadout().contains(skill.id())) {
+                    drag = new Drag(skill.id(), -1, mx, my);
+                }
+            }
+            return;
+        }
+
+        // Stats tab: picker rows.
+        PickerHit hit = pickerRowAt(screen, mx, my);
+        if (hit != null && hit.entry().available()) {
+            send(new ChoosePayload(hit.race() ? ChoosePayload.RACE : ChoosePayload.MAIN_CLASS,
+                    hit.entry().id()));
+        }
+    }
+
+    @SubscribeEvent
+    static void onMouseRelease(ScreenEvent.MouseButtonReleased.Pre event) {
+        if (drag == null || !(event.getScreen() instanceof InventoryScreen screen)) return;
+        Drag d = drag;
+        drag = null;
+        CharacterSummaryPayload s = summary();
+        if (s == null) return;
+        double mx = event.getMouseX();
+        double my = event.getMouseY();
+        boolean moved = Math.abs(mx - d.pressX()) > 4 || Math.abs(my - d.pressY()) > 4;
+        if (inPanel(screen, mx, my)) event.setCanceled(true);
+
+        int slot = slotAt(screen, mx, my);
+        if (d.fromSlot() < 0) {
+            // From the list: drop on the strip inserts there; a plain click appends.
+            if (slot >= 0) {
+                send(new LoadoutEditPayload(LoadoutEditPayload.ADD, d.skillId(), -1,
+                        Math.min(slot, s.loadout().size())));
+            } else if (!moved) {
+                send(new LoadoutEditPayload(LoadoutEditPayload.ADD, d.skillId(), -1, -1));
+            }
+            return;
+        }
+        // From a slot: click selects, drop on the strip reorders, drop anywhere else removes.
+        if (!moved) {
+            send(new LoadoutEditPayload(LoadoutEditPayload.SELECT, "", -1, d.fromSlot()));
+        } else if (slot >= 0) {
+            send(new LoadoutEditPayload(LoadoutEditPayload.MOVE, "", d.fromSlot(),
+                    Math.min(slot, s.loadout().size() - 1)));
+        } else {
+            send(new LoadoutEditPayload(LoadoutEditPayload.REMOVE, d.skillId(), -1, -1));
+        }
+    }
+
+    private static void send(net.minecraft.network.protocol.common.custom.CustomPacketPayload payload) {
+        if (summary() == null) return; // vanilla server
+        ClientPacketDistributor.sendToServer(payload);
     }
 
     // --- drawing ---
 
     @SubscribeEvent
     static void onScreenRender(ScreenEvent.Render.Post event) {
-        if (!open || !(event.getScreen() instanceof InventoryScreen screen)) return;
+        if (tab == Tab.NONE || !(event.getScreen() instanceof InventoryScreen screen)) return;
         GuiGraphics g = event.getGuiGraphics();
         Font font = screen.getMinecraft().font;
+        mouseX = event.getMouseX();
+        mouseY = event.getMouseY();
 
         int x = panelX(screen);
-        int y = screen.getGuiTop();
+        int y = panelY(screen);
         int h = panelHeight();
 
         // Dark plate with a gold frame.
@@ -203,14 +363,22 @@ public final class CharacterPanel {
         g.fill(x, y, x + 1, y + h, 0xFFDAA520);
         g.fill(x + PANEL_WIDTH - 1, y, x + PANEL_WIDTH, y + h, 0xFFDAA520);
 
-        int tx = x + 8;
-        int ty = y + 8;
-
-        CharacterSummaryPayload s = ClientCharacterState.summary();
+        CharacterSummaryPayload s = summary();
         if (s == null) {
-            g.drawString(font, "No LegendQuest data", tx, ty, 0xFF8888AA);
+            g.drawString(font, "No LegendQuest data", x + 8, y + 8, 0xFF8888AA);
             return;
         }
+        if (tab == Tab.SKILLS) {
+            renderSkillsTab(g, font, screen, s, x, y);
+        } else {
+            renderStatsTab(g, font, screen, s, x, y);
+        }
+    }
+
+    private static void renderStatsTab(GuiGraphics g, Font font, InventoryScreen screen,
+            CharacterSummaryPayload s, int x, int y) {
+        int tx = x + 8;
+        int ty = y + 8;
 
         String title = s.raceName() + " " + s.mainClassName()
                 + (s.subClassName().isEmpty() ? "" : "/" + s.subClassName());
@@ -232,21 +400,108 @@ public final class CharacterPanel {
         // Stats: two roomy columns, three rows.
         String[] names = {"STR", "DEX", "CON", "INT", "WIS", "CHR"};
         for (int n = 0; n < 6; n++) {
-            int col = n % 2;
-            int row = n / 2;
             int score = s.stats()[n];
             int mod = (score / 2) - 5;
             String text = "§7" + names[n] + " §f" + score
                     + " §8(" + (mod >= 0 ? "+" : "") + mod + ")";
-            g.drawString(font, text, tx + col * 66, ty + row * 11, 0xFFFFFFFF);
+            g.drawString(font, text, tx + (n % 2) * 66, ty + (n / 2) * 11, 0xFFFFFFFF);
         }
         ty += 35;
         g.drawString(font, "§7Skill points §f" + (s.spTotal() - s.spSpent()) + "§7/§f" + s.spTotal(),
                 tx, ty, 0xFFFFFFFF);
         ty += 12;
+        g.drawString(font, "§8Skills live on the ✦ tab", tx, ty, 0xFFFFFFFF);
+        ty += 12;
 
-        // Skill list: green ready, red cooling (with seconds), grey unowned.
-        for (CharacterSummaryPayload.SkillEntry skill : s.skills()) {
+        // Race/class pickers, while those choices are open.
+        ty = renderPicker(g, font, s.raceChoices(), true, tx, ty);
+        renderPicker(g, font, s.classChoices(), false, tx, ty);
+    }
+
+    private static int renderPicker(GuiGraphics g, Font font,
+            List<CharacterSummaryPayload.PickEntry> choices, boolean race, int tx, int ty) {
+        if (choices.isEmpty()) return ty;
+        g.drawString(font, "§6§lChoose your " + (race ? "race:" : "class:"), tx, ty, 0xFFFFFFFF);
+        ty += 13;
+        for (CharacterSummaryPayload.PickEntry entry : choices) {
+            boolean hover = mouseX >= tx && mouseX < tx + PANEL_WIDTH - 16
+                    && mouseY >= ty - 1 && mouseY < ty + 10;
+            if (hover) g.fill(tx - 2, ty - 1, tx + PANEL_WIDTH - 14, ty + 10, 0x30FFFFFF);
+            String colour = !entry.available() ? "§8" : hover ? "§e" : "§a";
+            g.drawString(font, colour + "▸ " + entry.name()
+                    + (entry.available() ? "" : " §8[locked]"), tx, ty, 0xFFFFFFFF);
+            if (hover) {
+                tooltip(g, font, entry.name(),
+                        entry.description().isEmpty()
+                                ? (entry.available() ? "Click to choose!" : "Not open to you.")
+                                : entry.description() + (entry.available() ? "\n§eClick to choose!" : "\n§cNot open to you."));
+            }
+            ty += 11;
+        }
+        return ty + 4;
+    }
+
+    private static void renderSkillsTab(GuiGraphics g, Font font, InventoryScreen screen,
+            CharacterSummaryPayload s, int x, int y) {
+        int tx = x + 8;
+        g.drawString(font, "§6§lLoadout", tx, y + 8, 0xFFFFFFFF);
+
+        // The slot strip.
+        int sy = slotsY(screen);
+        for (int i = 0; i < SLOT_COUNT; i++) {
+            int sx = tx + i * (SLOT_SIZE + 1);
+            boolean filled = i < s.loadout().size();
+            boolean selected = filled && i == s.loadoutIndex();
+            g.fill(sx, sy, sx + SLOT_SIZE, sy + SLOT_SIZE, 0xFF26263A);
+            int border = selected ? 0xFFDAA520 : 0xFF44445A;
+            g.fill(sx, sy, sx + SLOT_SIZE, sy + 1, border);
+            g.fill(sx, sy + SLOT_SIZE - 1, sx + SLOT_SIZE, sy + SLOT_SIZE, border);
+            g.fill(sx, sy, sx + 1, sy + SLOT_SIZE, border);
+            g.fill(sx + SLOT_SIZE - 1, sy, sx + SLOT_SIZE, sy + SLOT_SIZE, border);
+            if (filled) {
+                String id = s.loadout().get(i);
+                var entry = findSkill(s, id);
+                boolean beingDragged = drag != null && drag.fromSlot() == i;
+                if (!beingDragged) {
+                    g.renderItem(icon(entry != null ? entry.icon() : ""), sx + 2, sy + 2);
+                    if (entry != null && entry.readyInSec() > 0) {
+                        g.fill(sx + 1, sy + 1, sx + SLOT_SIZE - 1, sy + SLOT_SIZE - 1, 0x90000000);
+                        String secs = String.valueOf(entry.readyInSec());
+                        g.drawString(font, secs, sx + SLOT_SIZE - 1 - font.width(secs), sy + 6, 0xFFFF5555);
+                    }
+                }
+                boolean hover = mouseX >= sx && mouseX < sx + SLOT_SIZE
+                        && mouseY >= sy && mouseY < sy + SLOT_SIZE;
+                if (hover && drag == null && entry != null) {
+                    tooltip(g, font, entry.name(), skillTooltip(entry)
+                            + "\n§eClick to select · drag off to remove");
+                }
+            }
+        }
+
+        // Spellbook hint.
+        int hy = sy + SLOT_SIZE + 4;
+        String book = s.loadoutItem().isEmpty()
+                ? "§8No spellbook — hold an item, /loadout bind"
+                : "§7Spellbook: §f" + itemName(s.loadoutItem());
+        g.drawString(font, trim(font, book, PANEL_WIDTH - 16), tx, hy, 0xFFFFFFFF);
+
+        g.fill(x + 4, hy + 12, x + PANEL_WIDTH - 4, hy + 13, 0xFF44445A);
+
+        // The skill list.
+        int ly = listY(screen);
+        for (int i = 0; i < s.skills().size(); i++) {
+            var skill = s.skills().get(i);
+            int ry = ly + i * ROW_HEIGHT;
+            boolean hover = mouseX >= x + 4 && mouseX < x + PANEL_WIDTH - 4
+                    && mouseY >= ry && mouseY < ry + ROW_HEIGHT;
+            boolean inLoadout = s.loadout().contains(skill.id());
+            if (hover) g.fill(x + 4, ry, x + PANEL_WIDTH - 4, ry + ROW_HEIGHT, 0x28FFFFFF);
+
+            g.renderItem(icon(skill.icon()), tx, ry + 1);
+            if (!skill.owned()) {
+                g.fill(tx, ry + 1, tx + 16, ry + 17, 0xA0101018); // greyed-out icon
+            }
             String line;
             if (!skill.owned()) {
                 line = "§8" + skill.name() + " §7[lvl " + skill.levelReq()
@@ -254,11 +509,118 @@ public final class CharacterPanel {
             } else if (skill.readyInSec() > 0) {
                 line = "§c" + skill.name() + " §7" + skill.readyInSec() + "s";
             } else {
-                line = "§a" + skill.name() + " §8" + skill.type().toLowerCase().charAt(0);
+                line = (inLoadout ? "§6" : "§a") + skill.name()
+                        + (inLoadout ? " §8◆" : "")
+                        + " §8" + skill.type().toLowerCase().charAt(0);
             }
-            g.drawString(font, line, tx, ty, 0xFFFFFFFF);
-            ty += 10;
+            g.drawString(font, trim(font, line, PANEL_WIDTH - 34), tx + 20, ry + 5, 0xFFFFFFFF);
+
+            if (hover && drag == null) {
+                tooltip(g, font, skill.name(), skillTooltip(skill) + rowHint(skill, inLoadout));
+            }
         }
+
+        // The drag ghost rides the cursor.
+        if (drag != null) {
+            var entry = findSkill(s, drag.skillId());
+            if (entry != null) {
+                g.renderItem(icon(entry.icon()), (int) mouseX - 8, (int) mouseY - 8);
+            }
+        }
+    }
+
+    private static String rowHint(CharacterSummaryPayload.SkillEntry skill, boolean inLoadout) {
+        if (!skill.owned()) {
+            return skill.cost() > 0 ? "\n§8Buy with /skill buy when you have the points" : "";
+        }
+        if (!"ACTIVE".equals(skill.type())) {
+            return "\n§8" + (skill.type().equals("PASSIVE") ? "Always on." : "Fires on its trigger.");
+        }
+        return inLoadout ? "\n§8Already in the loadout" : "\n§eClick or drag to the loadout";
+    }
+
+    private static String skillTooltip(CharacterSummaryPayload.SkillEntry skill) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("§7").append(skill.type().toLowerCase());
+        if (skill.manaCost() > 0) sb.append(" §9· ").append(skill.manaCost()).append(" mana");
+        if (skill.cooldownSec() > 0) sb.append(" §7· ").append(skill.cooldownSec()).append("s cooldown");
+        if (!skill.description().isEmpty()) sb.append("\n§f").append(skill.description());
+        if (!skill.owned()) {
+            sb.append("\n§cRequires level ").append(skill.levelReq());
+            if (skill.cost() > 0) sb.append(" + ").append(skill.cost()).append(" skill points");
+        }
+        return sb.toString();
+    }
+
+    /** Title + body tooltip; body lines word-wrapped to fit beside the panel. */
+    private static void tooltip(GuiGraphics g, Font font, String title, String body) {
+        List<FormattedCharSequence> lines = new ArrayList<>();
+        lines.add(Component.literal("§6" + title).getVisualOrderText());
+        for (String para : body.split("\n")) {
+            lines.addAll(font.split(net.minecraft.network.chat.FormattedText.of(para), 160));
+        }
+        g.setTooltipForNextFrame(lines, (int) mouseX, (int) mouseY);
+    }
+
+    // --- small helpers ---
+
+    private static CharacterSummaryPayload.SkillEntry findSkill(CharacterSummaryPayload s, String id) {
+        for (var skill : s.skills()) {
+            if (skill.id().equals(id)) return skill;
+        }
+        return null;
+    }
+
+    private static ItemStack icon(String id) {
+        return ICON_CACHE.computeIfAbsent(id, key -> {
+            Identifier rl = Identifier.tryParse(key);
+            if (rl == null || !BuiltInRegistries.ITEM.containsKey(rl)) {
+                return new ItemStack(Items.ENCHANTED_BOOK);
+            }
+            return new ItemStack(BuiltInRegistries.ITEM.getValue(rl));
+        });
+    }
+
+    private static String itemName(String id) {
+        Identifier rl = Identifier.tryParse(id);
+        if (rl == null || !BuiltInRegistries.ITEM.containsKey(rl)) return id;
+        return new ItemStack(BuiltInRegistries.ITEM.getValue(rl)).getHoverName().getString();
+    }
+
+    private static String trim(Font font, String text, int width) {
+        if (font.width(text) <= width) return text;
+        String out = text;
+        while (!out.isEmpty() && font.width(out + "…") > width) {
+            out = out.substring(0, out.length() - 1);
+        }
+        return out + "…";
+    }
+
+    private record PickerHit(CharacterSummaryPayload.PickEntry entry, boolean race) {}
+
+    /** Mirrors {@link #renderStatsTab}'s layout maths for click hit-testing. */
+    private static PickerHit pickerRowAt(InventoryScreen screen, double mx, double my) {
+        CharacterSummaryPayload s = summary();
+        if (s == null) return null;
+        int tx = panelX(screen) + 8;
+        if (mx < tx - 2 || mx >= tx + PANEL_WIDTH - 14) return null;
+        int ty = panelY(screen) + 8 + 12 + 12 + 12 + 35 + 12 + 12; // top of picker block
+        if (!s.raceChoices().isEmpty()) {
+            ty += 13;
+            for (CharacterSummaryPayload.PickEntry entry : s.raceChoices()) {
+                if (my >= ty - 1 && my < ty + 10) return new PickerHit(entry, true);
+                ty += 11;
+            }
+            ty += 4;
+        }
+        if (!s.classChoices().isEmpty()) {
+            ty += 13;
+            for (CharacterSummaryPayload.PickEntry entry : s.classChoices()) {
+                if (my >= ty - 1 && my < ty + 10) return new PickerHit(entry, false);
+                ty += 11;
+            }
+        }
+        return null;
     }
 
     private CharacterPanel() {}

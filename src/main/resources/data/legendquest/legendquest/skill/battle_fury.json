@@ -1,11 +1,26 @@
 {
   "name": "Battle Fury",
   "description": "Your blows sometimes ignite with rage.",
+  "icon": "minecraft:blaze_powder",
   "type": "triggered",
   "cooldown": 3000,
-  "trigger": { "on": "melee_hit", "chance": 25.0 },
+  "trigger": {
+    "on": "melee_hit",
+    "chance": 25.0
+  },
   "effects": [
-    { "type": "legendquest:ignite", "duration": 3000, "target": { "kind": "trigger" } },
-    { "type": "legendquest:sound", "sound": "minecraft:entity.blaze.shoot", "volume": 0.6, "pitch": 1.2 }
+    {
+      "type": "legendquest:ignite",
+      "duration": 3000,
+      "target": {
+        "kind": "trigger"
+      }
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:entity.blaze.shoot",
+      "volume": 0.6,
+      "pitch": 1.2
+    }
   ]
 }

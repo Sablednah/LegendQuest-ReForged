@@ -1,11 +1,24 @@
 {
   "name": "Second Wind",
   "description": "When hurt, you sometimes find hidden reserves.",
+  "icon": "minecraft:golden_apple",
   "type": "triggered",
   "cooldown": 15000,
-  "trigger": { "on": "hurt", "chance": 20.0 },
+  "trigger": {
+    "on": "hurt",
+    "chance": 20.0
+  },
   "effects": [
-    { "type": "legendquest:heal", "amount": 4.0, "target": { "kind": "self" } },
-    { "type": "legendquest:message", "text": "&aA second wind fills your lungs!" }
+    {
+      "type": "legendquest:heal",
+      "amount": 4.0,
+      "target": {
+        "kind": "self"
+      }
+    },
+    {
+      "type": "legendquest:message",
+      "text": "&aA second wind fills your lungs!"
+    }
   ]
 }

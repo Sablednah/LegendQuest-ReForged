@@ -1,5 +1,7 @@
 package com.sablednah.legendquest.network;
 
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -15,28 +17,63 @@ public final class LQNetwork {
         PayloadRegistrar registrar = event.registrar("1").optional();
         registrar.playToClient(CharacterSummaryPayload.TYPE, CharacterSummaryPayload.CODEC,
                 LQNetwork::handleSummary);
+        registrar.playToClient(CombatIndicatorPayload.TYPE, CombatIndicatorPayload.CODEC,
+                LQNetwork::handleIndicator);
         registrar.playToServer(SkillActionPayload.TYPE, SkillActionPayload.CODEC,
                 LQNetwork::handleSkillAction);
+        registrar.playToServer(LoadoutEditPayload.TYPE, LoadoutEditPayload.CODEC,
+                LQNetwork::handleLoadoutEdit);
+        registrar.playToServer(ChoosePayload.TYPE, ChoosePayload.CODEC,
+                LQNetwork::handleChoose);
     }
 
-    /** Server only (playToServer): hotkey skill actions from modded clients. */
+    /**
+     * Client only (playToClient). The client state classes are referenced
+     * only inside the enqueued lambdas, so they load lazily on first packet
+     * and are never pulled in on a dedicated server during registration.
+     */
+    private static void handleSummary(CharacterSummaryPayload payload, IPayloadContext context) {
+        context.enqueueWork(() ->
+                com.sablednah.legendquest.client.ClientCharacterState.accept(payload));
+    }
+
+    private static void handleIndicator(CombatIndicatorPayload payload, IPayloadContext context) {
+        context.enqueueWork(() ->
+                com.sablednah.legendquest.client.CombatIndicators.accept(payload));
+    }
+
+    // --- serverbound (all validated server-side; the GUI only requests) ---
+
     private static void handleSkillAction(SkillActionPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
-            if (context.player() instanceof net.minecraft.server.level.ServerPlayer player) {
+            if (context.player() instanceof ServerPlayer player) {
                 com.sablednah.legendquest.neoforge.SkillActions.handle(
                         player, payload.action(), payload.slot());
             }
         });
     }
 
-    /**
-     * Client only (playToClient). The client state class is referenced only
-     * inside the enqueued lambda, so it is loaded lazily on first packet and
-     * never pulled in on a dedicated server during registration.
-     */
-    private static void handleSummary(CharacterSummaryPayload payload, IPayloadContext context) {
-        context.enqueueWork(() ->
-                com.sablednah.legendquest.client.ClientCharacterState.accept(payload));
+    private static void handleLoadoutEdit(LoadoutEditPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (context.player() instanceof ServerPlayer player) {
+                com.sablednah.legendquest.neoforge.SkillActions.handleLoadoutEdit(player, payload);
+            }
+        });
+    }
+
+    private static void handleChoose(ChoosePayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (!(context.player() instanceof ServerPlayer player)) return;
+            Identifier id = Identifier.tryParse(payload.id());
+            if (id == null) return;
+            switch (payload.kind()) {
+                case ChoosePayload.RACE ->
+                        com.sablednah.legendquest.neoforge.CharacterActions.chooseRace(player, id);
+                case ChoosePayload.MAIN_CLASS ->
+                        com.sablednah.legendquest.neoforge.CharacterActions.chooseClass(player, id, false);
+                default -> { }
+            }
+        });
     }
 
     private LQNetwork() {}

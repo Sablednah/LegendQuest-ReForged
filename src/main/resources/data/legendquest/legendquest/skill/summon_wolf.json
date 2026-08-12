@@ -1,6 +1,7 @@
 {
   "name": "Summon Wolf",
   "description": "Call a wolf from the wild to your side.",
+  "icon": "minecraft:bone",
   "type": "active",
   "cooldown": 60000,
   "mana_cost": 20,

@@ -1,8 +1,13 @@
 {
   "name": "Night Vision",
   "description": "The dark holds no secrets from you.",
+  "icon": "minecraft:golden_carrot",
   "type": "passive",
   "effects": [
-    { "type": "legendquest:potion_effect", "effect": "minecraft:night_vision", "duration": 15000 }
+    {
+      "type": "legendquest:potion_effect",
+      "effect": "minecraft:night_vision",
+      "duration": 15000
+    }
   ]
 }

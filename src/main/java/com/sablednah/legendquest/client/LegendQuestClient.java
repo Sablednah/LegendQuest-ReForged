@@ -21,6 +21,8 @@ public class LegendQuestClient {
         modEventBus.addListener(LQKeyMappings::register);
         NeoForge.EVENT_BUS.register(CharacterPanel.class);
         NeoForge.EVENT_BUS.register(ClientCharacterState.class);
+        NeoForge.EVENT_BUS.register(LQHud.class);
+        NeoForge.EVENT_BUS.register(CombatIndicators.class);
         NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post event) -> LQKeyMappings.onClientTick());
     }
 }

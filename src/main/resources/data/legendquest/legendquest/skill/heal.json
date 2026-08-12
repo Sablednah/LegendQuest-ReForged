@@ -1,13 +1,25 @@
 {
   "name": "Heal",
   "description": "Mend the wounds of whoever you gaze upon - or yourself.",
+  "icon": "minecraft:glistering_melon_slice",
   "type": "active",
   "cooldown": 8000,
   "mana_cost": 10,
   "karma_reward": 1,
   "xp": 2,
   "effects": [
-    { "type": "legendquest:heal", "amount": 6.0, "target": { "kind": "looking_at", "range": 12 } },
-    { "type": "legendquest:sound", "sound": "minecraft:entity.experience_orb.pickup", "pitch": 1.4 }
+    {
+      "type": "legendquest:heal",
+      "amount": 6.0,
+      "target": {
+        "kind": "looking_at",
+        "range": 12
+      }
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:entity.experience_orb.pickup",
+      "pitch": 1.4
+    }
   ]
 }

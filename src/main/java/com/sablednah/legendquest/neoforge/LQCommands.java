@@ -366,25 +366,7 @@ public final class LQCommands {
         Identifier skillId = resolve(ctx.getSource(), LQRegistries.SKILL,
                 ResourceKeyArgument.getRegistryKey(ctx, "skill", LQRegistries.SKILL, ERROR_UNKNOWN_SKILL),
                 ERROR_UNKNOWN_SKILL);
-        if (!SkillEngine.grants(player).containsKey(skillId)) {
-            Feedback.chat(player, "&cYou don't know that skill.");
-            return 0;
-        }
-        var def = SkillEngine.definition(player, skillId);
-        if (def.isEmpty() || def.get().type() != com.sablednah.legendquest.skills.SkillType.ACTIVE) {
-            Feedback.chat(player, "&cOnly active skills belong in a loadout.");
-            return 0;
-        }
-        PlayerCharacter pc = CharacterService.data(player);
-        if (!pc.addToLoadout(skillId)) {
-            Feedback.chat(player, "&7Already in the loadout.");
-            return 0;
-        }
-        Feedback.chat(player, "&6Added &l" + def.get().name() + "&r&6 to the loadout.");
-        if (pc.loadoutItem().isEmpty()) {
-            Feedback.chat(player, "&7Now hold your spellbook item and run /loadout bind.");
-        }
-        return 1;
+        return CharacterActions.loadoutAdd(player, skillId) ? 1 : 0;
     }
 
     private static int loadoutRemove(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
@@ -392,13 +374,7 @@ public final class LQCommands {
         Identifier skillId = resolve(ctx.getSource(), LQRegistries.SKILL,
                 ResourceKeyArgument.getRegistryKey(ctx, "skill", LQRegistries.SKILL, ERROR_UNKNOWN_SKILL),
                 ERROR_UNKNOWN_SKILL);
-        PlayerCharacter pc = CharacterService.data(player);
-        if (pc.removeFromLoadout(skillId)) {
-            Feedback.chat(player, "&6Removed from the loadout.");
-            return 1;
-        }
-        Feedback.chat(player, "&7That skill isn't in the loadout.");
-        return 0;
+        return CharacterActions.loadoutRemove(player, skillId) ? 1 : 0;
     }
 
     private static int loadoutClear(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
@@ -512,24 +488,7 @@ public final class LQCommands {
         Identifier raceId = resolve(ctx.getSource(), LQRegistries.RACE,
                 ResourceKeyArgument.getRegistryKey(ctx, "race", LQRegistries.RACE, ERROR_UNKNOWN_RACE),
                 ERROR_UNKNOWN_RACE);
-        ResourceKey<Race> key = ResourceKey.create(LQRegistries.RACE, raceId);
-        PlayerCharacter pc = CharacterService.data(player);
-
-        boolean onDefault = CharacterService.race(player).map(Race::isDefault).orElse(true);
-        if (pc.raceChanged() || !onDefault) {
-            Feedback.chat(player, "&cYour race is chosen for life. An admin can change it.");
-            return 0;
-        }
-        if (!LQPermissions.canSelectRace(player, key.identifier())) {
-            Feedback.chat(player, "&cThat race is not open to you.");
-            return 0;
-        }
-        Race target = ctx.getSource().registryAccess().lookupOrThrow(LQRegistries.RACE)
-                .get(key).map(r -> r.value()).orElseThrow();
-        pc.setRace(key.identifier(), !target.isDefault());
-        CharacterService.refresh(player);
-        Feedback.chat(player, "&6You are now " + article(target.name()) + " &l" + target.name() + "&r&6.");
-        return 1;
+        return CharacterActions.chooseRace(player, raceId) ? 1 : 0;
     }
 
     private static int classChoose(CommandContext<CommandSourceStack> ctx, boolean asSub)
@@ -538,59 +497,7 @@ public final class LQCommands {
         Identifier classId = resolve(ctx.getSource(), LQRegistries.CHAR_CLASS,
                 ResourceKeyArgument.getRegistryKey(ctx, "class", LQRegistries.CHAR_CLASS, ERROR_UNKNOWN_CLASS),
                 ERROR_UNKNOWN_CLASS);
-        ResourceKey<CharClass> key = ResourceKey.create(LQRegistries.CHAR_CLASS, classId);
-        CharClass target = ctx.getSource().registryAccess().lookupOrThrow(LQRegistries.CHAR_CLASS)
-                .get(key).map(r -> r.value()).orElseThrow();
-        PlayerCharacter pc = CharacterService.data(player);
-
-        if (!LQPermissions.canSelectClass(player, key.identifier())) {
-            Feedback.chat(player, "&cThat class is not open to you.");
-            return 0;
-        }
-        if (asSub && target.eligibility().mainOnly()) {
-            Feedback.chat(player, "&c" + target.name() + " can only be a main class.");
-            return 0;
-        }
-        if (!asSub && target.eligibility().subOnly()) {
-            Feedback.chat(player, "&c" + target.name() + " can only be a sub class.");
-            return 0;
-        }
-        // Race eligibility.
-        Optional<Identifier> raceId = pc.raceId();
-        List<Identifier> allowedRaces = target.eligibility().allowedRaces();
-        List<String> allowedGroups = target.eligibility().allowedGroups();
-        if (!allowedRaces.isEmpty() || !allowedGroups.isEmpty()) {
-            boolean raceOk = raceId.isPresent() && allowedRaces.contains(raceId.get());
-            boolean groupOk = CharacterService.race(player)
-                    .map(r -> r.groups().stream().anyMatch(allowedGroups::contains)).orElse(false);
-            if (!raceOk && !groupOk) {
-                Feedback.chat(player, "&cA " + CharacterService.race(player).map(Race::name).orElse("nobody")
-                        + " cannot become " + article(target.name()) + " " + target.name() + ".");
-                return 0;
-            }
-        }
-        // Dependency chains, checked against mastered classes.
-        long masterXp = Leveling.totalXpForLevel(LQConfig.MAX_LEVEL.get(), LQConfig.XP_LEVEL_BASE.get());
-        var requires = target.eligibility().requires();
-        var requiresOne = target.eligibility().requiresOne();
-        boolean requiresOk = requires.stream().allMatch(id -> pc.xpFor(id) >= masterXp)
-                && (requiresOne.isEmpty() || requiresOne.stream().anyMatch(id -> pc.xpFor(id) >= masterXp));
-        if (!requiresOk) {
-            Feedback.chat(player, "&c" + target.name() + " requires mastering: "
-                    + (requires.isEmpty() ? "" : requires)
-                    + (requiresOne.isEmpty() ? "" : " one of " + requiresOne));
-            return 0;
-        }
-
-        if (asSub) {
-            pc.setSubClass(Optional.of(key.identifier()));
-        } else {
-            pc.setMainClass(key.identifier());
-        }
-        CharacterService.refresh(player);
-        Feedback.chat(player, "&6You are now " + article(target.name()) + " &l" + target.name()
-                + "&r&6" + (asSub ? " (sub class)." : "."));
-        return 1;
+        return CharacterActions.chooseClass(player, classId, asSub) ? 1 : 0;
     }
 
     private static int stats(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {

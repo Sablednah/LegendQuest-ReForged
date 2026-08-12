@@ -223,4 +223,13 @@ public final class PlayerCharacter {
     public void selectLoadout(int index) {
         if (index >= 0 && index < loadout.size()) loadoutIndex = index;
     }
+
+    /** Reorder (drag & drop): move {@code from} to {@code to}, keeping the
+     *  currently selected <em>skill</em> selected whatever its new slot. */
+    public void moveLoadout(int from, int to) {
+        if (from < 0 || from >= loadout.size() || to < 0 || to >= loadout.size() || from == to) return;
+        String selected = loadout.isEmpty() ? null : loadout.get(Math.min(loadoutIndex, loadout.size() - 1));
+        loadout.add(to, loadout.remove(from));
+        if (selected != null) loadoutIndex = Math.max(0, loadout.indexOf(selected));
+    }
 }

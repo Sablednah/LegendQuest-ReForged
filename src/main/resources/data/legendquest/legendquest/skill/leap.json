@@ -1,11 +1,20 @@
 {
   "name": "Leap",
   "description": "Spring forward with unnatural power.",
+  "icon": "minecraft:rabbit_foot",
   "type": "active",
   "cooldown": 4000,
   "mana_cost": 3,
   "effects": [
-    { "type": "legendquest:leap", "power": 1.6, "lift": 0.7 },
-    { "type": "legendquest:sound", "sound": "minecraft:entity.rabbit.jump", "pitch": 0.7 }
+    {
+      "type": "legendquest:leap",
+      "power": 1.6,
+      "lift": 0.7
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:entity.rabbit.jump",
+      "pitch": 0.7
+    }
   ]
 }

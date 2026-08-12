@@ -113,6 +113,10 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 - [x] Network payloads: character summary (race/class/level/karma/mana/stats/skills+cooldowns) pushed on login, character change, and 1/s; registrar `.optional()` so vanilla clients connect
 - [x] Client mod class (`dist=CLIENT`); inventory-screen character panel: LQ button beside the recipe-book button, panel slides out LEFT recipe-book-style (same 147×166 footprint + `leftPos` shift maths), mutually exclusive with the recipe book. Always-on HUD overlay via `RenderGuiEvent.Post` still open
 - [x] Keybinds (Controls → LegendQuest): open sheet (K), use selected skill (R), cycle loadout (G), use loadout slot 1–5 (unbound — per-skill binds via loadout slots); serverbound `SkillActionPayload`, inert on vanilla servers
+- [x] Skills tab (✦ button): loadout slot strip + full skill list with item icons (`icon:` field on skills, lenient string), greyed unowned, hover tooltips (description/mana/cooldown/requirements); drag & drop add/reorder/remove, click to select — all via serverbound `LoadoutEditPayload`, validated by the same `CharacterActions` rules as /loadout
+- [x] Race/class pickers on the stats tab while the choice is open (catalogs travel in the summary only until chosen); click to choose via `ChoosePayload` → `CharacterActions` (same rules/messages as /race /class choose)
+- [x] Always-on HUD (bottom-left): mana bar + level, loadout chips with selected highlight and cooldown countdowns
+- [x] Combat indicators: floating 60s-Batman words (Kapow!/Miss!/CRITICAL!/Clang!) near the victim on hit/miss/crit/fumble — `CombatIndicatorPayload` to the attacker, MobHealth GUI-pass projection, random word/colour/jitter, drift-up fade. Natural 20 = crit = ×1.5 damage
 - [ ] Config screen (`IConfigScreenFactory` + lang keys for every option)
 - [ ] Action-bar feedback helpers (`&`-code translation, like ZombieMod `Announce`)
 

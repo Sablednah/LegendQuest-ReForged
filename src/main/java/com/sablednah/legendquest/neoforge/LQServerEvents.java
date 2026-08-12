@@ -5,6 +5,7 @@ import com.sablednah.legendquest.character.PlayerCharacter;
 import com.sablednah.legendquest.core.Mechanics;
 import com.sablednah.legendquest.core.Stat;
 import com.sablednah.legendquest.data.ItemRules;
+import com.sablednah.legendquest.network.CombatIndicatorPayload;
 import com.sablednah.legendquest.skills.TriggerSpec;
 
 import java.util.UUID;
@@ -172,6 +173,7 @@ public final class LQServerEvents {
                 event.setAmount(Math.min(event.getAmount(), 1.0F));
                 Feedback.actionBar(playerAttacker, "&cYou fumble with the unfamiliar "
                         + weapon.getHoverName().getString() + "...");
+                indicate(playerAttacker, victim, CombatIndicatorPayload.FUMBLE);
             }
         }
 
@@ -182,14 +184,26 @@ public final class LQServerEvents {
             Integer dodgeMod = victim instanceof ServerPlayer p
                     ? CharacterService.statModifier(p, Stat.DEX) : null;
             if (attackMod != null || dodgeMod != null) {
-                boolean hits = Mechanics.opposedTest(victim.getRandom()::nextInt,
+                var outcome = Mechanics.opposedAttack(victim.getRandom()::nextInt,
                         attackMod != null ? attackMod : 0,
                         dodgeMod != null ? dodgeMod : 0);
-                if (!hits) {
+                if (outcome == Mechanics.AttackOutcome.MISS) {
                     event.setCanceled(true);
                     if (victim instanceof ServerPlayer p) Feedback.actionBar(p, "&aDodged!");
-                    if (attacker instanceof ServerPlayer p) Feedback.actionBar(p, "&7They dodged.");
+                    if (attacker instanceof ServerPlayer p) {
+                        Feedback.actionBar(p, "&7They dodged.");
+                        indicate(p, victim, CombatIndicatorPayload.MISS);
+                    }
                     return;
+                }
+                if (attacker instanceof ServerPlayer p) {
+                    if (outcome == Mechanics.AttackOutcome.CRIT) {
+                        // A natural 20 hits half again as hard. Tabletop law.
+                        event.setAmount(event.getAmount() * 1.5F);
+                        indicate(p, victim, CombatIndicatorPayload.CRIT);
+                    } else {
+                        indicate(p, victim, CombatIndicatorPayload.HIT);
+                    }
                 }
             }
             // STR bonus for player melee (direct hits only: attacker == direct entity).
@@ -208,6 +222,14 @@ public final class LQServerEvents {
             SkillEngine.trigger(p, TriggerSpec.Kind.HURT,
                     attacker instanceof LivingEntity la ? la : null);
         }
+    }
+
+    /** Floating combat word above the victim, for the attacker's eyes.
+     *  Vanilla clients never registered the channel; the send just drops. */
+    private static void indicate(ServerPlayer attacker, LivingEntity victim, int kind) {
+        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(attacker,
+                new CombatIndicatorPayload(victim.getX(),
+                        victim.getY() + victim.getBbHeight() * 0.9, victim.getZ(), kind));
     }
 
     // --- restrictions: armour and tools ---

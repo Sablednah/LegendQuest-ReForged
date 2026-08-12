@@ -11,10 +11,14 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
 /**
- * Everything the client HUD/panel needs to draw the character sheet.
+ * Everything the client HUD/panels need to draw the character sheet.
  * Server → client, pushed on login, on character changes, and once a
  * second (mana and cooldowns move constantly anyway). Plain data only —
  * deliberately free of Minecraft world types so both sides can hold it.
+ *
+ * <p>The picker catalogs ({@code raceChoices}/{@code classChoices}) are only
+ * populated while that choice is still open — once you're an Elf for life,
+ * the race list stops travelling.</p>
  */
 public record CharacterSummaryPayload(
         String raceName,
@@ -27,11 +31,21 @@ public record CharacterSummaryPayload(
         int[] stats,           // STR DEX CON INT WIS CHR effective scores
         int spSpent,
         int spTotal,
-        List<SkillEntry> skills) implements CustomPacketPayload {
+        List<SkillEntry> skills,
+        List<String> loadout,  // skill ids, in order
+        int loadoutIndex,
+        String loadoutItem,    // item id, empty = no spellbook bound
+        List<PickEntry> raceChoices,   // empty = race locked in
+        List<PickEntry> classChoices)  // empty = class chosen
+        implements CustomPacketPayload {
 
     /** One row of the skill list, ready to render. */
-    public record SkillEntry(String name, String type, int levelReq, int cost,
+    public record SkillEntry(String id, String name, String type, String description,
+            String icon, int manaCost, int cooldownSec, int levelReq, int cost,
             boolean owned, int readyInSec) {}
+
+    /** One clickable option in the race/class picker. */
+    public record PickEntry(String id, String name, String description, boolean available) {}
 
     public static final Type<CharacterSummaryPayload> TYPE =
             new Type<>(Identifier.fromNamespaceAndPath(LegendQuest.MODID, "character_summary"));
@@ -52,19 +66,30 @@ public record CharacterSummaryPayload(
         buf.writeVarInt(p.spTotal);
         buf.writeVarInt(p.skills.size());
         for (SkillEntry s : p.skills) {
+            buf.writeUtf(s.id());
             buf.writeUtf(s.name());
             buf.writeUtf(s.type());
+            buf.writeUtf(s.description());
+            buf.writeUtf(s.icon());
+            buf.writeVarInt(s.manaCost());
+            buf.writeVarInt(s.cooldownSec());
             buf.writeVarInt(s.levelReq());
             buf.writeVarInt(s.cost());
             buf.writeBoolean(s.owned());
             buf.writeVarInt(s.readyInSec());
         }
+        buf.writeVarInt(p.loadout.size());
+        for (String id : p.loadout) buf.writeUtf(id);
+        buf.writeVarInt(p.loadoutIndex);
+        buf.writeUtf(p.loadoutItem);
+        writePicks(buf, p.raceChoices);
+        writePicks(buf, p.classChoices);
     }
 
     private static CharacterSummaryPayload decode(RegistryFriendlyByteBuf buf) {
         String race = buf.readUtf();
-        String main = buf.readUtf();
-        String sub = buf.readUtf();
+        String mainClass = buf.readUtf();
+        String subClass = buf.readUtf();
         int level = buf.readVarInt();
         String karma = buf.readUtf();
         float mana = buf.readFloat();
@@ -73,14 +98,42 @@ public record CharacterSummaryPayload(
         for (int n = 0; n < 6; n++) stats[n] = buf.readVarInt();
         int spSpent = buf.readVarInt();
         int spTotal = buf.readVarInt();
-        int count = buf.readVarInt();
-        List<SkillEntry> skills = new ArrayList<>(count);
-        for (int n = 0; n < count; n++) {
-            skills.add(new SkillEntry(buf.readUtf(), buf.readUtf(),
-                    buf.readVarInt(), buf.readVarInt(), buf.readBoolean(), buf.readVarInt()));
+        int skillCount = buf.readVarInt();
+        List<SkillEntry> skills = new ArrayList<>(skillCount);
+        for (int n = 0; n < skillCount; n++) {
+            skills.add(new SkillEntry(buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readUtf(),
+                    buf.readUtf(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(),
+                    buf.readVarInt(), buf.readBoolean(), buf.readVarInt()));
         }
-        return new CharacterSummaryPayload(race, main, sub, level, karma,
-                mana, maxMana, stats, spSpent, spTotal, skills);
+        int loadoutCount = buf.readVarInt();
+        List<String> loadout = new ArrayList<>(loadoutCount);
+        for (int n = 0; n < loadoutCount; n++) loadout.add(buf.readUtf());
+        int loadoutIndex = buf.readVarInt();
+        String loadoutItem = buf.readUtf();
+        List<PickEntry> raceChoices = readPicks(buf);
+        List<PickEntry> classChoices = readPicks(buf);
+        return new CharacterSummaryPayload(race, mainClass, subClass, level, karma, mana, maxMana,
+                stats, spSpent, spTotal, skills, loadout, loadoutIndex, loadoutItem,
+                raceChoices, classChoices);
+    }
+
+    private static void writePicks(RegistryFriendlyByteBuf buf, List<PickEntry> picks) {
+        buf.writeVarInt(picks.size());
+        for (PickEntry pick : picks) {
+            buf.writeUtf(pick.id());
+            buf.writeUtf(pick.name());
+            buf.writeUtf(pick.description());
+            buf.writeBoolean(pick.available());
+        }
+    }
+
+    private static List<PickEntry> readPicks(RegistryFriendlyByteBuf buf) {
+        int count = buf.readVarInt();
+        List<PickEntry> picks = new ArrayList<>(count);
+        for (int n = 0; n < count; n++) {
+            picks.add(new PickEntry(buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readBoolean()));
+        }
+        return picks;
     }
 
     @Override

@@ -28,6 +28,7 @@ import com.sablednah.legendquest.skills.TriggerSpec;
 public record SkillDefinition(
         String name,
         Optional<String> description,
+        String icon,
         SkillType type,
         Timing timing,
         SkillCosts costs,
@@ -35,9 +36,15 @@ public record SkillDefinition(
         long passiveIntervalMs,
         List<SkillEffect> effects) {
 
+    /** GUI icon shown in the skills panel/HUD when nothing is configured. */
+    public static final String DEFAULT_ICON = "minecraft:enchanted_book";
+
     public static final Codec<SkillDefinition> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.STRING.fieldOf("name").forGetter(SkillDefinition::name),
             Codec.STRING.optionalFieldOf("description").forGetter(SkillDefinition::description),
+            // A plain string, not an Item codec: a typo'd icon should never
+            // fail a world load — the client just falls back to the book.
+            Codec.STRING.optionalFieldOf("icon", DEFAULT_ICON).forGetter(SkillDefinition::icon),
             SkillType.CODEC.optionalFieldOf("type", SkillType.ACTIVE).forGetter(SkillDefinition::type),
             Timing.MAP_CODEC.forGetter(SkillDefinition::timing),
             SkillCosts.MAP_CODEC.forGetter(SkillDefinition::costs),

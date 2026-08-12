@@ -1,13 +1,27 @@
 {
   "name": "Smite",
   "description": "Call lightning down on your target.",
+  "icon": "minecraft:blaze_rod",
   "type": "active",
   "buildup": 1000,
   "cooldown": 20000,
   "mana_cost": 25,
   "karma_cost": 5,
   "effects": [
-    { "type": "legendquest:lightning", "target": { "kind": "looking_at", "range": 32 } },
-    { "type": "legendquest:damage", "amount": 6.0, "target": { "kind": "looking_at", "range": 32 } }
+    {
+      "type": "legendquest:lightning",
+      "target": {
+        "kind": "looking_at",
+        "range": 32
+      }
+    },
+    {
+      "type": "legendquest:damage",
+      "amount": 6.0,
+      "target": {
+        "kind": "looking_at",
+        "range": 32
+      }
+    }
   ]
 }
