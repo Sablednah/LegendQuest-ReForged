@@ -34,6 +34,16 @@
     "legendquest:second_wind": {
       "level": 20,
       "cost": 5
+    },
+    "legendquest:holy_light": {
+      "level": 12,
+      "cost": 0,
+      "karma_min": 50
+    },
+    "legendquest:darkness": {
+      "level": 12,
+      "cost": 0,
+      "karma_max": -50
     }
   },
   "allowed_tools": "#legendquest:cleric_tools"

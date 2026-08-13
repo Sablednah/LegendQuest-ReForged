@@ -38,6 +38,8 @@ public record Feat(
         String icon,
         int cost,
         int level,
+        long karmaMin,
+        long karmaMax,
         List<Identifier> requires,
         List<Identifier> allowedRaces,
         List<String> allowedGroups,
@@ -46,12 +48,22 @@ public record Feat(
         Map<Identifier, SkillGrant> skills,
         ItemRules itemRules) {
 
+    public boolean karmaAllows(long karma) {
+        return karma >= karmaMin && karma <= karmaMax;
+    }
+
+    public boolean hasKarmaBand() {
+        return karmaMin != Long.MIN_VALUE || karmaMax != Long.MAX_VALUE;
+    }
+
     public static final Codec<Feat> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.STRING.fieldOf("name").forGetter(Feat::name),
             Codec.STRING.optionalFieldOf("description").forGetter(Feat::description),
             Codec.STRING.optionalFieldOf("icon", "minecraft:nether_star").forGetter(Feat::icon),
             Codec.INT.optionalFieldOf("cost", 5).forGetter(Feat::cost),
             Codec.INT.optionalFieldOf("level", 0).forGetter(Feat::level),
+            Codec.LONG.optionalFieldOf("karma_min", Long.MIN_VALUE).forGetter(Feat::karmaMin),
+            Codec.LONG.optionalFieldOf("karma_max", Long.MAX_VALUE).forGetter(Feat::karmaMax),
             Identifier.CODEC.listOf().optionalFieldOf("requires", List.of()).forGetter(Feat::requires),
             Identifier.CODEC.listOf().optionalFieldOf("allowed_races", List.of())
                     .forGetter(Feat::allowedRaces),

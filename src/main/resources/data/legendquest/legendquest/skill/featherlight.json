@@ -1,0 +1,26 @@
+{
+  "name": "Featherlight",
+  "description": "For half a minute, the world forgets to pull. Leap rooftops, fall like a snowflake, moonwalk with dignity. (Also the reference permskill: any command + undo command + duration.)",
+  "icon": "minecraft:feather",
+  "type": "active",
+  "cooldown": 90000,
+  "mana_cost": 20,
+  "effects": [
+    {
+      "type": "legendquest:run_command",
+      "command": "attribute @s minecraft:gravity base set 0.02",
+      "undo_command": "attribute @s minecraft:gravity base reset",
+      "duration": 30000
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:entity.breeze.idle_air",
+      "volume": 0.8,
+      "pitch": 1.2
+    },
+    {
+      "type": "legendquest:message",
+      "text": "&dThe world lets go of you... for a while."
+    }
+  ]
+}

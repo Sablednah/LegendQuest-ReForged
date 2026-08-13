@@ -193,12 +193,16 @@ public final class LQCommands {
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("race", ResourceKeyArgument.key(LQRegistries.RACE))
                                         .suggests(LQCommands::suggestRaces)
-                                        .executes(LQCommands::adminSetRace))))
+                                        .executes(ctx -> adminSetRace(ctx, false))
+                                        .then(Commands.literal("force")
+                                                .executes(ctx -> adminSetRace(ctx, true))))))
                 .then(Commands.literal("setclass")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("class", ResourceKeyArgument.key(LQRegistries.CHAR_CLASS))
                                         .suggests(LQCommands::suggestClasses)
-                                        .executes(LQCommands::adminSetClass))))
+                                        .executes(ctx -> adminSetClass(ctx, false))
+                                        .then(Commands.literal("force")
+                                                .executes(ctx -> adminSetClass(ctx, true))))))
                 .then(Commands.literal("addxp")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("amount", LongArgumentType.longArg(0))
@@ -648,27 +652,69 @@ public final class LQCommands {
 
     // --- admin ---
 
-    private static int adminSetRace(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+    private static int adminSetRace(CommandContext<CommandSourceStack> ctx, boolean force)
+            throws CommandSyntaxException {
         ServerPlayer target = EntityArgument.getPlayer(ctx, "player");
         Identifier raceId = resolve(ctx.getSource(), LQRegistries.RACE,
                 ResourceKeyArgument.getRegistryKey(ctx, "race", LQRegistries.RACE, ERROR_UNKNOWN_RACE),
                 ERROR_UNKNOWN_RACE);
+        Race race = ctx.getSource().registryAccess().lookupOrThrow(LQRegistries.RACE)
+                .get(ResourceKey.create(LQRegistries.RACE, raceId)).map(r -> r.value()).orElseThrow();
+
+        // Legality: the target's current classes must be open to the new
+        // race, or the admin must say 'force' (dwarf mages are a choice,
+        // not an accident).
+        if (!force) {
+            for (var classId : java.util.List.of(
+                    CharacterService.data(target).mainClassId(),
+                    CharacterService.data(target).subClassId())) {
+                var illegal = classId
+                        .flatMap(id -> CharacterService.charClass(target, classId))
+                        .filter(cls -> !CharacterActions.classOpenTo(raceId, race, cls));
+                if (illegal.isPresent()) {
+                    ctx.getSource().sendFailure(Component.literal(
+                            "A " + race.name() + " cannot be a " + illegal.get().name()
+                                    + " — append 'force' to make the illegal combo anyway."));
+                    return 0;
+                }
+            }
+        }
         CharacterService.data(target).setRace(raceId, false);
         CharacterService.refresh(target);
         ctx.getSource().sendSuccess(() -> Component.literal(
-                "Set " + target.getName().getString() + "'s race to " + raceId), true);
+                "Set " + target.getName().getString() + "'s race to " + raceId
+                        + (force ? " (forced)" : "")), true);
         return 1;
     }
 
-    private static int adminSetClass(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+    private static int adminSetClass(CommandContext<CommandSourceStack> ctx, boolean force)
+            throws CommandSyntaxException {
         ServerPlayer target = EntityArgument.getPlayer(ctx, "player");
         Identifier classId = resolve(ctx.getSource(), LQRegistries.CHAR_CLASS,
                 ResourceKeyArgument.getRegistryKey(ctx, "class", LQRegistries.CHAR_CLASS, ERROR_UNKNOWN_CLASS),
                 ERROR_UNKNOWN_CLASS);
+        CharClass cls = ctx.getSource().registryAccess().lookupOrThrow(LQRegistries.CHAR_CLASS)
+                .get(ResourceKey.create(LQRegistries.CHAR_CLASS, classId)).map(r -> r.value()).orElseThrow();
+
+        if (!force) {
+            var raceBlock = CharacterService.data(target).raceId()
+                    .flatMap(rid -> ctx.getSource().registryAccess().lookupOrThrow(LQRegistries.RACE)
+                            .get(ResourceKey.create(LQRegistries.RACE, rid))
+                            .map(ref -> !CharacterActions.classOpenTo(rid, ref.value(), cls)))
+                    .orElse(false);
+            if (raceBlock || cls.eligibility().subOnly()) {
+                ctx.getSource().sendFailure(Component.literal(
+                        (raceBlock ? "That race cannot take " + cls.name()
+                                : cls.name() + " is sub-class only")
+                                + " — append 'force' to make the illegal combo anyway."));
+                return 0;
+            }
+        }
         CharacterService.data(target).setMainClass(classId);
         CharacterService.refresh(target);
         ctx.getSource().sendSuccess(() -> Component.literal(
-                "Set " + target.getName().getString() + "'s class to " + classId), true);
+                "Set " + target.getName().getString() + "'s class to " + classId
+                        + (force ? " (forced)" : "")), true);
         return 1;
     }
 

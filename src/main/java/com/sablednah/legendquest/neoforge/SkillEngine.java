@@ -78,6 +78,9 @@ public final class SkillEngine {
     public static boolean owns(ServerPlayer player, Identifier skillId, SkillGrant grant) {
         if (CharacterService.level(player) < grant.level()) return false;
         if (grant.cost() > 0 && !CharacterService.data(player).hasPurchased(skillId)) return false;
+        // Karma bands suspend, never forget: drift out and the skill sleeps,
+        // repent (or fall) back into the band and it wakes.
+        if (!grant.karmaAllows(CharacterService.data(player).karma())) return false;
         return true;
     }
 
@@ -198,6 +201,7 @@ public final class SkillEngine {
 
     public static void tick(MinecraftServer server) {
         long now = System.currentTimeMillis();
+        com.sablednah.legendquest.skills.effects.LQEffects.RunCommand.tickUndos(server);
 
         if (!PENDING.isEmpty()) {
             Iterator<Pending> it = PENDING.iterator();

@@ -34,5 +34,6 @@
       "base": 0.5,
       "per_level": 0.03
     }
-  }
+  },
+  "allow_enchanting": false
 }

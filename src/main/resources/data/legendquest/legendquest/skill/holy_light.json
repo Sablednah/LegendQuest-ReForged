@@ -1,0 +1,33 @@
+{
+  "name": "Holy Light",
+  "description": "A benediction made visible: a lance of radiance that knits the flesh of whoever it touches. Only a bright soul can hold it.",
+  "icon": "minecraft:glowstone_dust",
+  "type": "active",
+  "cooldown": 8000,
+  "mana_cost": 10,
+  "effects": [
+    {
+      "type": "legendquest:particle_line",
+      "particle": "minecraft:end_rod",
+      "per_block": 6.0,
+      "target": {
+        "kind": "looking_at",
+        "range": 20
+      }
+    },
+    {
+      "type": "legendquest:heal",
+      "amount": 8.0,
+      "target": {
+        "kind": "looking_at",
+        "range": 20
+      }
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:block.amethyst_block.chime",
+      "volume": 1.0,
+      "pitch": 0.8
+    }
+  ]
+}

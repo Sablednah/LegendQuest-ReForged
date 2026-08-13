@@ -34,5 +34,7 @@
       "cost": 5
     }
   },
-  "allowed_tools": "#legendquest:barbarian_tools"
+  "allowed_tools": "#legendquest:barbarian_tools",
+  "allow_enchanting": false,
+  "allow_brewing": false
 }

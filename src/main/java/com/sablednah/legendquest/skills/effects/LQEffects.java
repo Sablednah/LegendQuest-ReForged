@@ -58,6 +58,7 @@ public final class LQEffects {
         SkillEffectTypes.register(Sound.TYPE, Sound.CODEC);
         SkillEffectTypes.register(ParticleLine.TYPE, ParticleLine.CODEC);
         SkillEffectTypes.register(ProjectileEffect.TYPE, ProjectileEffect.CODEC);
+        SkillEffectTypes.register(RunCommand.TYPE, RunCommand.CODEC);
     }
 
     /** Magic damage to the target. The old Hurt/MightyBlow backbone. */
@@ -390,6 +391,65 @@ public final class LQEffects {
             launched.snapTo(spawn.x, spawn.y, spawn.z,
                     ctx.caster().getYRot(), ctx.caster().getXRot());
             ctx.level().addFreshEntity(launched);
+        }
+    }
+
+    /**
+     * The old "permskills" intent, modernised: run any command under LQ's
+     * costs and cooldowns — server-installed /fly, /home, whatever — with an
+     * optional undo command after a duration ("temp flight" is exactly
+     * {@code command} + {@code undo_command} + {@code duration}). Runs with
+     * permission level 2 as the caster ({@code @s} works), output silenced.
+     * {@code %player%} expands to the caster's name for plugin-style syntax.
+     *
+     * <p>An undo whose player is offline waits for them; pending undos do
+     * not survive a server restart (alpha note in SKILL-PACKS.md).</p>
+     */
+    public record RunCommand(String command, String undoCommand, long durationMs)
+            implements SkillEffect {
+        public static final Identifier TYPE = id("run_command");
+        public static final MapCodec<RunCommand> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+                Codec.STRING.fieldOf("command").forGetter(RunCommand::command),
+                Codec.STRING.optionalFieldOf("undo_command", "").forGetter(RunCommand::undoCommand),
+                Codec.LONG.optionalFieldOf("duration", 0L).forGetter(RunCommand::durationMs))
+                .apply(i, RunCommand::new));
+
+        private record DelayedUndo(java.util.UUID player, String command, long atMs) {}
+        private static final java.util.List<DelayedUndo> UNDOS =
+                new java.util.concurrent.CopyOnWriteArrayList<>();
+
+        @Override public Identifier type() { return TYPE; }
+
+        @Override
+        public void apply(SkillContext ctx) {
+            runAs(ctx.caster(), command);
+            if (!undoCommand.isEmpty() && durationMs > 0) {
+                UNDOS.add(new DelayedUndo(ctx.caster().getUUID(), undoCommand,
+                        System.currentTimeMillis() + durationMs));
+            }
+        }
+
+        private static void runAs(net.minecraft.server.level.ServerPlayer player, String command) {
+            String expanded = command.replace("%player%", player.getName().getString());
+            player.level().getServer().getCommands().performPrefixedCommand(
+                    player.createCommandSourceStack()
+                            .withPermission(net.minecraft.server.permissions
+                                    .LevelBasedPermissionSet.GAMEMASTER)
+                            .withSuppressedOutput(),
+                    expanded);
+        }
+
+        /** Called from SkillEngine.tick. Undos wait for offline players. */
+        public static void tickUndos(net.minecraft.server.MinecraftServer server) {
+            if (UNDOS.isEmpty()) return;
+            long now = System.currentTimeMillis();
+            for (DelayedUndo undo : UNDOS) {
+                if (undo.atMs() > now) continue;
+                var player = server.getPlayerList().getPlayer(undo.player());
+                if (player == null) continue; // holds until they return
+                UNDOS.remove(undo);
+                runAs(player, undo.command());
+            }
         }
     }
 

@@ -438,6 +438,64 @@ public final class LQServerEvents {
                 || path.equals("diamond") || path.equals("leather") || path.equals("turtle_scute");
     }
 
+    // --- station gates: the old core-ability booleans, enforced ---
+
+    /** Deny wins across race + main + sub, matching the item-rule ethos. */
+    private static boolean craftAllowed(ServerPlayer player,
+            java.util.function.Predicate<com.sablednah.legendquest.data.CraftRules> allowed) {
+        if (!CharacterService.race(player).map(r -> allowed.test(r.craftRules())).orElse(true)) return false;
+        if (!CharacterService.mainClass(player).map(c -> allowed.test(c.craftRules())).orElse(true)) return false;
+        return CharacterService.subClass(player).map(c -> allowed.test(c.craftRules())).orElse(true);
+    }
+
+    /** Which station (if any) this block is, and can the player use it? */
+    @SubscribeEvent
+    static void onOpenStation(net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.RightClickBlock event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        var state = event.getLevel().getBlockState(event.getPos());
+        var block = state.getBlock();
+        String refusal = null;
+        if (block == net.minecraft.world.level.block.Blocks.CRAFTING_TABLE
+                || block == net.minecraft.world.level.block.Blocks.CRAFTER) {
+            if (!craftAllowed(player, com.sablednah.legendquest.data.CraftRules::crafting)) {
+                refusal = "&cYour hands were never taught the maker's craft.";
+            }
+        } else if (block == net.minecraft.world.level.block.Blocks.FURNACE
+                || block == net.minecraft.world.level.block.Blocks.BLAST_FURNACE
+                || block == net.minecraft.world.level.block.Blocks.SMOKER) {
+            if (!craftAllowed(player, com.sablednah.legendquest.data.CraftRules::smelting)) {
+                refusal = "&cThe fire does not answer to your kind.";
+            }
+        } else if (block == net.minecraft.world.level.block.Blocks.BREWING_STAND) {
+            if (!craftAllowed(player, com.sablednah.legendquest.data.CraftRules::brewing)) {
+                refusal = "&cPotioncraft is beyond your discipline.";
+            }
+        } else if (block == net.minecraft.world.level.block.Blocks.ENCHANTING_TABLE) {
+            if (!craftAllowed(player, com.sablednah.legendquest.data.CraftRules::enchanting)) {
+                refusal = "&cThe runes squirm away from your gaze.";
+            }
+        } else if (state.is(net.minecraft.tags.BlockTags.ANVIL)
+                || block == net.minecraft.world.level.block.Blocks.GRINDSTONE
+                || block == net.minecraft.world.level.block.Blocks.SMITHING_TABLE) {
+            if (!craftAllowed(player, com.sablednah.legendquest.data.CraftRules::repairing)) {
+                refusal = "&cMending is a craft, and it is not yours.";
+            }
+        }
+        if (refusal != null) {
+            event.setCanceled(true);
+            Feedback.actionBar(player, refusal);
+        }
+    }
+
+    @SubscribeEvent
+    static void onTame(net.neoforged.neoforge.event.entity.living.AnimalTameEvent event) {
+        if (!(event.getTamer() instanceof ServerPlayer player)) return;
+        if (!craftAllowed(player, com.sablednah.legendquest.data.CraftRules::taming)) {
+            event.setCanceled(true);
+            Feedback.actionBar(player, "&cThe beast senses your kind cannot be trusted.");
+        }
+    }
+
     @SubscribeEvent
     static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;

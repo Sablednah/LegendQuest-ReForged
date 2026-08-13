@@ -314,15 +314,24 @@ public final class CharacterService {
                 + feats(player).stream().mapToDouble(f -> getter.applyAsDouble(f.boons())).sum();
     }
 
-    /** The player's purchased feats, resolved (unknown ids simply skipped). */
+    /**
+     * The player's purchased feats, resolved (unknown ids simply skipped).
+     * A feat whose karma band the player has drifted out of is SUSPENDED —
+     * excluded here, so its boons, proficiencies and skills all sleep until
+     * the soul returns to spec. Bought, never refunded: falls from grace
+     * are supposed to hurt.
+     */
     public static java.util.List<com.sablednah.legendquest.data.Feat> feats(ServerPlayer player) {
         var lookup = player.level().registryAccess().lookupOrThrow(LQRegistries.FEAT);
+        long karma = data(player).karma();
         java.util.List<com.sablednah.legendquest.data.Feat> out = new java.util.ArrayList<>();
         for (String id : data(player).featIds()) {
             Identifier featId = Identifier.tryParse(id);
             if (featId == null) continue;
             lookup.get(ResourceKey.create(LQRegistries.FEAT, featId))
-                    .ifPresent(ref -> out.add(ref.value()));
+                    .map(Holder.Reference::value)
+                    .filter(feat -> feat.karmaAllows(karma))
+                    .ifPresent(out::add);
         }
         return out;
     }

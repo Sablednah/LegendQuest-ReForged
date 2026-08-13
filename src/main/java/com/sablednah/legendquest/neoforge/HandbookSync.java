@@ -93,6 +93,10 @@ public final class HandbookSync {
         lines.add(Line.text(""));
         lines.add(Line.text("§7Cost: §f" + feat.cost() + " skill points"
                 + (feat.level() > 0 ? " §7· needs level §f" + feat.level() : "")));
+        if (feat.hasKarmaBand()) {
+            lines.add(Line.text("§7Soul: §f" + karmaBand(feat.karmaMin(), feat.karmaMax())
+                    + " §8(drifting out of band suspends the feat)"));
+        }
         if (!feat.requires().isEmpty()) {
             lines.add(Line.text("§6Requires the feat" + (feat.requires().size() > 1 ? "s" : "") + ":"));
             for (Identifier req : feat.requires()) {
@@ -148,6 +152,7 @@ public final class HandbookSync {
             lines.add(Line.text("§7Lineage: §f" + String.join(", ", race.groups())));
         }
         itemRuleLines(lines, race.itemRules(), gear);
+        craftRuleLines(lines, race.craftRules());
         boonLines(lines, race.boons());
         grantLines(lines, race.skills());
 
@@ -233,6 +238,7 @@ public final class HandbookSync {
             }
         }
         itemRuleLines(lines, charClass.itemRules(), gear);
+        craftRuleLines(lines, charClass.craftRules());
         boonLines(lines, charClass.boons());
         grantLines(lines, charClass.skills());
         return new Entry(id.toString(), charClass.name(), "", 0, lines);
@@ -311,6 +317,19 @@ public final class HandbookSync {
         lines.add(Line.text(sb.toString()));
     }
 
+    private static void craftRuleLines(List<Line> lines, com.sablednah.legendquest.data.CraftRules rules) {
+        List<String> barred = new ArrayList<>();
+        if (!rules.crafting()) barred.add("crafting");
+        if (!rules.smelting()) barred.add("smelting");
+        if (!rules.brewing()) barred.add("brewing");
+        if (!rules.enchanting()) barred.add("enchanting");
+        if (!rules.repairing()) barred.add("repair");
+        if (!rules.taming()) barred.add("taming");
+        if (!barred.isEmpty()) {
+            lines.add(Line.text("§7Stations §cbarred§7: " + String.join(", ", barred)));
+        }
+    }
+
     private static void boonLines(List<Line> lines, com.sablednah.legendquest.data.Boons boons) {
         boons.attributes().forEach((id, bonus) -> {
             Identifier attrId = Identifier.tryParse(id);
@@ -345,11 +364,25 @@ public final class HandbookSync {
     }
 
     private static String grantSuffix(SkillGrant grant) {
-        if (grant.level() <= 0 && grant.cost() <= 0) return " §8(from the start)";
+        if (grant.level() <= 0 && grant.cost() <= 0 && !grant.hasKarmaBand()) {
+            return " §8(from the start)";
+        }
         StringBuilder sb = new StringBuilder(" §8(");
-        if (grant.level() > 0) sb.append("level ").append(grant.level());
-        if (grant.cost() > 0) sb.append(grant.level() > 0 ? ", " : "").append(grant.cost()).append(" sp");
+        boolean first = true;
+        if (grant.level() > 0) { sb.append("level ").append(grant.level()); first = false; }
+        if (grant.cost() > 0) {
+            sb.append(first ? "" : ", ").append(grant.cost()).append(" sp");
+            first = false;
+        }
+        if (grant.hasKarmaBand()) sb.append(first ? "" : ", ").append(karmaBand(grant.karmaMin(), grant.karmaMax()));
         return sb.append(")").toString();
+    }
+
+    /** "karma ≥ 50" / "karma ≤ -50" / "karma 0..100" — soul requirements. */
+    private static String karmaBand(long min, long max) {
+        if (min != Long.MIN_VALUE && max != Long.MAX_VALUE) return "karma " + min + "…" + max;
+        if (min != Long.MIN_VALUE) return "karma ≥ " + min;
+        return "karma ≤ " + max;
     }
 
     // --- item rules + gear pages ---

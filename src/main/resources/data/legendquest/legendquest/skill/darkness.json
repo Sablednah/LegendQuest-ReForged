@@ -1,0 +1,44 @@
+{
+  "name": "Darkness",
+  "description": "The light's exact refusal: a ribbon of unlight that withers what it finds. Only a dark soul can quench the world this way.",
+  "icon": "minecraft:wither_rose",
+  "type": "active",
+  "cooldown": 8000,
+  "mana_cost": 10,
+  "effects": [
+    {
+      "type": "legendquest:particle_line",
+      "particle": "minecraft:squid_ink",
+      "per_block": 6.0,
+      "target": {
+        "kind": "looking_at",
+        "range": 20
+      }
+    },
+    {
+      "type": "legendquest:potion_effect",
+      "effect": "minecraft:wither",
+      "duration": 6000,
+      "amplifier": 1,
+      "target": {
+        "kind": "looking_at",
+        "range": 20
+      }
+    },
+    {
+      "type": "legendquest:potion_effect",
+      "effect": "minecraft:blindness",
+      "duration": 4000,
+      "target": {
+        "kind": "looking_at",
+        "range": 20
+      }
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:entity.wither.ambient",
+      "volume": 0.7,
+      "pitch": 1.3
+    }
+  ]
+}

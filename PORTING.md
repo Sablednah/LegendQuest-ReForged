@@ -40,20 +40,15 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 - Vanilla-XP mirroring with hardcoded 1.8 curve constants → own XP pool fed by vanilla XP pickup.
 
 ### Deferred (revisit after core works)
-- **Karma-gated skills and feats** — acquisition-time karma requirements
-  (`karma_required` already gates *use* via SkillCosts; extend the same idea
-  to skill grants and feats: `karma_min`/`karma_max` on `SkillGrant` and
-  `Feat`). Enables paired good/evil choices — a cleric picks a god and gets
-  Holy Light *or* Darkness, mutually exclusive by karma band; buy chips and
-  the handbook grey out what your soul can't hold, and a feat already bought
-  could lapse (suspend, not refund) if karma drifts out of band. Makes karma
-  a real mechanic instead of a cosmetic title whenever the server owner
-  leans into it.
 - Economy costs (`pay:`) — no Vault equivalent on NeoForge; design a hook interface, ship no-op.
-- Permskills (running other plugins' commands under LQ costs/cooldowns) — a `run_command`/`grant_permission` skill effect pair covers the intent later.
 - Written-book character journal, chat prefixes/placeholders. (Loadouts: DONE — /loadout add/bind, sneak+right-click cycles, right-click casts.)
 - Party centroid teleport + SafeLoc; parties themselves are in scope.
-- Crafting/brewing/enchanting/smelting/repair/taming gates (needs per-station event survey); weapon/tool/armour gates are in scope now.
+
+### Formerly deferred, now DONE
+- [x] **Karma-gated skills and feats** — `karma_min`/`karma_max` on `SkillGrant` and `Feat`; out-of-band = suspended (not refunded), so redemption/corruption arcs are real. Cleric ships the paired Holy Light (karma ≥ 50) vs Darkness (karma ≤ -50). Handbook prints soul requirements.
+- [x] **Permskills** — `legendquest:run_command` effect: any command under LQ costs/cooldowns, permission level 2, `%player%` placeholder, optional `undo_command` after `duration` ms (undo waits for offline players; doesn't survive restart). Reference skill: Featherlight (mage 35) — low gravity for 30s via /attribute.
+- [x] **Station gates** — CraftRules enforced: crafting table/crafter, furnaces, brewing stand, enchanting table, anvils/grindstone/smithing table via RightClickBlock; taming via AnimalTameEvent. Deny wins across race+main+sub. Orcs can't enchant; barbarians can't enchant or brew. Handbook lists barred stations.
+- [x] **Admin legality + force** — `/lq admin setrace|setclass` reject illegal race/class combos with a clear message unless a trailing `force` literal is given.
 
 ---
 

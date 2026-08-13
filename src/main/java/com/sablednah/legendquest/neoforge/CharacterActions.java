@@ -95,6 +95,14 @@ public final class CharacterActions {
         return true;
     }
 
+    /** Is this class open to that race? (Shared with admin legality checks.) */
+    public static boolean classOpenTo(Identifier raceId, Race race, CharClass cls) {
+        var el = cls.eligibility();
+        return (el.allowedRaces().isEmpty() && el.allowedGroups().isEmpty())
+                || el.allowedRaces().contains(raceId)
+                || race.groups().stream().anyMatch(el.allowedGroups()::contains);
+    }
+
     static boolean raceEligible(ServerPlayer player, PlayerCharacter pc, CharClass target) {
         List<Identifier> allowedRaces = target.eligibility().allowedRaces();
         List<String> allowedGroups = target.eligibility().allowedGroups();
@@ -175,6 +183,12 @@ public final class CharacterActions {
             Feedback.notify(player, "&cThat needs level " + grant.level() + ".");
             return false;
         }
+        if (!grant.karmaAllows(pc.karma())) {
+            Feedback.notify(player, pc.karma() < grant.karmaMin()
+                    ? "&cYour soul is not bright enough for that."
+                    : "&cYour soul is not dark enough for that.");
+            return false;
+        }
         int available = CharacterService.skillPointsTotal(player) - pc.skillPointsSpent();
         if (available < grant.cost()) {
             Feedback.notify(player, "&cNeeds " + grant.cost() + " skill points; you have " + available + ".");
@@ -219,6 +233,12 @@ public final class CharacterActions {
         }
         if (CharacterService.level(player) < feat.level()) {
             Feedback.notify(player, "&c" + feat.name() + " needs level " + feat.level() + ".");
+            return false;
+        }
+        if (!feat.karmaAllows(pc.karma())) {
+            Feedback.notify(player, pc.karma() < feat.karmaMin()
+                    ? "&cYour soul is not bright enough for " + feat.name() + "."
+                    : "&cYour soul is not dark enough for " + feat.name() + ".");
             return false;
         }
         for (Identifier required : feat.requires()) {
