@@ -2,6 +2,7 @@ package com.sablednah.legendquest.neoforge;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -19,6 +20,7 @@ import com.sablednah.legendquest.network.HandbookPayload.Entry;
 import com.sablednah.legendquest.network.HandbookPayload.Line;
 
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -30,6 +32,10 @@ import net.neoforged.neoforge.network.PacketDistributor;
  * Builds the Players Handbook from the live registries and sends it once on
  * login. Pages are plain lines plus typed links, so adding a race in a YAML
  * file updates the book on the next login with zero client knowledge.
+ *
+ * <p>Every tag referenced by an item rule also becomes a "gear" page listing
+ * its actual items (icons included), and the rule line links to it — "what
+ * exactly ARE fighter weapons?" is one click, never a wiki visit.</p>
  */
 public final class HandbookSync {
 
@@ -39,19 +45,24 @@ public final class HandbookSync {
 
     private static HandbookPayload build(ServerPlayer player) {
         var access = player.level().registryAccess();
-        var raceLookup = access.lookupOrThrow(LQRegistries.RACE);
-        var classLookup = access.lookupOrThrow(LQRegistries.CHAR_CLASS);
+        HolderLookup.RegistryLookup<Race> raceLookup = access.lookupOrThrow(LQRegistries.RACE);
+        HolderLookup.RegistryLookup<CharClass> classLookup = access.lookupOrThrow(LQRegistries.CHAR_CLASS);
         var skillLookup = access.lookupOrThrow(LQRegistries.SKILL);
+
+        // Gear pages are collected while rendering rule lines.
+        Map<String, Entry> gear = new LinkedHashMap<>();
 
         List<Entry> races = new ArrayList<>();
         raceLookup.listElements()
                 .sorted(Comparator.comparing(ref -> ref.value().name()))
-                .forEach(ref -> races.add(racePage(ref.key().identifier(), ref.value(), classLookup)));
+                .forEach(ref -> races.add(racePage(ref.key().identifier(), ref.value(),
+                        classLookup, gear)));
 
         List<Entry> classes = new ArrayList<>();
         classLookup.listElements()
                 .sorted(Comparator.comparing(ref -> ref.value().name()))
-                .forEach(ref -> classes.add(classPage(ref.key().identifier(), ref.value(), raceLookup)));
+                .forEach(ref -> classes.add(classPage(ref.key().identifier(), ref.value(),
+                        raceLookup, gear)));
 
         List<Entry> skills = new ArrayList<>();
         skillLookup.listElements()
@@ -59,13 +70,15 @@ public final class HandbookSync {
                 .forEach(ref -> skills.add(skillPage(ref.key().identifier(), ref.value(),
                         raceLookup, classLookup)));
 
-        return new HandbookPayload(races, classes, skills);
+        List<Entry> gearPages = new ArrayList<>(gear.values());
+        gearPages.sort(Comparator.comparing(Entry::name));
+        return new HandbookPayload(races, classes, skills, gearPages);
     }
 
     // --- race pages ---
 
     private static Entry racePage(Identifier id, Race race,
-            net.minecraft.core.HolderLookup.RegistryLookup<CharClass> classLookup) {
+            HolderLookup.RegistryLookup<CharClass> classLookup, Map<String, Entry> gear) {
         List<Line> lines = new ArrayList<>();
         description(lines, race.identity().description(), race.identity().longDescription());
         if (race.isDefault()) lines.add(Line.text("§8The starting race, until you choose."));
@@ -75,9 +88,9 @@ public final class HandbookSync {
                 + " §7(+" + trim(race.manaPerSecond()) + "/s) §7· Size §f" + trim(race.size())));
         statLine(lines, race.statmods());
         if (!race.groups().isEmpty()) {
-            lines.add(Line.text("§7Groups: §f" + String.join(", ", race.groups())));
+            lines.add(Line.text("§7Lineage: §f" + String.join(", ", race.groups())));
         }
-        itemRuleLines(lines, race.itemRules());
+        itemRuleLines(lines, race.itemRules(), gear);
         boonLines(lines, race.boons());
         grantLines(lines, race.skills());
 
@@ -86,12 +99,9 @@ public final class HandbookSync {
         classLookup.listElements().forEach(ref -> {
             CharClass c = ref.value();
             if (c.isDefault()) return;
-            var el = c.eligibility();
-            boolean open = (el.allowedRaces().isEmpty() && el.allowedGroups().isEmpty())
-                    || el.allowedRaces().contains(id)
-                    || race.groups().stream().anyMatch(el.allowedGroups()::contains);
-            if (open) {
-                classLines.add(new Line("  ▸ " + c.name(), "class", ref.key().identifier().toString()));
+            if (classOpenToRace(c, id, race)) {
+                classLines.add(Line.link("  ▸ " + c.name(), "class",
+                        ref.key().identifier().toString()));
             }
         });
         if (!classLines.isEmpty()) {
@@ -102,10 +112,17 @@ public final class HandbookSync {
         return new Entry(id.toString(), race.name(), "", lines);
     }
 
+    private static boolean classOpenToRace(CharClass charClass, Identifier raceId, Race race) {
+        var el = charClass.eligibility();
+        return (el.allowedRaces().isEmpty() && el.allowedGroups().isEmpty())
+                || el.allowedRaces().contains(raceId)
+                || race.groups().stream().anyMatch(el.allowedGroups()::contains);
+    }
+
     // --- class pages ---
 
     private static Entry classPage(Identifier id, CharClass charClass,
-            net.minecraft.core.HolderLookup.RegistryLookup<Race> raceLookup) {
+            HolderLookup.RegistryLookup<Race> raceLookup, Map<String, Entry> gear) {
         List<Line> lines = new ArrayList<>();
         description(lines, charClass.identity().description(), charClass.identity().longDescription());
         if (charClass.isDefault()) lines.add(Line.text("§8The starting class, until you choose."));
@@ -125,15 +142,23 @@ public final class HandbookSync {
         var el = charClass.eligibility();
         if (el.mainOnly()) lines.add(Line.text("§7Main class only."));
         if (el.subOnly()) lines.add(Line.text("§7Sub class only."));
+
+        // "Open to" resolves groups to the actual races — clickable, no jargon.
         if (!el.allowedRaces().isEmpty() || !el.allowedGroups().isEmpty()) {
             lines.add(Line.text("§6Open to:"));
-            for (Identifier raceId : el.allowedRaces()) {
-                raceLookup.get(net.minecraft.resources.ResourceKey.create(LQRegistries.RACE, raceId))
-                        .ifPresent(r -> lines.add(new Line("  ▸ " + r.value().name(),
-                                "race", raceId.toString())));
-            }
+            raceLookup.listElements()
+                    .sorted(Comparator.comparing(ref -> ref.value().name()))
+                    .forEach(ref -> {
+                        Race race = ref.value();
+                        if (race.isDefault()) return;
+                        if (classOpenToRace(charClass, ref.key().identifier(), race)) {
+                            lines.add(Line.link("  ▸ " + race.name(), "race",
+                                    ref.key().identifier().toString()));
+                        }
+                    });
             if (!el.allowedGroups().isEmpty()) {
-                lines.add(Line.text("  §7…and any " + String.join(", ", el.allowedGroups())));
+                lines.add(Line.text("  §8— the " + String.join(", ", el.allowedGroups())
+                        + " lineage" + (el.allowedGroups().size() > 1 ? "s" : "")));
             }
         } else {
             lines.add(Line.text("§7Open to every race."));
@@ -141,16 +166,16 @@ public final class HandbookSync {
         if (!el.requires().isEmpty() || !el.requiresOne().isEmpty()) {
             lines.add(Line.text("§6Requires mastering:"));
             for (Identifier req : el.requires()) {
-                lines.add(new Line("  ▸ " + prettify(req.getPath()), "class", req.toString()));
+                lines.add(Line.link("  ▸ " + prettify(req.getPath()), "class", req.toString()));
             }
             if (!el.requiresOne().isEmpty()) {
                 lines.add(Line.text("  §7one of:"));
                 for (Identifier req : el.requiresOne()) {
-                    lines.add(new Line("  ▸ " + prettify(req.getPath()), "class", req.toString()));
+                    lines.add(Line.link("  ▸ " + prettify(req.getPath()), "class", req.toString()));
                 }
             }
         }
-        itemRuleLines(lines, charClass.itemRules());
+        itemRuleLines(lines, charClass.itemRules(), gear);
         boonLines(lines, charClass.boons());
         grantLines(lines, charClass.skills());
         return new Entry(id.toString(), charClass.name(), "", lines);
@@ -159,8 +184,8 @@ public final class HandbookSync {
     // --- skill pages ---
 
     private static Entry skillPage(Identifier id, com.sablednah.legendquest.data.SkillDefinition def,
-            net.minecraft.core.HolderLookup.RegistryLookup<Race> raceLookup,
-            net.minecraft.core.HolderLookup.RegistryLookup<CharClass> classLookup) {
+            HolderLookup.RegistryLookup<Race> raceLookup,
+            HolderLookup.RegistryLookup<CharClass> classLookup) {
         List<Line> lines = new ArrayList<>();
         description(lines, def.description(), Optional.empty());
         lines.add(Line.text(""));
@@ -186,14 +211,14 @@ public final class HandbookSync {
         raceLookup.listElements().forEach(ref -> {
             SkillGrant grant = ref.value().skills().get(id);
             if (grant != null) {
-                sources.add(new Line("  ▸ " + ref.value().name() + grantSuffix(grant),
+                sources.add(Line.link("  ▸ " + ref.value().name() + grantSuffix(grant),
                         "race", ref.key().identifier().toString()));
             }
         });
         classLookup.listElements().forEach(ref -> {
             SkillGrant grant = ref.value().skills().get(id);
             if (grant != null) {
-                sources.add(new Line("  ▸ " + ref.value().name() + grantSuffix(grant),
+                sources.add(Line.link("  ▸ " + ref.value().name() + grantSuffix(grant),
                         "class", ref.key().identifier().toString()));
             }
         });
@@ -229,25 +254,6 @@ public final class HandbookSync {
         lines.add(Line.text(sb.toString()));
     }
 
-    private static void grantLines(List<Line> lines, Map<Identifier, SkillGrant> skills) {
-        if (skills.isEmpty()) return;
-        lines.add(Line.text(""));
-        lines.add(Line.text("§6Skills:"));
-        skills.entrySet().stream()
-                .sorted(Map.Entry.comparingByValue(Comparator.comparingInt(SkillGrant::level)))
-                .forEach(entry -> lines.add(new Line(
-                        "  ▸ " + prettify(entry.getKey().getPath()) + grantSuffix(entry.getValue()),
-                        "skill", entry.getKey().toString())));
-    }
-
-    private static String grantSuffix(SkillGrant grant) {
-        if (grant.level() <= 0 && grant.cost() <= 0) return " §8(from the start)";
-        StringBuilder sb = new StringBuilder(" §8(");
-        if (grant.level() > 0) sb.append("level ").append(grant.level());
-        if (grant.cost() > 0) sb.append(grant.level() > 0 ? ", " : "").append(grant.cost()).append(" sp");
-        return sb.append(")").toString();
-    }
-
     private static void boonLines(List<Line> lines, com.sablednah.legendquest.data.Boons boons) {
         boons.attributes().forEach((id, bonus) -> {
             Identifier attrId = Identifier.tryParse(id);
@@ -266,26 +272,73 @@ public final class HandbookSync {
         }
     }
 
-    private static void itemRuleLines(List<Line> lines, ItemRules rules) {
-        ruleLine(lines, "Weapons", rules.allowedWeapons(), rules.disallowedWeapons());
-        ruleLine(lines, "Armour", rules.allowedArmour(), rules.disallowedArmour());
-        ruleLine(lines, "Tools", rules.allowedTools(), rules.disallowedTools());
+    private static void grantLines(List<Line> lines, Map<Identifier, SkillGrant> skills) {
+        if (skills.isEmpty()) return;
+        lines.add(Line.text(""));
+        lines.add(Line.text("§6Skills:"));
+        skills.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue(Comparator.comparingInt(SkillGrant::level)))
+                .forEach(entry -> lines.add(Line.link(
+                        "  ▸ " + prettify(entry.getKey().getPath()) + grantSuffix(entry.getValue()),
+                        "skill", entry.getKey().toString())));
+    }
+
+    private static String grantSuffix(SkillGrant grant) {
+        if (grant.level() <= 0 && grant.cost() <= 0) return " §8(from the start)";
+        StringBuilder sb = new StringBuilder(" §8(");
+        if (grant.level() > 0) sb.append("level ").append(grant.level());
+        if (grant.cost() > 0) sb.append(grant.level() > 0 ? ", " : "").append(grant.cost()).append(" sp");
+        return sb.append(")").toString();
+    }
+
+    // --- item rules + gear pages ---
+
+    private static void itemRuleLines(List<Line> lines, ItemRules rules, Map<String, Entry> gear) {
+        ruleLine(lines, "Weapons", rules.allowedWeapons(), false, gear);
+        ruleLine(lines, "Weapons", rules.disallowedWeapons(), true, gear);
+        ruleLine(lines, "Armour", rules.allowedArmour(), false, gear);
+        ruleLine(lines, "Armour", rules.disallowedArmour(), true, gear);
+        ruleLine(lines, "Tools", rules.allowedTools(), false, gear);
+        ruleLine(lines, "Tools", rules.disallowedTools(), true, gear);
     }
 
     private static void ruleLine(List<Line> lines, String label,
-            Optional<HolderSet<Item>> allowed, Optional<HolderSet<Item>> disallowed) {
-        allowed.ifPresent(set ->
-                lines.add(Line.text("§7" + label + ": §a" + describeSet(set))));
-        disallowed.ifPresent(set ->
-                lines.add(Line.text("§7" + label + " §cbarred§7: " + describeSet(set))));
-    }
-
-    /** A tag prints as its prettified name; a direct list prints item names. */
-    private static String describeSet(HolderSet<Item> set) {
+            Optional<HolderSet<Item>> maybeSet, boolean barred, Map<String, Entry> gear) {
+        if (maybeSet.isEmpty()) return;
+        HolderSet<Item> set = maybeSet.get();
+        String verb = barred ? " §cbarred§7: " : ": ";
         var tagKey = set.unwrapKey();
         if (tagKey.isPresent()) {
-            return prettify(tagKey.get().location().getPath());
+            String gearId = gearPage(gear, set);
+            String pretty = prettify(tagKey.get().location().getPath());
+            lines.add(new Line("§7" + label + verb + (barred ? "§c" : "§a") + pretty + " §8→",
+                    "", "gear", gearId));
+        } else {
+            lines.add(Line.text("§7" + label + verb + (barred ? "§c" : "§a") + describeList(set)));
         }
+    }
+
+    /** Register (once) a gear page listing a tag's actual items, icons and all. */
+    private static String gearPage(Map<String, Entry> gear, HolderSet<Item> set) {
+        var tagKey = set.unwrapKey().orElseThrow();
+        String id = "#" + tagKey.location();
+        gear.computeIfAbsent(id, key -> {
+            List<Line> lines = new ArrayList<>();
+            lines.add(Line.text("§7Everything the tag §f" + tagKey.location() + "§7 covers:"));
+            lines.add(Line.text(""));
+            String iconId = "";
+            for (Holder<Item> holder : set) {
+                Identifier itemId = BuiltInRegistries.ITEM.getKey(holder.value());
+                lines.add(Line.icon("§f" + itemName(holder.value()), itemId.toString()));
+                if (iconId.isEmpty()) iconId = itemId.toString();
+            }
+            if (lines.size() == 2) lines.add(Line.text("§8(empty tag)"));
+            return new Entry(key, prettify(tagKey.location().getPath()), iconId, lines);
+        });
+        return id;
+    }
+
+    private static String describeList(HolderSet<Item> set) {
         List<String> names = new ArrayList<>();
         for (Holder<Item> holder : set) {
             names.add(itemName(holder.value()));

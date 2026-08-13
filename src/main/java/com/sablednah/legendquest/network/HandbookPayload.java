@@ -13,20 +13,26 @@ import net.minecraft.resources.Identifier;
 /**
  * The LegendQuest Players Handbook, server → client, once on login. Pages
  * are pre-rendered server-side into lines; a line may carry a link to
- * another entry ("race"/"class"/"skill" + id), which the client renders
- * clickable. The client stays a dumb, happy book.
+ * another entry ("race"/"class"/"skill"/"gear" + id) and/or an item icon.
+ * The client stays a dumb, happy book.
  */
 public record HandbookPayload(
         List<Entry> races,
         List<Entry> classes,
-        List<Entry> skills) implements CustomPacketPayload {
+        List<Entry> skills,
+        List<Entry> gear) implements CustomPacketPayload {
 
-    /** One page: a race, class or skill. Icon is an item id ("" = none). */
+    /** One page: a race, class, skill or gear list. Icon is an item id. */
     public record Entry(String id, String name, String icon, List<Line> lines) {}
 
-    /** One page line. {@code linkSection} is ""/"race"/"class"/"skill". */
-    public record Line(String text, String linkSection, String linkId) {
-        public static Line text(String text) { return new Line(text, "", ""); }
+    /** One page line. {@code linkSection} is ""/"race"/"class"/"skill"/"gear";
+     *  {@code icon} is an item id rendered before the text ("" = none). */
+    public record Line(String text, String icon, String linkSection, String linkId) {
+        public static Line text(String text) { return new Line(text, "", "", ""); }
+        public static Line link(String text, String section, String id) {
+            return new Line(text, "", section, id);
+        }
+        public static Line icon(String text, String icon) { return new Line(text, icon, "", ""); }
         public boolean isLink() { return !linkSection.isEmpty(); }
     }
 
@@ -40,10 +46,12 @@ public record HandbookPayload(
         writeEntries(buf, p.races);
         writeEntries(buf, p.classes);
         writeEntries(buf, p.skills);
+        writeEntries(buf, p.gear);
     }
 
     private static HandbookPayload decode(RegistryFriendlyByteBuf buf) {
-        return new HandbookPayload(readEntries(buf), readEntries(buf), readEntries(buf));
+        return new HandbookPayload(readEntries(buf), readEntries(buf), readEntries(buf),
+                readEntries(buf));
     }
 
     private static void writeEntries(RegistryFriendlyByteBuf buf, List<Entry> entries) {
@@ -55,6 +63,7 @@ public record HandbookPayload(
             buf.writeVarInt(entry.lines().size());
             for (Line line : entry.lines()) {
                 buf.writeUtf(line.text());
+                buf.writeUtf(line.icon());
                 buf.writeUtf(line.linkSection());
                 buf.writeUtf(line.linkId());
             }
@@ -71,7 +80,7 @@ public record HandbookPayload(
             int lineCount = buf.readVarInt();
             List<Line> lines = new ArrayList<>(lineCount);
             for (int l = 0; l < lineCount; l++) {
-                lines.add(new Line(buf.readUtf(), buf.readUtf(), buf.readUtf()));
+                lines.add(new Line(buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readUtf()));
             }
             entries.add(new Entry(id, name, icon, lines));
         }
