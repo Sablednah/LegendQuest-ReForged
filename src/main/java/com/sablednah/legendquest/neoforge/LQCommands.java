@@ -166,6 +166,15 @@ public final class LQCommands {
                     CharacterActions.buyStat(ctx.getSource().getPlayerOrException(), stat) ? 1 : 0));
         }
 
+        LiteralArgumentBuilder<CommandSourceStack> feat = Commands.literal("feat")
+                .then(Commands.literal("list").executes(LQCommands::featList))
+                .then(Commands.literal("buy")
+                        .then(Commands.argument("feat", ResourceKeyArgument.key(LQRegistries.FEAT))
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(friendlyIds(
+                                        ctx.getSource().registryAccess().lookupOrThrow(LQRegistries.FEAT)
+                                                .listElements().map(ref -> ref.key().identifier())), builder))
+                                .executes(LQCommands::featBuy)));
+
         LiteralArgumentBuilder<CommandSourceStack> respec = Commands.literal("respec")
                 .executes(ctx -> CharacterActions.respec(ctx.getSource().getPlayerOrException()) ? 1 : 0);
 
@@ -203,7 +212,7 @@ public final class LQCommands {
                 .executes(LQCommands::stats)
                 .then(race).then(charClass).then(skill)
                 .then(bind).then(unbind).then(loadout).then(party)
-                .then(buystat).then(respec)
+                .then(buystat).then(respec).then(feat)
                 .then(stats).then(karma).then(roll).then(admin));
 
         // Classic shorthands.
@@ -589,6 +598,34 @@ public final class LQCommands {
                 ResourceKeyArgument.getRegistryKey(ctx, "skill", LQRegistries.SKILL, ERROR_UNKNOWN_SKILL),
                 ERROR_UNKNOWN_SKILL);
         return CharacterActions.buySkill(player, id) ? 1 : 0;
+    }
+
+    private static final DynamicCommandExceptionType ERROR_UNKNOWN_FEAT =
+            new DynamicCommandExceptionType(id -> Component.literal("Unknown feat: " + id));
+
+    private static int featList(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        PlayerCharacter pc = CharacterService.data(player);
+        var lookup = ctx.getSource().registryAccess().lookupOrThrow(LQRegistries.FEAT);
+        StringBuilder sb = new StringBuilder("§6Feats §7(browse the Handbook for details):§r");
+        lookup.listElements().sorted(Comparator.comparing(r -> r.value().name())).forEach(ref -> {
+            var feat = ref.value();
+            boolean owned = pc.hasFeat(ref.key().identifier());
+            sb.append("\n §7-§r ").append(owned ? "§a✔ " : "§f").append(feat.name())
+                    .append(" §8(").append(feat.cost()).append(" sp");
+            if (feat.level() > 0) sb.append(", level ").append(feat.level());
+            sb.append(")");
+        });
+        ctx.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
+        return 1;
+    }
+
+    private static int featBuy(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        Identifier featId = resolve(ctx.getSource(), LQRegistries.FEAT,
+                ResourceKeyArgument.getRegistryKey(ctx, "feat", LQRegistries.FEAT, ERROR_UNKNOWN_FEAT),
+                ERROR_UNKNOWN_FEAT);
+        return CharacterActions.buyFeat(player, featId) ? 1 : 0;
     }
 
     private static int karma(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {

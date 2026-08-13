@@ -64,6 +64,7 @@ public final class SkillEngine {
         CharacterService.race(player).ifPresent(r -> out.putAll(r.skills()));
         CharacterService.mainClass(player).ifPresent(c -> out.putAll(c.skills()));
         CharacterService.subClass(player).ifPresent(c -> out.putAll(c.skills()));
+        CharacterService.feats(player).forEach(f -> out.putAll(f.skills()));
         return out;
     }
 

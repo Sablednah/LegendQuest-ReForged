@@ -29,11 +29,16 @@ public final class LQRegistries {
     public static final ResourceKey<Registry<SkillDefinition>> SKILL =
             ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(LegendQuest.MODID, "skill"));
 
+    public static final ResourceKey<Registry<com.sablednah.legendquest.data.Feat>> FEAT =
+            ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(LegendQuest.MODID, "feat"));
+
     /** Registered on the mod event bus. */
     static void register(DataPackRegistryEvent.NewRegistry event) {
         event.dataPackRegistry(RACE, Race.CODEC, Race.CODEC);
         event.dataPackRegistry(CHAR_CLASS, CharClass.CODEC, CharClass.CODEC);
         event.dataPackRegistry(SKILL, SkillDefinition.CODEC, SkillDefinition.CODEC);
+        event.dataPackRegistry(FEAT, com.sablednah.legendquest.data.Feat.CODEC,
+                com.sablednah.legendquest.data.Feat.CODEC);
     }
 
     private LQRegistries() {}

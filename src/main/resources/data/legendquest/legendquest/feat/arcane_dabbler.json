@@ -1,0 +1,16 @@
+{
+  "name": "Arcane Dabbler",
+  "description": "You read one forbidden book and it stuck. A single trick of true magic \u2014 the short step between here and there.",
+  "icon": "minecraft:amethyst_shard",
+  "cost": 12,
+  "level": 20,
+  "allowed_groups": [
+    "Arcane"
+  ],
+  "skills": {
+    "legendquest:blink": {
+      "level": 20,
+      "cost": 0
+    }
+  }
+}

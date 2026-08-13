@@ -77,7 +77,8 @@ public final class CharacterSync {
                 pc.loadoutIndex(),
                 pc.loadoutItem().map(Identifier::toString).orElse(""),
                 raceChoices(player, pc),
-                classChoices(player, pc));
+                classChoices(player, pc),
+                List.copyOf(pc.featIds()));
     }
 
     /** How far into the current level, 0..1 (pegged at 1 at the level cap). */

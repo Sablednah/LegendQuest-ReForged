@@ -1,0 +1,8 @@
+{
+  "name": "Weapon Master",
+  "description": "Every edge, every haft, every string \u2014 proficiency with the whole armoury, whatever your calling says.",
+  "icon": "minecraft:netherite_sword",
+  "cost": 12,
+  "level": 15,
+  "allowed_weapons": "#legendquest:proficiency_weapons"
+}

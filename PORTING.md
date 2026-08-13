@@ -117,6 +117,11 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 - [x] Race/class pickers on the stats tab while the choice is open (catalogs travel in the summary only until chosen); click to choose via `ChoosePayload` → `CharacterActions` (same rules/messages as /race /class choose)
 - [x] Always-on HUD (bottom-left): mana bar + level, loadout chips with selected highlight and cooldown countdowns
 - [x] Combat indicators: floating 60s-Batman words (Kapow!/Miss!/CRITICAL!/Clang!) near the victim on hit/miss/crit/fumble — `CombatIndicatorPayload` to the attacker, MobHealth GUI-pass projection, random word/colour/jitter, drift-up fade. Natural 20 = crit = ×1.5 damage
+- [x] Players Handbook: server-built pages (`HandbookSync`→`HandbookPayload` on login), tome-styled screen, Races/Classes/Skills/Feats/Gear tabs, clickable cross-links + back stack, scrollbar, gear pages listing tag contents with icons; H keybind, ? button, right-click lookups
+- [x] Proficiency master lists (`#legendquest:proficiency_weapons/tools`) — only listed items ever fumble; stone/iron/gold tools free for all; per-class tool kits; dwarves get all fine tools by blood; golden tools = arcane conduits (mage boon: harvest like netherite for mana)
+- [x] Boons engine on race/class/feat: per-level attribute bonuses, enchant XP rebates, smithing material refunds, gold-tool mana mining
+- [x] Skill-point economy: [Buy] chips in the panel, `/lq buystat` +1 stat chips at escalating cost, `/lq respec` (refund all, burn a level, two-step confirm)
+- [x] **Feats** — fourth datapack registry (YAML front door included): purchasable bundles of boons + item proficiencies + skill grants, gated by level/feat chains/race/group/class; bought from the handbook's Feats tab ([Buy] chip on the page) or `/lq feat buy`; 9 starter feats (Toughness→Battle Hardened chain, Weapon Master, Arcane Dabbler, Second Breakfast for the Stout...)
 - [ ] Config screen (`IConfigScreenFactory` + lang keys for every option)
 - [ ] Action-bar feedback helpers (`&`-code translation, like ZombieMod `Announce`)
 

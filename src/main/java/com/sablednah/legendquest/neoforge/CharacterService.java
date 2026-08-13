@@ -272,9 +272,12 @@ public final class CharacterService {
         race(player).ifPresent(r -> accumulateBoons(combined, r.boons(), lvl));
         mainClass(player).ifPresent(c -> accumulateBoons(combined, c.boons(), lvl));
         subClass(player).ifPresent(c -> accumulateBoons(combined, c.boons(), lvl));
+        feats(player).forEach(f -> accumulateBoons(combined, f.boons(), lvl));
         player.level().registryAccess().lookupOrThrow(LQRegistries.RACE).listElements()
                 .forEach(ref -> mentioned.addAll(ref.value().boons().attributes().keySet()));
         player.level().registryAccess().lookupOrThrow(LQRegistries.CHAR_CLASS).listElements()
+                .forEach(ref -> mentioned.addAll(ref.value().boons().attributes().keySet()));
+        player.level().registryAccess().lookupOrThrow(LQRegistries.FEAT).listElements()
                 .forEach(ref -> mentioned.addAll(ref.value().boons().attributes().keySet()));
 
         for (String idString : mentioned) {
@@ -302,12 +305,26 @@ public final class CharacterService {
         boons.attributes().forEach((id, bonus) -> into.merge(id, bonus.at(level), Double::sum));
     }
 
-    /** Race + main + sub, for the scalar boons (rebates, refunds). */
+    /** Race + main + sub + feats, for the scalar boons (rebates, refunds). */
     static double totalBoon(ServerPlayer player,
             java.util.function.ToDoubleFunction<com.sablednah.legendquest.data.Boons> getter) {
         return race(player).map(r -> getter.applyAsDouble(r.boons())).orElse(0.0D)
                 + mainClass(player).map(c -> getter.applyAsDouble(c.boons())).orElse(0.0D)
-                + subClass(player).map(c -> getter.applyAsDouble(c.boons())).orElse(0.0D);
+                + subClass(player).map(c -> getter.applyAsDouble(c.boons())).orElse(0.0D)
+                + feats(player).stream().mapToDouble(f -> getter.applyAsDouble(f.boons())).sum();
+    }
+
+    /** The player's purchased feats, resolved (unknown ids simply skipped). */
+    public static java.util.List<com.sablednah.legendquest.data.Feat> feats(ServerPlayer player) {
+        var lookup = player.level().registryAccess().lookupOrThrow(LQRegistries.FEAT);
+        java.util.List<com.sablednah.legendquest.data.Feat> out = new java.util.ArrayList<>();
+        for (String id : data(player).featIds()) {
+            Identifier featId = Identifier.tryParse(id);
+            if (featId == null) continue;
+            lookup.get(ResourceKey.create(LQRegistries.FEAT, featId))
+                    .ifPresent(ref -> out.add(ref.value()));
+        }
+        return out;
     }
 
     // --- karma ---

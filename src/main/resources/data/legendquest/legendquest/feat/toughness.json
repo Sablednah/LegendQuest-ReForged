@@ -1,0 +1,12 @@
+{
+  "name": "Toughness",
+  "description": "You are remarkably hard to put down. Two extra hearts' worth of sheer stubbornness.",
+  "icon": "minecraft:shield",
+  "cost": 8,
+  "level": 5,
+  "attributes": {
+    "minecraft:max_health": {
+      "base": 4
+    }
+  }
+}

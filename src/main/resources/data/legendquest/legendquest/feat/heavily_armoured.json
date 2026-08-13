@@ -1,0 +1,8 @@
+{
+  "name": "Heavily Armoured",
+  "description": "You learned to carry the tin can instead of letting it carry you. Heavy plate without penalty.",
+  "icon": "minecraft:iron_chestplate",
+  "cost": 10,
+  "level": 10,
+  "allowed_armour": "#legendquest:heavy_armour"
+}

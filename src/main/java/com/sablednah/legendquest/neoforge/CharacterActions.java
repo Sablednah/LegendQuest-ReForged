@@ -204,6 +204,59 @@ public final class CharacterActions {
         return true;
     }
 
+    public static boolean buyFeat(ServerPlayer player, Identifier featId) {
+        var lookup = player.level().registryAccess().lookupOrThrow(LQRegistries.FEAT);
+        var holder = lookup.get(ResourceKey.create(LQRegistries.FEAT, featId));
+        if (holder.isEmpty()) {
+            Feedback.chat(player, "&cUnknown feat: " + featId);
+            return false;
+        }
+        var feat = holder.get().value();
+        PlayerCharacter pc = CharacterService.data(player);
+        if (pc.hasFeat(featId)) {
+            Feedback.chat(player, "&7You already have &l" + feat.name() + "&7.");
+            return false;
+        }
+        if (CharacterService.level(player) < feat.level()) {
+            Feedback.chat(player, "&c" + feat.name() + " needs level " + feat.level() + ".");
+            return false;
+        }
+        for (Identifier required : feat.requires()) {
+            if (!pc.hasFeat(required)) {
+                String name = lookup.get(ResourceKey.create(LQRegistries.FEAT, required))
+                        .map(r -> r.value().name()).orElse(required.toString());
+                Feedback.chat(player, "&c" + feat.name() + " requires the &l" + name + "&r&c feat first.");
+                return false;
+            }
+        }
+        boolean raceOk = feat.allowedRaces().isEmpty() && feat.allowedGroups().isEmpty()
+                || (pc.raceId().isPresent() && feat.allowedRaces().contains(pc.raceId().get()))
+                || CharacterService.race(player)
+                        .map(r -> r.groups().stream().anyMatch(feat.allowedGroups()::contains))
+                        .orElse(false);
+        if (!raceOk) {
+            Feedback.chat(player, "&c" + feat.name() + " is not in your blood.");
+            return false;
+        }
+        if (!feat.allowedClasses().isEmpty()
+                && !(pc.mainClassId().map(feat.allowedClasses()::contains).orElse(false)
+                        || pc.subClassId().map(feat.allowedClasses()::contains).orElse(false))) {
+            Feedback.chat(player, "&c" + feat.name() + " is not for your calling.");
+            return false;
+        }
+        int available = CharacterService.skillPointsTotal(player) - pc.skillPointsSpent();
+        if (available < feat.cost()) {
+            Feedback.chat(player, "&c" + feat.name() + " costs " + feat.cost()
+                    + " skill points; you have " + available + ".");
+            return false;
+        }
+        pc.buyFeat(featId, feat.cost());
+        CharacterService.refresh(player); // boons/proficiencies apply now
+        Feedback.chat(player, "&6Feat gained: &l" + feat.name() + "&r&6 ("
+                + feat.cost() + " points).");
+        return true;
+    }
+
     // --- respec: burn levels, get every point back ---
 
     private static final java.util.Map<java.util.UUID, Long> RESPEC_OFFERS =

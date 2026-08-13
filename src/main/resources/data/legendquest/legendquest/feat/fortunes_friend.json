@@ -1,0 +1,12 @@
+{
+  "name": "Fortune's Friend",
+  "description": "Dice love you. Coins land your side up. Chests are just better around you.",
+  "icon": "minecraft:rabbit_foot",
+  "cost": 8,
+  "level": 10,
+  "attributes": {
+    "minecraft:luck": {
+      "base": 1
+    }
+  }
+}

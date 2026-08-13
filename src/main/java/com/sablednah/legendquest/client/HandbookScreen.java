@@ -86,6 +86,7 @@ public final class HandbookScreen extends Screen {
             case "class" -> book.classes();
             case "skill" -> book.skills();
             case "gear" -> book.gear();
+            case "feat" -> book.feats();
             default -> book.races();
         };
     }
@@ -158,6 +159,7 @@ public final class HandbookScreen extends Screen {
         tx = tab(g, tx, tabY, "Races", "race", mouseX, mouseY);
         tx = tab(g, tx, tabY, "Classes", "class", mouseX, mouseY);
         tx = tab(g, tx, tabY, "Skills", "skill", mouseX, mouseY);
+        tx = tab(g, tx, tabY, "Feats", "feat", mouseX, mouseY);
         tab(g, tx, tabY, "Gear", "gear", mouseX, mouseY);
         chip(g, x + BOOK_W - 22, tabY, 14, "✕", true, false, mouseX, mouseY, this::onClose);
 
@@ -178,7 +180,12 @@ public final class HandbookScreen extends Screen {
             if (isSelected) g.fill(listX, ly - 1, listX + LIST_W - 4, ly + 10, 0x40DAA520);
             else if (hover) g.fill(listX, ly - 1, listX + LIST_W - 4, ly + 10, 0x28FFFFFF);
             String colour = isSelected ? "§6§l" : hover ? "§e" : "§7";
-            g.drawString(font, colour + trim(entry.name(), LIST_W - 16), listX + 3, ly, 0xFFFFFFFF);
+            String owned = "";
+            if (section.equals("feat")) {
+                var summary = ClientCharacterState.summary();
+                if (summary != null && summary.ownedFeats().contains(entry.id())) owned = "§a✔ ";
+            }
+            g.drawString(font, owned + colour + trim(entry.name(), LIST_W - 16), listX + 3, ly, 0xFFFFFFFF);
             if (!isSelected) {
                 String toId = entry.id();
                 hotspots.add(new Hot(listX, ly - 1, listX + LIST_W - 4, ly + 10,
@@ -205,6 +212,30 @@ public final class HandbookScreen extends Screen {
             g.drawString(font, "§6§l" + current.name(), px + 20, cy, 0xFFFFFFFF);
         } else {
             g.drawString(font, "§6§l" + current.name(), px, cy, 0xFFFFFFFF);
+        }
+        // Feat pages are shops: a live Buy chip (or a proud ✔) beside the title.
+        if (section.equals("feat")) {
+            var summary = ClientCharacterState.summary();
+            if (summary != null) {
+                if (summary.ownedFeats().contains(current.id())) {
+                    g.drawString(font, "§a✔ Known", px + pw - font.width("✔ Known"), cy, 0xFFFFFFFF);
+                } else if (summary.spTotal() - summary.spSpent() >= current.cost()) {
+                    String chip = "[Buy " + current.cost() + "]";
+                    int cw = font.width(chip);
+                    int chipX = px + pw - cw - 4;
+                    boolean chipHover = mouseX >= chipX - 2 && mouseX < chipX + cw + 2
+                            && mouseY >= cy - 2 && mouseY < cy + 9;
+                    g.fill(chipX - 2, cy - 2, chipX + cw + 2, cy + 9,
+                            chipHover ? 0xFF2E4A1E : 0xFF1E3216);
+                    g.drawString(font, (chipHover ? "§a§l" : "§a") + chip, chipX, cy, 0xFFFFFFFF);
+                    String featId = current.id();
+                    hotspots.add(new Hot(chipX - 2, cy - 2, chipX + cw + 2, cy + 9, () ->
+                            net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(
+                                    new com.sablednah.legendquest.network.SkillActionPayload(
+                                            com.sablednah.legendquest.network.SkillActionPayload.BUY_FEAT,
+                                            0, featId))));
+                }
+            }
         }
         cy += 14;
 

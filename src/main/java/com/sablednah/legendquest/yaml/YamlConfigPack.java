@@ -50,7 +50,8 @@ public final class YamlConfigPack implements PackResources {
     private static final Map<String, String> FOLDERS = Map.of(
             "races", "race",
             "classes", "class",
-            "skills", "skill");
+            "skills", "skill",
+            "feats", "feat");
 
     private static final PackLocationInfo LOCATION = new PackLocationInfo(
             PACK_ID,

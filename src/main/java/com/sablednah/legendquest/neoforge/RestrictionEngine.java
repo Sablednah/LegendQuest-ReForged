@@ -59,10 +59,11 @@ public final class RestrictionEngine {
         if (slot == ItemRules.Slot.TOOL && !stack.is(PROFICIENCY_TOOLS)) return true;
         Holder<Item> item = stack.getItemHolder();
 
-        List<ItemRules> sources = new ArrayList<>(3);
+        List<ItemRules> sources = new ArrayList<>(4);
         CharacterService.race(player).ifPresent(r -> sources.add(r.itemRules()));
         CharacterService.mainClass(player).ifPresent(c -> sources.add(c.itemRules()));
         CharacterService.subClass(player).ifPresent(c -> sources.add(c.itemRules()));
+        CharacterService.feats(player).forEach(f -> sources.add(f.itemRules()));
 
         boolean anyAllowStatement = false;
         boolean allowed = false;

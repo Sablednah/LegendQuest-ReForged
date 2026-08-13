@@ -20,6 +20,7 @@ public record SkillActionPayload(int action, int slot, String id) implements Cus
     public static final int USE_SLOT = 2;   // slot
     public static final int BUY_SKILL = 3;  // id = skill id
     public static final int BUY_STAT = 4;   // id = stat key ("str".."chr")
+    public static final int BUY_FEAT = 5;   // id = feat id
 
     public static final Type<SkillActionPayload> TYPE =
             new Type<>(Identifier.fromNamespaceAndPath(LegendQuest.MODID, "skill_action"));

@@ -70,9 +70,66 @@ public final class HandbookSync {
                 .forEach(ref -> skills.add(skillPage(ref.key().identifier(), ref.value(),
                         raceLookup, classLookup)));
 
+        var featLookup = access.lookupOrThrow(LQRegistries.FEAT);
+        List<Entry> feats = new ArrayList<>();
+        featLookup.listElements()
+                .sorted(Comparator.comparing(ref -> ref.value().name()))
+                .forEach(ref -> feats.add(featPage(ref.key().identifier(), ref.value(),
+                        featLookup, raceLookup, classLookup, gear)));
+
         List<Entry> gearPages = new ArrayList<>(gear.values());
         gearPages.sort(Comparator.comparing(Entry::name));
-        return new HandbookPayload(races, classes, skills, gearPages);
+        return new HandbookPayload(races, classes, skills, gearPages, feats);
+    }
+
+    // --- feat pages ---
+
+    private static Entry featPage(Identifier id, com.sablednah.legendquest.data.Feat feat,
+            HolderLookup.RegistryLookup<com.sablednah.legendquest.data.Feat> featLookup,
+            HolderLookup.RegistryLookup<Race> raceLookup,
+            HolderLookup.RegistryLookup<CharClass> classLookup, Map<String, Entry> gear) {
+        List<Line> lines = new ArrayList<>();
+        description(lines, feat.description(), Optional.empty());
+        lines.add(Line.text(""));
+        lines.add(Line.text("§7Cost: §f" + feat.cost() + " skill points"
+                + (feat.level() > 0 ? " §7· needs level §f" + feat.level() : "")));
+        if (!feat.requires().isEmpty()) {
+            lines.add(Line.text("§6Requires the feat" + (feat.requires().size() > 1 ? "s" : "") + ":"));
+            for (Identifier req : feat.requires()) {
+                String name = featLookup.get(net.minecraft.resources.ResourceKey
+                        .create(LQRegistries.FEAT, req))
+                        .map(r -> r.value().name()).orElse(prettify(req.getPath()));
+                lines.add(Line.link("  ▸ " + name, "feat", req.toString()));
+            }
+        }
+        if (!feat.allowedRaces().isEmpty() || !feat.allowedGroups().isEmpty()) {
+            lines.add(Line.text("§6Only for:"));
+            raceLookup.listElements()
+                    .sorted(Comparator.comparing(ref -> ref.value().name()))
+                    .forEach(ref -> {
+                        Race race = ref.value();
+                        if (race.isDefault()) return;
+                        boolean open = feat.allowedRaces().contains(ref.key().identifier())
+                                || race.groups().stream().anyMatch(feat.allowedGroups()::contains);
+                        if (open) {
+                            lines.add(Line.link("  ▸ " + race.name(), "race",
+                                    ref.key().identifier().toString()));
+                        }
+                    });
+        }
+        if (!feat.allowedClasses().isEmpty()) {
+            lines.add(Line.text("§6Only for the calling" + (feat.allowedClasses().size() > 1 ? "s" : "") + ":"));
+            for (Identifier classId : feat.allowedClasses()) {
+                String name = classLookup.get(net.minecraft.resources.ResourceKey
+                        .create(LQRegistries.CHAR_CLASS, classId))
+                        .map(r -> r.value().name()).orElse(prettify(classId.getPath()));
+                lines.add(Line.link("  ▸ " + name, "class", classId.toString()));
+            }
+        }
+        itemRuleLines(lines, feat.itemRules(), gear);
+        boonLines(lines, feat.boons());
+        grantLines(lines, feat.skills());
+        return new Entry(id.toString(), feat.name(), feat.icon(), feat.cost(), lines);
     }
 
     // --- race pages ---
@@ -109,7 +166,7 @@ public final class HandbookSync {
             lines.add(Line.text("§6Open classes:"));
             lines.addAll(classLines);
         }
-        return new Entry(id.toString(), race.name(), "", lines);
+        return new Entry(id.toString(), race.name(), "", 0, lines);
     }
 
     private static boolean classOpenToRace(CharClass charClass, Identifier raceId, Race race) {
@@ -178,7 +235,7 @@ public final class HandbookSync {
         itemRuleLines(lines, charClass.itemRules(), gear);
         boonLines(lines, charClass.boons());
         grantLines(lines, charClass.skills());
-        return new Entry(id.toString(), charClass.name(), "", lines);
+        return new Entry(id.toString(), charClass.name(), "", 0, lines);
     }
 
     // --- skill pages ---
@@ -227,7 +284,7 @@ public final class HandbookSync {
             lines.add(Line.text("§6Taught by:"));
             lines.addAll(sources);
         }
-        return new Entry(id.toString(), def.name(), def.icon(), lines);
+        return new Entry(id.toString(), def.name(), def.icon(), 0, lines);
     }
 
     // --- shared formatting ---
@@ -337,7 +394,7 @@ public final class HandbookSync {
                 if (iconId.isEmpty()) iconId = itemId.toString();
             }
             if (lines.size() == 2) lines.add(Line.text("§8(empty tag)"));
-            return new Entry(key, prettify(tagKey.location().getPath()), iconId, lines);
+            return new Entry(key, prettify(tagKey.location().getPath()), iconId, 0, lines);
         });
         return id;
     }

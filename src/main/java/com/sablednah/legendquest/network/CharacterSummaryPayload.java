@@ -38,7 +38,8 @@ public record CharacterSummaryPayload(
         int loadoutIndex,
         String loadoutItem,    // item id, empty = no spellbook bound
         List<PickEntry> raceChoices,   // empty = race locked in
-        List<PickEntry> classChoices)  // empty = class chosen
+        List<PickEntry> classChoices,  // empty = class chosen
+        List<String> ownedFeats)       // feat ids already bought
         implements CustomPacketPayload {
 
     /** One row of the skill list, ready to render. */
@@ -88,6 +89,8 @@ public record CharacterSummaryPayload(
         buf.writeUtf(p.loadoutItem);
         writePicks(buf, p.raceChoices);
         writePicks(buf, p.classChoices);
+        buf.writeVarInt(p.ownedFeats.size());
+        for (String feat : p.ownedFeats) buf.writeUtf(feat);
     }
 
     private static CharacterSummaryPayload decode(RegistryFriendlyByteBuf buf) {
@@ -118,9 +121,12 @@ public record CharacterSummaryPayload(
         String loadoutItem = buf.readUtf();
         List<PickEntry> raceChoices = readPicks(buf);
         List<PickEntry> classChoices = readPicks(buf);
+        int featCount = buf.readVarInt();
+        List<String> ownedFeats = new ArrayList<>(featCount);
+        for (int n = 0; n < featCount; n++) ownedFeats.add(buf.readUtf());
         return new CharacterSummaryPayload(race, mainClass, subClass, level, xpProgress, karma, mana, maxMana,
                 stats, spSpent, spTotal, statBoostCost, skills, loadout, loadoutIndex, loadoutItem,
-                raceChoices, classChoices);
+                raceChoices, classChoices, ownedFeats);
     }
 
     private static void writePicks(RegistryFriendlyByteBuf buf, List<PickEntry> picks) {

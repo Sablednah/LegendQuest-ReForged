@@ -1,0 +1,8 @@
+{
+  "name": "Master Miner",
+  "description": "Stone speaks to you now. Full proficiency with the finest picks and tools.",
+  "icon": "minecraft:diamond_pickaxe",
+  "cost": 8,
+  "level": 10,
+  "allowed_tools": "#legendquest:proficiency_tools"
+}

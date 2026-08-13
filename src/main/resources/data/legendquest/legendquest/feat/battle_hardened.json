@@ -1,0 +1,16 @@
+{
+  "name": "Battle Hardened",
+  "description": "Scar tissue is armour too. Your hide turns blows better with every level.",
+  "icon": "minecraft:netherite_scrap",
+  "cost": 10,
+  "level": 20,
+  "requires": [
+    "legendquest:toughness"
+  ],
+  "attributes": {
+    "minecraft:armor_toughness": {
+      "base": 1,
+      "per_level": 0.02
+    }
+  }
+}

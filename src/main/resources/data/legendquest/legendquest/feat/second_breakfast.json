@@ -1,0 +1,15 @@
+{
+  "name": "Second Breakfast",
+  "description": "The deep wisdom of the well-fed: never fight on an empty stomach, never adventure without a spare one.",
+  "icon": "minecraft:bread",
+  "cost": 4,
+  "level": 3,
+  "allowed_groups": [
+    "Stout"
+  ],
+  "attributes": {
+    "minecraft:max_health": {
+      "base": 2
+    }
+  }
+}

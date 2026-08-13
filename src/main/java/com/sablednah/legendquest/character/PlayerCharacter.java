@@ -38,6 +38,8 @@ public final class PlayerCharacter {
     private final Map<String, Long> classXp = new HashMap<>();
     /** Skill ids bought with skill points. */
     private final Set<String> purchasedSkills = new HashSet<>();
+    /** Feat ids bought with skill points. */
+    private final Set<String> purchasedFeats = new HashSet<>();
     private int skillPointsSpent = 0;
     /** Skill id → last activation (epoch ms); drives the phase machine. */
     private final Map<String, Long> lastUse = new HashMap<>();
@@ -52,10 +54,28 @@ public final class PlayerCharacter {
 
     public PlayerCharacter() {}
 
+    /**
+     * Everything skill points were spent on, grouped so the main codec stays
+     * under RecordCodecBuilder's 16-field ceiling. A MapCodec reads sibling
+     * keys, so the saved NBT keeps the exact same flat layout as before.
+     */
+    private record Purchases(List<String> skills, List<String> feats,
+            int spent, Map<String, Integer> statBoosts) {
+
+        static final MapCodec<Purchases> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+                Codec.STRING.listOf().optionalFieldOf("purchased_skills", List.of())
+                        .forGetter(Purchases::skills),
+                Codec.STRING.listOf().optionalFieldOf("purchased_feats", List.of())
+                        .forGetter(Purchases::feats),
+                Codec.INT.optionalFieldOf("skill_points_spent", 0).forGetter(Purchases::spent),
+                Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("stat_boosts", Map.of())
+                        .forGetter(Purchases::statBoosts))
+                .apply(i, Purchases::new));
+    }
+
     private PlayerCharacter(Optional<Identifier> raceId, Optional<Identifier> mainClassId,
             Optional<Identifier> subClassId, boolean raceChanged, long karma, double mana,
-            Optional<StatBlock> baseStats, Map<String, Long> classXp, List<String> purchased,
-            int skillPointsSpent, Map<String, Integer> statBoosts,
+            Optional<StatBlock> baseStats, Map<String, Long> classXp, Purchases purchases,
             Map<String, Long> lastUse, Map<String, String> bindings,
             List<String> loadout, int loadoutIndex, Optional<Identifier> loadoutItem) {
         this.raceId = raceId;
@@ -66,9 +86,10 @@ public final class PlayerCharacter {
         this.mana = mana;
         this.baseStats = baseStats;
         this.classXp.putAll(classXp);
-        this.purchasedSkills.addAll(purchased);
-        this.skillPointsSpent = skillPointsSpent;
-        this.statBoosts.putAll(statBoosts);
+        this.purchasedSkills.addAll(purchases.skills());
+        this.purchasedFeats.addAll(purchases.feats());
+        this.skillPointsSpent = purchases.spent();
+        this.statBoosts.putAll(purchases.statBoosts());
         this.lastUse.putAll(lastUse);
         this.bindings.putAll(bindings);
         this.loadout.addAll(loadout);
@@ -86,11 +107,9 @@ public final class PlayerCharacter {
             StatBlock.CODEC.optionalFieldOf("base_stats").forGetter(c -> c.baseStats),
             Codec.unboundedMap(Codec.STRING, Codec.LONG).optionalFieldOf("class_xp", Map.of())
                     .forGetter(c -> Map.copyOf(c.classXp)),
-            Codec.STRING.listOf().optionalFieldOf("purchased_skills", List.of())
-                    .forGetter(c -> List.copyOf(c.purchasedSkills)),
-            Codec.INT.optionalFieldOf("skill_points_spent", 0).forGetter(c -> c.skillPointsSpent),
-            Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("stat_boosts", Map.of())
-                    .forGetter(c -> Map.copyOf(c.statBoosts)),
+            Purchases.MAP_CODEC.forGetter(c -> new Purchases(
+                    List.copyOf(c.purchasedSkills), List.copyOf(c.purchasedFeats),
+                    c.skillPointsSpent, Map.copyOf(c.statBoosts))),
             Codec.unboundedMap(Codec.STRING, Codec.LONG).optionalFieldOf("last_use", Map.of())
                     .forGetter(c -> Map.copyOf(c.lastUse)),
             Codec.unboundedMap(Codec.STRING, Codec.STRING).optionalFieldOf("bindings", Map.of())
@@ -169,11 +188,27 @@ public final class PlayerCharacter {
         skillPointsSpent += cost;
     }
 
-    /** Respec: hand back every point spent on skills and stats. */
+    /** Respec: hand back every point spent on skills, feats and stats. */
     public void refundPurchases() {
         purchasedSkills.clear();
+        purchasedFeats.clear();
         statBoosts.clear();
         skillPointsSpent = 0;
+    }
+
+    // --- feats ---
+
+    public boolean hasFeat(Identifier featId) {
+        return purchasedFeats.contains(featId.toString());
+    }
+
+    public Set<String> featIds() {
+        return Set.copyOf(purchasedFeats);
+    }
+
+    public void buyFeat(Identifier featId, int cost) {
+        purchasedFeats.add(featId.toString());
+        skillPointsSpent += cost;
     }
 
     public long lastUse(Identifier skillId) {

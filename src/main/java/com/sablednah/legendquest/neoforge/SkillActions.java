@@ -27,6 +27,10 @@ public final class SkillActions {
                 var skillId = net.minecraft.resources.Identifier.tryParse(id);
                 if (skillId != null) CharacterActions.buySkill(player, skillId);
             }
+            case SkillActionPayload.BUY_FEAT -> {
+                var featId = net.minecraft.resources.Identifier.tryParse(id);
+                if (featId != null) CharacterActions.buyFeat(player, featId);
+            }
             case SkillActionPayload.BUY_STAT -> {
                 for (com.sablednah.legendquest.core.Stat stat
                         : com.sablednah.legendquest.core.Stat.values()) {
