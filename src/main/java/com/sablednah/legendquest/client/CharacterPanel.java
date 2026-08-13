@@ -70,6 +70,11 @@ public final class CharacterPanel {
     private static double mouseX;
     private static double mouseY;
 
+    /** Handbook hotspots, rebuilt every rendered frame (immediate-mode).
+     *  {@code rightOnly} regions share space with a left-click action. */
+    private record Hot(int x0, int y0, int x1, int y1, boolean rightOnly, Runnable action) {}
+    private static final List<Hot> HOTSPOTS = new ArrayList<>();
+
     private static final Map<String, ItemStack> ICON_CACHE = new HashMap<>();
 
     /** Hotkey path: open the stats tab as soon as the inventory screen inits. */
@@ -286,6 +291,16 @@ public final class CharacterPanel {
         CharacterSummaryPayload s = summary();
         if (s == null) return;
 
+        // Handbook hotspots first — right-click on rows, any click on links.
+        for (Hot hot : HOTSPOTS) {
+            if (mx >= hot.x0() && mx < hot.x1() && my >= hot.y0() && my < hot.y1()
+                    && (!hot.rightOnly() || event.getButton() == 1)) {
+                hot.action().run();
+                return;
+            }
+        }
+        if (event.getButton() != 0) return; // everything below is left-click
+
         if (tab == Tab.SKILLS) {
             // Spellbook slot: click with an item on the cursor to set it,
             // click with an empty cursor to unbind.
@@ -371,6 +386,7 @@ public final class CharacterPanel {
         Font font = screen.getMinecraft().font;
         mouseX = event.getMouseX();
         mouseY = event.getMouseY();
+        HOTSPOTS.clear();
 
         int x = panelX(screen);
         int y = panelY(screen);
@@ -393,6 +409,42 @@ public final class CharacterPanel {
         } else {
             renderStatsTab(g, font, screen, s, x, y);
         }
+
+        // The Players Handbook button, tucked in the bottom-right corner.
+        if (ClientHandbook.get() != null) {
+            int bx = x + PANEL_WIDTH - 18;
+            int by = y + h - 15;
+            boolean hover = mouseX >= bx && mouseX < bx + 14 && mouseY >= by && mouseY < by + 12;
+            g.fill(bx, by, bx + 14, by + 12, hover ? 0xFF403010 : 0xFF26263A);
+            g.fill(bx, by, bx + 14, by + 1, 0xFFDAA520);
+            g.fill(bx, by + 11, bx + 14, by + 12, 0xFFDAA520);
+            g.fill(bx, by, bx + 1, by + 12, 0xFFDAA520);
+            g.fill(bx + 13, by, bx + 14, by + 12, 0xFFDAA520);
+            g.drawString(font, "§6?", bx + 5, by + 2, 0xFFFFFFFF);
+            HOTSPOTS.add(new Hot(bx, by, bx + 14, by + 12, false, HandbookScreen::open));
+            if (hover) {
+                tooltip(g, font, "Players Handbook",
+                        "Races, classes and skills — everything a legend needs to know. §8(Key: H)");
+            }
+        }
+    }
+
+    /** Open the handbook at the entry whose display name matches. */
+    private static void openHandbookByName(String section, String name) {
+        var book = ClientHandbook.get();
+        if (book == null) return;
+        var list = switch (section) {
+            case "class" -> book.classes();
+            case "skill" -> book.skills();
+            default -> book.races();
+        };
+        for (var entry : list) {
+            if (entry.name().equalsIgnoreCase(name)) {
+                HandbookScreen.open(section, entry.id());
+                return;
+            }
+        }
+        HandbookScreen.open(section, null);
     }
 
     private static void renderStatsTab(GuiGraphics g, Font font, InventoryScreen screen,
@@ -400,9 +452,28 @@ public final class CharacterPanel {
         int tx = x + 8;
         int ty = y + 8;
 
-        String title = s.raceName() + " " + s.mainClassName()
+        // Race and class are handbook links (hover to see, click to read).
+        String raceText = "§6§l" + s.raceName();
+        String classText = "§6§l" + s.mainClassName()
                 + (s.subClassName().isEmpty() ? "" : "/" + s.subClassName());
-        g.drawString(font, "§6§l" + title, tx, ty, 0xFFFFFFFF);
+        int raceW = font.width(raceText);
+        boolean raceHover = mouseX >= tx && mouseX < tx + raceW && mouseY >= ty - 1 && mouseY < ty + 10;
+        boolean classHover = mouseX >= tx + raceW + 4 && mouseX < tx + raceW + 4 + font.width(classText)
+                && mouseY >= ty - 1 && mouseY < ty + 10;
+        String raceName = s.raceName();
+        String className = s.mainClassName();
+        g.drawString(font, raceHover ? "§e§l§n" + raceName : raceText, tx, ty, 0xFFFFFFFF);
+        g.drawString(font, classHover ? "§e§l§n" + s.mainClassName()
+                + (s.subClassName().isEmpty() ? "" : "/" + s.subClassName()) : classText,
+                tx + raceW + 4, ty, 0xFFFFFFFF);
+        if (ClientHandbook.get() != null) {
+            HOTSPOTS.add(new Hot(tx, ty - 1, tx + raceW, ty + 10, false,
+                    () -> openHandbookByName("race", raceName)));
+            HOTSPOTS.add(new Hot(tx + raceW + 4, ty - 1, tx + raceW + 4 + font.width(classText),
+                    ty + 10, false, () -> openHandbookByName("class", className)));
+            if (raceHover) tooltip(g, font, raceName, "§7Open in the Players Handbook");
+            if (classHover) tooltip(g, font, className, "§7Open in the Players Handbook");
+        }
         ty += 12;
         g.drawString(font, "§7Level §f" + s.level() + "  §7Karma §f" + s.karmaName(),
                 tx, ty, 0xFFFFFFFF);
@@ -450,11 +521,13 @@ public final class CharacterPanel {
             String colour = !entry.available() ? "§8" : hover ? "§e" : "§a";
             g.drawString(font, colour + "▸ " + entry.name()
                     + (entry.available() ? "" : " §8[locked]"), tx, ty, 0xFFFFFFFF);
+            HOTSPOTS.add(new Hot(tx - 2, ty - 1, tx + PANEL_WIDTH - 14, ty + 10, true,
+                    () -> HandbookScreen.open(race ? "race" : "class", entry.id())));
             if (hover) {
                 tooltip(g, font, entry.name(),
-                        entry.description().isEmpty()
-                                ? (entry.available() ? "Click to choose!" : "Not open to you.")
-                                : entry.description() + (entry.available() ? "\n§eClick to choose!" : "\n§cNot open to you."));
+                        (entry.description().isEmpty() ? "" : entry.description() + "\n")
+                                + (entry.available() ? "§eClick to choose!" : "§cNot open to you.")
+                                + "\n§8Right-click: handbook");
             }
             ty += 11;
         }
@@ -492,9 +565,15 @@ public final class CharacterPanel {
                 }
                 boolean hover = mouseX >= sx && mouseX < sx + SLOT_SIZE
                         && mouseY >= sy && mouseY < sy + SLOT_SIZE;
+                if (entry != null) {
+                    var slotEntry = entry;
+                    HOTSPOTS.add(new Hot(sx, sy, sx + SLOT_SIZE, sy + SLOT_SIZE, true,
+                            () -> HandbookScreen.open("skill", slotEntry.id())));
+                }
                 if (hover && drag == null && entry != null) {
                     tooltip(g, font, entry.name(), skillTooltip(entry)
-                            + "\n§eClick to select · drag off to remove");
+                            + "\n§eClick to select · drag off to remove"
+                            + "\n§8Right-click: handbook");
                 }
             }
         }
@@ -560,8 +639,11 @@ public final class CharacterPanel {
             }
             g.drawString(font, trim(font, line, PANEL_WIDTH - 34), tx + 20, ry + 5, 0xFFFFFFFF);
 
+            HOTSPOTS.add(new Hot(x + 4, ry, x + PANEL_WIDTH - 4, ry + ROW_HEIGHT, true,
+                    () -> HandbookScreen.open("skill", skill.id())));
             if (hover && drag == null) {
-                tooltip(g, font, skill.name(), skillTooltip(skill) + rowHint(skill, inLoadout));
+                tooltip(g, font, skill.name(), skillTooltip(skill) + rowHint(skill, inLoadout)
+                        + "\n§8Right-click: handbook");
             }
         }
 

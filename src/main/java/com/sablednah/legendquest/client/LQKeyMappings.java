@@ -39,6 +39,8 @@ public final class LQKeyMappings {
             "key.legendquest.use_skill", InputConstants.KEY_R, CATEGORY);
     public static final KeyMapping CYCLE = new KeyMapping(
             "key.legendquest.cycle_skill", InputConstants.KEY_G, CATEGORY);
+    public static final KeyMapping HANDBOOK = new KeyMapping(
+            "key.legendquest.handbook", InputConstants.KEY_H, CATEGORY);
     public static final KeyMapping[] SLOTS = new KeyMapping[SLOT_COUNT];
     static {
         for (int n = 0; n < SLOT_COUNT; n++) {
@@ -52,6 +54,7 @@ public final class LQKeyMappings {
         event.register(OPEN_SHEET);
         event.register(USE_SELECTED);
         event.register(CYCLE);
+        event.register(HANDBOOK);
         for (KeyMapping slot : SLOTS) event.register(slot);
     }
 
@@ -65,6 +68,9 @@ public final class LQKeyMappings {
                 CharacterPanel.openOnNextInit();
                 mc.setScreen(new InventoryScreen(mc.player));
             }
+        }
+        while (HANDBOOK.consumeClick()) {
+            if (mc.screen == null) HandbookScreen.open();
         }
         while (USE_SELECTED.consumeClick()) {
             send(new SkillActionPayload(SkillActionPayload.USE_SELECTED, 0));

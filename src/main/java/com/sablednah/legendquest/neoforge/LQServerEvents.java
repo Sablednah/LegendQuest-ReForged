@@ -43,6 +43,7 @@ public final class LQServerEvents {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         CharacterService.ensureInitialised(player);
         CharacterService.refresh(player);
+        HandbookSync.send(player);
         var pc = CharacterService.data(player);
         String race = CharacterService.race(player).map(r -> r.name()).orElse("Undecided");
         String cls = CharacterService.mainClass(player).map(c -> c.name()).orElse("Citizen");

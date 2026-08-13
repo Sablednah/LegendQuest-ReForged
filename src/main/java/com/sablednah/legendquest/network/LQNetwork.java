@@ -19,6 +19,8 @@ public final class LQNetwork {
                 LQNetwork::handleSummary);
         registrar.playToClient(CombatIndicatorPayload.TYPE, CombatIndicatorPayload.CODEC,
                 LQNetwork::handleIndicator);
+        registrar.playToClient(HandbookPayload.TYPE, HandbookPayload.CODEC,
+                LQNetwork::handleHandbook);
         registrar.playToServer(SkillActionPayload.TYPE, SkillActionPayload.CODEC,
                 LQNetwork::handleSkillAction);
         registrar.playToServer(LoadoutEditPayload.TYPE, LoadoutEditPayload.CODEC,
@@ -40,6 +42,11 @@ public final class LQNetwork {
     private static void handleIndicator(CombatIndicatorPayload payload, IPayloadContext context) {
         context.enqueueWork(() ->
                 com.sablednah.legendquest.client.CombatIndicators.accept(payload));
+    }
+
+    private static void handleHandbook(HandbookPayload payload, IPayloadContext context) {
+        context.enqueueWork(() ->
+                com.sablednah.legendquest.client.ClientHandbook.accept(payload));
     }
 
     // --- serverbound (all validated server-side; the GUI only requests) ---
