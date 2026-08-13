@@ -43,10 +43,12 @@ public final class HandbookScreen extends Screen {
 
     private record Target(String section, String id) {}
 
-    private String section; // "race" | "class" | "skill" | "gear"
+    private String section; // "race" | "class" | "skill" | "feat" | "gear"
     private String selectedId;
     private double scroll = 0;
     private double maxScroll = 0;
+    private double listScroll = 0;
+    private double maxListScroll = 0;
     private final Deque<Target> history = new ArrayDeque<>();
 
     /** Clickable regions, rebuilt every frame (immediate-mode style). */
@@ -110,14 +112,17 @@ public final class HandbookScreen extends Screen {
     private void goBack() {
         Target target = history.poll();
         if (target != null) {
+            boolean sameList = section.equals(target.section());
             section = target.section();
             selectedId = target.id();
             scroll = 0;
+            if (!sameList) listScroll = 0;
         }
     }
 
     private void navigate(String toSection, String toId) {
         pushHistory();
+        if (!section.equals(toSection)) listScroll = 0;
         section = toSection;
         selectedId = toId;
         scroll = 0;
@@ -168,15 +173,23 @@ public final class HandbookScreen extends Screen {
         g.fill(x + 8, divY, x + BOOK_W - 8, divY + 1, INK_DIVIDER);
         g.drawString(font, "§6❖", x + BOOK_W / 2 - 3, divY - 4, 0xFFFFFFFF);
 
-        // Entry list on its own inset panel.
+        // Entry list on its own inset panel — scissored and scrollable, so
+        // sixteen gear tags don't spill out of the book's binding.
         int listX = x + 6;
-        g.fill(listX, paneY() - 2, listX + LIST_W - 4, y + h - 8, 0x30000000);
-        int ly = paneY() + 1;
+        int listTop = paneY() - 1;
+        int listBottom = y + h - 8;
+        int listH = listBottom - listTop;
+        maxListScroll = Math.max(0, entries().size() * 12 + 2 - listH);
+        listScroll = Math.max(0, Math.min(listScroll, maxListScroll));
+        g.fill(listX, paneY() - 2, listX + LIST_W - 4, listBottom, 0x30000000);
+        g.enableScissor(listX, listTop, listX + LIST_W - 4, listBottom);
+        int ly = paneY() + 1 - (int) listScroll;
         var current = selected();
         for (var entry : entries()) {
+            boolean rowVisible = ly + 10 > listTop && ly - 1 < listBottom;
             boolean isSelected = current != null && entry.id().equals(current.id());
-            boolean hover = mouseX >= listX && mouseX < listX + LIST_W - 4
-                    && mouseY >= ly - 1 && mouseY < ly + 10;
+            boolean hover = rowVisible && mouseX >= listX && mouseX < listX + LIST_W - 4
+                    && mouseY >= Math.max(ly - 1, listTop) && mouseY < Math.min(ly + 10, listBottom);
             if (isSelected) g.fill(listX, ly - 1, listX + LIST_W - 4, ly + 10, 0x40DAA520);
             else if (hover) g.fill(listX, ly - 1, listX + LIST_W - 4, ly + 10, 0x28FFFFFF);
             String colour = isSelected ? "§6§l" : hover ? "§e" : "§7";
@@ -186,12 +199,22 @@ public final class HandbookScreen extends Screen {
                 if (summary != null && summary.ownedFeats().contains(entry.id())) owned = "§a✔ ";
             }
             g.drawString(font, owned + colour + trim(entry.name(), LIST_W - 16), listX + 3, ly, 0xFFFFFFFF);
-            if (!isSelected) {
+            if (!isSelected && rowVisible) {
                 String toId = entry.id();
-                hotspots.add(new Hot(listX, ly - 1, listX + LIST_W - 4, ly + 10,
+                hotspots.add(new Hot(listX, Math.max(ly - 1, listTop),
+                        listX + LIST_W - 4, Math.min(ly + 10, listBottom),
                         () -> navigate(section, toId)));
             }
             ly += 12;
+        }
+        g.disableScissor();
+        if (maxListScroll > 0) {
+            int barX = listX + LIST_W - 6;
+            g.fill(barX, listTop, barX + 2, listBottom, 0x50000000);
+            int contentH = entries().size() * 12 + 2;
+            int thumbH = Math.max(10, listH * listH / contentH);
+            int thumbY = listTop + (int) ((listH - thumbH) * (listScroll / maxListScroll));
+            g.fill(barX, thumbY, barX + 2, thumbY + thumbH, 0xC0DAA520);
         }
 
         if (current == null) {
@@ -337,7 +360,12 @@ public final class HandbookScreen extends Screen {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
         if (super.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) return true;
-        scroll = Math.max(0, Math.min(maxScroll, scroll - scrollY * 12));
+        // The wheel scrolls whichever column it hovers over.
+        if (mouseX < paneX() - 2) {
+            listScroll = Math.max(0, Math.min(maxListScroll, listScroll - scrollY * 12));
+        } else {
+            scroll = Math.max(0, Math.min(maxScroll, scroll - scrollY * 12));
+        }
         return true;
     }
 
