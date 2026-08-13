@@ -19,6 +19,7 @@ public record LoadoutEditPayload(int action, String skillId, int from, int to)
     public static final int REMOVE = 1;   // skillId
     public static final int MOVE = 2;     // from -> to
     public static final int SELECT = 3;   // to = slot
+    public static final int SET_ITEM = 4; // skillId carries an ITEM id; "" = unbind
 
     public static final Type<LoadoutEditPayload> TYPE =
             new Type<>(Identifier.fromNamespaceAndPath(LegendQuest.MODID, "loadout_edit"));

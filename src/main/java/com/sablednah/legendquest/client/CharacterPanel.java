@@ -51,8 +51,9 @@ public final class CharacterPanel {
     private static final int PANEL_WIDTH = 147;
     private static final int PANEL_HEIGHT = 166;
     private static final int GAP = 2;
-    private static final int SLOT_COUNT = 6;
+    private static final int SLOT_COUNT = 5; // matches the five slot hotkeys
     private static final int SLOT_SIZE = 20;
+    private static final int BOOK_SLOT_GAP = 5;
     private static final int ROW_HEIGHT = 18;
 
     private enum Tab { NONE, STATS, SKILLS }
@@ -256,6 +257,13 @@ public final class CharacterPanel {
         return -1;
     }
 
+    /** The spellbook slot sits at the right end of the strip, set apart. */
+    private static boolean inBookSlot(InventoryScreen screen, double mx, double my) {
+        int y = slotsY(screen);
+        int sx = panelX(screen) + 8 + SLOT_COUNT * (SLOT_SIZE + 1) + BOOK_SLOT_GAP;
+        return mx >= sx && mx < sx + SLOT_SIZE && my >= y && my < y + SLOT_SIZE;
+    }
+
     private static int listRowAt(InventoryScreen screen, double mx, double my) {
         CharacterSummaryPayload s = summary();
         if (s == null) return -1;
@@ -279,6 +287,18 @@ public final class CharacterPanel {
         if (s == null) return;
 
         if (tab == Tab.SKILLS) {
+            // Spellbook slot: click with an item on the cursor to set it,
+            // click with an empty cursor to unbind.
+            if (inBookSlot(screen, mx, my)) {
+                ItemStack carried = screen.getMenu().getCarried();
+                if (!carried.isEmpty()) {
+                    send(new LoadoutEditPayload(LoadoutEditPayload.SET_ITEM,
+                            BuiltInRegistries.ITEM.getKey(carried.getItem()).toString(), -1, -1));
+                } else if (!s.loadoutItem().isEmpty()) {
+                    send(new LoadoutEditPayload(LoadoutEditPayload.SET_ITEM, "", -1, -1));
+                }
+                return;
+            }
             int slot = slotAt(screen, mx, my);
             if (slot >= 0 && slot < s.loadout().size()) {
                 drag = new Drag(s.loadout().get(slot), slot, mx, my);
@@ -479,11 +499,36 @@ public final class CharacterPanel {
             }
         }
 
+        // The spellbook slot: purple-framed, apart from the strip.
+        int bx = tx + SLOT_COUNT * (SLOT_SIZE + 1) + BOOK_SLOT_GAP;
+        boolean bookSet = !s.loadoutItem().isEmpty();
+        g.fill(bx, sy, bx + SLOT_SIZE, sy + SLOT_SIZE, 0xFF2A2038);
+        int bBorder = bookSet ? 0xFF9060C0 : 0xFF554570;
+        g.fill(bx, sy, bx + SLOT_SIZE, sy + 1, bBorder);
+        g.fill(bx, sy + SLOT_SIZE - 1, bx + SLOT_SIZE, sy + SLOT_SIZE, bBorder);
+        g.fill(bx, sy, bx + 1, sy + SLOT_SIZE, bBorder);
+        g.fill(bx + SLOT_SIZE - 1, sy, bx + SLOT_SIZE, sy + SLOT_SIZE, bBorder);
+        if (bookSet) {
+            g.renderItem(icon(s.loadoutItem()), bx + 2, sy + 2);
+        } else {
+            g.drawString(font, "?", bx + 8, sy + 6, 0xFF9060C0);
+        }
+        boolean bookHover = mouseX >= bx && mouseX < bx + SLOT_SIZE
+                && mouseY >= sy && mouseY < sy + SLOT_SIZE;
+        if (bookHover && drag == null) {
+            tooltip(g, font, "Spellbook item",
+                    (bookSet ? "§f" + itemName(s.loadoutItem())
+                            + "§7 — right-click casts the selected skill, sneak+right-click cycles."
+                            : "§7No item bound yet.")
+                    + "\n§ePick an item up from your inventory and click here to set it."
+                    + (bookSet ? "\n§8Click with an empty cursor to unbind." : ""));
+        }
+
         // Spellbook hint.
         int hy = sy + SLOT_SIZE + 4;
-        String book = s.loadoutItem().isEmpty()
-                ? "§8No spellbook — hold an item, /loadout bind"
-                : "§7Spellbook: §f" + itemName(s.loadoutItem());
+        String book = bookSet
+                ? "§7Spellbook: §f" + itemName(s.loadoutItem())
+                : "§8No spellbook — drop an item on the ? slot";
         g.drawString(font, trim(font, book, PANEL_WIDTH - 16), tx, hy, 0xFFFFFFFF);
 
         g.fill(x + 4, hy + 12, x + PANEL_WIDTH - 4, hy + 13, 0xFF44445A);

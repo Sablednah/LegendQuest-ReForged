@@ -57,9 +57,30 @@ public final class SkillActions {
                     pc.moveLoadout(payload.from(), payload.to());
             case com.sablednah.legendquest.network.LoadoutEditPayload.SELECT ->
                     pc.selectLoadout(payload.to());
+            case com.sablednah.legendquest.network.LoadoutEditPayload.SET_ITEM -> {
+                if (payload.skillId().isEmpty()) {
+                    pc.setLoadoutItem(java.util.Optional.empty());
+                    Feedback.chat(player, "&6Loadout item unbound (the skill list is kept).");
+                } else if (skillId != null) { // an ITEM id in this action
+                    if (pc.bindingFor(skillId).isPresent()) {
+                        Feedback.chat(player,
+                                "&cThat item type already has a single-skill /bind — /unbind it first.");
+                    } else {
+                        pc.setLoadoutItem(java.util.Optional.of(skillId));
+                        Feedback.chat(player, "&6" + itemName(skillId)
+                                + " is now your spellbook: right-click casts, sneak+right-click cycles.");
+                    }
+                }
+            }
             default -> { }
         }
         CharacterSync.send(player);
+    }
+
+    private static String itemName(net.minecraft.resources.Identifier itemId) {
+        var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(itemId);
+        return item.map(i -> new net.minecraft.world.item.ItemStack(i).getHoverName().getString())
+                .orElse(itemId.toString());
     }
 
     private static void useSelected(ServerPlayer player, PlayerCharacter pc) {
