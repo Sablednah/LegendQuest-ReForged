@@ -24,15 +24,35 @@ public final class ClientConduitSpeed {
     private static final TagKey<Item> ARCANE_CONDUITS = TagKey.create(Registries.ITEM,
             Identifier.fromNamespaceAndPath(LegendQuest.MODID, "arcane_conduit_tools"));
 
+    private static boolean conduitDig(net.minecraft.world.entity.player.Player player,
+            net.minecraft.world.level.block.state.BlockState state) {
+        CharacterSummaryPayload s = ClientCharacterState.summary();
+        if (s == null || s.goldToolMana() <= 0 || s.mana() < s.goldToolMana()) return false;
+        ItemStack held = player.getMainHandItem();
+        return !held.isEmpty() && held.is(ARCANE_CONDUITS)
+                && !held.isCorrectToolForDrops(state); // gold manages alone otherwise
+    }
+
     @SubscribeEvent
     static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
         if (!event.getEntity().level().isClientSide()) return; // server handler owns that side
-        CharacterSummaryPayload s = ClientCharacterState.summary();
-        if (s == null || s.goldToolMana() <= 0 || s.mana() < s.goldToolMana()) return;
-        ItemStack held = event.getEntity().getMainHandItem();
-        if (held.isEmpty() || !held.is(ARCANE_CONDUITS)) return;
-        if (held.isCorrectToolForDrops(event.getState())) return; // gold manages alone
-        event.setNewSpeed(Math.max(event.getNewSpeed(), 9.0F)); // netherite's pace
+        if (conduitDig(event.getEntity(), event.getState())) {
+            event.setNewSpeed(Math.max(event.getNewSpeed(), 9.0F)); // netherite's pace
+        }
+    }
+
+    /**
+     * The other half the client needs: destroy progress divides by 100
+     * instead of 30 while the client believes it can't harvest the block —
+     * the server-side grant alone still left obsidian at ~28s. Both sides
+     * must agree the harvest is legitimate.
+     */
+    @SubscribeEvent
+    static void onHarvestCheck(PlayerEvent.HarvestCheck event) {
+        if (event.canHarvest() || !event.getEntity().level().isClientSide()) return;
+        if (conduitDig(event.getEntity(), event.getTargetBlock())) {
+            event.setCanHarvest(true);
+        }
     }
 
     private ClientConduitSpeed() {}
