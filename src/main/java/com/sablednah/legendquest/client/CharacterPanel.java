@@ -47,8 +47,10 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
  */
 public final class CharacterPanel {
 
-    /** Same as RecipeBookComponent.IMAGE_WIDTH/HEIGHT — visual symmetry. */
-    private static final int PANEL_WIDTH = 147;
+    /** A shade wider than the recipe book (147): breathing room for the Buy
+     *  buttons and a clear slots↔spellbook gap. Still fits the shifted GUI's
+     *  left margin at vanilla's narrowest shifting width (379px → 178px). */
+    private static final int PANEL_WIDTH = 170;
     private static final int PANEL_HEIGHT = 166;
     private static final int GAP = 2;
     private static final int SLOT_COUNT = 5; // matches the five slot hotkeys
@@ -269,10 +271,10 @@ public final class CharacterPanel {
         return -1;
     }
 
-    /** The spellbook slot sits at the right end of the strip, set apart. */
+    /** The spellbook slot hugs the panel's right edge, clearly apart. */
     private static boolean inBookSlot(InventoryScreen screen, double mx, double my) {
         int y = slotsY(screen);
-        int sx = panelX(screen) + 8 + SLOT_COUNT * (SLOT_SIZE + 1) + BOOK_SLOT_GAP;
+        int sx = panelX(screen) + PANEL_WIDTH - 8 - SLOT_SIZE;
         return mx >= sx && mx < sx + SLOT_SIZE && my >= y && my < y + SLOT_SIZE;
     }
 
@@ -632,8 +634,8 @@ public final class CharacterPanel {
             }
         }
 
-        // The spellbook slot: purple-framed, apart from the strip.
-        int bx = tx + SLOT_COUNT * (SLOT_SIZE + 1) + BOOK_SLOT_GAP;
+        // The spellbook slot: purple-framed, right-aligned, clearly apart.
+        int bx = x + PANEL_WIDTH - 8 - SLOT_SIZE;
         boolean bookSet = !s.loadoutItem().isEmpty();
         g.fill(bx, sy, bx + SLOT_SIZE, sy + SLOT_SIZE, 0xFF2A2038);
         int bBorder = bookSet ? 0xFF9060C0 : 0xFF554570;
@@ -691,12 +693,14 @@ public final class CharacterPanel {
                         + (inLoadout ? " §8◆" : "")
                         + " §8" + skill.type().toLowerCase().charAt(0);
             }
-            g.drawString(font, trim(font, line, PANEL_WIDTH - 34), tx + 20, ry + 5, 0xFFFFFFFF);
 
             // The Buy chip: unowned, purchasable, level met, points in hand.
             boolean buyable = !skill.owned() && skill.cost() > 0
                     && s.level() >= skill.levelReq()
                     && (s.spTotal() - s.spSpent()) >= skill.cost();
+            // Text never runs under the button: reserve its width up front.
+            int reserved = buyable ? font.width("§lBuy " + skill.cost()) + 18 : 10;
+            g.drawString(font, trim(font, line, PANEL_WIDTH - 24 - reserved), tx + 20, ry + 5, 0xFFFFFFFF);
             if (buyable) {
                 String chip = "Buy " + skill.cost();
                 int cw = font.width("§l" + chip) + 8;

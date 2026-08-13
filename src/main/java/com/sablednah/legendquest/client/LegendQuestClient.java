@@ -24,6 +24,7 @@ public class LegendQuestClient {
         NeoForge.EVENT_BUS.register(LQHud.class);
         NeoForge.EVENT_BUS.register(CombatIndicators.class);
         NeoForge.EVENT_BUS.register(ClientNotices.class);
+        NeoForge.EVENT_BUS.register(ClientConduitSpeed.class);
         NeoForge.EVENT_BUS.addListener((ClientTickEvent.Post event) -> LQKeyMappings.onClientTick());
     }
 }

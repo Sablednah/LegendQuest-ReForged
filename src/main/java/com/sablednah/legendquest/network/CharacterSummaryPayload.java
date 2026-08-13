@@ -33,6 +33,7 @@ public record CharacterSummaryPayload(
         int spSpent,
         int spTotal,
         int statBoostCost,     // price of the next +1 stat, in skill points
+        float goldToolMana,    // arcane conduit boon: mana per boosted block (0 = no boon)
         List<SkillEntry> skills,
         List<String> loadout,  // skill ids, in order
         int loadoutIndex,
@@ -69,6 +70,7 @@ public record CharacterSummaryPayload(
         buf.writeVarInt(p.spSpent);
         buf.writeVarInt(p.spTotal);
         buf.writeVarInt(p.statBoostCost);
+        buf.writeFloat(p.goldToolMana);
         buf.writeVarInt(p.skills.size());
         for (SkillEntry s : p.skills) {
             buf.writeUtf(s.id());
@@ -107,6 +109,7 @@ public record CharacterSummaryPayload(
         int spSpent = buf.readVarInt();
         int spTotal = buf.readVarInt();
         int statBoostCost = buf.readVarInt();
+        float goldToolMana = buf.readFloat();
         int skillCount = buf.readVarInt();
         List<SkillEntry> skills = new ArrayList<>(skillCount);
         for (int n = 0; n < skillCount; n++) {
@@ -125,7 +128,7 @@ public record CharacterSummaryPayload(
         List<String> ownedFeats = new ArrayList<>(featCount);
         for (int n = 0; n < featCount; n++) ownedFeats.add(buf.readUtf());
         return new CharacterSummaryPayload(race, mainClass, subClass, level, xpProgress, karma, mana, maxMana,
-                stats, spSpent, spTotal, statBoostCost, skills, loadout, loadoutIndex, loadoutItem,
+                stats, spSpent, spTotal, statBoostCost, goldToolMana, skills, loadout, loadoutIndex, loadoutItem,
                 raceChoices, classChoices, ownedFeats);
     }
 

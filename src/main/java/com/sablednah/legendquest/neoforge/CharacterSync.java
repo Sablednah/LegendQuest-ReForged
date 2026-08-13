@@ -72,6 +72,7 @@ public final class CharacterSync {
                 pc.skillPointsSpent(),
                 CharacterService.skillPointsTotal(player),
                 CharacterService.nextStatBoostCost(player),
+                (float) CharacterService.totalBoon(player, b -> b.goldToolMana()),
                 skills,
                 pc.loadout().stream().map(Identifier::toString).toList(),
                 pc.loadoutIndex(),
