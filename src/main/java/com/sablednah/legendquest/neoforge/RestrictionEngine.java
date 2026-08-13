@@ -18,8 +18,23 @@ import net.minecraft.world.item.ItemStack;
  * disallow always wins; if any source (race, main, sub) states an allowlist
  * for a slot family, the union of allowlists is authoritative; with no
  * statement anywhere, everything is allowed.
+ *
+ * <p>Gated behind <b>proficiency master lists</b>: only items in
+ * {@code #legendquest:proficiency_weapons} / {@code proficiency_tools} are
+ * ever checked at all. Grass, torches, dinner, and every stone/iron tool
+ * are nobody's proficiency problem — picking up clutter must never fumble,
+ * and core Minecraft stays open to everyone.</p>
  */
 public final class RestrictionEngine {
+
+    private static final net.minecraft.tags.TagKey<Item> PROFICIENCY_WEAPONS =
+            net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ITEM,
+                    net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                            com.sablednah.legendquest.LegendQuest.MODID, "proficiency_weapons"));
+    private static final net.minecraft.tags.TagKey<Item> PROFICIENCY_TOOLS =
+            net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ITEM,
+                    net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                            com.sablednah.legendquest.LegendQuest.MODID, "proficiency_tools"));
 
     /**
      * How many worn armour pieces this character may not wear. Disallowed
@@ -39,6 +54,9 @@ public final class RestrictionEngine {
 
     public static boolean isAllowed(ServerPlayer player, ItemRules.Slot slot, ItemStack stack) {
         if (stack.isEmpty()) return true;
+        // Not on the proficiency list = not a skill item = free for everyone.
+        if (slot == ItemRules.Slot.WEAPON && !stack.is(PROFICIENCY_WEAPONS)) return true;
+        if (slot == ItemRules.Slot.TOOL && !stack.is(PROFICIENCY_TOOLS)) return true;
         Holder<Item> item = stack.getItemHolder();
 
         List<ItemRules> sources = new ArrayList<>(3);

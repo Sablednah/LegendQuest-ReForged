@@ -33,5 +33,6 @@
       "level": 20,
       "cost": 10
     }
-  }
+  },
+  "allowed_tools": "#legendquest:proficiency_tools"
 }

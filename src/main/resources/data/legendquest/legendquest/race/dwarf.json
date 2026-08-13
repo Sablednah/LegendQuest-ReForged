@@ -53,5 +53,6 @@
     }
   },
   "enchant_rebate": 1,
-  "smith_refund": 0.2
+  "smith_refund": 0.2,
+  "allowed_tools": "#legendquest:proficiency_tools"
 }

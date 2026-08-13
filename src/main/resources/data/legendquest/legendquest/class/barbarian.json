@@ -33,5 +33,6 @@
       "level": 15,
       "cost": 5
     }
-  }
+  },
+  "allowed_tools": "#legendquest:barbarian_tools"
 }

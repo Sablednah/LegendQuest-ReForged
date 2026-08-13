@@ -35,5 +35,6 @@
       "level": 20,
       "cost": 5
     }
-  }
+  },
+  "allowed_tools": "#legendquest:cleric_tools"
 }
