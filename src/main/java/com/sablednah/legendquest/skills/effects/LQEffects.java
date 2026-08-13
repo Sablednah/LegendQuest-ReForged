@@ -301,9 +301,30 @@ public final class LQEffects {
     public record ParticleLine(net.minecraft.core.particles.ParticleOptions particle,
             double perBlock, TargetSpec target) implements SkillEffect {
         public static final Identifier TYPE = id("particle_line");
+
+        /** Vanilla's particle codec insists on {@code {"type": ...}}; skill
+         *  authors get to write plain {@code "minecraft:end_rod"} too.
+         *  (Bare strings only work for simple particles — dust and friends
+         *  need the object form for their options.) */
+        private static final Codec<net.minecraft.core.particles.ParticleOptions> PARTICLE =
+                Codec.withAlternative(
+                        net.minecraft.core.particles.ParticleTypes.CODEC,
+                        Codec.STRING.comapFlatMap(
+                                s -> {
+                                    Identifier rl = Identifier.tryParse(s);
+                                    var type = rl == null ? null
+                                            : BuiltInRegistries.PARTICLE_TYPE.getValue(rl);
+                                    return type instanceof net.minecraft.core.particles.SimpleParticleType simple
+                                            ? com.mojang.serialization.DataResult.success(
+                                                    (net.minecraft.core.particles.ParticleOptions) simple)
+                                            : com.mojang.serialization.DataResult.error(() -> s
+                                                    + " is not a simple particle — use the {\"type\": ...} form");
+                                },
+                                options -> BuiltInRegistries.PARTICLE_TYPE
+                                        .getKey(options.getType()).toString()));
+
         public static final MapCodec<ParticleLine> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-                net.minecraft.core.particles.ParticleTypes.CODEC
-                        .optionalFieldOf("particle", ParticleTypes.END_ROD).forGetter(ParticleLine::particle),
+                PARTICLE.optionalFieldOf("particle", ParticleTypes.END_ROD).forGetter(ParticleLine::particle),
                 Codec.DOUBLE.optionalFieldOf("per_block", 4.0D).forGetter(ParticleLine::perBlock),
                 TargetSpec.CODEC.optionalFieldOf("target", TargetSpec.LOOKING_AT).forGetter(ParticleLine::target))
                 .apply(i, ParticleLine::new));
