@@ -56,6 +56,8 @@ public final class LQEffects {
         SkillEffectTypes.register(Ignite.TYPE, Ignite.CODEC);
         SkillEffectTypes.register(GiveItem.TYPE, GiveItem.CODEC);
         SkillEffectTypes.register(Sound.TYPE, Sound.CODEC);
+        SkillEffectTypes.register(ParticleLine.TYPE, ParticleLine.CODEC);
+        SkillEffectTypes.register(ProjectileEffect.TYPE, ProjectileEffect.CODEC);
     }
 
     /** Magic damage to the target. The old Hurt/MightyBlow backbone. */
@@ -97,14 +99,20 @@ public final class LQEffects {
         }
     }
 
-    /** Apply a potion effect. Covers Aura/PassiveAura/Hex/Curse-style skills. */
-    public record Potion(Holder<MobEffect> effect, long durationMs, int amplifier, TargetSpec target)
-            implements SkillEffect {
+    /**
+     * Apply a potion effect. Covers Aura/PassiveAura/Hex/Curse-style skills.
+     * {@code particles: false} for always-on passives — nobody wants to
+     * live inside a lava lamp; the HUD icon stays so the buff is visible.
+     */
+    public record Potion(Holder<MobEffect> effect, long durationMs, int amplifier,
+            boolean particles, boolean showIcon, TargetSpec target) implements SkillEffect {
         public static final Identifier TYPE = id("potion_effect");
         public static final MapCodec<Potion> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 BuiltInRegistries.MOB_EFFECT.holderByNameCodec().fieldOf("effect").forGetter(Potion::effect),
                 Codec.LONG.optionalFieldOf("duration", 5000L).forGetter(Potion::durationMs),
                 Codec.INT.optionalFieldOf("amplifier", 0).forGetter(Potion::amplifier),
+                Codec.BOOL.optionalFieldOf("particles", true).forGetter(Potion::particles),
+                Codec.BOOL.optionalFieldOf("show_icon", true).forGetter(Potion::showIcon),
                 TargetSpec.CODEC.optionalFieldOf("target", TargetSpec.SELF).forGetter(Potion::target))
                 .apply(i, Potion::new));
 
@@ -114,7 +122,8 @@ public final class LQEffects {
         public void apply(SkillContext ctx) {
             int ticks = (int) Math.max(1, durationMs / 50);
             for (LivingEntity e : target.resolveEntities(ctx)) {
-                e.addEffect(new MobEffectInstance(effect, ticks, amplifier));
+                e.addEffect(new MobEffectInstance(effect, ticks, amplifier,
+                        !particles, particles, showIcon));
             }
         }
     }
@@ -282,6 +291,80 @@ public final class LQEffects {
         public void apply(SkillContext ctx) {
             ctx.level().playSound(null, ctx.caster().getX(), ctx.caster().getY(), ctx.caster().getZ(),
                     sound.value(), SoundSource.PLAYERS, volume, pitch);
+        }
+    }
+
+    /**
+     * A line of particles from the caster's eyes to the target — the visual
+     * language of "I cast a thing at you". Magic Missile's whole aesthetic.
+     */
+    public record ParticleLine(net.minecraft.core.particles.ParticleOptions particle,
+            double perBlock, TargetSpec target) implements SkillEffect {
+        public static final Identifier TYPE = id("particle_line");
+        public static final MapCodec<ParticleLine> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+                net.minecraft.core.particles.ParticleTypes.CODEC
+                        .optionalFieldOf("particle", ParticleTypes.END_ROD).forGetter(ParticleLine::particle),
+                Codec.DOUBLE.optionalFieldOf("per_block", 4.0D).forGetter(ParticleLine::perBlock),
+                TargetSpec.CODEC.optionalFieldOf("target", TargetSpec.LOOKING_AT).forGetter(ParticleLine::target))
+                .apply(i, ParticleLine::new));
+
+        @Override public Identifier type() { return TYPE; }
+
+        @Override
+        public void apply(SkillContext ctx) {
+            Vec3 from = ctx.caster().getEyePosition().add(0, -0.2D, 0);
+            Vec3 to = target.resolveEntities(ctx).stream().findFirst()
+                    .map(e -> e.position().add(0, e.getBbHeight() * 0.6D, 0))
+                    .or(() -> target.resolvePos(ctx).map(p ->
+                            new Vec3(p.getX() + 0.5D, p.getY() + 0.5D, p.getZ() + 0.5D)))
+                    .orElse(from.add(ctx.caster().getLookAngle().scale(target.range())));
+            double length = from.distanceTo(to);
+            int steps = Math.max(2, (int) (length * perBlock));
+            for (int n = 0; n <= steps; n++) {
+                Vec3 p = from.lerp(to, n / (double) steps);
+                ctx.level().sendParticles(particle, p.x, p.y, p.z, 1, 0.02D, 0.02D, 0.02D, 0.0D);
+            }
+        }
+    }
+
+    /**
+     * Launch a projectile along the caster's look. Fireballs get their real
+     * constructors (owner, direction, explosion power); anything else spawns
+     * with {@code speed} as straight velocity. Fireball, the skill, at last.
+     */
+    public record ProjectileEffect(EntityType<?> entity, double speed, int power)
+            implements SkillEffect {
+        public static final Identifier TYPE = id("projectile");
+        public static final MapCodec<ProjectileEffect> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+                BuiltInRegistries.ENTITY_TYPE.byNameCodec().fieldOf("entity").forGetter(ProjectileEffect::entity),
+                Codec.DOUBLE.optionalFieldOf("speed", 1.5D).forGetter(ProjectileEffect::speed),
+                Codec.INT.optionalFieldOf("power", 1).forGetter(ProjectileEffect::power))
+                .apply(i, ProjectileEffect::new));
+
+        @Override public Identifier type() { return TYPE; }
+
+        @Override
+        public void apply(SkillContext ctx) {
+            Vec3 look = ctx.caster().getLookAngle();
+            Vec3 spawn = ctx.caster().getEyePosition().add(look.scale(1.2D));
+            net.minecraft.world.entity.Entity launched;
+            if (entity == EntityType.FIREBALL) {
+                launched = new net.minecraft.world.entity.projectile.hurtingprojectile.LargeFireball(
+                        ctx.level(), ctx.caster(), look, power);
+            } else if (entity == EntityType.SMALL_FIREBALL) {
+                launched = new net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball(
+                        ctx.level(), ctx.caster(), look);
+            } else {
+                launched = entity.create(ctx.level(), EntitySpawnReason.TRIGGERED);
+                if (launched == null) return;
+                if (launched instanceof net.minecraft.world.entity.projectile.Projectile projectile) {
+                    projectile.setOwner(ctx.caster());
+                }
+                launched.setDeltaMovement(look.scale(speed));
+            }
+            launched.snapTo(spawn.x, spawn.y, spawn.z,
+                    ctx.caster().getYRot(), ctx.caster().getXRot());
+            ctx.level().addFreshEntity(launched);
         }
     }
 

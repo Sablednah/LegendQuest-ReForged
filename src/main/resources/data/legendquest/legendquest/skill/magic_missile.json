@@ -1,0 +1,33 @@
+{
+  "name": "Magic Missile",
+  "description": "A dart of pure force that never misses. The first spell every apprentice learns and the last one most ever need.",
+  "icon": "minecraft:amethyst_shard",
+  "type": "active",
+  "cooldown": 2000,
+  "mana_cost": 3,
+  "effects": [
+    {
+      "type": "legendquest:particle_line",
+      "particle": "minecraft:end_rod",
+      "per_block": 5.0,
+      "target": {
+        "kind": "looking_at",
+        "range": 24
+      }
+    },
+    {
+      "type": "legendquest:damage",
+      "amount": 5.0,
+      "target": {
+        "kind": "looking_at",
+        "range": 24
+      }
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:block.amethyst_block.resonate",
+      "volume": 1.0,
+      "pitch": 1.4
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "Fireball",
+  "description": "The classic argument-ender: a roaring sphere of flame that explodes on arrival. Mind the scenery.",
+  "icon": "minecraft:fire_charge",
+  "type": "active",
+  "cooldown": 12000,
+  "delay": 750,
+  "mana_cost": 15,
+  "effects": [
+    {
+      "type": "legendquest:projectile",
+      "entity": "minecraft:fireball",
+      "power": 1
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:entity.ghast.shoot",
+      "volume": 1.0,
+      "pitch": 0.9
+    }
+  ]
+}

@@ -173,6 +173,15 @@ public final class HandbookScreen extends Screen {
         g.fill(x + 8, divY, x + BOOK_W - 8, divY + 1, INK_DIVIDER);
         g.drawString(font, "§6❖", x + BOOK_W / 2 - 3, divY - 4, 0xFFFFFFFF);
 
+        // The feat shop shows your purse.
+        if (section.equals("feat")) {
+            var summary = ClientCharacterState.summary();
+            if (summary != null) {
+                String purse = "§7Points to spend: §6§l" + (summary.spTotal() - summary.spSpent());
+                g.drawString(font, purse, x + BOOK_W - 10 - font.width(purse), divY - 4, 0xFFFFFFFF);
+            }
+        }
+
         // Entry list on its own inset panel — scissored and scrollable, so
         // sixteen gear tags don't spill out of the book's binding.
         int listX = x + 6;
@@ -309,7 +318,7 @@ public final class HandbookScreen extends Screen {
     /** A tab chip; returns the next tab's x. */
     private int tab(GuiGraphics g, int x, int y, String label, String target,
             int mouseX, int mouseY) {
-        int w = font.width(label) + 12;
+        int w = font.width("§l" + label) + 12; // sized for the bold active state
         chip(g, x, y, w, label, true, section.equals(target), mouseX, mouseY, () -> {
             if (!section.equals(target)) {
                 pushHistory();
@@ -329,7 +338,8 @@ public final class HandbookScreen extends Screen {
         g.fill(x, y, x + w, y + h, bg);
         frame(g, x, y, x + w, y + h, active ? GOLD : hover ? GOLD_DIM : BRONZE, 1);
         String colour = !enabled ? "§8" : active ? "§6§l" : hover ? "§e" : "§7";
-        g.drawString(font, colour + label, x + (w - font.width(label)) / 2 + 1, y + 3, 0xFFFFFFFF);
+        String drawn = colour + label;
+        g.drawString(font, drawn, x + (w - font.width(drawn)) / 2, y + 3, 0xFFFFFFFF);
         if (enabled) hotspots.add(new Hot(x, y, x + w, y + h, action));
     }
 

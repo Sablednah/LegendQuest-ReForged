@@ -34,6 +34,14 @@
     "legendquest:smite": {
       "level": 15,
       "cost": 5
+    },
+    "legendquest:magic_missile": {
+      "level": 2,
+      "cost": 0
+    },
+    "legendquest:fireball": {
+      "level": 25,
+      "cost": 8
     }
   },
   "allowed_tools": "#legendquest:mage_tools",
