@@ -73,14 +73,14 @@ public final class LQKeyMappings {
             if (mc.screen == null) HandbookScreen.open();
         }
         while (USE_SELECTED.consumeClick()) {
-            send(new SkillActionPayload(SkillActionPayload.USE_SELECTED, 0));
+            send(new SkillActionPayload(SkillActionPayload.USE_SELECTED, 0, ""));
         }
         while (CYCLE.consumeClick()) {
-            send(new SkillActionPayload(SkillActionPayload.CYCLE, 0));
+            send(new SkillActionPayload(SkillActionPayload.CYCLE, 0, ""));
         }
         for (int n = 0; n < SLOT_COUNT; n++) {
             while (SLOTS[n].consumeClick()) {
-                send(new SkillActionPayload(SkillActionPayload.USE_SLOT, n));
+                send(new SkillActionPayload(SkillActionPayload.USE_SLOT, n, ""));
             }
         }
     }

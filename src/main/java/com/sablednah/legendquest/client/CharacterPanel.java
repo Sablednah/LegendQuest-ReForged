@@ -70,9 +70,10 @@ public final class CharacterPanel {
     private static double mouseX;
     private static double mouseY;
 
-    /** Handbook hotspots, rebuilt every rendered frame (immediate-mode).
-     *  {@code rightOnly} regions share space with a left-click action. */
-    private record Hot(int x0, int y0, int x1, int y1, boolean rightOnly, Runnable action) {}
+    /** Click hotspots, rebuilt every rendered frame (immediate-mode).
+     *  {@code button}: -1 = any mouse button, 0 = left only, 1 = right only
+     *  (right-only regions share space with a left-click action). */
+    private record Hot(int x0, int y0, int x1, int y1, int button, Runnable action) {}
     private static final List<Hot> HOTSPOTS = new ArrayList<>();
 
     private static final Map<String, ItemStack> ICON_CACHE = new HashMap<>();
@@ -210,6 +211,11 @@ public final class CharacterPanel {
         return Math.max(0, screen.getGuiLeft() - PANEL_WIDTH - GAP);
     }
 
+    /** The stat-boost chip row appears only when the next boost is payable. */
+    private static boolean boostRowShown(CharacterSummaryPayload s) {
+        return s.spTotal() - s.spSpent() >= s.statBoostCost();
+    }
+
     /** Top of the panel: the GUI's top, but slid up if the content would
      *  run off the bottom of the screen (both pickers open, long skill list). */
     private static int panelY(InventoryScreen screen) {
@@ -235,6 +241,7 @@ public final class CharacterPanel {
             h = 8 + 12 + SLOT_SIZE + 4 + 12 + 6 + s.skills().size() * ROW_HEIGHT + 8;
         } else {
             h = 8 + 12 + 12 + 12 + 35 + 12 + 12; // core stats block
+            if (boostRowShown(s)) h += 13;
             if (!s.raceChoices().isEmpty()) h += 13 + s.raceChoices().size() * 11 + 4;
             if (!s.classChoices().isEmpty()) h += 13 + s.classChoices().size() * 11 + 4;
         }
@@ -291,10 +298,10 @@ public final class CharacterPanel {
         CharacterSummaryPayload s = summary();
         if (s == null) return;
 
-        // Handbook hotspots first — right-click on rows, any click on links.
+        // Hotspots first — buy chips, handbook links, right-click lookups.
         for (Hot hot : HOTSPOTS) {
             if (mx >= hot.x0() && mx < hot.x1() && my >= hot.y0() && my < hot.y1()
-                    && (!hot.rightOnly() || event.getButton() == 1)) {
+                    && (hot.button() == -1 || hot.button() == event.getButton())) {
                 hot.action().run();
                 return;
             }
@@ -421,12 +428,14 @@ public final class CharacterPanel {
             g.fill(bx, by, bx + 1, by + 12, 0xFFDAA520);
             g.fill(bx + 13, by, bx + 14, by + 12, 0xFFDAA520);
             g.drawString(font, "§6?", bx + 5, by + 2, 0xFFFFFFFF);
-            HOTSPOTS.add(new Hot(bx, by, bx + 14, by + 12, false, HandbookScreen::open));
+            HOTSPOTS.add(new Hot(bx, by, bx + 14, by + 12, -1, HandbookScreen::open));
             if (hover) {
                 tooltip(g, font, "Players Handbook",
                         "Races, classes and skills — everything a legend needs to know. §8(Key: H)");
             }
         }
+
+        drawPendingTooltip(g, font); // last, so nothing paints over it
     }
 
     /** Open the handbook at the entry whose display name matches. */
@@ -467,10 +476,10 @@ public final class CharacterPanel {
                 + (s.subClassName().isEmpty() ? "" : "/" + s.subClassName()) : classText,
                 tx + raceW + 4, ty, 0xFFFFFFFF);
         if (ClientHandbook.get() != null) {
-            HOTSPOTS.add(new Hot(tx, ty - 1, tx + raceW, ty + 10, false,
+            HOTSPOTS.add(new Hot(tx, ty - 1, tx + raceW, ty + 10, -1,
                     () -> openHandbookByName("race", raceName)));
             HOTSPOTS.add(new Hot(tx + raceW + 4, ty - 1, tx + raceW + 4 + font.width(classText),
-                    ty + 10, false, () -> openHandbookByName("class", className)));
+                    ty + 10, -1, () -> openHandbookByName("class", className)));
             if (raceHover) tooltip(g, font, raceName, "§7Open in the Players Handbook");
             if (classHover) tooltip(g, font, className, "§7Open in the Players Handbook");
         }
@@ -501,6 +510,35 @@ public final class CharacterPanel {
         g.drawString(font, "§7Skill points §f" + (s.spTotal() - s.spSpent()) + "§7/§f" + s.spTotal(),
                 tx, ty, 0xFFFFFFFF);
         ty += 12;
+
+        // Stat boost chips: a +1 wherever it hurts least, at a stinging price.
+        if (s.spTotal() - s.spSpent() >= s.statBoostCost()) {
+            g.drawString(font, "§7Boost §8(" + s.statBoostCost() + "sp)§7:", tx, ty, 0xFFFFFFFF);
+            int bx = tx + font.width("Boost (" + s.statBoostCost() + "sp): ") + 2;
+            String[] keys = {"str", "dex", "con", "int", "wis", "chr"};
+            for (int n = 0; n < 6; n++) {
+                String chip = "+" + keys[n].toUpperCase().charAt(0);
+                int cw = font.width(chip) + 3;
+                boolean chipHover = mouseX >= bx && mouseX < bx + cw
+                        && mouseY >= ty - 2 && mouseY < ty + 9;
+                g.fill(bx - 1, ty - 2, bx + cw, ty + 9, chipHover ? 0xFF2E4A1E : 0xFF1E3216);
+                g.drawString(font, (chipHover ? "§a§l" : "§a") + chip, bx + 1, ty, 0xFFFFFFFF);
+                String key = keys[n];
+                HOTSPOTS.add(new Hot(bx - 1, ty - 2, bx + cw, ty + 9, 0,
+                        () -> send(new com.sablednah.legendquest.network.SkillActionPayload(
+                                com.sablednah.legendquest.network.SkillActionPayload.BUY_STAT,
+                                0, key))));
+                if (chipHover) {
+                    tooltip(g, font, "+1 " + key.toUpperCase(),
+                            "Permanently raises the stat for " + s.statBoostCost()
+                            + " skill points.\n§8Each boost bought raises the next one's price."
+                            + "\n§8Regret it later? /lq respec");
+                }
+                bx += cw + 3;
+            }
+            ty += 13;
+        }
+
         g.drawString(font, "§8Skills live on the ✦ tab", tx, ty, 0xFFFFFFFF);
         ty += 12;
 
@@ -521,7 +559,7 @@ public final class CharacterPanel {
             String colour = !entry.available() ? "§8" : hover ? "§e" : "§a";
             g.drawString(font, colour + "▸ " + entry.name()
                     + (entry.available() ? "" : " §8[locked]"), tx, ty, 0xFFFFFFFF);
-            HOTSPOTS.add(new Hot(tx - 2, ty - 1, tx + PANEL_WIDTH - 14, ty + 10, true,
+            HOTSPOTS.add(new Hot(tx - 2, ty - 1, tx + PANEL_WIDTH - 14, ty + 10, 1,
                     () -> HandbookScreen.open(race ? "race" : "class", entry.id())));
             if (hover) {
                 tooltip(g, font, entry.name(),
@@ -567,7 +605,7 @@ public final class CharacterPanel {
                         && mouseY >= sy && mouseY < sy + SLOT_SIZE;
                 if (entry != null) {
                     var slotEntry = entry;
-                    HOTSPOTS.add(new Hot(sx, sy, sx + SLOT_SIZE, sy + SLOT_SIZE, true,
+                    HOTSPOTS.add(new Hot(sx, sy, sx + SLOT_SIZE, sy + SLOT_SIZE, 1,
                             () -> HandbookScreen.open("skill", slotEntry.id())));
                 }
                 if (hover && drag == null && entry != null) {
@@ -639,10 +677,29 @@ public final class CharacterPanel {
             }
             g.drawString(font, trim(font, line, PANEL_WIDTH - 34), tx + 20, ry + 5, 0xFFFFFFFF);
 
-            HOTSPOTS.add(new Hot(x + 4, ry, x + PANEL_WIDTH - 4, ry + ROW_HEIGHT, true,
+            // The Buy chip: unowned, purchasable, level met, points in hand.
+            boolean buyable = !skill.owned() && skill.cost() > 0
+                    && s.level() >= skill.levelReq()
+                    && (s.spTotal() - s.spSpent()) >= skill.cost();
+            if (buyable) {
+                String chip = "[Buy " + skill.cost() + "]";
+                int cw = font.width(chip);
+                int cx = x + PANEL_WIDTH - 8 - cw;
+                boolean chipHover = mouseX >= cx - 2 && mouseX < cx + cw + 2
+                        && mouseY >= ry + 3 && mouseY < ry + 14;
+                g.fill(cx - 2, ry + 3, cx + cw + 2, ry + 14, chipHover ? 0xFF2E4A1E : 0xFF1E3216);
+                g.drawString(font, (chipHover ? "§a§l" : "§a") + chip, cx, ry + 5, 0xFFFFFFFF);
+                HOTSPOTS.add(new Hot(cx - 2, ry + 3, cx + cw + 2, ry + 14, 0,
+                        () -> send(new com.sablednah.legendquest.network.SkillActionPayload(
+                                com.sablednah.legendquest.network.SkillActionPayload.BUY_SKILL,
+                                0, skill.id()))));
+            }
+
+            HOTSPOTS.add(new Hot(x + 4, ry, x + PANEL_WIDTH - 4, ry + ROW_HEIGHT, 1,
                     () -> HandbookScreen.open("skill", skill.id())));
             if (hover && drag == null) {
                 tooltip(g, font, skill.name(), skillTooltip(skill) + rowHint(skill, inLoadout)
+                        + (buyable ? "\n§aThe green chip buys it." : "")
                         + "\n§8Right-click: handbook");
             }
         }
@@ -679,14 +736,48 @@ public final class CharacterPanel {
         return sb.toString();
     }
 
-    /** Title + body tooltip; body lines word-wrapped to fit beside the panel. */
+    /**
+     * Queue a tooltip: the vanilla deferred-tooltip hook is flushed before
+     * Render.Post handlers run, so anything we defer to IT never shows —
+     * we draw our own at the very end of the panel render instead (so no
+     * later row paints over it). Word-wrapped, gold-framed, kept on screen.
+     */
+    private static String[] pendingTooltip;
+
     private static void tooltip(GuiGraphics g, Font font, String title, String body) {
+        pendingTooltip = new String[] {title, body};
+    }
+
+    private static void drawPendingTooltip(GuiGraphics g, Font font) {
+        if (pendingTooltip == null) return;
+        String title = pendingTooltip[0];
+        String body = pendingTooltip[1];
+        pendingTooltip = null;
         List<FormattedCharSequence> lines = new ArrayList<>();
         lines.add(Component.literal("§6" + title).getVisualOrderText());
         for (String para : body.split("\n")) {
             lines.addAll(font.split(net.minecraft.network.chat.FormattedText.of(para), 160));
         }
-        g.setTooltipForNextFrame(lines, (int) mouseX, (int) mouseY);
+        int w = 0;
+        for (FormattedCharSequence line : lines) w = Math.max(w, font.width(line));
+        int h = lines.size() * 10 + 6;
+        int x = (int) mouseX + 12;
+        int y = (int) mouseY - 6;
+        if (x + w + 6 > g.guiWidth()) x = (int) mouseX - w - 14;
+        if (y + h > g.guiHeight()) y = g.guiHeight() - h - 2;
+        if (x < 2) x = 2;
+        if (y < 2) y = 2;
+
+        g.fill(x - 3, y - 3, x + w + 3, y + h - 1, 0xF0100C14);
+        g.fill(x - 3, y - 3, x + w + 3, y - 2, 0xFFDAA520);
+        g.fill(x - 3, y + h - 2, x + w + 3, y + h - 1, 0xFFDAA520);
+        g.fill(x - 3, y - 3, x - 2, y + h - 1, 0xFFDAA520);
+        g.fill(x + w + 2, y - 3, x + w + 3, y + h - 1, 0xFFDAA520);
+        int ty = y;
+        for (FormattedCharSequence line : lines) {
+            g.drawString(font, line, x, ty, 0xFFFFFFFF);
+            ty += 10;
+        }
     }
 
     // --- small helpers ---
@@ -731,7 +822,8 @@ public final class CharacterPanel {
         if (s == null) return null;
         int tx = panelX(screen) + 8;
         if (mx < tx - 2 || mx >= tx + PANEL_WIDTH - 14) return null;
-        int ty = panelY(screen) + 8 + 12 + 12 + 12 + 35 + 12 + 12; // top of picker block
+        int ty = panelY(screen) + 8 + 12 + 12 + 12 + 35 + 12 + 12 // top of picker block
+                + (boostRowShown(s) ? 13 : 0);
         if (!s.raceChoices().isEmpty()) {
             ty += 13;
             for (CharacterSummaryPayload.PickEntry entry : s.raceChoices()) {

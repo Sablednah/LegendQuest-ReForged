@@ -24,6 +24,8 @@ public final class LQConfig {
     public static final ModConfigSpec.IntValue XP_LEVEL_BASE;
     public static final ModConfigSpec.IntValue MAX_LEVEL;
     public static final ModConfigSpec.IntValue PASSIVE_TICK_MS;
+    public static final ModConfigSpec.IntValue STAT_BOOST_BASE_COST;
+    public static final ModConfigSpec.IntValue RESPEC_LEVEL_COST;
     public static final ModConfigSpec.LongValue KARMA_KILL_PLAYER;
     public static final ModConfigSpec.LongValue KARMA_KILL_VILLAGER;
     public static final ModConfigSpec.LongValue KARMA_KILL_ANIMAL;
@@ -65,6 +67,13 @@ public final class LQConfig {
         PASSIVE_TICK_MS = BUILDER
                 .comment("How often PASSIVE skill effects re-apply, in milliseconds.")
                 .defineInRange("passiveTickMs", 3000, 250, 60_000);
+        STAT_BOOST_BASE_COST = BUILDER
+                .comment("Skill points for the first +1 stat boost; every boost already",
+                        "bought raises the next one's price by one (they're meant to sting).")
+                .defineInRange("statBoostBaseCost", 5, 1, 1_000);
+        RESPEC_LEVEL_COST = BUILDER
+                .comment("Character levels burned by /lq respec (which refunds every skill point).")
+                .defineInRange("respecLevelCost", 1, 0, 100);
         BUILDER.pop();
 
         BUILDER.comment("Karma (alignment). Positive deeds raise it, dark ones lower it.").push("karma");

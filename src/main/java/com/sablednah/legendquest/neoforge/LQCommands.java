@@ -159,6 +159,16 @@ public final class LQCommands {
                 .then(Commands.literal("decline").executes(LQCommands::partyDecline))
                 .then(Commands.literal("leave").executes(LQCommands::partyLeave));
 
+        // Spend skill points on permanent +1 stats; escalating cost.
+        LiteralArgumentBuilder<CommandSourceStack> buystat = Commands.literal("buystat");
+        for (com.sablednah.legendquest.core.Stat stat : com.sablednah.legendquest.core.Stat.values()) {
+            buystat.then(Commands.literal(stat.key()).executes(ctx ->
+                    CharacterActions.buyStat(ctx.getSource().getPlayerOrException(), stat) ? 1 : 0));
+        }
+
+        LiteralArgumentBuilder<CommandSourceStack> respec = Commands.literal("respec")
+                .executes(ctx -> CharacterActions.respec(ctx.getSource().getPlayerOrException()) ? 1 : 0);
+
         LiteralArgumentBuilder<CommandSourceStack> stats =
                 Commands.literal("stats").executes(LQCommands::stats);
         LiteralArgumentBuilder<CommandSourceStack> karma =
@@ -193,6 +203,7 @@ public final class LQCommands {
                 .executes(LQCommands::stats)
                 .then(race).then(charClass).then(skill)
                 .then(bind).then(unbind).then(loadout).then(party)
+                .then(buystat).then(respec)
                 .then(stats).then(karma).then(roll).then(admin));
 
         // Classic shorthands.
@@ -577,30 +588,7 @@ public final class LQCommands {
         Identifier id = resolve(ctx.getSource(), LQRegistries.SKILL,
                 ResourceKeyArgument.getRegistryKey(ctx, "skill", LQRegistries.SKILL, ERROR_UNKNOWN_SKILL),
                 ERROR_UNKNOWN_SKILL);
-        PlayerCharacter pc = CharacterService.data(player);
-        SkillGrant grant = SkillEngine.grants(player).get(id);
-        if (grant == null) {
-            Feedback.chat(player, "&cYour race/class does not offer that skill.");
-            return 0;
-        }
-        if (grant.cost() <= 0) {
-            Feedback.chat(player, "&7No purchase needed — it unlocks at level " + grant.level() + ".");
-            return 0;
-        }
-        if (pc.hasPurchased(id)) {
-            Feedback.chat(player, "&7Already bought.");
-            return 0;
-        }
-        int available = CharacterService.skillPointsTotal(player) - pc.skillPointsSpent();
-        if (available < grant.cost()) {
-            Feedback.chat(player, "&cNeeds " + grant.cost() + " skill points; you have " + available + ".");
-            return 0;
-        }
-        pc.purchase(id, grant.cost());
-        Feedback.chat(player, "&6Learned &l"
-                + SkillEngine.definition(player, id).map(d -> d.name()).orElse(id.toString())
-                + "&r&6 for " + grant.cost() + " points.");
-        return 1;
+        return CharacterActions.buySkill(player, id) ? 1 : 0;
     }
 
     private static int karma(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {

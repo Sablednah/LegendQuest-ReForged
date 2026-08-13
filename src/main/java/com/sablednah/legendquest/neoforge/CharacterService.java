@@ -144,7 +144,16 @@ public final class CharacterService {
         int lvl = level(player);
         StatBlock fromLevels = race(player).map(r -> r.levels().totalStats(lvl)).orElse(StatBlock.ZERO)
                 .plus(mainClass(player).map(c -> c.levels().totalStats(lvl)).orElse(StatBlock.ZERO));
-        return stats.plus(fromLevels);
+        StatBlock bought = new StatBlock(
+                pc.statBoost(Stat.STR.key()), pc.statBoost(Stat.DEX.key()),
+                pc.statBoost(Stat.CON.key()), pc.statBoost(Stat.INT.key()),
+                pc.statBoost(Stat.WIS.key()), pc.statBoost(Stat.CHR.key()));
+        return stats.plus(fromLevels).plus(bought);
+    }
+
+    /** Escalating price of the NEXT +1 stat boost, wherever it lands. */
+    public static int nextStatBoostCost(ServerPlayer player) {
+        return LQConfig.STAT_BOOST_BASE_COST.get() + data(player).totalStatBoosts();
     }
 
     public static int statModifier(ServerPlayer player, Stat stat) {

@@ -55,7 +55,7 @@ public final class LQNetwork {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer player) {
                 com.sablednah.legendquest.neoforge.SkillActions.handle(
-                        player, payload.action(), payload.slot());
+                        player, payload.action(), payload.slot(), payload.id());
             }
         });
     }

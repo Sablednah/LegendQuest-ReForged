@@ -41,6 +41,8 @@ public final class PlayerCharacter {
     private int skillPointsSpent = 0;
     /** Skill id → last activation (epoch ms); drives the phase machine. */
     private final Map<String, Long> lastUse = new HashMap<>();
+    /** Stat name → points bought with skill points ("expensive stat boosts"). */
+    private final Map<String, Integer> statBoosts = new HashMap<>();
     /** Item id → skill id: right-clicking that item fires the skill. */
     private final Map<String, String> bindings = new HashMap<>();
     /** The loadout: an ordered skill list cycled on one "spellbook" item. */
@@ -53,7 +55,8 @@ public final class PlayerCharacter {
     private PlayerCharacter(Optional<Identifier> raceId, Optional<Identifier> mainClassId,
             Optional<Identifier> subClassId, boolean raceChanged, long karma, double mana,
             Optional<StatBlock> baseStats, Map<String, Long> classXp, List<String> purchased,
-            int skillPointsSpent, Map<String, Long> lastUse, Map<String, String> bindings,
+            int skillPointsSpent, Map<String, Integer> statBoosts,
+            Map<String, Long> lastUse, Map<String, String> bindings,
             List<String> loadout, int loadoutIndex, Optional<Identifier> loadoutItem) {
         this.raceId = raceId;
         this.mainClassId = mainClassId;
@@ -65,6 +68,7 @@ public final class PlayerCharacter {
         this.classXp.putAll(classXp);
         this.purchasedSkills.addAll(purchased);
         this.skillPointsSpent = skillPointsSpent;
+        this.statBoosts.putAll(statBoosts);
         this.lastUse.putAll(lastUse);
         this.bindings.putAll(bindings);
         this.loadout.addAll(loadout);
@@ -85,6 +89,8 @@ public final class PlayerCharacter {
             Codec.STRING.listOf().optionalFieldOf("purchased_skills", List.of())
                     .forGetter(c -> List.copyOf(c.purchasedSkills)),
             Codec.INT.optionalFieldOf("skill_points_spent", 0).forGetter(c -> c.skillPointsSpent),
+            Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("stat_boosts", Map.of())
+                    .forGetter(c -> Map.copyOf(c.statBoosts)),
             Codec.unboundedMap(Codec.STRING, Codec.LONG).optionalFieldOf("last_use", Map.of())
                     .forGetter(c -> Map.copyOf(c.lastUse)),
             Codec.unboundedMap(Codec.STRING, Codec.STRING).optionalFieldOf("bindings", Map.of())
@@ -129,6 +135,11 @@ public final class PlayerCharacter {
         classXp.merge(classId.toString(), amount, Long::sum);
     }
 
+    /** Respec's blunt instrument: rewrite a class's banked XP outright. */
+    public void setXp(Identifier classId, long amount) {
+        classXp.put(classId.toString(), Math.max(0, amount));
+    }
+
     public Map<String, Long> allXp() { return Map.copyOf(classXp); }
 
     // --- skills ---
@@ -142,6 +153,28 @@ public final class PlayerCharacter {
     }
 
     public int skillPointsSpent() { return skillPointsSpent; }
+
+    // --- stat boosts (skill points made permanent) ---
+
+    public int statBoost(String statName) {
+        return statBoosts.getOrDefault(statName, 0);
+    }
+
+    public int totalStatBoosts() {
+        return statBoosts.values().stream().mapToInt(Integer::intValue).sum();
+    }
+
+    public void buyStatBoost(String statName, int cost) {
+        statBoosts.merge(statName, 1, Integer::sum);
+        skillPointsSpent += cost;
+    }
+
+    /** Respec: hand back every point spent on skills and stats. */
+    public void refundPurchases() {
+        purchasedSkills.clear();
+        statBoosts.clear();
+        skillPointsSpent = 0;
+    }
 
     public long lastUse(Identifier skillId) {
         return lastUse.getOrDefault(skillId.toString(), 0L);

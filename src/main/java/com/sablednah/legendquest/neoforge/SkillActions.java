@@ -12,7 +12,7 @@ import net.minecraft.server.level.ServerPlayer;
  */
 public final class SkillActions {
 
-    public static void handle(ServerPlayer player, int action, int slot) {
+    public static void handle(ServerPlayer player, int action, int slot, String id) {
         PlayerCharacter pc = CharacterService.data(player);
         switch (action) {
             case SkillActionPayload.CYCLE -> {
@@ -23,6 +23,19 @@ public final class SkillActions {
                 }
             }
             case SkillActionPayload.USE_SELECTED -> useSelected(player, pc);
+            case SkillActionPayload.BUY_SKILL -> {
+                var skillId = net.minecraft.resources.Identifier.tryParse(id);
+                if (skillId != null) CharacterActions.buySkill(player, skillId);
+            }
+            case SkillActionPayload.BUY_STAT -> {
+                for (com.sablednah.legendquest.core.Stat stat
+                        : com.sablednah.legendquest.core.Stat.values()) {
+                    if (stat.key().equals(id)) {
+                        CharacterActions.buyStat(player, stat);
+                        break;
+                    }
+                }
+            }
             case SkillActionPayload.USE_SLOT -> {
                 if (slot < 0 || slot >= pc.loadout().size()) {
                     Feedback.actionBar(player, "&7Nothing in loadout slot " + (slot + 1)

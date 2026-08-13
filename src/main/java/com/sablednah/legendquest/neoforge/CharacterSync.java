@@ -71,6 +71,7 @@ public final class CharacterSync {
                 statArray,
                 pc.skillPointsSpent(),
                 CharacterService.skillPointsTotal(player),
+                CharacterService.nextStatBoostCost(player),
                 skills,
                 pc.loadout().stream().map(Identifier::toString).toList(),
                 pc.loadoutIndex(),

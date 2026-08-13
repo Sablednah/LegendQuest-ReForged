@@ -32,6 +32,7 @@ public record CharacterSummaryPayload(
         int[] stats,           // STR DEX CON INT WIS CHR effective scores
         int spSpent,
         int spTotal,
+        int statBoostCost,     // price of the next +1 stat, in skill points
         List<SkillEntry> skills,
         List<String> loadout,  // skill ids, in order
         int loadoutIndex,
@@ -66,6 +67,7 @@ public record CharacterSummaryPayload(
         for (int n = 0; n < 6; n++) buf.writeVarInt(p.stats[n]);
         buf.writeVarInt(p.spSpent);
         buf.writeVarInt(p.spTotal);
+        buf.writeVarInt(p.statBoostCost);
         buf.writeVarInt(p.skills.size());
         for (SkillEntry s : p.skills) {
             buf.writeUtf(s.id());
@@ -101,6 +103,7 @@ public record CharacterSummaryPayload(
         for (int n = 0; n < 6; n++) stats[n] = buf.readVarInt();
         int spSpent = buf.readVarInt();
         int spTotal = buf.readVarInt();
+        int statBoostCost = buf.readVarInt();
         int skillCount = buf.readVarInt();
         List<SkillEntry> skills = new ArrayList<>(skillCount);
         for (int n = 0; n < skillCount; n++) {
@@ -116,7 +119,7 @@ public record CharacterSummaryPayload(
         List<PickEntry> raceChoices = readPicks(buf);
         List<PickEntry> classChoices = readPicks(buf);
         return new CharacterSummaryPayload(race, mainClass, subClass, level, xpProgress, karma, mana, maxMana,
-                stats, spSpent, spTotal, skills, loadout, loadoutIndex, loadoutItem,
+                stats, spSpent, spTotal, statBoostCost, skills, loadout, loadoutIndex, loadoutItem,
                 raceChoices, classChoices);
     }
 

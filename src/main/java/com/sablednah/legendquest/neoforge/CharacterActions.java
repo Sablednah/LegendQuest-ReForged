@@ -154,6 +154,97 @@ public final class CharacterActions {
         return false;
     }
 
+    // --- spending skill points ---
+
+    public static boolean buySkill(ServerPlayer player, Identifier skillId) {
+        PlayerCharacter pc = CharacterService.data(player);
+        var grant = SkillEngine.grants(player).get(skillId);
+        if (grant == null) {
+            Feedback.chat(player, "&cYour race/class does not offer that skill.");
+            return false;
+        }
+        if (grant.cost() <= 0) {
+            Feedback.chat(player, "&7No purchase needed — it unlocks at level " + grant.level() + ".");
+            return false;
+        }
+        if (pc.hasPurchased(skillId)) {
+            Feedback.chat(player, "&7Already bought.");
+            return false;
+        }
+        if (CharacterService.level(player) < grant.level()) {
+            Feedback.chat(player, "&cThat needs level " + grant.level() + ".");
+            return false;
+        }
+        int available = CharacterService.skillPointsTotal(player) - pc.skillPointsSpent();
+        if (available < grant.cost()) {
+            Feedback.chat(player, "&cNeeds " + grant.cost() + " skill points; you have " + available + ".");
+            return false;
+        }
+        pc.purchase(skillId, grant.cost());
+        Feedback.chat(player, "&6Learned &l"
+                + SkillEngine.definition(player, skillId).map(d -> d.name()).orElse(skillId.toString())
+                + "&r&6 for " + grant.cost() + " points.");
+        CharacterSync.send(player);
+        return true;
+    }
+
+    public static boolean buyStat(ServerPlayer player, com.sablednah.legendquest.core.Stat stat) {
+        PlayerCharacter pc = CharacterService.data(player);
+        int cost = CharacterService.nextStatBoostCost(player);
+        int available = CharacterService.skillPointsTotal(player) - pc.skillPointsSpent();
+        if (available < cost) {
+            Feedback.chat(player, "&cA +1 " + stat.name() + " costs " + cost
+                    + " skill points; you have " + available + ".");
+            return false;
+        }
+        pc.buyStatBoost(stat.key(), cost);
+        CharacterService.refresh(player);
+        Feedback.chat(player, "&6+1 " + stat.name() + " bought for " + cost
+                + " points &7(next boost costs " + CharacterService.nextStatBoostCost(player) + ").");
+        return true;
+    }
+
+    // --- respec: burn levels, get every point back ---
+
+    private static final java.util.Map<java.util.UUID, Long> RESPEC_OFFERS =
+            new java.util.HashMap<>();
+
+    /** Two-step: first call quotes the price, second within 30s pays it. */
+    public static boolean respec(ServerPlayer player) {
+        PlayerCharacter pc = CharacterService.data(player);
+        int levelCost = LQConfig.RESPEC_LEVEL_COST.get();
+        if (pc.skillPointsSpent() <= 0) {
+            Feedback.chat(player, "&7Nothing to respec — no skill points are spent.");
+            return false;
+        }
+        Long offered = RESPEC_OFFERS.get(player.getUUID());
+        long now = System.currentTimeMillis();
+        if (offered == null || now - offered > 30_000) {
+            RESPEC_OFFERS.put(player.getUUID(), now);
+            Feedback.chat(player, "&6Respec refunds &l" + pc.skillPointsSpent()
+                    + "&r&6 skill points (forgetting bought skills and stat boosts)"
+                    + (levelCost > 0 ? " and burns &c" + levelCost + " character level"
+                            + (levelCost == 1 ? "" : "s") + "&6." : "."));
+            Feedback.chat(player, "&7Run &f/lq respec&7 again within 30 seconds to seal it.");
+            return false;
+        }
+        RESPEC_OFFERS.remove(player.getUUID());
+        int refunded = pc.skillPointsSpent();
+        pc.refundPurchases();
+        if (levelCost > 0) {
+            pc.mainClassId().ifPresent(cls -> {
+                int level = CharacterService.level(player);
+                int target = Math.max(0, level - levelCost);
+                pc.setXp(cls, Leveling.totalXpForLevel(target, LQConfig.XP_LEVEL_BASE.get()));
+            });
+        }
+        CharacterService.refresh(player);
+        Feedback.chat(player, "&6The past unravels: &f" + refunded
+                + "&6 skill points refunded, level " + CharacterService.level(player)
+                + " — spend wiser this time.");
+        return true;
+    }
+
     private static String article(String noun) {
         return noun.isEmpty() || "AEIOU".indexOf(Character.toUpperCase(noun.charAt(0))) < 0 ? "a" : "an";
     }
