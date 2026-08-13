@@ -40,6 +40,15 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 - Vanilla-XP mirroring with hardcoded 1.8 curve constants → own XP pool fed by vanilla XP pickup.
 
 ### Deferred (revisit after core works)
+- **Karma-gated skills and feats** — acquisition-time karma requirements
+  (`karma_required` already gates *use* via SkillCosts; extend the same idea
+  to skill grants and feats: `karma_min`/`karma_max` on `SkillGrant` and
+  `Feat`). Enables paired good/evil choices — a cleric picks a god and gets
+  Holy Light *or* Darkness, mutually exclusive by karma band; buy chips and
+  the handbook grey out what your soul can't hold, and a feat already bought
+  could lapse (suspend, not refund) if karma drifts out of band. Makes karma
+  a real mechanic instead of a cosmetic title whenever the server owner
+  leans into it.
 - Economy costs (`pay:`) — no Vault equivalent on NeoForge; design a hook interface, ship no-op.
 - Permskills (running other plugins' commands under LQ costs/cooldowns) — a `run_command`/`grant_permission` skill effect pair covers the intent later.
 - Written-book character journal, chat prefixes/placeholders. (Loadouts: DONE — /loadout add/bind, sneak+right-click cycles, right-click casts.)
