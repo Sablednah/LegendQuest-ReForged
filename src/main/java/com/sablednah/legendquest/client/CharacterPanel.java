@@ -241,7 +241,7 @@ public final class CharacterPanel {
             h = 8 + 12 + SLOT_SIZE + 4 + 12 + 6 + s.skills().size() * ROW_HEIGHT + 8;
         } else {
             h = 8 + 12 + 12 + 12 + 35 + 12 + 12; // core stats block
-            if (boostRowShown(s)) h += 13;
+            if (boostRowShown(s)) h += 24; // label line + chip line
             if (!s.raceChoices().isEmpty()) h += 13 + s.raceChoices().size() * 11 + 4;
             if (!s.classChoices().isEmpty()) h += 13 + s.classChoices().size() * 11 + 4;
         }
@@ -512,12 +512,15 @@ public final class CharacterPanel {
         ty += 12;
 
         // Stat boost chips: a +1 wherever it hurts least, at a stinging price.
-        if (s.spTotal() - s.spSpent() >= s.statBoostCost()) {
-            g.drawString(font, "§7Boost §8(" + s.statBoostCost() + "sp)§7:", tx, ty, 0xFFFFFFFF);
-            int bx = tx + font.width("Boost (" + s.statBoostCost() + "sp): ") + 2;
+        // Label and chips on separate lines — six chips never fit beside it.
+        if (boostRowShown(s)) {
+            g.drawString(font, "§7Boost a stat §8(" + s.statBoostCost() + "sp):", tx, ty, 0xFFFFFFFF);
+            ty += 11;
+            int bx = tx + 4;
             String[] keys = {"str", "dex", "con", "int", "wis", "chr"};
+            String[] labels = {"S", "D", "C", "I", "W", "Ch"}; // CON vs CHR
             for (int n = 0; n < 6; n++) {
-                String chip = "+" + keys[n].toUpperCase().charAt(0);
+                String chip = "+" + labels[n];
                 int cw = font.width(chip) + 3;
                 boolean chipHover = mouseX >= bx && mouseX < bx + cw
                         && mouseY >= ty - 2 && mouseY < ty + 9;
@@ -823,7 +826,7 @@ public final class CharacterPanel {
         int tx = panelX(screen) + 8;
         if (mx < tx - 2 || mx >= tx + PANEL_WIDTH - 14) return null;
         int ty = panelY(screen) + 8 + 12 + 12 + 12 + 35 + 12 + 12 // top of picker block
-                + (boostRowShown(s) ? 13 : 0);
+                + (boostRowShown(s) ? 24 : 0);
         if (!s.raceChoices().isEmpty()) {
             ty += 13;
             for (CharacterSummaryPayload.PickEntry entry : s.raceChoices()) {
