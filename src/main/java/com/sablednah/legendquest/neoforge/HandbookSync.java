@@ -270,6 +270,10 @@ public final class HandbookSync {
             lines.add(Line.text("§dBoon: §f" + Math.round(boons.smithRefund() * 100)
                     + "% chance to recover a material when crafting gear"));
         }
+        if (boons.goldToolMana() > 0) {
+            lines.add(Line.text("§dBoon: §fgolden tools harvest like netherite, burning "
+                    + trim(boons.goldToolMana()) + " mana per block"));
+        }
     }
 
     private static void grantLines(List<Line> lines, Map<Identifier, SkillGrant> skills) {

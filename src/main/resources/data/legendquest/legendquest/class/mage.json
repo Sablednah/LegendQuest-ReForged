@@ -36,5 +36,6 @@
       "cost": 5
     }
   },
-  "allowed_tools": "#legendquest:mage_tools"
+  "allowed_tools": "#legendquest:mage_tools",
+  "gold_tool_mana": 2.0
 }

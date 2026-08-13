@@ -389,6 +389,41 @@ public final class LQServerEvents {
         Feedback.actionBar(player, "&6The forge favours you — a " + name + " survives the making.");
     }
 
+    /** Golden tools as arcane conduits: they harvest like netherite for
+     *  those with the boon, at a mana price per block that needed it. */
+    private static final net.minecraft.tags.TagKey<net.minecraft.world.item.Item> ARCANE_CONDUITS =
+            net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ITEM,
+                    Identifier.fromNamespaceAndPath(com.sablednah.legendquest.LegendQuest.MODID,
+                            "arcane_conduit_tools"));
+
+    /** True when this dig is a boon-powered golden tool doing netherite's job. */
+    private static boolean arcaneConduitDig(ServerPlayer player,
+            net.minecraft.world.level.block.state.BlockState state) {
+        ItemStack held = player.getMainHandItem();
+        if (held.isEmpty() || !held.is(ARCANE_CONDUITS)) return false;
+        if (held.isCorrectToolForDrops(state)) return false; // gold managed alone
+        double cost = CharacterService.totalBoon(player, b -> b.goldToolMana());
+        return cost > 0 && CharacterService.data(player).mana() >= cost;
+    }
+
+    @SubscribeEvent
+    static void onHarvestCheck(PlayerEvent.HarvestCheck event) {
+        if (event.canHarvest()) return;
+        if (event.getEntity() instanceof ServerPlayer player
+                && arcaneConduitDig(player, event.getTargetBlock())) {
+            event.setCanHarvest(true);
+        }
+    }
+
+    @SubscribeEvent
+    static void onBlockBreak(net.neoforged.neoforge.event.level.BlockEvent.BreakEvent event) {
+        if (!(event.getPlayer() instanceof ServerPlayer player)) return;
+        if (!arcaneConduitDig(player, event.getState())) return;
+        double cost = CharacterService.totalBoon(player, b -> b.goldToolMana());
+        var pc = CharacterService.data(player);
+        pc.setMana(Math.max(0, pc.mana() - cost));
+    }
+
     private static boolean isSmithingMaterial(ItemStack stack) {
         Identifier id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem());
         String path = id.getPath();

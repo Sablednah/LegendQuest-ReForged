@@ -26,9 +26,11 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 public record Boons(
         Map<String, Bonus> attributes,
         int enchantRebate,
-        double smithRefund) {
+        double smithRefund,
+        /** Mana per block: golden tools harvest like netherite for this cost. */
+        double goldToolMana) {
 
-    public static final Boons NONE = new Boons(Map.of(), 0, 0.0D);
+    public static final Boons NONE = new Boons(Map.of(), 0, 0.0D, 0.0D);
 
     /** A flat bonus plus a per-level ramp, evaluated at the player's level. */
     public record Bonus(double base, double perLevel) {
@@ -47,6 +49,7 @@ public record Boons(
             Codec.unboundedMap(Codec.STRING, Bonus.CODEC).optionalFieldOf("attributes", Map.of())
                     .forGetter(Boons::attributes),
             Codec.INT.optionalFieldOf("enchant_rebate", 0).forGetter(Boons::enchantRebate),
-            Codec.DOUBLE.optionalFieldOf("smith_refund", 0.0D).forGetter(Boons::smithRefund))
+            Codec.DOUBLE.optionalFieldOf("smith_refund", 0.0D).forGetter(Boons::smithRefund),
+            Codec.DOUBLE.optionalFieldOf("gold_tool_mana", 0.0D).forGetter(Boons::goldToolMana))
             .apply(i, Boons::new));
 }
