@@ -29,15 +29,14 @@ public final class LQHud {
 
         GuiGraphics g = event.getGuiGraphics();
         Font font = mc.font;
-        int bottom = g.guiHeight() - MARGIN;
-        int x = MARGIN;
 
-        // Loadout strip (only once there's a loadout to show).
+        // Loadout strip, bottom-RIGHT (the left corner belongs to chat).
         int chips = s.loadout().size();
         if (chips > 0) {
-            int y = bottom - CHIP;
+            int y = g.guiHeight() - MARGIN - CHIP;
+            int x0 = g.guiWidth() - MARGIN - chips * (CHIP + 1) + 1;
             for (int i = 0; i < chips; i++) {
-                int cx = x + i * (CHIP + 1);
+                int cx = x0 + i * (CHIP + 1);
                 boolean selected = i == s.loadoutIndex();
                 g.fill(cx, y, cx + CHIP, y + CHIP, selected ? 0xC0403010 : 0x90101018);
                 int border = selected ? 0xFFDAA520 : 0x6044445A;
@@ -56,25 +55,34 @@ public final class LQHud {
                     }
                 }
             }
-            // Selected skill's name floats over its chip row.
+            // Selected skill's name floats above the strip, right-aligned.
             var selected = find(s, s.loadout().get(Math.min(s.loadoutIndex(), chips - 1)));
             if (selected != null) {
-                g.drawString(font, "§6" + selected.name(), x + 1, y - 10, 0xFFFFFFFF);
+                String name = "§6" + selected.name();
+                g.drawString(font, name, g.guiWidth() - MARGIN - font.width(name), y - 10, 0xFFFFFFFF);
             }
-            bottom = y - 13;
         }
 
-        // Mana bar with numbers, level tucked on the right.
+        // Mana bar (numbers + level) with the XP progress sliver underneath,
+        // bottom-left but tucked below where chat messages render.
+        int x = MARGIN;
+        int xpY = g.guiHeight() - MARGIN - 3;
+        int manaY = xpY - 9;
         if (s.maxMana() > 0) {
-            int y = bottom - 8;
             int filled = (int) (BAR_WIDTH * Math.min(1.0F, s.mana() / s.maxMana()));
-            g.fill(x - 1, y - 1, x + BAR_WIDTH + 1, y + 8, 0x90000000);
-            g.fill(x, y, x + BAR_WIDTH, y + 7, 0xFF16163A);
-            g.fill(x, y, x + filled, y + 7, 0xFF3355FF);
+            g.fill(x - 1, manaY - 1, x + BAR_WIDTH + 1, xpY + 4, 0x90000000);
+            g.fill(x, manaY, x + BAR_WIDTH, manaY + 7, 0xFF16163A);
+            g.fill(x, manaY, x + filled, manaY + 7, 0xFF3355FF);
             String text = (int) s.mana() + "/" + (int) s.maxMana();
-            g.drawString(font, text, x + (BAR_WIDTH - font.width(text)) / 2, y, 0xFFBBCCFF);
-            g.drawString(font, "§7L" + s.level(), x + BAR_WIDTH + 5, y, 0xFFFFFFFF);
+            g.drawString(font, text, x + (BAR_WIDTH - font.width(text)) / 2, manaY, 0xFFBBCCFF);
+            g.drawString(font, "§7L" + s.level(), x + BAR_WIDTH + 5, manaY, 0xFFFFFFFF);
+        } else {
+            g.fill(x - 1, xpY - 1, x + BAR_WIDTH + 1, xpY + 4, 0x90000000);
         }
+        // Class XP toward the next level, vanilla-green.
+        g.fill(x, xpY, x + BAR_WIDTH, xpY + 3, 0xFF1E3A16);
+        int xpFilled = (int) (BAR_WIDTH * Math.max(0.0F, Math.min(1.0F, s.xpProgress())));
+        g.fill(x, xpY, x + xpFilled, xpY + 3, 0xFF80FF20);
     }
 
     private static CharacterSummaryPayload.SkillEntry find(CharacterSummaryPayload s, String id) {

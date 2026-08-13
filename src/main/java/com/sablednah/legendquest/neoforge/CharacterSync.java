@@ -64,6 +64,7 @@ public final class CharacterSync {
                 CharacterService.mainClass(player).map(CharClass::name).orElse("Citizen"),
                 CharacterService.subClass(player).map(CharClass::name).orElse(""),
                 CharacterService.level(player),
+                xpProgress(player, pc),
                 CharacterService.karmaName(pc.karma()),
                 (float) pc.mana(),
                 (float) CharacterService.maxMana(player),
@@ -76,6 +77,19 @@ public final class CharacterSync {
                 pc.loadoutItem().map(Identifier::toString).orElse(""),
                 raceChoices(player, pc),
                 classChoices(player, pc));
+    }
+
+    /** How far into the current level, 0..1 (pegged at 1 at the level cap). */
+    private static float xpProgress(ServerPlayer player, PlayerCharacter pc) {
+        long base = com.sablednah.legendquest.LQConfig.XP_LEVEL_BASE.get();
+        int maxLevel = com.sablednah.legendquest.LQConfig.MAX_LEVEL.get();
+        int level = CharacterService.level(player);
+        if (level >= maxLevel) return 1.0F;
+        long xp = pc.mainClassId().map(pc::xpFor).orElse(0L);
+        long floor = com.sablednah.legendquest.core.Leveling.totalXpForLevel(level, base);
+        long ceiling = com.sablednah.legendquest.core.Leveling.totalXpForLevel(level + 1, base);
+        if (ceiling <= floor) return 1.0F;
+        return Math.max(0.0F, Math.min(1.0F, (xp - floor) / (float) (ceiling - floor)));
     }
 
     /** Non-empty only while the race choice is still open. Default races

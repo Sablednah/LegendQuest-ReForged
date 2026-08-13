@@ -25,6 +25,7 @@ public record CharacterSummaryPayload(
         String mainClassName,
         String subClassName,   // empty = none
         int level,
+        float xpProgress,      // 0..1 into the current level
         String karmaName,
         float mana,
         float maxMana,
@@ -58,6 +59,7 @@ public record CharacterSummaryPayload(
         buf.writeUtf(p.mainClassName);
         buf.writeUtf(p.subClassName);
         buf.writeVarInt(p.level);
+        buf.writeFloat(p.xpProgress);
         buf.writeUtf(p.karmaName);
         buf.writeFloat(p.mana);
         buf.writeFloat(p.maxMana);
@@ -91,6 +93,7 @@ public record CharacterSummaryPayload(
         String mainClass = buf.readUtf();
         String subClass = buf.readUtf();
         int level = buf.readVarInt();
+        float xpProgress = buf.readFloat();
         String karma = buf.readUtf();
         float mana = buf.readFloat();
         float maxMana = buf.readFloat();
@@ -112,7 +115,7 @@ public record CharacterSummaryPayload(
         String loadoutItem = buf.readUtf();
         List<PickEntry> raceChoices = readPicks(buf);
         List<PickEntry> classChoices = readPicks(buf);
-        return new CharacterSummaryPayload(race, mainClass, subClass, level, karma, mana, maxMana,
+        return new CharacterSummaryPayload(race, mainClass, subClass, level, xpProgress, karma, mana, maxMana,
                 stats, spSpent, spTotal, skills, loadout, loadoutIndex, loadoutItem,
                 raceChoices, classChoices);
     }
