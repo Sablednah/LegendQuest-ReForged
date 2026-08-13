@@ -1,0 +1,39 @@
+{
+  "name": "Cleric",
+  "chat_tag": "[C]",
+  "description": "Faith as a weapon, mercy as a shield.",
+  "long_description": "Clerics negotiate with higher powers on behalf of people currently bleeding. The faithful races only \u2014 and the gods are traditionalists about edges: maces and hammers crush, they do not cut. Somehow this satisfies everyone.",
+  "size": 1.8,
+  "frequency": 250,
+  "health_mod": 2.0,
+  "health_per_level": 0.1,
+  "mana_bonus": 12.0,
+  "mana_per_level": 0.3,
+  "mana_per_second": 1.5,
+  "statmods": {
+    "wis": 2,
+    "chr": 1,
+    "dex": -1
+  },
+  "allowed_groups": [
+    "Faithful"
+  ],
+  "skill_points": 10,
+  "skill_points_per_level": 0.2,
+  "allowed_weapons": "#legendquest:cleric_weapons",
+  "allowed_armour": "#legendquest:cleric_armour",
+  "skills": {
+    "legendquest:heal": {
+      "level": 0,
+      "cost": 0
+    },
+    "legendquest:smite": {
+      "level": 10,
+      "cost": 0
+    },
+    "legendquest:second_wind": {
+      "level": 20,
+      "cost": 5
+    }
+  }
+}

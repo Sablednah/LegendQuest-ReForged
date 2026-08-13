@@ -78,6 +78,7 @@ public final class HandbookSync {
             lines.add(Line.text("§7Groups: §f" + String.join(", ", race.groups())));
         }
         itemRuleLines(lines, race.itemRules());
+        boonLines(lines, race.boons());
         grantLines(lines, race.skills());
 
         // Which classes will have this race?
@@ -150,6 +151,7 @@ public final class HandbookSync {
             }
         }
         itemRuleLines(lines, charClass.itemRules());
+        boonLines(lines, charClass.boons());
         grantLines(lines, charClass.skills());
         return new Entry(id.toString(), charClass.name(), "", lines);
     }
@@ -244,6 +246,24 @@ public final class HandbookSync {
         if (grant.level() > 0) sb.append("level ").append(grant.level());
         if (grant.cost() > 0) sb.append(grant.level() > 0 ? ", " : "").append(grant.cost()).append(" sp");
         return sb.append(")").toString();
+    }
+
+    private static void boonLines(List<Line> lines, com.sablednah.legendquest.data.Boons boons) {
+        boons.attributes().forEach((id, bonus) -> {
+            Identifier attrId = Identifier.tryParse(id);
+            String name = attrId == null ? id : prettify(attrId.getPath());
+            String ramp = bonus.perLevel() != 0
+                    ? " §8(+" + trim(bonus.perLevel()) + "/level)" : "";
+            lines.add(Line.text("§dBoon: §f" + signed(bonus.base()) + " " + name + ramp));
+        });
+        if (boons.enchantRebate() > 0) {
+            lines.add(Line.text("§dBoon: §fenchanting rebates " + boons.enchantRebate()
+                    + " XP level" + (boons.enchantRebate() == 1 ? "" : "s")));
+        }
+        if (boons.smithRefund() > 0) {
+            lines.add(Line.text("§dBoon: §f" + Math.round(boons.smithRefund() * 100)
+                    + "% chance to recover a material when crafting gear"));
+        }
     }
 
     private static void itemRuleLines(List<Line> lines, ItemRules rules) {

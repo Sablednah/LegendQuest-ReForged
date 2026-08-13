@@ -3,21 +3,55 @@
   "plural": "Dwarves",
   "chat_tag": "[D]",
   "description": "Stout mountain folk, born to stone and forge.",
+  "long_description": "Magic slides off a dwarf like rain off granite \u2014 no mage's path for them. In exchange the stone remembers its own: dwarven skin turns blades like armour plate, the forge wastes nothing in their hands, and runes come cheap.",
   "size": 1.2,
   "frequency": 400,
   "base_health": 24.0,
   "base_mana": 5.0,
   "mana_per_second": 1.0,
   "base_speed": 0.19,
-  "statmods": { "str": 1, "con": 2, "dex": -1, "chr": -1 },
-  "groups": ["Humanoid", "Dwarven"],
+  "statmods": {
+    "str": 1,
+    "con": 2,
+    "dex": -1,
+    "chr": -1
+  },
+  "groups": [
+    "Humanoid",
+    "Dwarven",
+    "Stout",
+    "Faithful",
+    "Wild"
+  ],
   "skill_points": 10,
   "skill_points_per_level": 0.2,
   "skills": {
-    "legendquest:second_wind": { "level": 5, "cost": 0 }
+    "legendquest:second_wind": {
+      "level": 5,
+      "cost": 0
+    },
+    "legendquest:night_vision": {
+      "level": 10,
+      "cost": 0
+    }
   },
   "levels": {
-    "10": { "hp": 2 },
-    "25": { "hp": 2, "stats": { "con": 1 } }
-  }
+    "10": {
+      "hp": 2
+    },
+    "25": {
+      "hp": 2,
+      "stats": {
+        "con": 1
+      }
+    }
+  },
+  "attributes": {
+    "minecraft:armor_toughness": {
+      "base": 1.0,
+      "per_level": 0.05
+    }
+  },
+  "enchant_rebate": 1,
+  "smith_refund": 0.2
 }

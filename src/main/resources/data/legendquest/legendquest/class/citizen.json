@@ -2,6 +2,7 @@
   "_comment": "The default class everyone starts with.",
   "name": "Citizen",
   "description": "An ordinary soul, yet to find a calling.",
+  "long_description": "Honest work, warm bread, no destiny to speak of. Yet. Every legend in every book started exactly here.",
   "size": 1.8,
   "frequency": 0,
   "default": true

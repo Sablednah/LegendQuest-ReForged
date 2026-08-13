@@ -1,0 +1,30 @@
+{
+  "name": "Rogue",
+  "chat_tag": "[Ro]",
+  "description": "Anything not nailed down is legally yours.",
+  "long_description": "Rogues believe locked doors are a puzzle, pockets are community property, and fair fights are a failure of preparation. Leather only \u2014 you can't sneak in a bucket. Open to anyone with flexible morals, which is everyone, eventually.",
+  "size": 1.8,
+  "frequency": 300,
+  "mana_bonus": 4.0,
+  "speed_mod": 0.05,
+  "statmods": {
+    "dex": 2,
+    "chr": 1,
+    "str": -1,
+    "wis": -1
+  },
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "allowed_weapons": "#legendquest:rogue_weapons",
+  "allowed_armour": "#legendquest:rogue_armour",
+  "skills": {
+    "legendquest:night_vision": {
+      "level": 5,
+      "cost": 0
+    },
+    "legendquest:shadowstep": {
+      "level": 15,
+      "cost": 5
+    }
+  }
+}

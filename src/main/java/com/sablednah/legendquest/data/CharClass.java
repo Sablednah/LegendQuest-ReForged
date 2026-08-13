@@ -30,7 +30,8 @@ public record CharClass(
         Optional<String> perm,
         CraftRules craftRules,
         ItemRules itemRules,
-        Race.Progression progression) {
+        Race.Progression progression,
+        Boons boons) {
 
     /** How the class scales the race's base numbers. */
     public record Growth(double healthMod, double healthPerLevel, double manaBonus,
@@ -82,7 +83,8 @@ public record CharClass(
             Codec.STRING.optionalFieldOf("perm").forGetter(CharClass::perm),
             CraftRules.MAP_CODEC.forGetter(CharClass::craftRules),
             ItemRules.MAP_CODEC.forGetter(CharClass::itemRules),
-            Race.Progression.MAP_CODEC.forGetter(CharClass::progression))
+            Race.Progression.MAP_CODEC.forGetter(CharClass::progression),
+            Boons.MAP_CODEC.forGetter(CharClass::boons))
             .apply(i, CharClass::new));
 
     public String name() { return identity.name(); }

@@ -30,7 +30,8 @@ public record Race(
         Optional<String> perm,
         CraftRules craftRules,
         ItemRules itemRules,
-        Progression progression) {
+        Progression progression,
+        Boons boons) {
 
     /** Naming and flavour. */
     public record Identity(String name, Optional<String> plural, Optional<String> chatTag,
@@ -97,7 +98,8 @@ public record Race(
             Codec.STRING.optionalFieldOf("perm").forGetter(Race::perm),
             CraftRules.MAP_CODEC.forGetter(Race::craftRules),
             ItemRules.MAP_CODEC.forGetter(Race::itemRules),
-            Progression.MAP_CODEC.forGetter(Race::progression))
+            Progression.MAP_CODEC.forGetter(Race::progression),
+            Boons.MAP_CODEC.forGetter(Race::boons))
             .apply(i, Race::new));
 
     // Convenience delegates so callers don't care about the grouping.

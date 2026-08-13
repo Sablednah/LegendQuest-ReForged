@@ -245,6 +245,60 @@ public final class CharacterService {
             speed.addOrUpdateTransientModifier(new AttributeModifier(
                     SPEED_ID, multiplier, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
         }
+
+        applyBoonAttributes(player);
+    }
+
+    /**
+     * Innate attribute boons (dwarven toughness, hobbit luck...), race +
+     * classes stacking, ramping with level. We sweep the union of attribute
+     * ids mentioned by ANY race/class so a stale bonus is removed when the
+     * player changes into something less gifted.
+     */
+    private static void applyBoonAttributes(ServerPlayer player) {
+        int lvl = level(player);
+        java.util.Map<String, Double> combined = new java.util.HashMap<>();
+        java.util.Set<String> mentioned = new java.util.HashSet<>();
+
+        race(player).ifPresent(r -> accumulateBoons(combined, r.boons(), lvl));
+        mainClass(player).ifPresent(c -> accumulateBoons(combined, c.boons(), lvl));
+        subClass(player).ifPresent(c -> accumulateBoons(combined, c.boons(), lvl));
+        player.level().registryAccess().lookupOrThrow(LQRegistries.RACE).listElements()
+                .forEach(ref -> mentioned.addAll(ref.value().boons().attributes().keySet()));
+        player.level().registryAccess().lookupOrThrow(LQRegistries.CHAR_CLASS).listElements()
+                .forEach(ref -> mentioned.addAll(ref.value().boons().attributes().keySet()));
+
+        for (String idString : mentioned) {
+            Identifier attrId = Identifier.tryParse(idString);
+            if (attrId == null) continue;
+            var holder = net.minecraft.core.registries.BuiltInRegistries.ATTRIBUTE
+                    .get(ResourceKey.create(net.minecraft.core.registries.Registries.ATTRIBUTE, attrId));
+            if (holder.isEmpty()) continue; // typo'd id: boon lost, world fine
+            AttributeInstance instance = player.getAttribute(holder.get());
+            if (instance == null) continue;
+            Identifier modId = Identifier.fromNamespaceAndPath(LegendQuest.MODID,
+                    "boon." + attrId.getNamespace() + "." + attrId.getPath());
+            Double value = combined.get(idString);
+            if (value != null && value != 0.0D) {
+                instance.addOrUpdateTransientModifier(new AttributeModifier(
+                        modId, value, AttributeModifier.Operation.ADD_VALUE));
+            } else {
+                instance.removeModifier(modId);
+            }
+        }
+    }
+
+    private static void accumulateBoons(java.util.Map<String, Double> into,
+            com.sablednah.legendquest.data.Boons boons, int level) {
+        boons.attributes().forEach((id, bonus) -> into.merge(id, bonus.at(level), Double::sum));
+    }
+
+    /** Race + main + sub, for the scalar boons (rebates, refunds). */
+    static double totalBoon(ServerPlayer player,
+            java.util.function.ToDoubleFunction<com.sablednah.legendquest.data.Boons> getter) {
+        return race(player).map(r -> getter.applyAsDouble(r.boons())).orElse(0.0D)
+                + mainClass(player).map(c -> getter.applyAsDouble(c.boons())).orElse(0.0D)
+                + subClass(player).map(c -> getter.applyAsDouble(c.boons())).orElse(0.0D);
     }
 
     // --- karma ---

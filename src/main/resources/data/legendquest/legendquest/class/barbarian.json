@@ -1,0 +1,37 @@
+{
+  "name": "Barbarian",
+  "chat_tag": "[B]",
+  "description": "Armour is for people who plan to get hit.",
+  "long_description": "Civilisation is a rumour barbarians decline to confirm. The wild races only: rage is an inheritance, not a curriculum. Heavy plate is refused on principle \u2014 speed, fury and an axe answer most philosophical questions.",
+  "size": 1.8,
+  "frequency": 200,
+  "health_mod": 6.0,
+  "health_per_level": 0.3,
+  "statmods": {
+    "str": 2,
+    "con": 2,
+    "int": -2,
+    "wis": -1
+  },
+  "allowed_groups": [
+    "Wild"
+  ],
+  "skill_points": 8,
+  "skill_points_per_level": 0.15,
+  "allowed_weapons": "#legendquest:barbarian_weapons",
+  "disallowed_armour": "#legendquest:heavy_armour",
+  "skills": {
+    "legendquest:battle_fury": {
+      "level": 0,
+      "cost": 0
+    },
+    "legendquest:leap": {
+      "level": 10,
+      "cost": 0
+    },
+    "legendquest:second_wind": {
+      "level": 15,
+      "cost": 5
+    }
+  }
+}

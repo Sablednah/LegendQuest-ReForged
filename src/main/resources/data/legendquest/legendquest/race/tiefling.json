@@ -1,0 +1,34 @@
+{
+  "name": "Tiefling",
+  "plural": "Tieflings",
+  "chat_tag": "[T]",
+  "description": "An infernal bloodline and a point to prove.",
+  "long_description": "Somewhere up the family tree, someone made a deal. Tieflings pay the interest in suspicious glances \u2014 and collect the principal in fire that cannot touch them, silver tongues, and an easy talent for the arcane. Temples stay politely out of reach.",
+  "size": 1.8,
+  "frequency": 120,
+  "base_health": 18.0,
+  "base_mana": 14.0,
+  "mana_per_second": 1.3,
+  "statmods": {
+    "chr": 2,
+    "int": 1,
+    "wis": -1
+  },
+  "groups": [
+    "Humanoid",
+    "Outsider",
+    "Arcane"
+  ],
+  "skill_points": 10,
+  "skill_points_per_level": 0.2,
+  "skills": {
+    "legendquest:infernal_hide": {
+      "level": 0,
+      "cost": 0
+    },
+    "legendquest:smite": {
+      "level": 25,
+      "cost": 5
+    }
+  }
+}

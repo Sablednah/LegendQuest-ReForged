@@ -2,6 +2,7 @@
   "name": "Fighter",
   "chat_tag": "[F]",
   "description": "Steel, sweat, and the front line.",
+  "long_description": "Fighters do not believe in complicated problems \u2014 only in under-equipped ones. Any race can pick up a sword; fighters simply refuse to put it down. Heavy plate, heavy blade, heavier opinions about people who stand at the back throwing sparks.",
   "size": 1.8,
   "frequency": 400,
   "health_mod": 4.0,

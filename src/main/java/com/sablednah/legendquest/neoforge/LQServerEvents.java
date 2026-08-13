@@ -347,6 +347,55 @@ public final class LQServerEvents {
         }
     }
 
+    // --- innate boons: runic thrift + forge favour ---
+
+    /** Dwarven/gnomish thrift: some XP levels come back after enchanting. */
+    @SubscribeEvent
+    static void onEnchant(net.neoforged.neoforge.event.entity.player.PlayerEnchantItemEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        int rebate = (int) Math.round(CharacterService.totalBoon(player,
+                b -> b.enchantRebate()));
+        if (rebate <= 0) return;
+        player.giveExperienceLevels(rebate);
+        Feedback.actionBar(player, "&dRunic thrift: " + rebate + " level"
+                + (rebate == 1 ? "" : "s") + " rebated.");
+    }
+
+    /** Forge favour: a chance that one material survives crafting gear. */
+    @SubscribeEvent
+    static void onCrafted(PlayerEvent.ItemCraftedEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        if (!event.getCrafting().isDamageableItem()) return; // gear only
+        double chance = Math.min(0.8D, CharacterService.totalBoon(player, b -> b.smithRefund()));
+        if (chance <= 0 || player.getRandom().nextDouble() >= chance) return;
+
+        // Refund one of the most numerous smithing materials on the bench.
+        ItemStack best = ItemStack.EMPTY;
+        int bestCount = 0;
+        var counts = new java.util.HashMap<net.minecraft.world.item.Item, Integer>();
+        for (int slot = 0; slot < event.getInventory().getContainerSize(); slot++) {
+            ItemStack stack = event.getInventory().getItem(slot);
+            if (stack.isEmpty() || !isSmithingMaterial(stack)) continue;
+            int count = counts.merge(stack.getItem(), 1, Integer::sum);
+            if (count > bestCount) {
+                bestCount = count;
+                best = stack;
+            }
+        }
+        if (best.isEmpty()) return;
+        ItemStack refund = best.copyWithCount(1);
+        String name = refund.getHoverName().getString();
+        player.getInventory().placeItemBackInInventory(refund);
+        Feedback.actionBar(player, "&6The forge favours you — a " + name + " survives the making.");
+    }
+
+    private static boolean isSmithingMaterial(ItemStack stack) {
+        Identifier id = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(stack.getItem());
+        String path = id.getPath();
+        return path.endsWith("_ingot") || path.endsWith("_scrap")
+                || path.equals("diamond") || path.equals("leather") || path.equals("turtle_scute");
+    }
+
     @SubscribeEvent
     static void onBreakSpeed(PlayerEvent.BreakSpeed event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;

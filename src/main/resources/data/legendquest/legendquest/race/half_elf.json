@@ -1,0 +1,32 @@
+{
+  "name": "Half-Elf",
+  "plural": "Half-Elves",
+  "chat_tag": "[He]",
+  "description": "Caught between two worlds, welcome in both.",
+  "long_description": "Half-elves inherit the elven grace without the elven condescension. No door is closed to them \u2014 arcane, divine or wild \u2014 and everyone assumes they're on their side. Usually correct.",
+  "size": 1.75,
+  "frequency": 180,
+  "base_health": 19.0,
+  "base_mana": 12.0,
+  "mana_per_second": 1.2,
+  "statmods": {
+    "dex": 1,
+    "chr": 1
+  },
+  "groups": [
+    "Humanoid",
+    "Elvish",
+    "Adaptable",
+    "Arcane",
+    "Faithful",
+    "Wild"
+  ],
+  "skill_points": 11,
+  "skill_points_per_level": 0.2,
+  "skills": {
+    "legendquest:night_vision": {
+      "level": 10,
+      "cost": 0
+    }
+  }
+}

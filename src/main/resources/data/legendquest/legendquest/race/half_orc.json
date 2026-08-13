@@ -1,0 +1,39 @@
+{
+  "name": "Half-Orc",
+  "plural": "Half-Orcs",
+  "chat_tag": "[Ho]",
+  "description": "Orcish fire, tempered steel.",
+  "long_description": "Strong enough to shoulder an orcish grudge, civil enough to be let into town to settle it. The rage is quieter in them, but it is not gone \u2014 and the gods, oddly, listen to half-orcs.",
+  "size": 1.9,
+  "frequency": 180,
+  "base_health": 23.0,
+  "base_mana": 6.0,
+  "mana_per_second": 0.8,
+  "statmods": {
+    "str": 2,
+    "con": 1,
+    "int": -1,
+    "chr": -1
+  },
+  "groups": [
+    "Humanoid",
+    "Orcoid",
+    "Adaptable",
+    "Wild",
+    "Faithful"
+  ],
+  "skill_points": 9,
+  "skill_points_per_level": 0.18,
+  "skills": {
+    "legendquest:battle_fury": {
+      "level": 15,
+      "cost": 0
+    }
+  },
+  "attributes": {
+    "minecraft:attack_damage": {
+      "base": 0.25,
+      "per_level": 0.02
+    }
+  }
+}

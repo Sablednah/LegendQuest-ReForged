@@ -2,6 +2,7 @@
   "_comment": "The starting race. Players may change away from it exactly once.",
   "name": "Undecided",
   "plural": "Undecided",
+  "description": "A blank page. Open the Players Handbook (H) and choose who you are.",
   "size": 1.8,
   "frequency": 0,
   "default": true,

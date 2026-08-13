@@ -2,13 +2,26 @@
   "name": "Human",
   "plural": "Humans",
   "chat_tag": "[H]",
-  "description": "Adaptable and ambitious.",
+  "description": "Adaptable and ambitious \u2014 the jack of every trade.",
+  "long_description": "Humans master nothing at birth and everything by stubbornness. Every calling is open to them, fortune has a soft spot for them, and they learn a little faster than anyone thinks they should.",
   "size": 1.8,
   "frequency": 500,
   "base_health": 20.0,
   "base_mana": 10.0,
   "mana_per_second": 1.0,
-  "groups": ["Humanoid"],
+  "groups": [
+    "Humanoid",
+    "Adaptable",
+    "Arcane",
+    "Faithful",
+    "Wild"
+  ],
   "skill_points": 10,
-  "skill_points_per_level": 0.2
+  "skill_points_per_level": 0.25,
+  "skills": {
+    "legendquest:lucky": {
+      "level": 0,
+      "cost": 0
+    }
+  }
 }

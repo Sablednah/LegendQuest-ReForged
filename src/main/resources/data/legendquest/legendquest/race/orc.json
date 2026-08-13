@@ -3,16 +3,36 @@
   "plural": "Orcs",
   "chat_tag": "[O]",
   "description": "Brutal strength, short temper.",
+  "long_description": "An orc solves problems, and most things are problems. Too loud for spellwork and too impatient for prayer, they hit harder with every year of scars \u2014 and their fury sometimes catches fire, literally.",
   "size": 2.0,
   "frequency": 250,
   "base_health": 26.0,
   "base_mana": 4.0,
   "mana_per_second": 0.5,
-  "statmods": { "str": 2, "con": 1, "int": -1, "wis": -1, "chr": -1 },
-  "groups": ["Humanoid", "Orcoid"],
+  "statmods": {
+    "str": 2,
+    "con": 1,
+    "int": -1,
+    "wis": -1,
+    "chr": -1
+  },
+  "groups": [
+    "Humanoid",
+    "Orcoid",
+    "Wild"
+  ],
   "skill_points": 8,
   "skill_points_per_level": 0.15,
   "skills": {
-    "legendquest:battle_fury": { "level": 10, "cost": 0 }
+    "legendquest:battle_fury": {
+      "level": 10,
+      "cost": 0
+    }
+  },
+  "attributes": {
+    "minecraft:attack_damage": {
+      "base": 0.5,
+      "per_level": 0.03
+    }
   }
 }

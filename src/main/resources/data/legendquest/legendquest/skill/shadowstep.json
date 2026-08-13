@@ -1,0 +1,14 @@
+{
+  "name": "Shadowstep",
+  "description": "Melt into shadow and reappear a short slip away. Quieter than Blink, and prouder of it.",
+  "icon": "minecraft:phantom_membrane",
+  "type": "active",
+  "cooldown": 4000,
+  "mana_cost": 4,
+  "effects": [
+    {
+      "type": "legendquest:teleport",
+      "max_range": 12
+    }
+  ]
+}

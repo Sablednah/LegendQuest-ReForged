@@ -3,6 +3,7 @@
   "plural": "Hobbitses",
   "chat_tag": "[Hb]",
   "description": "Small, nimble, and fond of second breakfast.",
+  "long_description": "Hobbits want adventure the way fish want ladders, which is exactly why fortune adores them. Light on their (bare, boots never fit) feet, luckier than they deserve, and devastating at close range with a full pantry behind them.",
   "size": 1.0,
   "frequency": 200,
   "base_health": 16.0,
@@ -15,7 +16,9 @@
     "chr": 1
   },
   "groups": [
-    "Humanoid"
+    "Humanoid",
+    "Stout",
+    "Faithful"
   ],
   "skill_points": 12,
   "skill_points_per_level": 0.25,
@@ -25,5 +28,11 @@
       "cost": 0
     }
   },
-  "disallowed_armour": "#legendquest:boots"
+  "disallowed_armour": "#legendquest:boots",
+  "attributes": {
+    "minecraft:luck": {
+      "base": 0.5,
+      "per_level": 0.01
+    }
+  }
 }

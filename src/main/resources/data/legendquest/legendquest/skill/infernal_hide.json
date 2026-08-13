@@ -1,0 +1,13 @@
+{
+  "name": "Infernal Hide",
+  "description": "The fires of your ancestry recognise their own. Flame and lava cannot burn you.",
+  "icon": "minecraft:magma_cream",
+  "type": "passive",
+  "effects": [
+    {
+      "type": "legendquest:potion_effect",
+      "effect": "minecraft:fire_resistance",
+      "duration": 15000
+    }
+  ]
+}

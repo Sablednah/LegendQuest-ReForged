@@ -3,18 +3,35 @@
   "name": "Warlord",
   "chat_tag": "[W]",
   "description": "A master of war. Only proven veterans need apply.",
+  "long_description": "Nobody is born a warlord. Master the sword or master the trail first \u2014 then come back and learn what command costs. Warlords hit like a landslide and expect to be obeyed like one.",
   "size": 1.8,
   "frequency": 50,
   "main_only": true,
-  "requires_one": ["legendquest:fighter", "legendquest:ranger"],
+  "requires_one": [
+    "legendquest:fighter",
+    "legendquest:ranger"
+  ],
   "health_mod": 6.0,
   "health_per_level": 0.3,
-  "statmods": { "str": 2, "con": 2, "chr": 1 },
+  "statmods": {
+    "str": 2,
+    "con": 2,
+    "chr": 1
+  },
   "skill_points": 15,
   "skill_points_per_level": 0.3,
   "skills": {
-    "legendquest:battle_fury": { "level": 0, "cost": 0 },
-    "legendquest:second_wind": { "level": 0, "cost": 0 },
-    "legendquest:smite": { "level": 20, "cost": 10 }
+    "legendquest:battle_fury": {
+      "level": 0,
+      "cost": 0
+    },
+    "legendquest:second_wind": {
+      "level": 0,
+      "cost": 0
+    },
+    "legendquest:smite": {
+      "level": 20,
+      "cost": 10
+    }
   }
 }

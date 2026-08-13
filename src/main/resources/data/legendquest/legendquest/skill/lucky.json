@@ -1,0 +1,13 @@
+{
+  "name": "Lucky",
+  "description": "Fortune quietly stacks the deck in your favour \u2014 better finds, kinder rolls.",
+  "icon": "minecraft:emerald",
+  "type": "passive",
+  "effects": [
+    {
+      "type": "legendquest:potion_effect",
+      "effect": "minecraft:luck",
+      "duration": 15000
+    }
+  ]
+}

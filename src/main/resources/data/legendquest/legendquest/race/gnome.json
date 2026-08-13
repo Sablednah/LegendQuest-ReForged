@@ -1,0 +1,35 @@
+{
+  "name": "Gnome",
+  "plural": "Gnomes",
+  "chat_tag": "[G]",
+  "description": "Tiny tinkers with outsized minds.",
+  "long_description": "A gnome regards an enchanting table as light entertainment and a locked mechanism as flirting. Frail as kindling, bright as their own glowstone lamps \u2014 the deepest rebates on runework anywhere.",
+  "size": 0.9,
+  "frequency": 150,
+  "base_health": 14.0,
+  "base_mana": 16.0,
+  "mana_per_second": 1.5,
+  "statmods": {
+    "int": 2,
+    "chr": 1,
+    "str": -2
+  },
+  "groups": [
+    "Humanoid",
+    "Stout",
+    "Arcane"
+  ],
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "skills": {
+    "legendquest:night_vision": {
+      "level": 0,
+      "cost": 0
+    },
+    "legendquest:blink": {
+      "level": 20,
+      "cost": 5
+    }
+  },
+  "enchant_rebate": 2
+}

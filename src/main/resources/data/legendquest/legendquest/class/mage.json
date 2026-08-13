@@ -2,6 +2,7 @@
   "name": "Mage",
   "chat_tag": "[M]",
   "description": "Knowledge is power; mana is ammunition.",
+  "long_description": "The arcane is a language, and mages are the only ones rude enough to interrupt reality in it. It takes a bloodline with the gift \u2014 dwarves, orcs and hobbits need not apply. Robes and a good book only; armour muddles the diction.",
   "size": 1.8,
   "frequency": 300,
   "health_mod": -2.0,
@@ -15,8 +16,7 @@
     "con": -1
   },
   "allowed_groups": [
-    "Elvish",
-    "Humanoid"
+    "Arcane"
   ],
   "skill_points": 10,
   "skill_points_per_level": 0.2,
