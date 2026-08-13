@@ -173,12 +173,12 @@ public final class HandbookScreen extends Screen {
         g.fill(x + 8, divY, x + BOOK_W - 8, divY + 1, INK_DIVIDER);
         g.drawString(font, "§6❖", x + BOOK_W / 2 - 3, divY - 4, 0xFFFFFFFF);
 
-        // The feat shop shows your purse.
+        // The feat shop shows your purse, centred in the book's footer.
         if (section.equals("feat")) {
             var summary = ClientCharacterState.summary();
             if (summary != null) {
                 String purse = "§7Points to spend: §6§l" + (summary.spTotal() - summary.spSpent());
-                g.drawString(font, purse, x + BOOK_W - 10 - font.width(purse), divY - 4, 0xFFFFFFFF);
+                g.drawCenteredString(font, purse, x + BOOK_W / 2, y + h - 13, 0xFFFFFFFF);
             }
         }
 
@@ -252,16 +252,14 @@ public final class HandbookScreen extends Screen {
                 if (summary.ownedFeats().contains(current.id())) {
                     g.drawString(font, "§a✔ Known", px + pw - font.width("✔ Known"), cy, 0xFFFFFFFF);
                 } else if (summary.spTotal() - summary.spSpent() >= current.cost()) {
-                    String chip = "[Buy " + current.cost() + "]";
-                    int cw = font.width(chip);
-                    int chipX = px + pw - cw - 4;
-                    boolean chipHover = mouseX >= chipX - 2 && mouseX < chipX + cw + 2
-                            && mouseY >= cy - 2 && mouseY < cy + 9;
-                    g.fill(chipX - 2, cy - 2, chipX + cw + 2, cy + 9,
-                            chipHover ? 0xFF2E4A1E : 0xFF1E3216);
-                    g.drawString(font, (chipHover ? "§a§l" : "§a") + chip, chipX, cy, 0xFFFFFFFF);
+                    String chip = "Buy " + current.cost();
+                    int cw = font.width("§l" + chip) + 8;
+                    int chipX = px + pw - cw - 2;
+                    boolean chipHover = mouseX >= chipX && mouseX < chipX + cw
+                            && mouseY >= cy - 3 && mouseY < cy + 9;
+                    CharacterPanel.buyButton(g, font, chipX, cy - 3, cw, 12, chip, chipHover);
                     String featId = current.id();
-                    hotspots.add(new Hot(chipX - 2, cy - 2, chipX + cw + 2, cy + 9, () ->
+                    hotspots.add(new Hot(chipX, cy - 3, chipX + cw, cy + 9, () ->
                             net.neoforged.neoforge.client.network.ClientPacketDistributor.sendToServer(
                                     new com.sablednah.legendquest.network.SkillActionPayload(
                                             com.sablednah.legendquest.network.SkillActionPayload.BUY_FEAT,
@@ -313,6 +311,8 @@ public final class HandbookScreen extends Screen {
             int thumbY = py + (int) ((ph - thumbH) * (scroll / maxScroll));
             g.fill(barX, thumbY, barX + 2, thumbY + thumbH, 0xC0DAA520);
         }
+
+        ClientNotices.draw(g, font); // buy rejections must beat the blur
     }
 
     /** A tab chip; returns the next tab's x. */

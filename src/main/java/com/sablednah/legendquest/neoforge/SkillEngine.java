@@ -131,6 +131,11 @@ public final class SkillEngine {
             if (def.timing().buildupMs() > 0) {
                 Feedback.actionBar(player, "&d" + def.name() + " building up...");
             }
+            // The charge cue: a rising hum now, swirling glyphs until it
+            // fires (see tick) — no more "did that even work?".
+            player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
+                    net.minecraft.sounds.SoundEvents.RESPAWN_ANCHOR_CHARGE,
+                    net.minecraft.sounds.SoundSource.PLAYERS, 0.5F, 1.6F);
             PENDING.add(new Pending(player.getUUID(), skillId, fireAt));
         }
         return UseResult.FIRED;
@@ -197,7 +202,17 @@ public final class SkillEngine {
         if (!PENDING.isEmpty()) {
             Iterator<Pending> it = PENDING.iterator();
             for (Pending p : PENDING) {
-                if (p.fireAtMs() > now) continue;
+                if (p.fireAtMs() > now) {
+                    // Still charging: swirl glyphs around the caster.
+                    ServerPlayer caster = server.getPlayerList().getPlayer(p.player());
+                    if (caster != null) {
+                        caster.level().sendParticles(
+                                net.minecraft.core.particles.ParticleTypes.ENCHANT,
+                                caster.getX(), caster.getY() + 1.2D, caster.getZ(),
+                                3, 0.35D, 0.4D, 0.35D, 0.05D);
+                    }
+                    continue;
+                }
                 PENDING.remove(p);
                 ServerPlayer player = server.getPlayerList().getPlayer(p.player());
                 if (player == null) continue; // logged out mid-cast; cost stays spent

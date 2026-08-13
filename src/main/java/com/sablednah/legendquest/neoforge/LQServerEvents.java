@@ -178,8 +178,15 @@ public final class LQServerEvents {
             }
         }
 
+        // Skill damage (indirect magic) is a true strike: Magic Missile
+        // never misses, never crits, and takes no STR bonus — the spell
+        // already decided what it does.
+        boolean trueStrike = event.getSource()
+                .is(net.minecraft.world.damagesource.DamageTypes.INDIRECT_MAGIC);
+
         // Opposed d20 DEX test between players/mobs when enabled.
-        if (LQConfig.USE_D20_COMBAT.get() && attacker instanceof LivingEntity livingAttacker) {
+        if (!trueStrike && LQConfig.USE_D20_COMBAT.get()
+                && attacker instanceof LivingEntity livingAttacker) {
             Integer attackMod = attacker instanceof ServerPlayer p
                     ? CharacterService.statModifier(p, Stat.DEX) : null;
             Integer dodgeMod = victim instanceof ServerPlayer p
@@ -230,7 +237,7 @@ public final class LQServerEvents {
     private static void indicate(ServerPlayer attacker, LivingEntity victim, int kind) {
         net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(attacker,
                 new CombatIndicatorPayload(victim.getX(),
-                        victim.getY() + victim.getBbHeight() * 0.9, victim.getZ(), kind));
+                        victim.getY() + victim.getBbHeight() * 0.6, victim.getZ(), kind));
     }
 
     // --- restrictions: armour and tools ---
@@ -436,6 +443,13 @@ public final class LQServerEvents {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         ItemStack tool = player.getMainHandItem();
         if (tool.isEmpty()) return;
+        // Arcane conduit: granting the HARVEST isn't enough — gold's Tool
+        // component still reports speed 1.0 on blocks above its tier, which
+        // made obsidian a lifetime project. Dig like netherite instead.
+        if (arcaneConduitDig(player, event.getState())) {
+            event.setNewSpeed(Math.max(event.getNewSpeed(), 9.0F));
+            return;
+        }
         if (!RestrictionEngine.isAllowed(player, ItemRules.Slot.TOOL, tool)) {
             event.setNewSpeed(event.getNewSpeed() * 0.25F); // clumsy, not impossible
         }

@@ -4,7 +4,7 @@
   "icon": "minecraft:amethyst_shard",
   "type": "active",
   "cooldown": 2000,
-  "mana_cost": 3,
+  "mana_cost": 5,
   "effects": [
     {
       "type": "legendquest:particle_line",

@@ -333,7 +333,11 @@ public final class LQEffects {
 
         @Override
         public void apply(SkillContext ctx) {
-            Vec3 from = ctx.caster().getEyePosition().add(0, -0.2D, 0);
+            // Start ahead of and below the eyes — wand height, not eyeball
+            // height — so the caster's own screen isn't full of sparkle.
+            Vec3 from = ctx.caster().getEyePosition()
+                    .add(ctx.caster().getLookAngle().scale(0.9D))
+                    .add(0, -0.4D, 0);
             Vec3 to = target.resolveEntities(ctx).stream().findFirst()
                     .map(e -> e.position().add(0, e.getBbHeight() * 0.6D, 0))
                     .or(() -> target.resolvePos(ctx).map(p ->

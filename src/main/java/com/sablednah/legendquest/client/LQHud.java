@@ -83,6 +83,8 @@ public final class LQHud {
         g.fill(x, xpY, x + BAR_WIDTH, xpY + 3, 0xFF1E3A16);
         int xpFilled = (int) (BAR_WIDTH * Math.max(0.0F, Math.min(1.0F, s.xpProgress())));
         g.fill(x, xpY, x + xpFilled, xpY + 3, 0xFF80FF20);
+
+        ClientNotices.draw(g, font); // command feedback with no screen open
     }
 
     private static CharacterSummaryPayload.SkillEntry find(CharacterSummaryPayload s, String id) {

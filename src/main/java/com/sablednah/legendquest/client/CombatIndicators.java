@@ -31,7 +31,7 @@ import org.joml.Vector4f;
 public final class CombatIndicators {
 
     private static final long LIFE_MS = 1300;
-    private static final float DRIFT_PX = 26.0F; // total upward drift, in GUI pixels
+    private static final float DRIFT_PX = 16.0F; // total upward drift, in GUI pixels
 
     private static final Random RANDOM = new Random();
 
@@ -63,7 +63,7 @@ public final class CombatIndicators {
         }
         ACTIVE.add(new Floater(
                 payload.x() + (RANDOM.nextDouble() - 0.5) * 0.7,
-                payload.y() + 0.1 + RANDOM.nextDouble() * 0.4,
+                payload.y() + RANDOM.nextDouble() * 0.2,
                 payload.z() + (RANDOM.nextDouble() - 0.5) * 0.7,
                 words[RANDOM.nextInt(words.length)],
                 colors[RANDOM.nextInt(colors.length)],

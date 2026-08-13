@@ -21,6 +21,9 @@ public final class LQNetwork {
                 LQNetwork::handleIndicator);
         registrar.playToClient(HandbookPayload.TYPE, HandbookPayload.CODEC,
                 LQNetwork::handleHandbook);
+        registrar.playToClient(NoticePayload.TYPE, NoticePayload.CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        com.sablednah.legendquest.client.ClientNotices.accept(payload)));
         registrar.playToServer(SkillActionPayload.TYPE, SkillActionPayload.CODEC,
                 LQNetwork::handleSkillAction);
         registrar.playToServer(LoadoutEditPayload.TYPE, LoadoutEditPayload.CODEC,

@@ -28,23 +28,23 @@ public final class CharacterActions {
         var lookup = player.level().registryAccess().lookupOrThrow(LQRegistries.RACE);
         var holder = lookup.get(ResourceKey.create(LQRegistries.RACE, raceId));
         if (holder.isEmpty()) {
-            Feedback.chat(player, "&cUnknown race: " + raceId);
+            Feedback.notify(player, "&cUnknown race: " + raceId);
             return false;
         }
         PlayerCharacter pc = CharacterService.data(player);
         boolean onDefault = CharacterService.race(player).map(Race::isDefault).orElse(true);
         if (pc.raceChanged() || !onDefault) {
-            Feedback.chat(player, "&cYour race is chosen for life. An admin can change it.");
+            Feedback.notify(player, "&cYour race is chosen for life. An admin can change it.");
             return false;
         }
         if (!LQPermissions.canSelectRace(player, raceId)) {
-            Feedback.chat(player, "&cThat race is not open to you.");
+            Feedback.notify(player, "&cThat race is not open to you.");
             return false;
         }
         Race target = holder.get().value();
         pc.setRace(raceId, !target.isDefault());
         CharacterService.refresh(player);
-        Feedback.chat(player, "&6You are now " + article(target.name()) + " &l" + target.name() + "&r&6.");
+        Feedback.notify(player, "&6You are now " + article(target.name()) + " &l" + target.name() + "&r&6.");
         return true;
     }
 
@@ -52,33 +52,33 @@ public final class CharacterActions {
         var lookup = player.level().registryAccess().lookupOrThrow(LQRegistries.CHAR_CLASS);
         var holder = lookup.get(ResourceKey.create(LQRegistries.CHAR_CLASS, classId));
         if (holder.isEmpty()) {
-            Feedback.chat(player, "&cUnknown class: " + classId);
+            Feedback.notify(player, "&cUnknown class: " + classId);
             return false;
         }
         CharClass target = holder.get().value();
         PlayerCharacter pc = CharacterService.data(player);
 
         if (!LQPermissions.canSelectClass(player, classId)) {
-            Feedback.chat(player, "&cThat class is not open to you.");
+            Feedback.notify(player, "&cThat class is not open to you.");
             return false;
         }
         if (asSub && target.eligibility().mainOnly()) {
-            Feedback.chat(player, "&c" + target.name() + " can only be a main class.");
+            Feedback.notify(player, "&c" + target.name() + " can only be a main class.");
             return false;
         }
         if (!asSub && target.eligibility().subOnly()) {
-            Feedback.chat(player, "&c" + target.name() + " can only be a sub class.");
+            Feedback.notify(player, "&c" + target.name() + " can only be a sub class.");
             return false;
         }
         if (!raceEligible(player, pc, target)) {
-            Feedback.chat(player, "&cA " + CharacterService.race(player).map(Race::name).orElse("nobody")
+            Feedback.notify(player, "&cA " + CharacterService.race(player).map(Race::name).orElse("nobody")
                     + " cannot become " + article(target.name()) + " " + target.name() + ".");
             return false;
         }
         if (!requirementsMastered(pc, target)) {
             var requires = target.eligibility().requires();
             var requiresOne = target.eligibility().requiresOne();
-            Feedback.chat(player, "&c" + target.name() + " requires mastering: "
+            Feedback.notify(player, "&c" + target.name() + " requires mastering: "
                     + (requires.isEmpty() ? "" : requires)
                     + (requiresOne.isEmpty() ? "" : " one of " + requiresOne));
             return false;
@@ -90,7 +90,7 @@ public final class CharacterActions {
             pc.setMainClass(classId);
         }
         CharacterService.refresh(player);
-        Feedback.chat(player, "&6You are now " + article(target.name()) + " &l" + target.name()
+        Feedback.notify(player, "&6You are now " + article(target.name()) + " &l" + target.name()
                 + "&r&6" + (asSub ? " (sub class)." : "."));
         return true;
     }
@@ -125,32 +125,32 @@ public final class CharacterActions {
 
     public static boolean loadoutAdd(ServerPlayer player, Identifier skillId) {
         if (!SkillEngine.grants(player).containsKey(skillId)) {
-            Feedback.chat(player, "&cYou don't know that skill.");
+            Feedback.notify(player, "&cYou don't know that skill.");
             return false;
         }
         var def = SkillEngine.definition(player, skillId);
         if (def.isEmpty() || def.get().type() != com.sablednah.legendquest.skills.SkillType.ACTIVE) {
-            Feedback.chat(player, "&cOnly active skills belong in a loadout.");
+            Feedback.notify(player, "&cOnly active skills belong in a loadout.");
             return false;
         }
         PlayerCharacter pc = CharacterService.data(player);
         if (!pc.addToLoadout(skillId)) {
-            Feedback.chat(player, "&7Already in the loadout.");
+            Feedback.notify(player, "&7Already in the loadout.");
             return false;
         }
-        Feedback.chat(player, "&6Added &l" + def.get().name() + "&r&6 to the loadout.");
+        Feedback.notify(player, "&6Added &l" + def.get().name() + "&r&6 to the loadout.");
         if (pc.loadoutItem().isEmpty()) {
-            Feedback.chat(player, "&7Now hold your spellbook item and run /loadout bind.");
+            Feedback.notify(player, "&7Now hold your spellbook item and run /loadout bind.");
         }
         return true;
     }
 
     public static boolean loadoutRemove(ServerPlayer player, Identifier skillId) {
         if (CharacterService.data(player).removeFromLoadout(skillId)) {
-            Feedback.chat(player, "&6Removed from the loadout.");
+            Feedback.notify(player, "&6Removed from the loadout.");
             return true;
         }
-        Feedback.chat(player, "&7That skill isn't in the loadout.");
+        Feedback.notify(player, "&7That skill isn't in the loadout.");
         return false;
     }
 
@@ -160,28 +160,28 @@ public final class CharacterActions {
         PlayerCharacter pc = CharacterService.data(player);
         var grant = SkillEngine.grants(player).get(skillId);
         if (grant == null) {
-            Feedback.chat(player, "&cYour race/class does not offer that skill.");
+            Feedback.notify(player, "&cYour race/class does not offer that skill.");
             return false;
         }
         if (grant.cost() <= 0) {
-            Feedback.chat(player, "&7No purchase needed — it unlocks at level " + grant.level() + ".");
+            Feedback.notify(player, "&7No purchase needed — it unlocks at level " + grant.level() + ".");
             return false;
         }
         if (pc.hasPurchased(skillId)) {
-            Feedback.chat(player, "&7Already bought.");
+            Feedback.notify(player, "&7Already bought.");
             return false;
         }
         if (CharacterService.level(player) < grant.level()) {
-            Feedback.chat(player, "&cThat needs level " + grant.level() + ".");
+            Feedback.notify(player, "&cThat needs level " + grant.level() + ".");
             return false;
         }
         int available = CharacterService.skillPointsTotal(player) - pc.skillPointsSpent();
         if (available < grant.cost()) {
-            Feedback.chat(player, "&cNeeds " + grant.cost() + " skill points; you have " + available + ".");
+            Feedback.notify(player, "&cNeeds " + grant.cost() + " skill points; you have " + available + ".");
             return false;
         }
         pc.purchase(skillId, grant.cost());
-        Feedback.chat(player, "&6Learned &l"
+        Feedback.notify(player, "&6Learned &l"
                 + SkillEngine.definition(player, skillId).map(d -> d.name()).orElse(skillId.toString())
                 + "&r&6 for " + grant.cost() + " points.");
         CharacterSync.send(player);
@@ -193,13 +193,13 @@ public final class CharacterActions {
         int cost = CharacterService.nextStatBoostCost(player);
         int available = CharacterService.skillPointsTotal(player) - pc.skillPointsSpent();
         if (available < cost) {
-            Feedback.chat(player, "&cA +1 " + stat.name() + " costs " + cost
+            Feedback.notify(player, "&cA +1 " + stat.name() + " costs " + cost
                     + " skill points; you have " + available + ".");
             return false;
         }
         pc.buyStatBoost(stat.key(), cost);
         CharacterService.refresh(player);
-        Feedback.chat(player, "&6+1 " + stat.name() + " bought for " + cost
+        Feedback.notify(player, "&6+1 " + stat.name() + " bought for " + cost
                 + " points &7(next boost costs " + CharacterService.nextStatBoostCost(player) + ").");
         return true;
     }
@@ -208,24 +208,24 @@ public final class CharacterActions {
         var lookup = player.level().registryAccess().lookupOrThrow(LQRegistries.FEAT);
         var holder = lookup.get(ResourceKey.create(LQRegistries.FEAT, featId));
         if (holder.isEmpty()) {
-            Feedback.chat(player, "&cUnknown feat: " + featId);
+            Feedback.notify(player, "&cUnknown feat: " + featId);
             return false;
         }
         var feat = holder.get().value();
         PlayerCharacter pc = CharacterService.data(player);
         if (pc.hasFeat(featId)) {
-            Feedback.chat(player, "&7You already have &l" + feat.name() + "&7.");
+            Feedback.notify(player, "&7You already have &l" + feat.name() + "&7.");
             return false;
         }
         if (CharacterService.level(player) < feat.level()) {
-            Feedback.chat(player, "&c" + feat.name() + " needs level " + feat.level() + ".");
+            Feedback.notify(player, "&c" + feat.name() + " needs level " + feat.level() + ".");
             return false;
         }
         for (Identifier required : feat.requires()) {
             if (!pc.hasFeat(required)) {
                 String name = lookup.get(ResourceKey.create(LQRegistries.FEAT, required))
                         .map(r -> r.value().name()).orElse(required.toString());
-                Feedback.chat(player, "&c" + feat.name() + " requires the &l" + name + "&r&c feat first.");
+                Feedback.notify(player, "&c" + feat.name() + " requires the &l" + name + "&r&c feat first.");
                 return false;
             }
         }
@@ -235,24 +235,24 @@ public final class CharacterActions {
                         .map(r -> r.groups().stream().anyMatch(feat.allowedGroups()::contains))
                         .orElse(false);
         if (!raceOk) {
-            Feedback.chat(player, "&c" + feat.name() + " is not in your blood.");
+            Feedback.notify(player, "&c" + feat.name() + " is not in your blood.");
             return false;
         }
         if (!feat.allowedClasses().isEmpty()
                 && !(pc.mainClassId().map(feat.allowedClasses()::contains).orElse(false)
                         || pc.subClassId().map(feat.allowedClasses()::contains).orElse(false))) {
-            Feedback.chat(player, "&c" + feat.name() + " is not for your calling.");
+            Feedback.notify(player, "&c" + feat.name() + " is not for your calling.");
             return false;
         }
         int available = CharacterService.skillPointsTotal(player) - pc.skillPointsSpent();
         if (available < feat.cost()) {
-            Feedback.chat(player, "&c" + feat.name() + " costs " + feat.cost()
+            Feedback.notify(player, "&c" + feat.name() + " costs " + feat.cost()
                     + " skill points; you have " + available + ".");
             return false;
         }
         pc.buyFeat(featId, feat.cost());
         CharacterService.refresh(player); // boons/proficiencies apply now
-        Feedback.chat(player, "&6Feat gained: &l" + feat.name() + "&r&6 ("
+        Feedback.notify(player, "&6Feat gained: &l" + feat.name() + "&r&6 ("
                 + feat.cost() + " points).");
         return true;
     }
@@ -267,18 +267,18 @@ public final class CharacterActions {
         PlayerCharacter pc = CharacterService.data(player);
         int levelCost = LQConfig.RESPEC_LEVEL_COST.get();
         if (pc.skillPointsSpent() <= 0) {
-            Feedback.chat(player, "&7Nothing to respec — no skill points are spent.");
+            Feedback.notify(player, "&7Nothing to respec — no skill points are spent.");
             return false;
         }
         Long offered = RESPEC_OFFERS.get(player.getUUID());
         long now = System.currentTimeMillis();
         if (offered == null || now - offered > 30_000) {
             RESPEC_OFFERS.put(player.getUUID(), now);
-            Feedback.chat(player, "&6Respec refunds &l" + pc.skillPointsSpent()
+            Feedback.notify(player, "&6Respec refunds &l" + pc.skillPointsSpent()
                     + "&r&6 skill points (forgetting bought skills and stat boosts)"
                     + (levelCost > 0 ? " and burns &c" + levelCost + " character level"
                             + (levelCost == 1 ? "" : "s") + "&6." : "."));
-            Feedback.chat(player, "&7Run &f/lq respec&7 again within 30 seconds to seal it.");
+            Feedback.notify(player, "&7Run &f/lq respec&7 again within 30 seconds to seal it.");
             return false;
         }
         RESPEC_OFFERS.remove(player.getUUID());
@@ -292,7 +292,7 @@ public final class CharacterActions {
             });
         }
         CharacterService.refresh(player);
-        Feedback.chat(player, "&6The past unravels: &f" + refunded
+        Feedback.notify(player, "&6The past unravels: &f" + refunded
                 + "&6 skill points refunded, level " + CharacterService.level(player)
                 + " — spend wiser this time.");
         return true;

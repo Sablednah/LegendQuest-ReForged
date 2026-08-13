@@ -45,5 +45,5 @@
     }
   },
   "allowed_tools": "#legendquest:mage_tools",
-  "gold_tool_mana": 2.0
+  "gold_tool_mana": 5.0
 }

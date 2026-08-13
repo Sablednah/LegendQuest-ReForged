@@ -417,10 +417,11 @@ public final class CharacterPanel {
             renderStatsTab(g, font, screen, s, x, y);
         }
 
-        // The Players Handbook button, tucked in the bottom-right corner.
+        // The Players Handbook button, top-right corner (the bottom one sat
+        // on the last skill row of long lists).
         if (ClientHandbook.get() != null) {
-            int bx = x + PANEL_WIDTH - 18;
-            int by = y + h - 15;
+            int bx = x + PANEL_WIDTH - 20;
+            int by = y + 5;
             boolean hover = mouseX >= bx && mouseX < bx + 14 && mouseY >= by && mouseY < by + 12;
             g.fill(bx, by, bx + 14, by + 12, hover ? 0xFF403010 : 0xFF26263A);
             g.fill(bx, by, bx + 14, by + 1, 0xFFDAA520);
@@ -436,6 +437,19 @@ public final class CharacterPanel {
         }
 
         drawPendingTooltip(g, font); // last, so nothing paints over it
+        ClientNotices.draw(g, font); // server notices beat even the tooltip
+    }
+
+    /** A proper little button: filled, framed, bevelled — not text in brackets. */
+    static void buyButton(GuiGraphics g, Font font, int x0, int y0, int w, int h,
+            String label, boolean hover) {
+        g.fill(x0, y0, x0 + w, y0 + h, hover ? 0xFF2E4A1E : 0xFF223A18);
+        g.fill(x0, y0, x0 + w, y0 + 1, hover ? 0xFF8CD05A : 0xFF5A9038);   // top bevel
+        g.fill(x0, y0 + h - 1, x0 + w, y0 + h, 0xFF12200C);                // bottom shadow
+        g.fill(x0, y0, x0 + 1, y0 + h, hover ? 0xFF8CD05A : 0xFF5A9038);
+        g.fill(x0 + w - 1, y0, x0 + w, y0 + h, 0xFF12200C);
+        String drawn = (hover ? "§f§l" : "§a") + label;
+        g.drawString(font, drawn, x0 + (w - font.width(drawn)) / 2, y0 + (h - 8) / 2 + 1, 0xFFFFFFFF);
     }
 
     /** Open the handbook at the entry whose display name matches. */
@@ -521,13 +535,12 @@ public final class CharacterPanel {
             String[] labels = {"S", "D", "C", "I", "W", "Ch"}; // CON vs CHR
             for (int n = 0; n < 6; n++) {
                 String chip = "+" + labels[n];
-                int cw = font.width(chip) + 3;
+                int cw = font.width("§l" + chip) + 6;
                 boolean chipHover = mouseX >= bx && mouseX < bx + cw
-                        && mouseY >= ty - 2 && mouseY < ty + 9;
-                g.fill(bx - 1, ty - 2, bx + cw, ty + 9, chipHover ? 0xFF2E4A1E : 0xFF1E3216);
-                g.drawString(font, (chipHover ? "§a§l" : "§a") + chip, bx + 1, ty, 0xFFFFFFFF);
+                        && mouseY >= ty - 2 && mouseY < ty + 10;
+                buyButton(g, font, bx, ty - 2, cw, 12, chip, chipHover);
                 String key = keys[n];
-                HOTSPOTS.add(new Hot(bx - 1, ty - 2, bx + cw, ty + 9, 0,
+                HOTSPOTS.add(new Hot(bx, ty - 2, bx + cw, ty + 10, 0,
                         () -> send(new com.sablednah.legendquest.network.SkillActionPayload(
                                 com.sablednah.legendquest.network.SkillActionPayload.BUY_STAT,
                                 0, key))));
@@ -685,14 +698,13 @@ public final class CharacterPanel {
                     && s.level() >= skill.levelReq()
                     && (s.spTotal() - s.spSpent()) >= skill.cost();
             if (buyable) {
-                String chip = "[Buy " + skill.cost() + "]";
-                int cw = font.width(chip);
-                int cx = x + PANEL_WIDTH - 8 - cw;
-                boolean chipHover = mouseX >= cx - 2 && mouseX < cx + cw + 2
-                        && mouseY >= ry + 3 && mouseY < ry + 14;
-                g.fill(cx - 2, ry + 3, cx + cw + 2, ry + 14, chipHover ? 0xFF2E4A1E : 0xFF1E3216);
-                g.drawString(font, (chipHover ? "§a§l" : "§a") + chip, cx, ry + 5, 0xFFFFFFFF);
-                HOTSPOTS.add(new Hot(cx - 2, ry + 3, cx + cw + 2, ry + 14, 0,
+                String chip = "Buy " + skill.cost();
+                int cw = font.width("§l" + chip) + 8;
+                int cx = x + PANEL_WIDTH - 6 - cw;
+                boolean chipHover = mouseX >= cx && mouseX < cx + cw
+                        && mouseY >= ry + 3 && mouseY < ry + 15;
+                buyButton(g, font, cx, ry + 3, cw, 12, chip, chipHover);
+                HOTSPOTS.add(new Hot(cx, ry + 3, cx + cw, ry + 15, 0,
                         () -> send(new com.sablednah.legendquest.network.SkillActionPayload(
                                 com.sablednah.legendquest.network.SkillActionPayload.BUY_SKILL,
                                 0, skill.id()))));

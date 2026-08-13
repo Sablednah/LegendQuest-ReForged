@@ -14,6 +14,20 @@ public final class Feedback {
         player.displayClientMessage(colored(text), false);
     }
 
+    /**
+     * A notice that must survive an open GUI: modded clients draw it over
+     * the screen (chat is blurred behind inventories); vanilla clients get
+     * ordinary chat.
+     */
+    public static void notify(ServerPlayer player, String text) {
+        if (player.connection.hasChannel(com.sablednah.legendquest.network.NoticePayload.TYPE)) {
+            net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
+                    new com.sablednah.legendquest.network.NoticePayload(text));
+        } else {
+            chat(player, text);
+        }
+    }
+
     public static Component colored(String text) {
         return Component.literal(text.replace('&', '§'));
     }
