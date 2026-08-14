@@ -6,7 +6,7 @@ rem
 rem Uses CurseForge's bundled JDK 21 and a separate gradle project cache
 rem (.gradle-win) so it never fights the WSL-side server worktree.
 rem Pair with the dev server: run `./gradlew runServer` in
-rem ..\LegendQuest-ReForged-srv from WSL, then Direct Connect: localhost
+rem ..\LegendQuest-ReForged-srv from WSL, then Direct Connect: 127.0.0.1 (NOT localhost - it resolves IPv6 first)
 rem ---------------------------------------------------------------------
 setlocal
 cd /d "%~dp0"
