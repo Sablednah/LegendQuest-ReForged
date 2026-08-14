@@ -577,7 +577,7 @@ public final class CharacterPanel {
             g.drawString(font, nDrawn, nx + (nw - font.width(nDrawn)) / 2, ty + 3, 0xFFFFFFFF);
             HOTSPOTS.add(new Hot(nx, ty, nx + nw, ty + 13, 0, () ->
                     net.minecraft.client.Minecraft.getInstance().setScreen(
-                            new net.minecraft.client.gui.screens.ChatScreen("/party create "))));
+                            new net.minecraft.client.gui.screens.ChatScreen("/party create ", false))));
             ty += 18;
             g.drawString(font, "§8Shared XP, no friendly fire,", tx, ty, 0xFFFFFFFF);
             g.drawString(font, "§8and /party tp to regroup.", tx, ty + 10, 0xFFFFFFFF);
