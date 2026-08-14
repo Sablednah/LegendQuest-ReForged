@@ -51,3 +51,4 @@ repo/
 /.apisrc/
 runBuddy/
 .gradle-buddy/
+.gradle-win/
