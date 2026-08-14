@@ -57,6 +57,9 @@ neoForge {
         clientBuddy {
             client()
             programArguments.addAll '--username', 'TestBuddy'
+            // Own game dir: sharing run/ with a live dev server means
+            // both fight over logs/latest.log on drvfs.
+            gameDirectory = file('runBuddy')
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 

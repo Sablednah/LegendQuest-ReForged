@@ -49,3 +49,5 @@ repo/
 
 # extracted NeoForge API sources for reference (regenerate from sources jar)
 /.apisrc/
+runBuddy/
+.gradle-buddy/
