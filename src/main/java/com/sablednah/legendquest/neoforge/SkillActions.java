@@ -16,7 +16,7 @@ public final class SkillActions {
         PlayerCharacter pc = CharacterService.data(player);
         switch (action) {
             case SkillActionPayload.CYCLE -> {
-                if (pc.cycleLoadout().isEmpty()) {
+                if (cycleToUsable(player, pc).isEmpty()) {
                     Feedback.actionBar(player, "&7Loadout is empty — /loadout add <skill>");
                 } else {
                     Feedback.actionBar(player, LQServerEvents.loadoutBar(player, pc, "&e"));
@@ -98,6 +98,25 @@ public final class SkillActions {
         var item = net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(itemId);
         return item.map(i -> new net.minecraft.world.item.ItemStack(i).getHoverName().getString())
                 .orElse(itemId.toString());
+    }
+
+    /**
+     * Cycle, skipping entries the character can't currently use (karma
+     * suspension, lost levels). If NOTHING in the loadout is usable, land
+     * one step on anyway so the bar still visibly moves.
+     */
+    static java.util.Optional<net.minecraft.resources.Identifier> cycleToUsable(
+            ServerPlayer player, PlayerCharacter pc) {
+        var grants = SkillEngine.grants(player);
+        int size = pc.loadout().size();
+        java.util.Optional<net.minecraft.resources.Identifier> selected = java.util.Optional.empty();
+        for (int step = 0; step < size; step++) {
+            selected = pc.cycleLoadout();
+            if (selected.isEmpty()) return selected; // empty loadout
+            var grant = grants.get(selected.get());
+            if (grant != null && SkillEngine.owns(player, selected.get(), grant)) return selected;
+        }
+        return selected; // full lap, everything asleep — stay where we landed
     }
 
     private static void useSelected(ServerPlayer player, PlayerCharacter pc) {

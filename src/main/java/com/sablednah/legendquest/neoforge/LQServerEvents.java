@@ -285,7 +285,7 @@ public final class LQServerEvents {
         if (last == null || now - last >= 250) {
             lastBindFire.put(player.getUUID(), now);
             if (isLoadoutItem && player.isShiftKeyDown()) {
-                pc.cycleLoadout();
+                SkillActions.cycleToUsable(player, pc);
                 Feedback.actionBar(player, loadoutBar(player, pc, "&e"));
             } else if (bound.isPresent()) {
                 var result = SkillEngine.use(player, bound.get());
@@ -319,18 +319,23 @@ public final class LQServerEvents {
         StringBuilder sb = new StringBuilder("&6");
         var skills = pc.loadout();
         long now = System.currentTimeMillis();
+        var grants = SkillEngine.grants(player);
         for (int n = 0; n < skills.size(); n++) {
             Identifier id = skills.get(n);
             var def = SkillEngine.definition(player, id);
             String name = def.map(d -> d.name()).orElse(id.getPath());
+            var grant = grants.get(id);
+            boolean asleep = grant == null || !SkillEngine.owns(player, id, grant);
             String suffix = "";
-            if (def.isPresent()) {
+            if (def.isPresent() && !asleep) {
                 long waitMs = com.sablednah.legendquest.core.SkillPhase.remainingMs(
                         now, pc.lastUse(id), def.get().timing());
                 if (waitMs > 0) suffix = " " + (waitMs / 1000 + 1) + "s";
             }
             if (n > 0) sb.append("  ");
-            if (n == pc.loadoutIndex()) {
+            if (asleep) {
+                sb.append("&8&m").append(name).append("&r&6"); // struck-through: asleep
+            } else if (n == pc.loadoutIndex()) {
                 sb.append(selectedColour).append("&l◆").append(name).append(suffix).append("◆&r&6");
             } else {
                 sb.append(suffix.isEmpty() ? "&7" : "&8").append(name).append(suffix).append("&6");

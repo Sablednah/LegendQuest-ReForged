@@ -640,7 +640,10 @@ public final class CharacterPanel {
                 boolean beingDragged = drag != null && drag.fromSlot() == i;
                 if (!beingDragged) {
                     g.renderItem(icon(entry != null ? entry.icon() : ""), sx + 2, sy + 2);
-                    if (entry != null && entry.activeForSec() > 0 && entry.durationSec() > 0) {
+                    if (entry != null && !entry.owned()) {
+                        g.fill(sx + 1, sy + 1, sx + SLOT_SIZE - 1, sy + SLOT_SIZE - 1, 0xB8101018);
+                        g.drawString(font, "§8✖", sx + (SLOT_SIZE - font.width("✖")) / 2, sy + 6, 0xFFFFFFFF);
+                    } else if (entry != null && entry.activeForSec() > 0 && entry.durationSec() > 0) {
                         float frac = Math.min(1.0F, entry.activeForSec() / (float) entry.durationSec());
                         g.fill(sx + 2, sy + SLOT_SIZE - 4, sx + SLOT_SIZE - 2, sy + SLOT_SIZE - 2, 0x80000000);
                         g.fill(sx + 2, sy + SLOT_SIZE - 4, sx + 2 + (int) ((SLOT_SIZE - 4) * frac),

@@ -61,7 +61,12 @@ public final class LQHud {
                 var entry = find(s, s.loadout().get(i));
                 if (entry != null) {
                     g.renderItem(icon(entry.icon()), cx + 4, y + 4);
-                    if (entry.activeForSec() > 0 && entry.durationSec() > 0) {
+                    if (!entry.owned()) {
+                        // Suspended (karma out of band, level lost): asleep,
+                        // greyed, and the cycle skips it server-side too.
+                        g.fill(cx + 1, y + 1, cx + CHIP - 1, y + CHIP - 1, 0xB8101018);
+                        g.drawString(font, "§8✖", cx + (CHIP - font.width("✖")) / 2, y + 8, 0xFFFFFFFF);
+                    } else if (entry.activeForSec() > 0 && entry.durationSec() > 0) {
                         // Running skill: a shrinking bar along the chip's foot.
                         float frac = Math.min(1.0F, entry.activeForSec() / (float) entry.durationSec());
                         g.fill(cx + 2, y + CHIP - 4, cx + CHIP - 2, y + CHIP - 2, 0x80000000);
@@ -77,7 +82,8 @@ public final class LQHud {
             // Selected skill's name floats above the strip, right-aligned.
             var selected = find(s, s.loadout().get(Math.min(s.loadoutIndex(), chips - 1)));
             if (selected != null) {
-                String name = "§6" + selected.name();
+                String name = selected.owned() ? "§6" + selected.name()
+                        : "§8§m" + selected.name();
                 g.drawString(font, name, g.guiWidth() - MARGIN - font.width(name), y - 10, 0xFFFFFFFF);
             }
         }
