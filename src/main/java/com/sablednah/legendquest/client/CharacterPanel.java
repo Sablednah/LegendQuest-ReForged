@@ -83,9 +83,18 @@ public final class CharacterPanel {
 
     private static final Map<String, ItemStack> ICON_CACHE = new HashMap<>();
 
+    private static Tab pendingTab = Tab.STATS;
+
     /** Hotkey path: open the stats tab as soon as the inventory screen inits. */
     public static void openOnNextInit() {
         openOnInit = true;
+        pendingTab = Tab.STATS;
+    }
+
+    /** The party hotkey lands here. */
+    public static void openPartyOnNextInit() {
+        openOnInit = true;
+        pendingTab = Tab.PARTY;
     }
 
     // --- vanilla has no setters for these; see class javadoc ---
@@ -151,7 +160,7 @@ public final class CharacterPanel {
 
         if (openOnInit) {
             openOnInit = false;
-            tab = Tab.STATS;
+            tab = pendingTab;
             RecipeBookComponent<?> book = recipeBook(screen);
             if (book.isVisible()) book.toggleVisibility();
         } else if (tab != Tab.NONE && recipeBook(screen).isVisible()) {
@@ -557,6 +566,18 @@ public final class CharacterPanel {
             HOTSPOTS.add(new Hot(tx, ty, tx + cw, ty + 13, 0, () -> send(
                     new com.sablednah.legendquest.network.PartyActionPayload(
                             com.sablednah.legendquest.network.PartyActionPayload.CREATE, ""))));
+            // Custom name: hand over to chat, pre-filled — no text box to fight.
+            int nx = tx + cw + 6;
+            int nw = font.width("§lName it…") + 10;
+            boolean nHover = mouseX >= nx && mouseX < nx + nw && mouseY >= ty && mouseY < ty + 13;
+            g.fill(nx, ty, nx + nw, ty + 13, nHover ? 0xFF33291E : 0xFF221A12);
+            g.fill(nx, ty, nx + nw, ty + 1, nHover ? 0xFFDAA520 : 0xFF44445A);
+            g.fill(nx, ty + 12, nx + nw, ty + 13, 0xFF14100C);
+            String nDrawn = (nHover ? "§e§l" : "§7") + "Name it…";
+            g.drawString(font, nDrawn, nx + (nw - font.width(nDrawn)) / 2, ty + 3, 0xFFFFFFFF);
+            HOTSPOTS.add(new Hot(nx, ty, nx + nw, ty + 13, 0, () ->
+                    net.minecraft.client.Minecraft.getInstance().setScreen(
+                            new net.minecraft.client.gui.screens.ChatScreen("/party create "))));
             ty += 18;
             g.drawString(font, "§8Shared XP, no friendly fire,", tx, ty, 0xFFFFFFFF);
             g.drawString(font, "§8and /party tp to regroup.", tx, ty + 10, 0xFFFFFFFF);
