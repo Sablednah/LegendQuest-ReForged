@@ -40,6 +40,18 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 - Vanilla-XP mirroring with hardcoded 1.8 curve constants → own XP pool fed by vanilla XP pickup.
 
 ### Deferred (revisit after core works)
+- **Terminology / vocabulary system** (needed before the genre packs): server-owner
+  configurable nouns for EVERYTHING — race→Archetype, class→Role, skill→Ability,
+  feat→Perk, mana→Energy/Force, karma→Infection/Reputation/Alignment, party→Crew/
+  Squad. Two layers: (a) ordinary lang-file i18n so players can translate,
+  (b) a server-side vocab config whose terms flow through all server-built text
+  (chat, notices, handbook pages) AND sync to modded clients in a small payload
+  so panel/handbook/HUD labels follow the server's genre. Even within a genre it
+  varies: sci-fi could be Trek, Wars, or Firefly. Zombie pack blocks on this.
+- **Configurable karma triggers**: server owners define what's good/bad (which
+  kills/actions move the needle, by how much) — or rename the whole scale and
+  repurpose it as infection level, faction reputation, force alignment...
+  Pairs with karma bands on grants/feats to make any axis mechanical.
 - Economy costs (`pay:`) — no Vault equivalent on NeoForge; design a hook interface, ship no-op.
 - Written-book character journal, chat prefixes/placeholders. (Loadouts: DONE — /loadout add/bind, sneak+right-click cycles, right-click casts.)
 - Party centroid teleport + SafeLoc; parties themselves are in scope.
