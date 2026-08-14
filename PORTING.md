@@ -21,7 +21,7 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 
 | # | Decision | Rationale |
 |---|---|---|
-| 1 | **Datapack registries + codecs** for races, classes, skills (`data/<pack>/legendquest/{race,class,skill}/*.json`) | ZombieMod-proven: free `/reload`, free client sync, free override semantics, validation with real error messages. `ZombieModRegistries.java` is the 38-line template. |
+| 1 | **Datapack registries + codecs** for races, classes, skills (`data/<pack>/legendquest/{race,class,skill}/*.json`) | ZombieMod-proven: free client sync, free override semantics (NOTE: registry content applies on restart, not /reload — dynamic registries freeze at world load), validation with real error messages. `ZombieModRegistries.java` is the 38-line template. |
 | 2 | **YAML front door**: `config/legendquest/{races,classes,skills}/*.yml` are converted (SnakeYAML → Gson `JsonElement`) into a generated datapack served via `AddPackFindersEvent` | Admins keep editing YAML; the codecs stay the single schema. YAML and JSON are two skins over one format. |
 | 3 | **Skill = data; skill effect = code.** A skill definition (data) composes typed *effects* dispatched with `Identifier.CODEC.dispatch("type", ...)`. `SkillEffectTypes.register()` is public. | The old 62 skill classes are mostly parameter variants of ~a dozen behaviours. Skill-pack mods register new effect/trigger/target types; servers compose them in YAML. Replaces the hand-rolled `SkillClassLoader` with NeoForge's own mod loading (versioned, dependency-checked). |
 | 4 | **Per-player state in one codec-serialized attachment** (`PlayerCharacter` on the player) | Skill definitions are immutable records; runtime state (cooldowns, mana, xp, karma) lives per-player. The Bukkit version's shared-singleton-skill and shared-`vars`-map bugs become structurally impossible. |
@@ -77,7 +77,7 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 
 ### Phase 2 — YAML front door
 - [x] `yaml/YamlToJson.java` — SnakeYAML → Gson tree
-- [x] `yaml/YamlPackSource` — `AddPackFindersEvent` pack that converts `config/legendquest/**/*.yml` into an in-memory/generated datapack on each pack scan (so `/reload` picks up YAML edits)
+- [x] `yaml/YamlPackSource` — `AddPackFindersEvent` pack that converts `config/legendquest/**/*.yml` into an in-memory/generated datapack on each pack scan (applied on server restart; /reload refreshes tags only)
 - [x] Malformed YAML → loud log + skip file (do NOT take the world down; note vanilla registry loader hard-fails on bad JSON — YAML path pre-validates)
 
 ### Phase 3 — Player character
@@ -136,7 +136,8 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 - [x] Parties — `/party create|invite|accept|decline|leave`, SavedData ledger on the overworld, XP share to nearby members (config %/range), friendly fire blocked
 
 ### Phase 9 — Verification
-- [x] `runServer` boot smoke test (clean boot 9s, all registries parsed, YAML race served) — in-game `/reload` cycle still to verify
+- [x] `runServer` boot smoke test (clean boot 9s, all registries parsed, YAML race served)
+- [x] **/reload cycle test — VERIFIED** (2026-08-14): YAML edit → /reload → registry content unchanged (frozen at world load, exactly like vanilla's data-driven enchantments); server restart applies it cleanly. Ops now get a chat notice on /reload explaining this.
 - [x] **Vanilla-client join test — PASSED** (2026-08-14): true vanilla 1.21.11 client joined a dev server running LegendQuest + CityWorld (apocalypse preset) + ZombieMod; full RPG playable via chat/action bar; found and fixed the login-kick bug (NeoForge THROWS on optional payloads to un-negotiated channels — every clientbound send now goes through Net.sendIfAble)
 - [ ] README.md (schema reference in the ZombieMod style: every field, default, and rationale)
 

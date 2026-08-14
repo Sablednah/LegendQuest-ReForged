@@ -52,6 +52,27 @@ public final class LQServerEvents {
                 + CharacterService.karmaName(pc.karma()) + ")");
     }
 
+    /**
+     * Truth in reloading: /reload rebuilds the YAML→datapack conversion and
+     * refreshes tags, but Minecraft freezes dynamic registries at world
+     * load — race/class/skill/feat content applies on RESTART (verified
+     * empirically 2026-08-14; same rule as vanilla's data-driven
+     * enchantments). Tell the op, so nobody stares at an unchanged goblin.
+     * OnDatapackSyncEvent with a null player = the /reload broadcast.
+     */
+    @SubscribeEvent
+    static void onDatapackSync(net.neoforged.neoforge.event.OnDatapackSyncEvent event) {
+        if (event.getPlayer() != null) return; // a join, not a /reload
+        for (ServerPlayer player : event.getPlayerList().getPlayers()) {
+            if (net.minecraft.commands.Commands.hasPermission(
+                    net.minecraft.commands.Commands.LEVEL_GAMEMASTERS)
+                    .test(player.createCommandSourceStack())) {
+                Feedback.chat(player, "&6[LegendQuest]&7 Tags reloaded. Race/class/skill/feat "
+                        + "content changes apply on server RESTART (registries freeze at world load).");
+            }
+        }
+    }
+
     // --- ticking: mana regen + skill engine ---
 
     private static int tickCounter = 0;
