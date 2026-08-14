@@ -9,7 +9,9 @@ rem Pair with the dev server: run `./gradlew runServer` in
 rem ..\LegendQuest-ReForged-srv from WSL, then Direct Connect: 127.0.0.1 (NOT localhost - it resolves IPv6 first)
 rem ---------------------------------------------------------------------
 setlocal
-cd /d "%~dp0"
+rem The buddy lives in its OWN worktree so its gradle build never fights
+rem the main repo's jar builds or the WSL server worktree over artifacts.
+cd /d "%~dp0..\LegendQuest-ReForged-buddy"
 set "JAVA_HOME=%USERPROFILE%\curseforge\minecraft\Install\runtime\java-runtime-delta\windows-x64\java-runtime-delta"
 if not exist "%JAVA_HOME%\bin\java.exe" (
     echo Could not find CurseForge's JDK 21 at %JAVA_HOME%
