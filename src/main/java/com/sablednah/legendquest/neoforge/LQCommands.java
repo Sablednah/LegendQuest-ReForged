@@ -158,7 +158,13 @@ public final class LQCommands {
                 .then(Commands.literal("accept").executes(LQCommands::partyAccept))
                 .then(Commands.literal("decline").executes(LQCommands::partyDecline))
                 .then(Commands.literal("leave").executes(LQCommands::partyLeave))
-                .then(Commands.literal("tp").executes(LQCommands::partyTp));
+                .then(Commands.literal("tp").executes(LQCommands::partyTp))
+                .then(Commands.literal("rename")
+                        .then(Commands.argument("name", com.mojang.brigadier.arguments.StringArgumentType.word())
+                                .executes(ctx -> PartyActions.rename(
+                                        ctx.getSource().getPlayerOrException(),
+                                        com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "name"))
+                                        ? 1 : 0)));
 
         // Spend skill points on permanent +1 stats; escalating cost.
         LiteralArgumentBuilder<CommandSourceStack> buystat = Commands.literal("buystat");

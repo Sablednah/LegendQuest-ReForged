@@ -584,7 +584,19 @@ public final class CharacterPanel {
             return;
         }
 
-        g.drawString(font, "§6§l" + trim(font, s.partyName(), PANEL_WIDTH - 20), tx, ty, 0xFFFFFFFF);
+        String shownName = "§6§l" + trim(font, s.partyName(), PANEL_WIDTH - 36);
+        g.drawString(font, shownName, tx, ty, 0xFFFFFFFF);
+        // The leader gets a rename pencil (chat handoff, like Name it…).
+        boolean amLeader = s.partyMembers().stream().anyMatch(m -> m.self() && m.leader());
+        if (amLeader) {
+            int px = tx + font.width(shownName) + 6;
+            boolean pHover = mouseX >= px - 1 && mouseX < px + 10 && mouseY >= ty - 1 && mouseY < ty + 10;
+            g.drawString(font, (pHover ? "§e" : "§8") + "✎", px, ty, 0xFFFFFFFF);
+            HOTSPOTS.add(new Hot(px - 1, ty - 1, px + 10, ty + 10, 0, () ->
+                    net.minecraft.client.Minecraft.getInstance().setScreen(
+                            new net.minecraft.client.gui.screens.ChatScreen("/party rename ", false))));
+            if (pHover) tooltip(g, font, "Rename party", "Opens chat pre-filled with /party rename");
+        }
         ty += 14;
         for (var member : s.partyMembers()) {
             String line = (member.online() ? "§a" : "§8") + member.name()

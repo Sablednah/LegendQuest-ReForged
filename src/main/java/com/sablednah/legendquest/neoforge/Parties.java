@@ -118,6 +118,23 @@ public final class Parties extends SavedData {
         INVITES.remove(invitee);
     }
 
+    /** @return empty on success, or the reason the rename was refused. */
+    public Optional<String> rename(Party party, String newName) {
+        String oldKey = party.name().toLowerCase(Locale.ROOT);
+        String newKey = newName.toLowerCase(Locale.ROOT);
+        if (!newName.matches("[A-Za-z0-9_\\-]{2,24}")) {
+            return Optional.of("Party names: 2-24 letters, numbers, _ or -.");
+        }
+        if (!newKey.equals(oldKey) && parties.containsKey(newKey)) {
+            return Optional.of("A party with that name already exists.");
+        }
+        parties.remove(oldKey);
+        parties.put(newKey, new Party(newName, party.owner(), party.members()));
+        INVITES.replaceAll((invitee, key) -> key.equals(oldKey) ? newKey : key);
+        setDirty();
+        return Optional.empty();
+    }
+
     /**
      * Leave (or be kicked). Empty parties dissolve; a departing owner hands
      * the party to the longest-standing remaining member.

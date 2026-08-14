@@ -106,6 +106,33 @@ public final class PartyActions {
         return true;
     }
 
+    public static boolean rename(ServerPlayer player, String newName) {
+        var server = player.level().getServer();
+        var parties = Parties.get(server);
+        var party = parties.partyOf(player.getUUID());
+        if (party.isEmpty()) {
+            Feedback.notify(player, "&7You are not in a party.");
+            return false;
+        }
+        if (!party.get().owner().equals(player.getUUID())) {
+            Feedback.notify(player, "&cOnly the party leader may rename it.");
+            return false;
+        }
+        String oldName = party.get().name();
+        var error = parties.rename(party.get(), newName);
+        if (error.isPresent()) {
+            Feedback.notify(player, "&c" + error.get());
+            return false;
+        }
+        for (var memberId : party.get().members()) {
+            ServerPlayer member = server.getPlayerList().getPlayer(memberId);
+            if (member == null) continue;
+            Feedback.notify(member, "&6The party &l" + oldName + "&r&6 is now &l" + newName + "&r&6.");
+            CharacterSync.send(member);
+        }
+        return true;
+    }
+
     // --- teleport (the old party gather) ---
 
     private static final java.util.Map<java.util.UUID, Long> TP_LAST = new java.util.HashMap<>();
