@@ -43,6 +43,7 @@ public final class CharacterActions {
         }
         Race target = holder.get().value();
         pc.setRace(raceId, !target.isDefault());
+        pruneUnknownSkills(player);
         CharacterService.refresh(player);
         Feedback.notify(player, "&6You are now " + article(target.name()) + " &l" + target.name() + "&r&6.");
         return true;
@@ -89,10 +90,32 @@ public final class CharacterActions {
         } else {
             pc.setMainClass(classId);
         }
+        pruneUnknownSkills(player);
         CharacterService.refresh(player);
         Feedback.notify(player, "&6You are now " + article(target.name()) + " &l" + target.name()
                 + "&r&6" + (asSub ? " (sub class)." : "."));
         return true;
+    }
+
+    /**
+     * After any identity change: drop loadout entries and item bindings for
+     * skills the character no longer has ANY grant for — a class switch
+     * must not leave five ghost books in the loadout strip. Karma-suspended
+     * skills keep their slots (they still have a grant; they're sleeping).
+     */
+    public static void pruneUnknownSkills(ServerPlayer player) {
+        var known = SkillEngine.grants(player).keySet();
+        PlayerCharacter pc = CharacterService.data(player);
+        for (Identifier skillId : pc.loadout()) {
+            if (!known.contains(skillId)) pc.removeFromLoadout(skillId);
+        }
+        for (var binding : pc.bindings().entrySet()) {
+            Identifier skillId = Identifier.tryParse(binding.getValue());
+            if (skillId == null || !known.contains(skillId)) {
+                Identifier itemId = Identifier.tryParse(binding.getKey());
+                if (itemId != null) pc.unbind(itemId);
+            }
+        }
     }
 
     /** Is this class open to that race? (Shared with admin legality checks.) */
@@ -311,6 +334,7 @@ public final class CharacterActions {
                 pc.setXp(cls, Leveling.totalXpForLevel(target, LQConfig.XP_LEVEL_BASE.get()));
             });
         }
+        pruneUnknownSkills(player);
         CharacterService.refresh(player);
         Feedback.notify(player, "&6The past unravels: &f" + refunded
                 + "&6 skill points refunded, level " + CharacterService.level(player)

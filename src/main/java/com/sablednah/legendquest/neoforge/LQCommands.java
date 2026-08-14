@@ -680,6 +680,7 @@ public final class LQCommands {
             }
         }
         CharacterService.data(target).setRace(raceId, false);
+        CharacterActions.pruneUnknownSkills(target);
         CharacterService.refresh(target);
         ctx.getSource().sendSuccess(() -> Component.literal(
                 "Set " + target.getName().getString() + "'s race to " + raceId
@@ -711,6 +712,7 @@ public final class LQCommands {
             }
         }
         CharacterService.data(target).setMainClass(classId);
+        CharacterActions.pruneUnknownSkills(target);
         CharacterService.refresh(target);
         ctx.getSource().sendSuccess(() -> Component.literal(
                 "Set " + target.getName().getString() + "'s class to " + classId

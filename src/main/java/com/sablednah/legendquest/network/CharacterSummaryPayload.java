@@ -46,7 +46,10 @@ public record CharacterSummaryPayload(
     /** One row of the skill list, ready to render. */
     public record SkillEntry(String id, String name, String type, String description,
             String icon, int manaCost, int cooldownSec, int levelReq, int cost,
-            boolean owned, int readyInSec) {}
+            boolean owned, int readyInSec,
+            int durationSec,     // timing duration (0 = instant skill)
+            int activeForSec,    // seconds of ACTIVE remaining right now
+            String karmaNote) {} // "" or "needs karma ≥ 50" — the REAL lock reason
 
     /** One clickable option in the race/class picker. */
     public record PickEntry(String id, String name, String description, boolean available) {}
@@ -84,6 +87,9 @@ public record CharacterSummaryPayload(
             buf.writeVarInt(s.cost());
             buf.writeBoolean(s.owned());
             buf.writeVarInt(s.readyInSec());
+            buf.writeVarInt(s.durationSec());
+            buf.writeVarInt(s.activeForSec());
+            buf.writeUtf(s.karmaNote());
         }
         buf.writeVarInt(p.loadout.size());
         for (String id : p.loadout) buf.writeUtf(id);
@@ -115,7 +121,8 @@ public record CharacterSummaryPayload(
         for (int n = 0; n < skillCount; n++) {
             skills.add(new SkillEntry(buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readUtf(),
                     buf.readUtf(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(),
-                    buf.readVarInt(), buf.readBoolean(), buf.readVarInt()));
+                    buf.readVarInt(), buf.readBoolean(), buf.readVarInt(),
+                    buf.readVarInt(), buf.readVarInt(), buf.readUtf()));
         }
         int loadoutCount = buf.readVarInt();
         List<String> loadout = new ArrayList<>(loadoutCount);

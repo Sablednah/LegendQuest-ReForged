@@ -3,7 +3,8 @@
   "description": "For half a minute, the world forgets to pull. Leap rooftops, fall like a snowflake, moonwalk with dignity. (Also the reference permskill: any command + undo command + duration.)",
   "icon": "minecraft:feather",
   "type": "active",
-  "cooldown": 90000,
+  "cooldown": 60000,
+  "duration": 30000,
   "mana_cost": 20,
   "effects": [
     {

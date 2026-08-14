@@ -44,7 +44,20 @@ public final class CharacterSync {
                     SkillGrant grant = entry.getValue();
                     var def = SkillEngine.definition(player, id);
                     if (def.isEmpty()) return;
-                    long waitMs = SkillPhase.remainingMs(now, pc.lastUse(id), def.get().timing());
+                    var timing = def.get().timing();
+                    long last = pc.lastUse(id);
+                    long waitMs = SkillPhase.remainingMs(now, last, timing);
+                    int activeFor = 0;
+                    if (SkillPhase.at(now, last, timing) == SkillPhase.ACTIVE) {
+                        long activeEnd = last + timing.buildupMs() + timing.delayMs() + timing.durationMs();
+                        activeFor = (int) Math.max(1, (activeEnd - now) / 1000 + 1);
+                    }
+                    String karmaNote = "";
+                    if (grant.hasKarmaBand() && !grant.karmaAllows(pc.karma())) {
+                        karmaNote = pc.karma() < grant.karmaMin()
+                                ? "needs karma ≥ " + grant.karmaMin()
+                                : "needs karma ≤ " + grant.karmaMax();
+                    }
                     skills.add(new CharacterSummaryPayload.SkillEntry(
                             id.toString(),
                             def.get().name(),
@@ -52,11 +65,14 @@ public final class CharacterSync {
                             def.get().description().orElse(""),
                             def.get().icon(),
                             def.get().costs().manaCost(),
-                            (int) (def.get().timing().cooldownMs() / 1000),
+                            (int) (timing.cooldownMs() / 1000),
                             grant.level(),
                             grant.cost(),
                             SkillEngine.owns(player, id, grant),
-                            waitMs <= 0 ? 0 : (int) (waitMs / 1000 + 1)));
+                            waitMs <= 0 ? 0 : (int) (waitMs / 1000 + 1),
+                            (int) (timing.durationMs() / 1000),
+                            activeFor,
+                            karmaNote));
                 });
 
         return new CharacterSummaryPayload(

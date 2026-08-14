@@ -295,8 +295,15 @@ public final class CharacterPanel {
         if (tab == Tab.NONE || !(event.getScreen() instanceof InventoryScreen screen)) return;
         double mx = event.getMouseX();
         double my = event.getMouseY();
-        if (!inPanel(screen, mx, my)) return;
-        event.setCanceled(true); // never reaches the screen: no thrown items
+        // The shield: clicks on the panel never reach the screen, and with an
+        // item on the cursor the ENTIRE region left of the GUI is safe ground
+        // — carrying your would-be spellbook to the slot must never count as
+        // "clicked outside, throw it on the floor".
+        boolean carrying = !screen.getMenu().getCarried().isEmpty();
+        boolean shielded = inPanel(screen, mx, my) || (carrying && mx < screen.getGuiLeft());
+        if (!shielded) return;
+        event.setCanceled(true);
+        if (!inPanel(screen, mx, my)) return; // shielded gap: swallow, do nothing
         CharacterSummaryPayload s = summary();
         if (s == null) return;
 
@@ -349,7 +356,18 @@ public final class CharacterPanel {
 
     @SubscribeEvent
     static void onMouseRelease(ScreenEvent.MouseButtonReleased.Pre event) {
-        if (drag == null || !(event.getScreen() instanceof InventoryScreen screen)) return;
+        if (!(event.getScreen() instanceof InventoryScreen screen)) return;
+        // Releases over the shield are swallowed too — quickcraft's
+        // release-outside path is another way to fling a carried item.
+        if (drag == null) {
+            if (tab != Tab.NONE
+                    && (inPanel(screen, event.getMouseX(), event.getMouseY())
+                            || (!screen.getMenu().getCarried().isEmpty()
+                                    && event.getMouseX() < screen.getGuiLeft()))) {
+                event.setCanceled(true);
+            }
+            return;
+        }
         Drag d = drag;
         drag = null;
         CharacterSummaryPayload s = summary();
@@ -436,6 +454,15 @@ public final class CharacterPanel {
                 tooltip(g, font, "Players Handbook",
                         "Races, classes and skills — everything a legend needs to know. §8(Key: H)");
             }
+        }
+
+        // The carried item again, on top: the screen drew it before us, so
+        // the panel was painting over it — your would-be spellbook seemed
+        // to vanish the moment it crossed onto the panel.
+        ItemStack carried = screen.getMenu().getCarried();
+        if (!carried.isEmpty() && mouseX < screen.getGuiLeft()) {
+            g.renderItem(carried, (int) mouseX - 8, (int) mouseY - 8);
+            g.renderItemDecorations(font, carried, (int) mouseX - 8, (int) mouseY - 8);
         }
 
         drawPendingTooltip(g, font); // last, so nothing paints over it
@@ -613,10 +640,15 @@ public final class CharacterPanel {
                 boolean beingDragged = drag != null && drag.fromSlot() == i;
                 if (!beingDragged) {
                     g.renderItem(icon(entry != null ? entry.icon() : ""), sx + 2, sy + 2);
-                    if (entry != null && entry.readyInSec() > 0) {
+                    if (entry != null && entry.activeForSec() > 0 && entry.durationSec() > 0) {
+                        float frac = Math.min(1.0F, entry.activeForSec() / (float) entry.durationSec());
+                        g.fill(sx + 2, sy + SLOT_SIZE - 4, sx + SLOT_SIZE - 2, sy + SLOT_SIZE - 2, 0x80000000);
+                        g.fill(sx + 2, sy + SLOT_SIZE - 4, sx + 2 + (int) ((SLOT_SIZE - 4) * frac),
+                                sy + SLOT_SIZE - 2, LQHud.durationColour(frac));
+                    } else if (entry != null && entry.readyInSec() > 0) {
                         g.fill(sx + 1, sy + 1, sx + SLOT_SIZE - 1, sy + SLOT_SIZE - 1, 0x90000000);
-                        String secs = String.valueOf(entry.readyInSec());
-                        g.drawString(font, secs, sx + SLOT_SIZE - 1 - font.width(secs), sy + 6, 0xFFFF5555);
+                        String secs = LQHud.cooldownText(entry.readyInSec());
+                        g.drawString(font, secs, sx + (SLOT_SIZE - font.width(secs)) / 2, sy + 6, 0xFFFF5555);
                     }
                 }
                 boolean hover = mouseX >= sx && mouseX < sx + SLOT_SIZE
@@ -683,7 +715,12 @@ public final class CharacterPanel {
                 g.fill(tx, ry + 1, tx + 16, ry + 17, 0xA0101018); // greyed-out icon
             }
             String line;
-            if (!skill.owned()) {
+            boolean soulLocked = !skill.owned() && !skill.karmaNote().isEmpty()
+                    && s.level() >= skill.levelReq();
+            if (soulLocked) {
+                // The honest lock reason: it's the soul, not the level.
+                line = "§8" + skill.name() + " §5[soul]";
+            } else if (!skill.owned()) {
                 line = "§8" + skill.name() + " §7[lvl " + skill.levelReq()
                         + (skill.cost() > 0 ? ", " + skill.cost() + "sp" : "") + "]";
             } else if (skill.readyInSec() > 0) {
@@ -748,7 +785,10 @@ public final class CharacterPanel {
         if (skill.manaCost() > 0) sb.append(" §9· ").append(skill.manaCost()).append(" mana");
         if (skill.cooldownSec() > 0) sb.append(" §7· ").append(skill.cooldownSec()).append("s cooldown");
         if (!skill.description().isEmpty()) sb.append("\n§f").append(skill.description());
-        if (!skill.owned()) {
+        if (!skill.karmaNote().isEmpty()) {
+            sb.append("\n§5Soul-bound: ").append(skill.karmaNote());
+        }
+        if (!skill.owned() && skill.karmaNote().isEmpty()) {
             sb.append("\n§cRequires level ").append(skill.levelReq());
             if (skill.cost() > 0) sb.append(" + ").append(skill.cost()).append(" skill points");
         }

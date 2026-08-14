@@ -18,7 +18,20 @@ public final class LQHud {
 
     private static final int MARGIN = 6;
     private static final int BAR_WIDTH = 92;
-    private static final int CHIP = 18;
+    private static final int CHIP = 24; // roomy: 16px icon + 3-digit cooldowns fit
+
+    /** "45" under 100s, "2:36" beyond — three digits never overflow again. */
+    static String cooldownText(int sec) {
+        return sec < 100 ? String.valueOf(sec)
+                : (sec / 60) + ":" + String.format("%02d", sec % 60);
+    }
+
+    /** Remaining-duration bar: green while comfortable, amber, then red. */
+    static int durationColour(float fraction) {
+        if (fraction > 0.5F) return 0xFF44CC44;
+        if (fraction > 0.22F) return 0xFFFFAA22;
+        return 0xFFEE4444;
+    }
 
     @SubscribeEvent
     static void onRenderGui(RenderGuiEvent.Post event) {
@@ -47,11 +60,17 @@ public final class LQHud {
 
                 var entry = find(s, s.loadout().get(i));
                 if (entry != null) {
-                    g.renderItem(icon(entry.icon()), cx + 1, y + 1);
-                    if (entry.readyInSec() > 0) {
+                    g.renderItem(icon(entry.icon()), cx + 4, y + 4);
+                    if (entry.activeForSec() > 0 && entry.durationSec() > 0) {
+                        // Running skill: a shrinking bar along the chip's foot.
+                        float frac = Math.min(1.0F, entry.activeForSec() / (float) entry.durationSec());
+                        g.fill(cx + 2, y + CHIP - 4, cx + CHIP - 2, y + CHIP - 2, 0x80000000);
+                        g.fill(cx + 2, y + CHIP - 4, cx + 2 + (int) ((CHIP - 4) * frac),
+                                y + CHIP - 2, durationColour(frac));
+                    } else if (entry.readyInSec() > 0) {
                         g.fill(cx + 1, y + 1, cx + CHIP - 1, y + CHIP - 1, 0xA0000000);
-                        String secs = String.valueOf(entry.readyInSec());
-                        g.drawString(font, secs, cx + CHIP - 1 - font.width(secs), y + 5, 0xFFFF5555);
+                        String secs = cooldownText(entry.readyInSec());
+                        g.drawString(font, secs, cx + (CHIP - font.width(secs)) / 2, y + 8, 0xFFFF5555);
                     }
                 }
             }

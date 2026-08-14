@@ -113,6 +113,14 @@ public final class SkillEngine {
                     + skillId + " (" + grant.cost() + " points)");
             return UseResult.NOT_PURCHASED;
         }
+        // The grant's karma band gates the CAST too — a suspended Holy Light
+        // must not keep firing from a stale loadout slot.
+        if (!grant.karmaAllows(pc.karma())) {
+            Feedback.actionBar(player, pc.karma() < grant.karmaMin()
+                    ? "&5" + def.name() + " has left you — your soul is too dark."
+                    : "&5" + def.name() + " has left you — your soul is too bright.");
+            return UseResult.KARMA_BLOCKED;
+        }
 
         long now = System.currentTimeMillis();
         SkillPhase phase = SkillPhase.at(now, pc.lastUse(skillId), def.timing());
@@ -228,6 +236,39 @@ public final class SkillEngine {
             lastPassiveRun = now;
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 passiveTick(player);
+            }
+        }
+    }
+
+    // --- duration warnings: "no time to scramble for Featherlight" ---
+
+    private static final java.util.Map<java.util.UUID, java.util.Set<String>> DURATION_WARNED =
+            new java.util.HashMap<>();
+
+    /** Called once a second per player: a heads-up 5s before an ACTIVE
+     *  duration skill (flight!) runs out, with an urgent little pling. */
+    public static void warnFadingDurations(ServerPlayer player) {
+        long now = System.currentTimeMillis();
+        PlayerCharacter pc = CharacterService.data(player);
+        var warned = DURATION_WARNED.computeIfAbsent(player.getUUID(), u -> new java.util.HashSet<>());
+        for (var entry : grants(player).entrySet()) {
+            var def = definition(player, entry.getKey());
+            if (def.isEmpty() || def.get().timing().durationMs() <= 0) continue;
+            String key = entry.getKey().toString();
+            long last = pc.lastUse(entry.getKey());
+            var timing = def.get().timing();
+            if (SkillPhase.at(now, last, timing) == SkillPhase.ACTIVE) {
+                long remaining = last + timing.buildupMs() + timing.delayMs()
+                        + timing.durationMs() - now;
+                if (remaining <= 5500 && warned.add(key)) {
+                    Feedback.actionBar(player, "&e⌛ " + def.get().name()
+                            + " fades in 5 seconds!");
+                    player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
+                            net.minecraft.sounds.SoundEvents.NOTE_BLOCK_PLING.value(),
+                            net.minecraft.sounds.SoundSource.PLAYERS, 0.8F, 0.6F);
+                }
+            } else {
+                warned.remove(key);
             }
         }
     }
