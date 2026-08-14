@@ -465,8 +465,9 @@ public final class CharacterPanel {
         // The Players Handbook button, top-right corner (the bottom one sat
         // on the last skill row of long lists).
         if (ClientHandbook.get() != null) {
-            int bx = x + PANEL_WIDTH - 20;
-            int by = y + 5;
+            // Same row, same height, same edge margin as the tab chips.
+            int bx = x + PANEL_WIDTH - 5 - 14;
+            int by = y + 3;
             boolean hover = mouseX >= bx && mouseX < bx + 14 && mouseY >= by && mouseY < by + 12;
             g.fill(bx, by, bx + 14, by + 12, hover ? 0xFF403010 : 0xFF26263A);
             g.fill(bx, by, bx + 14, by + 1, 0xFFDAA520);
