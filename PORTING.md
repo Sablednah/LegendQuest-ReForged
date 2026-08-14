@@ -143,7 +143,7 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 
 ### Phase 8 — Content & packs
 - [ ] Default D&D pack as **YAML** shipped in `config` defaults + mirrored JSON datapack: races (human, elf, dwarf, orc, hobbit, gnome, half-elf, half-orc, ender, wither, undecided), classes (citizen, fighter, mage, ranger, warlord), core skills re-expressed as data
-- [ ] Example skill-pack mod repo (`LegendQuest-SkillPack-Example`) proving third-party `SkillEffectTypes.register()`
+- [x] **Example skill-pack repo — LIVE** ([Sablednah/LegendQuest-SkillPack-Example](https://github.com/Sablednah/LegendQuest-SkillPack-Example)): 3 custom effect types (lifesteal/shockwave/sense), 4 skills incl. a pack+core composition, full README walkthrough. Verified: registers from mod constructor, boots clean beside LegendQuest, config-YAML race grants a pack-namespaced skill
 - [ ] Zombie-apocalypse pack (ties into ZombieMod genera + CityWorld)
 - [x] Parties — `/party create|invite|accept|decline|leave`, SavedData ledger on the overworld, XP share to nearby members (config %/range), friendly fire blocked
 
