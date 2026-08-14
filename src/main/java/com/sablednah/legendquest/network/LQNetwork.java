@@ -21,6 +21,9 @@ public final class LQNetwork {
                 LQNetwork::handleIndicator);
         registrar.playToClient(HandbookPayload.TYPE, HandbookPayload.CODEC,
                 LQNetwork::handleHandbook);
+        registrar.playToClient(VocabPayload.TYPE, VocabPayload.CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        com.sablednah.legendquest.client.ClientVocab.accept(payload)));
         registrar.playToClient(NoticePayload.TYPE, NoticePayload.CODEC,
                 (payload, context) -> context.enqueueWork(() ->
                         com.sablednah.legendquest.client.ClientNotices.accept(payload)));

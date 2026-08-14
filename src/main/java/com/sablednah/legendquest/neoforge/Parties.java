@@ -82,10 +82,10 @@ public final class Parties extends SavedData {
     /** @return empty on success, or a reason the party couldn't be created. */
     public Optional<String> create(String name, ServerPlayer owner) {
         String key = name.toLowerCase(Locale.ROOT);
-        if (partyOf(owner.getUUID()).isPresent()) return Optional.of("You are already in a party.");
-        if (parties.containsKey(key)) return Optional.of("A party with that name already exists.");
+        if (partyOf(owner.getUUID()).isPresent()) return Optional.of(Lang.get("msg.party.already_in_one"));
+        if (parties.containsKey(key)) return Optional.of(Lang.get("msg.party.name_taken"));
         if (!name.matches("[A-Za-z0-9_\\-]{2,24}")) {
-            return Optional.of("Party names: 2-24 letters, numbers, _ or -.");
+            return Optional.of(Lang.get("msg.party.name_rules"));
         }
         parties.put(key, new Party(name, owner.getUUID(), List.of(owner.getUUID())));
         setDirty();
@@ -123,10 +123,10 @@ public final class Parties extends SavedData {
         String oldKey = party.name().toLowerCase(Locale.ROOT);
         String newKey = newName.toLowerCase(Locale.ROOT);
         if (!newName.matches("[A-Za-z0-9_\\-]{2,24}")) {
-            return Optional.of("Party names: 2-24 letters, numbers, _ or -.");
+            return Optional.of(Lang.get("msg.party.name_rules"));
         }
         if (!newKey.equals(oldKey) && parties.containsKey(newKey)) {
-            return Optional.of("A party with that name already exists.");
+            return Optional.of(Lang.get("msg.party.name_taken"));
         }
         parties.remove(oldKey);
         parties.put(newKey, new Party(newName, party.owner(), party.members()));

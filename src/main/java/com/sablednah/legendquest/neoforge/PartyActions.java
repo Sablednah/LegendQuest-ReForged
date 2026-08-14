@@ -18,10 +18,10 @@ public final class PartyActions {
     public static boolean create(ServerPlayer player, String name) {
         var error = Parties.get(player.level().getServer()).create(name, player);
         if (error.isPresent()) {
-            Feedback.notify(player, "&c" + error.get());
+            Feedback.notify(player, error.get());
             return false;
         }
-        Feedback.notify(player, "&6Party &l" + name + "&r&6 created. Invite from the party tab or /party invite.");
+        Feedback.notify(player, Lang.fmt("msg.party.created", "name", name));
         CharacterSync.send(player);
         return true;
     }
@@ -39,27 +39,26 @@ public final class PartyActions {
         var server = player.level().getServer();
         ServerPlayer invitee = server.getPlayerList().getPlayerByName(inviteeName);
         if (invitee == null) {
-            Feedback.notify(player, "&c" + inviteeName + " is not online.");
+            Feedback.notify(player, Lang.fmt("msg.party.not_online", "name", inviteeName));
             return false;
         }
         var parties = Parties.get(server);
         var party = parties.partyOf(player.getUUID());
         if (party.isEmpty()) {
-            Feedback.notify(player, "&cYou are not in a party. Create one first.");
+            Feedback.notify(player, Lang.get("msg.party.create_first"));
             return false;
         }
         if (invitee == player || party.get().isMember(invitee.getUUID())) {
-            Feedback.notify(player, "&7They are already in the party.");
+            Feedback.notify(player, Lang.get("msg.party.already_member"));
             return false;
         }
         if (parties.partyOf(invitee.getUUID()).isPresent()) {
-            Feedback.notify(player, "&c" + invitee.getName().getString() + " is already in a party.");
+            Feedback.notify(player, Lang.fmt("msg.party.already_partied", "name", invitee.getName().getString()));
             return false;
         }
         parties.invite(party.get(), invitee.getUUID());
-        Feedback.notify(player, "&6Invited " + invitee.getName().getString() + ".");
-        Feedback.notify(invitee, "&6" + player.getName().getString() + " invites you to party &l"
-                + party.get().name() + "&r&6 — party tab or /party accept.");
+        Feedback.notify(player, Lang.fmt("msg.party.invited", "name", invitee.getName().getString()));
+        Feedback.notify(invitee, Lang.fmt("msg.party.invitation", "name", player.getName().getString(), "party", party.get().name()));
         CharacterSync.send(invitee); // the invite appears in their GUI now
         return true;
     }
@@ -68,15 +67,15 @@ public final class PartyActions {
         var server = player.level().getServer();
         var joined = Parties.get(server).accept(player.getUUID());
         if (joined.isEmpty()) {
-            Feedback.notify(player, "&cNo open invitation (it may have expired with a restart).");
+            Feedback.notify(player, Lang.get("msg.party.no_invite"));
             return false;
         }
-        Feedback.notify(player, "&6You joined &l" + joined.get().name() + "&r&6.");
+        Feedback.notify(player, Lang.fmt("msg.party.joined", "name", joined.get().name()));
         for (var memberId : joined.get().members()) {
             ServerPlayer member = server.getPlayerList().getPlayer(memberId);
             if (member == null) continue;
             if (!memberId.equals(player.getUUID())) {
-                Feedback.notify(member, "&6" + player.getName().getString() + " joined the party.");
+                Feedback.notify(member, Lang.fmt("msg.party.member_joined", "name", player.getName().getString()));
             }
             CharacterSync.send(member);
         }
@@ -85,7 +84,7 @@ public final class PartyActions {
 
     public static boolean decline(ServerPlayer player) {
         Parties.get(player.level().getServer()).decline(player.getUUID());
-        Feedback.notify(player, "&7Invitation declined.");
+        Feedback.notify(player, Lang.get("msg.party.declined"));
         CharacterSync.send(player);
         return true;
     }
@@ -94,10 +93,10 @@ public final class PartyActions {
         var server = player.level().getServer();
         var left = Parties.get(server).remove(player.getUUID());
         if (left.isEmpty()) {
-            Feedback.notify(player, "&7You are not in a party.");
+            Feedback.notify(player, Lang.get("msg.party.not_in_one"));
             return false;
         }
-        Feedback.notify(player, "&6You left &l" + left.get().name() + "&r&6.");
+        Feedback.notify(player, Lang.fmt("msg.party.left", "name", left.get().name()));
         CharacterSync.send(player);
         for (var memberId : left.get().members()) {
             ServerPlayer member = server.getPlayerList().getPlayer(memberId);
@@ -111,23 +110,23 @@ public final class PartyActions {
         var parties = Parties.get(server);
         var party = parties.partyOf(player.getUUID());
         if (party.isEmpty()) {
-            Feedback.notify(player, "&7You are not in a party.");
+            Feedback.notify(player, Lang.get("msg.party.not_in_one"));
             return false;
         }
         if (!party.get().owner().equals(player.getUUID())) {
-            Feedback.notify(player, "&cOnly the party leader may rename it.");
+            Feedback.notify(player, Lang.get("msg.party.leader_only_rename"));
             return false;
         }
         String oldName = party.get().name();
         var error = parties.rename(party.get(), newName);
         if (error.isPresent()) {
-            Feedback.notify(player, "&c" + error.get());
+            Feedback.notify(player, error.get());
             return false;
         }
         for (var memberId : party.get().members()) {
             ServerPlayer member = server.getPlayerList().getPlayer(memberId);
             if (member == null) continue;
-            Feedback.notify(member, "&6The party &l" + oldName + "&r&6 is now &l" + newName + "&r&6.");
+            Feedback.notify(member, Lang.fmt("msg.party.renamed", "old", oldName, "new", newName));
             CharacterSync.send(member);
         }
         return true;
@@ -140,20 +139,20 @@ public final class PartyActions {
     public static boolean teleport(ServerPlayer player) {
         int cooldown = LQConfig.PARTY_TP_COOLDOWN.get();
         if (cooldown <= 0) {
-            Feedback.notify(player, "&cParty teleport is disabled on this server.");
+            Feedback.notify(player, Lang.get("msg.party.tp_disabled"));
             return false;
         }
         var server = player.level().getServer();
         var party = Parties.get(server).partyOf(player.getUUID());
         if (party.isEmpty()) {
-            Feedback.notify(player, "&7You are not in a party.");
+            Feedback.notify(player, Lang.get("msg.party.not_in_one"));
             return false;
         }
         long now = System.currentTimeMillis();
         Long last = TP_LAST.get(player.getUUID());
         if (last != null && now - last < cooldown * 1000L) {
             long wait = (cooldown * 1000L - (now - last)) / 1000 + 1;
-            Feedback.notify(player, "&cThe party bond needs " + wait + "s to regather.");
+            Feedback.notify(player, Lang.fmt("msg.party.tp_cooldown", "sec", wait));
             return false;
         }
 
@@ -164,7 +163,7 @@ public final class PartyActions {
             if (mate != null && mate.level() == player.level()) mates.add(mate);
         }
         if (mates.isEmpty()) {
-            Feedback.notify(player, "&7No party members are online in this dimension.");
+            Feedback.notify(player, Lang.get("msg.party.tp_nobody"));
             return false;
         }
 
@@ -179,7 +178,7 @@ public final class PartyActions {
         Optional<net.minecraft.core.BlockPos> safe = SafeLoc.find(player.level(), centroid)
                 .or(() -> SafeLoc.find(player.level(), mates.getFirst().blockPosition()));
         if (safe.isEmpty()) {
-            Feedback.notify(player, "&cNowhere safe to arrive — your party stands in strange places.");
+            Feedback.notify(player, Lang.get("msg.party.tp_unsafe"));
             return false;
         }
 
@@ -194,7 +193,7 @@ public final class PartyActions {
         player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
                 net.minecraft.sounds.SoundEvents.ENDERMAN_TELEPORT,
                 net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 1.0F);
-        Feedback.notify(player, "&6The party bond draws you across the world.");
+        Feedback.notify(player, Lang.get("msg.party.tp_done"));
         return true;
     }
 

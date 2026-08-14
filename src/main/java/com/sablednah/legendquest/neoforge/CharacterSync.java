@@ -55,8 +55,8 @@ public final class CharacterSync {
                     String karmaNote = "";
                     if (grant.hasKarmaBand() && !grant.karmaAllows(pc.karma())) {
                         karmaNote = pc.karma() < grant.karmaMin()
-                                ? "needs karma ≥ " + grant.karmaMin()
-                                : "needs karma ≤ " + grant.karmaMax();
+                                ? Lang.fmt("msg.karma.needs_min", "value", grant.karmaMin())
+                                : Lang.fmt("msg.karma.needs_max", "value", grant.karmaMax());
                     }
                     skills.add(new CharacterSummaryPayload.SkillEntry(
                             id.toString(),
@@ -76,8 +76,8 @@ public final class CharacterSync {
                 });
 
         return new CharacterSummaryPayload(
-                CharacterService.race(player).map(Race::name).orElse("Undecided"),
-                CharacterService.mainClass(player).map(CharClass::name).orElse("Citizen"),
+                CharacterService.race(player).map(Race::name).orElse(Lang.get("msg.stats.undecided")),
+                CharacterService.mainClass(player).map(CharClass::name).orElse(Lang.get("msg.stats.citizen")),
                 CharacterService.subClass(player).map(CharClass::name).orElse(""),
                 CharacterService.level(player),
                 xpProgress(player, pc),

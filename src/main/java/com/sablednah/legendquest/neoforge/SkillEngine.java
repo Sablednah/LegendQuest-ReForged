@@ -90,35 +90,33 @@ public final class SkillEngine {
         PlayerCharacter pc = CharacterService.data(player);
         SkillGrant grant = grants(player).get(skillId);
         if (grant == null) {
-            Feedback.actionBar(player, "&cYou don't know that skill.");
+            Feedback.actionBar(player, Lang.get("msg.skill.not_known"));
             return UseResult.NOT_KNOWN;
         }
         Optional<SkillDefinition> defOpt = definition(player, skillId);
         if (defOpt.isEmpty()) {
-            Feedback.actionBar(player, "&cSkill '" + skillId + "' is not loaded — tell an admin.");
+            Feedback.actionBar(player, Lang.fmt("msg.skill.not_loaded", "id", skillId));
             LegendQuest.LOGGER.warn("Player {} has a grant for unknown skill {}", player.getName(), skillId);
             return UseResult.NOT_LOADED;
         }
         SkillDefinition def = defOpt.get();
         if (def.type() != SkillType.ACTIVE) {
-            Feedback.actionBar(player, "&e" + def.name() + " is " + def.type() + " — it works on its own.");
+            Feedback.actionBar(player, Lang.fmt("msg.skill.not_active_type", "skill", def.name(), "type", def.type()));
             return UseResult.NOT_ACTIVE;
         }
         if (CharacterService.level(player) < grant.level()) {
-            Feedback.actionBar(player, "&c" + def.name() + " unlocks at level " + grant.level() + ".");
+            Feedback.actionBar(player, Lang.fmt("msg.skill.level_locked", "skill", def.name(), "level", grant.level()));
             return UseResult.LEVEL_LOCKED;
         }
         if (grant.cost() > 0 && !pc.hasPurchased(skillId)) {
-            Feedback.actionBar(player, "&c" + def.name() + " must be bought first: /skill buy "
-                    + skillId + " (" + grant.cost() + " points)");
+            Feedback.actionBar(player, Lang.fmt("msg.skill.not_purchased", "skill", def.name(), "id", skillId, "cost", grant.cost()));
             return UseResult.NOT_PURCHASED;
         }
         // The grant's karma band gates the CAST too — a suspended Holy Light
         // must not keep firing from a stale loadout slot.
         if (!grant.karmaAllows(pc.karma())) {
-            Feedback.actionBar(player, pc.karma() < grant.karmaMin()
-                    ? "&5" + def.name() + " has left you — your soul is too dark."
-                    : "&5" + def.name() + " has left you — your soul is too bright.");
+            Feedback.actionBar(player, Lang.fmt(pc.karma() < grant.karmaMin()
+                    ? "msg.skill.soul_dark" : "msg.skill.soul_bright", "skill", def.name()));
             return UseResult.KARMA_BLOCKED;
         }
 
@@ -126,8 +124,7 @@ public final class SkillEngine {
         SkillPhase phase = SkillPhase.at(now, pc.lastUse(skillId), def.timing());
         if (phase != SkillPhase.READY) {
             long waitMs = SkillPhase.remainingMs(now, pc.lastUse(skillId), def.timing());
-            Feedback.actionBar(player, "&c" + def.name() + " is " + phase.name().toLowerCase()
-                    + " — ready in " + (waitMs / 1000 + 1) + "s");
+            Feedback.actionBar(player, Lang.fmt("msg.skill.phase_wait", "skill", def.name(), "phase", phase.name().toLowerCase(), "sec", waitMs / 1000 + 1));
             return UseResult.NOT_READY;
         }
 
@@ -140,7 +137,7 @@ public final class SkillEngine {
             fire(player, skillId, def);
         } else {
             if (def.timing().buildupMs() > 0) {
-                Feedback.actionBar(player, "&d" + def.name() + " building up...");
+                Feedback.actionBar(player, Lang.fmt("msg.skill.building", "skill", def.name()));
             }
             // The charge cue: a rising hum now, swirling glyphs until it
             // fires (see tick) — no more "did that even work?".
@@ -156,24 +153,22 @@ public final class SkillEngine {
         // Karma gate: positive required = must be at least this good;
         // negative = must be at least this evil (the old convention).
         if (costs.karmaRequired() > 0 && pc.karma() < costs.karmaRequired()) {
-            Feedback.actionBar(player, "&cYou are not virtuous enough for " + name + ".");
+            Feedback.actionBar(player, Lang.fmt("msg.skill.not_virtuous", "skill", name));
             return UseResult.KARMA_BLOCKED;
         }
         if (costs.karmaRequired() < 0 && pc.karma() > costs.karmaRequired()) {
-            Feedback.actionBar(player, "&cYou are not wicked enough for " + name + ".");
+            Feedback.actionBar(player, Lang.fmt("msg.skill.not_wicked", "skill", name));
             return UseResult.KARMA_BLOCKED;
         }
         if (pc.mana() < costs.manaCost()) {
-            Feedback.actionBar(player, "&9Not enough mana for " + name + " ("
-                    + (int) pc.mana() + "/" + costs.manaCost() + ").");
+            Feedback.actionBar(player, Lang.fmt("msg.skill.no_mana", "skill", name, "have", (int) pc.mana(), "need", costs.manaCost()));
             return UseResult.NO_MANA;
         }
         if (costs.consumes().isPresent()) {
             ItemStack needed = new ItemStack(costs.consumes().get(), costs.consumesQty());
             int slot = player.getInventory().findSlotMatchingItem(needed);
             if (slot < 0 || player.getInventory().getItem(slot).getCount() < costs.consumesQty()) {
-                Feedback.actionBar(player, "&c" + name + " needs "
-                        + costs.consumesQty() + "x " + needed.getHoverName().getString() + ".");
+                Feedback.actionBar(player, Lang.fmt("msg.skill.needs_item", "skill", name, "qty", costs.consumesQty(), "item", needed.getHoverName().getString()));
                 return UseResult.NO_ITEM;
             }
             player.getInventory().getItem(slot).shrink(costs.consumesQty());
@@ -262,8 +257,7 @@ public final class SkillEngine {
                 long remaining = last + timing.buildupMs() + timing.delayMs()
                         + timing.durationMs() - now;
                 if (remaining <= 5500 && warned.add(key)) {
-                    Feedback.actionBar(player, "&e⌛ " + def.get().name()
-                            + " fades in 5 seconds!");
+                    Feedback.actionBar(player, Lang.fmt("msg.skill.fades_soon", "skill", def.get().name()));
                     player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
                             net.minecraft.sounds.SoundEvents.NOTE_BLOCK_PLING.value(),
                             net.minecraft.sounds.SoundSource.PLAYERS, 0.8F, 0.6F);

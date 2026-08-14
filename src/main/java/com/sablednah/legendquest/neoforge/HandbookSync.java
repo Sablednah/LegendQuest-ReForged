@@ -93,14 +93,13 @@ public final class HandbookSync {
         List<Line> lines = new ArrayList<>();
         description(lines, feat.description(), Optional.empty());
         lines.add(Line.text(""));
-        lines.add(Line.text("§7Cost: §f" + feat.cost() + " skill points"
-                + (feat.level() > 0 ? " §7· needs level §f" + feat.level() : "")));
+        lines.add(Line.text("§7" + hbf("hb.cost_line", "cost", feat.cost())
+                + (feat.level() > 0 ? " §7· " + hbf("hb.needs_level", "level", feat.level()) : "")));
         if (feat.hasKarmaBand()) {
-            lines.add(Line.text("§7Soul: §f" + karmaBand(feat.karmaMin(), feat.karmaMax())
-                    + " §8(drifting out of band suspends the feat)"));
+            lines.add(Line.text("§7" + hbf("hb.soul_line", "band", karmaBand(feat.karmaMin(), feat.karmaMax()))));
         }
         if (!feat.requires().isEmpty()) {
-            lines.add(Line.text("§6Requires the feat" + (feat.requires().size() > 1 ? "s" : "") + ":"));
+            lines.add(Line.text("§6" + hb("hb.requires_feats")));
             for (Identifier req : feat.requires()) {
                 String name = featLookup.get(net.minecraft.resources.ResourceKey
                         .create(LQRegistries.FEAT, req))
@@ -109,7 +108,7 @@ public final class HandbookSync {
             }
         }
         if (!feat.allowedRaces().isEmpty() || !feat.allowedGroups().isEmpty()) {
-            lines.add(Line.text("§6Only for:"));
+            lines.add(Line.text("§6" + hb("hb.only_for")));
             raceLookup.listElements()
                     .sorted(Comparator.comparing(ref -> ref.value().name()))
                     .forEach(ref -> {
@@ -124,7 +123,7 @@ public final class HandbookSync {
                     });
         }
         if (!feat.allowedClasses().isEmpty()) {
-            lines.add(Line.text("§6Only for the calling" + (feat.allowedClasses().size() > 1 ? "s" : "") + ":"));
+            lines.add(Line.text("§6" + hb("hb.only_for_calling")));
             for (Identifier classId : feat.allowedClasses()) {
                 String name = classLookup.get(net.minecraft.resources.ResourceKey
                         .create(LQRegistries.CHAR_CLASS, classId))
@@ -144,14 +143,14 @@ public final class HandbookSync {
             HolderLookup.RegistryLookup<CharClass> classLookup, Map<String, Entry> gear) {
         List<Line> lines = new ArrayList<>();
         description(lines, race.identity().description(), race.identity().longDescription());
-        if (race.isDefault()) lines.add(Line.text("§8The starting race, until you choose."));
+        if (race.isDefault()) lines.add(Line.text("§8" + hb("hb.starting_race")));
         lines.add(Line.text(""));
-        lines.add(Line.text("§7Health §f" + trim(race.baseHealth())
-                + " §7· Mana §f" + trim(race.baseMana())
-                + " §7(+" + trim(race.manaPerSecond()) + "/s) §7· Size §f" + trim(race.size())));
+        lines.add(Line.text("§7" + hb("hb.health") + " §f" + trim(race.baseHealth())
+                + " §7· " + Lang.term("mana") + " §f" + trim(race.baseMana())
+                + " §7(+" + trim(race.manaPerSecond()) + "/s) §7· " + hb("hb.size") + " §f" + trim(race.size())));
         statLine(lines, race.statmods());
         if (!race.groups().isEmpty()) {
-            lines.add(Line.text("§7Lineage: §f" + String.join(", ", race.groups())));
+            lines.add(Line.text("§7" + hb("hb.lineage") + ": §f" + String.join(", ", race.groups())));
         }
         itemRuleLines(lines, race.itemRules(), gear);
         craftRuleLines(lines, race.craftRules());
@@ -170,7 +169,7 @@ public final class HandbookSync {
         });
         if (!classLines.isEmpty()) {
             lines.add(Line.text(""));
-            lines.add(Line.text("§6Open classes:"));
+            lines.add(Line.text("§6" + hb("hb.open_classes")));
             lines.addAll(classLines);
         }
         return new Entry(id.toString(), race.name(), "", 0, lines);
@@ -189,7 +188,7 @@ public final class HandbookSync {
             HolderLookup.RegistryLookup<Race> raceLookup, Map<String, Entry> gear) {
         List<Line> lines = new ArrayList<>();
         description(lines, charClass.identity().description(), charClass.identity().longDescription());
-        if (charClass.isDefault()) lines.add(Line.text("§8The starting class, until you choose."));
+        if (charClass.isDefault()) lines.add(Line.text("§8" + hb("hb.starting_class")));
         lines.add(Line.text(""));
 
         var growth = charClass.growth();
@@ -204,12 +203,12 @@ public final class HandbookSync {
         statLine(lines, charClass.statmods());
 
         var el = charClass.eligibility();
-        if (el.mainOnly()) lines.add(Line.text("§7Main class only."));
-        if (el.subOnly()) lines.add(Line.text("§7Sub class only."));
+        if (el.mainOnly()) lines.add(Line.text("§7" + hb("hb.main_only")));
+        if (el.subOnly()) lines.add(Line.text("§7" + hb("hb.sub_only")));
 
         // "Open to" resolves groups to the actual races — clickable, no jargon.
         if (!el.allowedRaces().isEmpty() || !el.allowedGroups().isEmpty()) {
-            lines.add(Line.text("§6Open to:"));
+            lines.add(Line.text("§6" + hb("hb.open_to")));
             raceLookup.listElements()
                     .sorted(Comparator.comparing(ref -> ref.value().name()))
                     .forEach(ref -> {
@@ -221,19 +220,18 @@ public final class HandbookSync {
                         }
                     });
             if (!el.allowedGroups().isEmpty()) {
-                lines.add(Line.text("  §8— the " + String.join(", ", el.allowedGroups())
-                        + " lineage" + (el.allowedGroups().size() > 1 ? "s" : "")));
+                lines.add(Line.text("  §8" + hbf("hb.lineage_line", "list", String.join(", ", el.allowedGroups()))));
             }
         } else {
-            lines.add(Line.text("§7Open to every race."));
+            lines.add(Line.text("§7" + hb("hb.open_to_everyone")));
         }
         if (!el.requires().isEmpty() || !el.requiresOne().isEmpty()) {
-            lines.add(Line.text("§6Requires mastering:"));
+            lines.add(Line.text("§6" + hb("hb.requires_mastering")));
             for (Identifier req : el.requires()) {
                 lines.add(Line.link("  ▸ " + prettify(req.getPath()), "class", req.toString()));
             }
             if (!el.requiresOne().isEmpty()) {
-                lines.add(Line.text("  §7one of:"));
+                lines.add(Line.text("  §7" + hb("hb.one_of")));
                 for (Identifier req : el.requiresOne()) {
                     lines.add(Line.link("  ▸ " + prettify(req.getPath()), "class", req.toString()));
                 }
@@ -254,21 +252,22 @@ public final class HandbookSync {
         List<Line> lines = new ArrayList<>();
         description(lines, def.description(), Optional.empty());
         lines.add(Line.text(""));
-        lines.add(Line.text("§7Type: §f" + def.type().name().toLowerCase(Locale.ROOT)));
+        lines.add(Line.text("§7" + hb("hb.type") + ": §f" + def.type().name().toLowerCase(Locale.ROOT)));
 
         var costs = def.costs();
         StringBuilder cost = new StringBuilder("§7");
-        if (costs.manaCost() > 0) cost.append("Mana ").append(costs.manaCost()).append(" ");
-        if (def.timing().cooldownMs() > 0) cost.append("· Cooldown ").append(def.timing().cooldownMs() / 1000).append("s ");
-        if (def.timing().buildupMs() > 0) cost.append("· Buildup ").append(def.timing().buildupMs() / 1000.0).append("s ");
-        if (def.timing().delayMs() > 0) cost.append("· Delay ").append(def.timing().delayMs() / 1000.0).append("s ");
-        if (def.timing().durationMs() > 0) cost.append("· Lasts ").append(def.timing().durationMs() / 1000.0).append("s");
+        if (costs.manaCost() > 0) cost.append(Lang.term("mana")).append(" ").append(costs.manaCost()).append(" ");
+        if (def.timing().cooldownMs() > 0) cost.append("· ").append(hb("hb.cooldown")).append(" ").append(def.timing().cooldownMs() / 1000).append("s ");
+        if (def.timing().buildupMs() > 0) cost.append("· ").append(hb("hb.buildup")).append(" ").append(def.timing().buildupMs() / 1000.0).append("s ");
+        if (def.timing().delayMs() > 0) cost.append("· ").append(hb("hb.delay")).append(" ").append(def.timing().delayMs() / 1000.0).append("s ");
+        if (def.timing().durationMs() > 0) cost.append("· ").append(hb("hb.lasts")).append(" ").append(def.timing().durationMs() / 1000.0).append("s");
         if (cost.length() > 2) lines.add(Line.text(cost.toString().strip()));
-        costs.consumes().ifPresent(item -> lines.add(Line.text("§7Consumes: §f"
+        costs.consumes().ifPresent(item -> lines.add(Line.text("§7" + hb("hb.consumes") + ": §f"
                 + costs.consumesQty() + "× " + itemName(item))));
         if (costs.karmaRequired() != 0) {
-            lines.add(Line.text("§7Karma: needs " + (costs.karmaRequired() > 0 ? "at least " : "at most ")
-                    + costs.karmaRequired()));
+            lines.add(Line.text("§7" + hbf(costs.karmaRequired() > 0
+                    ? "hb.karma_needs_at_least" : "hb.karma_needs_at_most",
+                    "value", costs.karmaRequired())));
         }
 
         // Who teaches it, and when?
@@ -289,7 +288,7 @@ public final class HandbookSync {
         });
         if (!sources.isEmpty()) {
             lines.add(Line.text(""));
-            lines.add(Line.text("§6Taught by:"));
+            lines.add(Line.text("§6" + hb("hb.taught_by")));
             lines.addAll(sources);
         }
         return new Entry(id.toString(), def.name(), def.icon(), 0, lines);
@@ -301,13 +300,13 @@ public final class HandbookSync {
         desc.ifPresent(d -> lines.add(Line.text("§f" + d)));
         longDesc.ifPresent(d -> lines.add(Line.text("§7" + d)));
         if (desc.isEmpty() && longDesc.isEmpty()) {
-            lines.add(Line.text("§8(No description — add one in the YAML!)"));
+            lines.add(Line.text("§8" + hb("hb.no_description")));
         }
     }
 
     private static void statLine(List<Line> lines, StatBlock mods) {
         if (mods.equals(StatBlock.ZERO)) return;
-        StringBuilder sb = new StringBuilder("§7Stats: §f");
+        StringBuilder sb = new StringBuilder("§7" + hb("hb.stats") + ": §f");
         boolean first = true;
         for (Stat stat : Stat.values()) {
             int v = mods.get(stat);
@@ -321,14 +320,14 @@ public final class HandbookSync {
 
     private static void craftRuleLines(List<Line> lines, com.sablednah.legendquest.data.CraftRules rules) {
         List<String> barred = new ArrayList<>();
-        if (!rules.crafting()) barred.add("crafting");
-        if (!rules.smelting()) barred.add("smelting");
-        if (!rules.brewing()) barred.add("brewing");
-        if (!rules.enchanting()) barred.add("enchanting");
-        if (!rules.repairing()) barred.add("repair");
-        if (!rules.taming()) barred.add("taming");
+        if (!rules.crafting()) barred.add(hb("hb.station_crafting"));
+        if (!rules.smelting()) barred.add(hb("hb.station_smelting"));
+        if (!rules.brewing()) barred.add(hb("hb.station_brewing"));
+        if (!rules.enchanting()) barred.add(hb("hb.station_enchanting"));
+        if (!rules.repairing()) barred.add(hb("hb.station_repair"));
+        if (!rules.taming()) barred.add(hb("hb.station_taming"));
         if (!barred.isEmpty()) {
-            lines.add(Line.text("§7Stations §cbarred§7: " + String.join(", ", barred)));
+            lines.add(Line.text("§7" + hbf("hb.stations_barred", "list", String.join(", ", barred))));
         }
     }
 
@@ -338,26 +337,26 @@ public final class HandbookSync {
             String name = attrId == null ? id : prettify(attrId.getPath());
             String ramp = bonus.perLevel() != 0
                     ? " §8(+" + trim(bonus.perLevel()) + "/level)" : "";
-            lines.add(Line.text("§dBoon: §f" + signed(bonus.base()) + " " + name + ramp));
+            lines.add(Line.text("§d" + hb("hb.boon") + ": §f" + signed(bonus.base()) + " " + name + ramp));
         });
         if (boons.enchantRebate() > 0) {
-            lines.add(Line.text("§dBoon: §fenchanting rebates " + boons.enchantRebate()
-                    + " XP level" + (boons.enchantRebate() == 1 ? "" : "s")));
+            lines.add(Line.text("§d" + hb("hb.boon") + ": §f"
+                    + hbf("hb.boon_enchant", "levels", boons.enchantRebate())));
         }
         if (boons.smithRefund() > 0) {
-            lines.add(Line.text("§dBoon: §f" + Math.round(boons.smithRefund() * 100)
-                    + "% chance to recover a material when crafting gear"));
+            lines.add(Line.text("§d" + hb("hb.boon") + ": §f"
+                    + hbf("hb.boon_smith", "pct", Math.round(boons.smithRefund() * 100))));
         }
         if (boons.goldToolMana() > 0) {
-            lines.add(Line.text("§dBoon: §fgolden tools harvest like netherite, burning "
-                    + trim(boons.goldToolMana()) + " mana per block"));
+            lines.add(Line.text("§d" + hb("hb.boon") + ": §f"
+                    + hbf("hb.boon_goldtool", "mana", trim(boons.goldToolMana()))));
         }
     }
 
     private static void grantLines(List<Line> lines, Map<Identifier, SkillGrant> skills) {
         if (skills.isEmpty()) return;
         lines.add(Line.text(""));
-        lines.add(Line.text("§6Skills:"));
+        lines.add(Line.text("§6" + hb("hb.skills_header")));
         skills.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue(Comparator.comparingInt(SkillGrant::level)))
                 .forEach(entry -> lines.add(Line.link(
@@ -367,13 +366,13 @@ public final class HandbookSync {
 
     private static String grantSuffix(SkillGrant grant) {
         if (grant.level() <= 0 && grant.cost() <= 0 && !grant.hasKarmaBand()) {
-            return " §8(from the start)";
+            return " §8(" + hb("hb.from_start") + ")";
         }
         StringBuilder sb = new StringBuilder(" §8(");
         boolean first = true;
-        if (grant.level() > 0) { sb.append("level ").append(grant.level()); first = false; }
+        if (grant.level() > 0) { sb.append(hbf("hb.grant_level", "level", grant.level())); first = false; }
         if (grant.cost() > 0) {
-            sb.append(first ? "" : ", ").append(grant.cost()).append(" sp");
+            sb.append(first ? "" : ", ").append(hbf("hb.grant_sp", "cost", grant.cost()));
             first = false;
         }
         if (grant.hasKarmaBand()) sb.append(first ? "" : ", ").append(karmaBand(grant.karmaMin(), grant.karmaMax()));
@@ -382,27 +381,27 @@ public final class HandbookSync {
 
     /** "karma ≥ 50" / "karma ≤ -50" / "karma 0..100" — soul requirements. */
     private static String karmaBand(long min, long max) {
-        if (min != Long.MIN_VALUE && max != Long.MAX_VALUE) return "karma " + min + "…" + max;
-        if (min != Long.MIN_VALUE) return "karma ≥ " + min;
-        return "karma ≤ " + max;
+        if (min != Long.MIN_VALUE && max != Long.MAX_VALUE) return hbf("hb.karma_between", "min", min, "max", max);
+        if (min != Long.MIN_VALUE) return hbf("hb.karma_at_least", "value", min);
+        return hbf("hb.karma_at_most", "value", max);
     }
 
     // --- item rules + gear pages ---
 
     private static void itemRuleLines(List<Line> lines, ItemRules rules, Map<String, Entry> gear) {
-        ruleLine(lines, "Weapons", rules.allowedWeapons(), false, gear);
-        ruleLine(lines, "Weapons", rules.disallowedWeapons(), true, gear);
-        ruleLine(lines, "Armour", rules.allowedArmour(), false, gear);
-        ruleLine(lines, "Armour", rules.disallowedArmour(), true, gear);
-        ruleLine(lines, "Tools", rules.allowedTools(), false, gear);
-        ruleLine(lines, "Tools", rules.disallowedTools(), true, gear);
+        ruleLine(lines, hb("hb.weapons"), rules.allowedWeapons(), false, gear);
+        ruleLine(lines, hb("hb.weapons"), rules.disallowedWeapons(), true, gear);
+        ruleLine(lines, hb("hb.armour"), rules.allowedArmour(), false, gear);
+        ruleLine(lines, hb("hb.armour"), rules.disallowedArmour(), true, gear);
+        ruleLine(lines, hb("hb.tools"), rules.allowedTools(), false, gear);
+        ruleLine(lines, hb("hb.tools"), rules.disallowedTools(), true, gear);
     }
 
     private static void ruleLine(List<Line> lines, String label,
             Optional<HolderSet<Item>> maybeSet, boolean barred, Map<String, Entry> gear) {
         if (maybeSet.isEmpty()) return;
         HolderSet<Item> set = maybeSet.get();
-        String verb = barred ? " §cbarred§7: " : ": ";
+        String verb = barred ? " §c" + hb("hb.barred") + "§7: " : ": ";
         var tagKey = set.unwrapKey();
         if (tagKey.isPresent()) {
             String gearId = gearPage(gear, set);
@@ -420,7 +419,7 @@ public final class HandbookSync {
         String id = "#" + tagKey.location();
         gear.computeIfAbsent(id, key -> {
             List<Line> lines = new ArrayList<>();
-            lines.add(Line.text("§7Everything the tag §f" + tagKey.location() + "§7 covers:"));
+            lines.add(Line.text("§7" + hbf("hb.tag_covers", "tag", tagKey.location())));
             lines.add(Line.text(""));
             String iconId = "";
             for (Holder<Item> holder : set) {
@@ -428,7 +427,7 @@ public final class HandbookSync {
                 lines.add(Line.icon("§f" + itemName(holder.value()), itemId.toString()));
                 if (iconId.isEmpty()) iconId = itemId.toString();
             }
-            if (lines.size() == 2) lines.add(Line.text("§8(empty tag)"));
+            if (lines.size() == 2) lines.add(Line.text("§8" + hb("hb.empty_tag")));
             return new Entry(key, prettify(tagKey.location().getPath()), iconId, 0, lines);
         });
         return id;
@@ -460,6 +459,15 @@ public final class HandbookSync {
 
     private static String signed(double value) {
         return (value > 0 ? "+" : "") + trim(value);
+    }
+
+    /** hb.* strings render client-side without Feedback, so convert '&' here. */
+    private static String hb(String key) {
+        return Lang.get(key).replace('&', '\u00a7');
+    }
+
+    private static String hbf(String key, Object... kv) {
+        return Lang.fmt(key, kv).replace('&', '\u00a7');
     }
 
     private HandbookSync() {}

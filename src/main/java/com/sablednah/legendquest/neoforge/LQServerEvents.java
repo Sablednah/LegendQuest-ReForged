@@ -39,17 +39,27 @@ public final class LQServerEvents {
     // --- lifecycle ---
 
     @SubscribeEvent
+    static void onServerStarting(net.neoforged.neoforge.event.server.ServerAboutToStartEvent event) {
+        Lang.load(); // messages.yml: generated on first run, merged thereafter
+    }
+
+    private static void sendVocab(ServerPlayer player) {
+        Net.sendIfAble(player, new com.sablednah.legendquest.network.VocabPayload(Lang.clientVocab()));
+    }
+
+    @SubscribeEvent
     static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         CharacterService.ensureInitialised(player);
+        sendVocab(player);
         CharacterService.refresh(player);
         HandbookSync.send(player);
         var pc = CharacterService.data(player);
         String race = CharacterService.race(player).map(r -> r.name()).orElse("Undecided");
         String cls = CharacterService.mainClass(player).map(c -> c.name()).orElse("Citizen");
-        Feedback.chat(player, "&6[LegendQuest]&r " + race + " " + cls
-                + " &7(level " + CharacterService.level(player) + ", "
-                + CharacterService.karmaName(pc.karma()) + ")");
+        Feedback.chat(player, Lang.fmt("msg.login", "race", race, "class", cls,
+                "level", CharacterService.level(player),
+                "karma", CharacterService.karmaName(pc.karma())));
     }
 
     /**
@@ -63,12 +73,15 @@ public final class LQServerEvents {
     @SubscribeEvent
     static void onDatapackSync(net.neoforged.neoforge.event.OnDatapackSyncEvent event) {
         if (event.getPlayer() != null) return; // a join, not a /reload
+        Lang.load(); // messages.yml IS reloadable — text isn't a frozen registry
+        for (ServerPlayer player : event.getPlayerList().getPlayers()) {
+            sendVocab(player);
+        }
         for (ServerPlayer player : event.getPlayerList().getPlayers()) {
             if (net.minecraft.commands.Commands.hasPermission(
                     net.minecraft.commands.Commands.LEVEL_GAMEMASTERS)
                     .test(player.createCommandSourceStack())) {
-                Feedback.chat(player, "&6[LegendQuest]&7 Tags reloaded. Race/class/skill/feat "
-                        + "content changes apply on server RESTART (registries freeze at world load).");
+                Feedback.chat(player, Lang.get("msg.reload_notice"));
             }
         }
     }
@@ -168,7 +181,7 @@ public final class LQServerEvents {
             int after = CharacterService.level(player);
             if (after > before) {
                 CharacterService.refresh(player);
-                Feedback.chat(player, "&6[LegendQuest]&a Level up! You are now level " + after + ".");
+                Feedback.chat(player, Lang.fmt("msg.levelup", "level", after));
             }
         });
     }
@@ -185,7 +198,7 @@ public final class LQServerEvents {
                 && attacker instanceof ServerPlayer pa && victim instanceof ServerPlayer pv
                 && Parties.get(pa.level().getServer()).sameParty(pa.getUUID(), pv.getUUID())) {
             event.setCanceled(true);
-            Feedback.actionBar(pa, "&7" + pv.getName().getString() + " is in your party.");
+            Feedback.actionBar(pa, Lang.fmt("msg.party.friendly_fire", "name", pv.getName().getString()));
             return;
         }
 
@@ -194,8 +207,7 @@ public final class LQServerEvents {
             ItemStack weapon = playerAttacker.getMainHandItem();
             if (!RestrictionEngine.isAllowed(playerAttacker, ItemRules.Slot.WEAPON, weapon)) {
                 event.setAmount(Math.min(event.getAmount(), 1.0F));
-                Feedback.actionBar(playerAttacker, "&cYou fumble with the unfamiliar "
-                        + weapon.getHoverName().getString() + "...");
+                Feedback.actionBar(playerAttacker, Lang.fmt("msg.combat.fumble", "item", weapon.getHoverName().getString()));
                 indicate(playerAttacker, victim, CombatIndicatorPayload.FUMBLE);
             }
         }
@@ -219,9 +231,9 @@ public final class LQServerEvents {
                         dodgeMod != null ? dodgeMod : 0);
                 if (outcome == Mechanics.AttackOutcome.MISS) {
                     event.setCanceled(true);
-                    if (victim instanceof ServerPlayer p) Feedback.actionBar(p, "&aDodged!");
+                    if (victim instanceof ServerPlayer p) Feedback.actionBar(p, Lang.get("msg.combat.dodged_you"));
                     if (attacker instanceof ServerPlayer p) {
-                        Feedback.actionBar(p, "&7They dodged.");
+                        Feedback.actionBar(p, Lang.get("msg.combat.they_dodged"));
                         indicate(p, victim, CombatIndicatorPayload.MISS);
                     }
                     return;
@@ -273,8 +285,7 @@ public final class LQServerEvents {
         if (!RestrictionEngine.isAllowed(player, ItemRules.Slot.ARMOUR, stack)) {
             // You may wear it — you'll just regret it. Penalties apply on the
             // next penalty tick; this is the up-front warning.
-            Feedback.actionBar(player, "&c" + stack.getHoverName().getString()
-                    + " was not made for your kind — it will slow and tire you.");
+            Feedback.actionBar(player, Lang.fmt("msg.combat.bad_armour", "item", stack.getHoverName().getString()));
         }
     }
 
@@ -315,7 +326,7 @@ public final class LQServerEvents {
                     Feedback.actionBar(player, loadoutBar(player, pc, resultColour(result)));
                 }
             } else {
-                Feedback.actionBar(player, "&7Loadout is empty — /loadout add <skill>");
+                Feedback.actionBar(player, Lang.get("msg.loadout.empty"));
             }
         }
         return true;
@@ -390,8 +401,7 @@ public final class LQServerEvents {
                 b -> b.enchantRebate()));
         if (rebate <= 0) return;
         player.giveExperienceLevels(rebate);
-        Feedback.actionBar(player, "&dRunic thrift: " + rebate + " level"
-                + (rebate == 1 ? "" : "s") + " rebated.");
+        Feedback.actionBar(player, Lang.fmt("msg.boon.rebate", "levels", rebate));
     }
 
     /** Forge favour: a chance that one material survives crafting gear. */
@@ -419,7 +429,7 @@ public final class LQServerEvents {
         ItemStack refund = best.copyWithCount(1);
         String name = refund.getHoverName().getString();
         player.getInventory().placeItemBackInInventory(refund);
-        Feedback.actionBar(player, "&6The forge favours you — a " + name + " survives the making.");
+        Feedback.actionBar(player, Lang.fmt("msg.boon.refund", "item", name));
     }
 
     /** Golden tools as arcane conduits: they harvest like netherite for
@@ -484,27 +494,27 @@ public final class LQServerEvents {
         if (block == net.minecraft.world.level.block.Blocks.CRAFTING_TABLE
                 || block == net.minecraft.world.level.block.Blocks.CRAFTER) {
             if (!craftAllowed(player, com.sablednah.legendquest.data.CraftRules::crafting)) {
-                refusal = "&cYour hands were never taught the maker's craft.";
+                refusal = Lang.get("msg.station.crafting");
             }
         } else if (block == net.minecraft.world.level.block.Blocks.FURNACE
                 || block == net.minecraft.world.level.block.Blocks.BLAST_FURNACE
                 || block == net.minecraft.world.level.block.Blocks.SMOKER) {
             if (!craftAllowed(player, com.sablednah.legendquest.data.CraftRules::smelting)) {
-                refusal = "&cThe fire does not answer to your kind.";
+                refusal = Lang.get("msg.station.smelting");
             }
         } else if (block == net.minecraft.world.level.block.Blocks.BREWING_STAND) {
             if (!craftAllowed(player, com.sablednah.legendquest.data.CraftRules::brewing)) {
-                refusal = "&cPotioncraft is beyond your discipline.";
+                refusal = Lang.get("msg.station.brewing");
             }
         } else if (block == net.minecraft.world.level.block.Blocks.ENCHANTING_TABLE) {
             if (!craftAllowed(player, com.sablednah.legendquest.data.CraftRules::enchanting)) {
-                refusal = "&cThe runes squirm away from your gaze.";
+                refusal = Lang.get("msg.station.enchanting");
             }
         } else if (state.is(net.minecraft.tags.BlockTags.ANVIL)
                 || block == net.minecraft.world.level.block.Blocks.GRINDSTONE
                 || block == net.minecraft.world.level.block.Blocks.SMITHING_TABLE) {
             if (!craftAllowed(player, com.sablednah.legendquest.data.CraftRules::repairing)) {
-                refusal = "&cMending is a craft, and it is not yours.";
+                refusal = Lang.get("msg.station.repairing");
             }
         }
         if (refusal != null) {
@@ -518,7 +528,7 @@ public final class LQServerEvents {
         if (!(event.getTamer() instanceof ServerPlayer player)) return;
         if (!craftAllowed(player, com.sablednah.legendquest.data.CraftRules::taming)) {
             event.setCanceled(true);
-            Feedback.actionBar(player, "&cThe beast senses your kind cannot be trusted.");
+            Feedback.actionBar(player, Lang.get("msg.station.taming"));
         }
     }
 

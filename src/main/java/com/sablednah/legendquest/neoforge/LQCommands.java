@@ -40,14 +40,14 @@ import com.mojang.brigadier.arguments.LongArgumentType;
 public final class LQCommands {
 
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_RACE =
-            new DynamicCommandExceptionType(id -> Component.literal("Unknown race: " + id));
+            new DynamicCommandExceptionType(id -> Component.literal(Lang.fmt("msg.cmd.unknown_race", "id", id)));
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_CLASS =
-            new DynamicCommandExceptionType(id -> Component.literal("Unknown class: " + id));
+            new DynamicCommandExceptionType(id -> Component.literal(Lang.fmt("msg.cmd.unknown_class", "id", id)));
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_SKILL =
-            new DynamicCommandExceptionType(id -> Component.literal("Unknown skill: " + id));
+            new DynamicCommandExceptionType(id -> Component.literal(Lang.fmt("msg.cmd.unknown_skill", "id", id)));
     private static final DynamicCommandExceptionType ERROR_AMBIGUOUS =
             new DynamicCommandExceptionType(ids -> Component.literal(
-                    "That short name matches more than one entry — use the full id: " + ids));
+                    Lang.fmt("msg.cmd.ambiguous", "ids", ids)));
 
     /**
      * Resolve what the player typed, accepting the bare name: {@code dwarf}
@@ -251,27 +251,27 @@ public final class LQCommands {
                 ERROR_UNKNOWN_SKILL);
         var held = player.getMainHandItem();
         if (held.isEmpty()) {
-            Feedback.chat(player, "&cHold the item you want to bind first.");
+            Feedback.chat(player, Lang.get("msg.bind.hold_item"));
             return 0;
         }
         if (!SkillEngine.grants(player).containsKey(skillId)) {
-            Feedback.chat(player, "&cYou don't know that skill.");
+            Feedback.chat(player, Lang.get("msg.skill.not_known"));
             return 0;
         }
         var def = SkillEngine.definition(player, skillId);
         if (def.isEmpty() || def.get().type() != com.sablednah.legendquest.skills.SkillType.ACTIVE) {
-            Feedback.chat(player, "&cOnly active skills can be bound to items.");
+            Feedback.chat(player, Lang.get("msg.bind.active_only"));
             return 0;
         }
         Identifier itemId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(held.getItem());
         PlayerCharacter pc = CharacterService.data(player);
         if (pc.loadoutItem().map(itemId::equals).orElse(false)) {
-            Feedback.chat(player, "&cThat item type is your loadout spellbook — /loadout unbind it first.");
+            Feedback.chat(player, Lang.get("msg.bind.is_spellbook"));
             return 0;
         }
         pc.bind(itemId, skillId);
-        Feedback.chat(player, "&6Bound &l" + def.get().name() + "&r&6 to "
-                + held.getHoverName().getString() + " &7(right-click to use, /unbind to clear)");
+        Feedback.chat(player, Lang.fmt("msg.bind.done",
+                "skill", def.get().name(), "item", held.getHoverName().getString()));
         return 1;
     }
 
@@ -284,21 +284,20 @@ public final class LQCommands {
         if (party.isEmpty()) {
             var invite = parties.pendingInvite(player.getUUID());
             if (invite.isPresent()) {
-                Feedback.chat(player, "&6You are invited to &l" + invite.get().name()
-                        + "&r&6 — /party accept or /party decline.");
+                Feedback.chat(player, Lang.fmt("msg.party.info_invited", "name", invite.get().name()));
             } else {
-                Feedback.chat(player, "&7Not in a party. /party create <name> to start one.");
+                Feedback.chat(player, Lang.get("msg.party.info_none"));
             }
             return 0;
         }
         var p = party.get();
-        StringBuilder sb = new StringBuilder("§6Party §l" + p.name() + "§r§6 — members:");
+        StringBuilder sb = new StringBuilder(lc("msg.party.info_header", "name", p.name()));
         for (var memberId : p.members()) {
             ServerPlayer online = ctx.getSource().getServer().getPlayerList().getPlayer(memberId);
             String name = online != null ? online.getName().getString()
-                    : memberId.toString().substring(0, 8) + "… (offline)";
+                    : memberId.toString().substring(0, 8) + "… " + lc("msg.list.offline");
             sb.append("\n §7-§r ").append(online != null ? "§a" : "§8").append(name);
-            if (memberId.equals(p.owner())) sb.append(" §6(leader)");
+            if (memberId.equals(p.owner())) sb.append(" §6").append(lc("msg.list.leader"));
         }
         ctx.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
         return 1;
@@ -338,11 +337,11 @@ public final class LQCommands {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         PlayerCharacter pc = CharacterService.data(player);
         if (pc.loadout().isEmpty()) {
-            Feedback.chat(player, "&7Loadout empty. /loadout add <skill>, then hold an item and /loadout bind.");
+            Feedback.chat(player, Lang.get("msg.loadout.show_empty"));
             return 0;
         }
-        String item = pc.loadoutItem().map(Identifier::toString).orElse("&cno item bound — /loadout bind");
-        Feedback.chat(player, "&6Loadout &7(" + item + "&7):");
+        String item = pc.loadoutItem().map(Identifier::toString).orElse(Lang.get("msg.loadout.no_item"));
+        Feedback.chat(player, Lang.fmt("msg.loadout.show_header", "item", item));
         Feedback.chat(player, LQServerEvents.loadoutBar(player, pc, "&e"));
         return 1;
     }
@@ -366,7 +365,7 @@ public final class LQCommands {
     private static int loadoutClear(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         CharacterService.data(player).clearLoadout();
-        Feedback.chat(player, "&6Loadout cleared.");
+        Feedback.chat(player, Lang.get("msg.loadout.cleared"));
         return 1;
     }
 
@@ -374,25 +373,24 @@ public final class LQCommands {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         var held = player.getMainHandItem();
         if (held.isEmpty()) {
-            Feedback.chat(player, "&cHold the item you want as your spellbook.");
+            Feedback.chat(player, Lang.get("msg.loadout.hold_spellbook"));
             return 0;
         }
         Identifier itemId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(held.getItem());
         PlayerCharacter pc = CharacterService.data(player);
         if (pc.bindingFor(itemId).isPresent()) {
-            Feedback.chat(player, "&cThat item type already has a single-skill /bind — /unbind it first.");
+            Feedback.chat(player, Lang.get("msg.loadout.bind_clash"));
             return 0;
         }
         pc.setLoadoutItem(java.util.Optional.of(itemId));
-        Feedback.chat(player, "&6" + held.getHoverName().getString()
-                + " is now your spellbook: right-click casts, sneak+right-click cycles.");
+        Feedback.chat(player, Lang.fmt("msg.loadout.spellbook_set", "item", held.getHoverName().getString()));
         return 1;
     }
 
     private static int loadoutUnbind(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         CharacterService.data(player).setLoadoutItem(java.util.Optional.empty());
-        Feedback.chat(player, "&6Loadout item unbound (the skill list is kept).");
+        Feedback.chat(player, Lang.get("msg.loadout.unbound"));
         return 1;
     }
 
@@ -400,17 +398,17 @@ public final class LQCommands {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         var held = player.getMainHandItem();
         if (held.isEmpty()) {
-            Feedback.chat(player, "&cHold the item you want to unbind.");
+            Feedback.chat(player, Lang.get("msg.unbind.hold_item"));
             return 0;
         }
         Identifier itemId = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(held.getItem());
         var removed = CharacterService.data(player).unbind(itemId);
         if (removed.isPresent()) {
-            Feedback.chat(player, "&6Unbound &l" + removed.get() + "&r&6 from "
-                    + held.getHoverName().getString() + ".");
+            Feedback.chat(player, Lang.fmt("msg.unbind.done",
+                    "skill", removed.get(), "item", held.getHoverName().getString()));
             return 1;
         }
-        Feedback.chat(player, "&7Nothing is bound to " + held.getHoverName().getString() + ".");
+        Feedback.chat(player, Lang.fmt("msg.unbind.nothing", "item", held.getHoverName().getString()));
         return 0;
     }
 
@@ -444,15 +442,15 @@ public final class LQCommands {
     private static int raceList(CommandContext<CommandSourceStack> ctx) {
         var lookup = ctx.getSource().registryAccess().lookupOrThrow(LQRegistries.RACE);
         ServerPlayer viewer = ctx.getSource().getEntity() instanceof ServerPlayer sp ? sp : null;
-        StringBuilder sb = new StringBuilder("§6Races:§r");
+        StringBuilder sb = new StringBuilder(lc("msg.list.races_header"));
         lookup.listElements().sorted(Comparator.comparing(r -> r.key().identifier()))
                 .forEach(ref -> {
                     boolean locked = viewer != null
                             && !LQPermissions.canSelectRace(viewer, ref.key().identifier());
                     sb.append("\n §7-§r ").append(locked ? "§8" : "").append(ref.value().name())
                             .append(" §8(").append(ref.key().identifier()).append(")")
-                            .append(ref.value().isDefault() ? " §7[default]" : "")
-                            .append(locked ? " §c[locked]" : "");
+                            .append(ref.value().isDefault() ? " " + lc("msg.list.default_tag") : "")
+                            .append(locked ? " " + lc("msg.list.locked_tag") : "");
                 });
         ctx.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
         return 1;
@@ -460,11 +458,11 @@ public final class LQCommands {
 
     private static int classList(CommandContext<CommandSourceStack> ctx) {
         var lookup = ctx.getSource().registryAccess().lookupOrThrow(LQRegistries.CHAR_CLASS);
-        StringBuilder sb = new StringBuilder("§6Classes:§r");
+        StringBuilder sb = new StringBuilder(lc("msg.list.classes_header"));
         lookup.listElements().sorted(Comparator.comparing(r -> r.key().identifier()))
                 .forEach(ref -> sb.append("\n §7-§r ").append(ref.value().name())
                         .append(" §8(").append(ref.key().identifier()).append(")")
-                        .append(ref.value().isDefault() ? " §7[default]" : ""));
+                        .append(ref.value().isDefault() ? " " + lc("msg.list.default_tag") : ""));
         ctx.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
         return 1;
     }
@@ -490,27 +488,27 @@ public final class LQCommands {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         PlayerCharacter pc = CharacterService.data(player);
         var stats = CharacterService.effectiveStats(player);
-        String race = CharacterService.race(player).map(Race::name).orElse("Undecided");
-        String main = CharacterService.mainClass(player).map(CharClass::name).orElse("Citizen");
+        String race = CharacterService.race(player).map(Race::name).orElse(Lang.get("msg.stats.undecided"));
+        String main = CharacterService.mainClass(player).map(CharClass::name).orElse(Lang.get("msg.stats.citizen"));
         String sub = CharacterService.subClass(player).map(CharClass::name).map(n -> " / " + n).orElse("");
         StringBuilder sb = new StringBuilder();
-        sb.append("§6=== ").append(player.getName().getString()).append(" — ")
-                .append(race).append(" ").append(main).append(sub).append(" ===§r");
-        sb.append("\n§7Level §f").append(CharacterService.level(player))
-                .append(" §7Karma §f").append(CharacterService.karmaName(pc.karma()))
-                .append(" §8(").append(pc.karma()).append(")");
+        sb.append(lc("msg.stats.header", "player", player.getName().getString(),
+                "race", race, "main", main, "sub", sub));
+        sb.append("\n").append(lc("msg.stats.line1", "level", CharacterService.level(player),
+                "karma_name", CharacterService.karmaName(pc.karma()), "karma", pc.karma()));
         for (Stat stat : Stat.values()) {
             int value = stats.get(stat);
             int mod = Stat.modifier(value);
             sb.append("\n§7").append(stat.name()).append(": §f").append(value)
                     .append(" §8(").append(mod >= 0 ? "+" : "").append(mod).append(")");
         }
-        sb.append("\n§7HP §f").append(String.format("%.0f", (double) player.getHealth()))
-                .append("§7/§f").append(String.format("%.0f", CharacterService.maxHealth(player)))
-                .append(" §7Mana §b").append(String.format("%.0f", pc.mana()))
-                .append("§7/§b").append(String.format("%.0f", CharacterService.maxMana(player)));
-        sb.append("\n§7Skill points spent §f").append(pc.skillPointsSpent())
-                .append("§7/§f").append(CharacterService.skillPointsTotal(player));
+        sb.append("\n").append(lc("msg.stats.hp_mana",
+                "hp", String.format("%.0f", (double) player.getHealth()),
+                "maxhp", String.format("%.0f", CharacterService.maxHealth(player)),
+                "mana", String.format("%.0f", pc.mana()),
+                "maxmana", String.format("%.0f", CharacterService.maxMana(player))));
+        sb.append("\n").append(lc("msg.stats.points", "spent", pc.skillPointsSpent(),
+                "total", CharacterService.skillPointsTotal(player)));
         ctx.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
         return 1;
     }
@@ -519,18 +517,18 @@ public final class LQCommands {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         var grants = SkillEngine.grants(player);
         if (grants.isEmpty()) {
-            Feedback.chat(player, "&7Your race and class grant no skills.");
+            Feedback.chat(player, Lang.get("msg.list.no_skills"));
             return 0;
         }
         long now = System.currentTimeMillis();
         PlayerCharacter pc = CharacterService.data(player);
-        StringBuilder sb = new StringBuilder("§6Skills:§r");
+        StringBuilder sb = new StringBuilder(lc("msg.list.skills_header"));
         grants.entrySet().stream().sorted(java.util.Map.Entry.comparingByKey()).forEach(entry -> {
             Identifier id = entry.getKey();
             SkillGrant grant = entry.getValue();
             var def = SkillEngine.definition(player, id);
             if (def.isEmpty()) {
-                sb.append("\n §c- ").append(id).append(" (missing definition!)");
+                sb.append("\n §c- ").append(id).append(" ").append(lc("msg.list.missing_def"));
                 return;
             }
             boolean owned = SkillEngine.owns(player, id, grant);
@@ -539,8 +537,8 @@ public final class LQCommands {
                     .append(" §8(").append(id).append(") §7")
                     .append(def.get().type().name().toLowerCase());
             if (!owned) {
-                sb.append(" §8[level ").append(grant.level());
-                if (grant.cost() > 0) sb.append(", ").append(grant.cost()).append(" sp");
+                sb.append(" §8[").append(lc("hb.grant_level", "level", grant.level()));
+                if (grant.cost() > 0) sb.append(", ").append(lc("hb.grant_sp", "cost", grant.cost()));
                 sb.append("]");
             } else if (phase != SkillPhase.READY) {
                 sb.append(" §c").append(phase.name().toLowerCase());
@@ -567,19 +565,19 @@ public final class LQCommands {
     }
 
     private static final DynamicCommandExceptionType ERROR_UNKNOWN_FEAT =
-            new DynamicCommandExceptionType(id -> Component.literal("Unknown feat: " + id));
+            new DynamicCommandExceptionType(id -> Component.literal(Lang.fmt("msg.cmd.unknown_feat", "id", id)));
 
     private static int featList(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         PlayerCharacter pc = CharacterService.data(player);
         var lookup = ctx.getSource().registryAccess().lookupOrThrow(LQRegistries.FEAT);
-        StringBuilder sb = new StringBuilder("§6Feats §7(browse the Handbook for details):§r");
+        StringBuilder sb = new StringBuilder(lc("msg.list.feats_header"));
         lookup.listElements().sorted(Comparator.comparing(r -> r.value().name())).forEach(ref -> {
             var feat = ref.value();
             boolean owned = pc.hasFeat(ref.key().identifier());
             sb.append("\n §7-§r ").append(owned ? "§a✔ " : "§f").append(feat.name())
-                    .append(" §8(").append(feat.cost()).append(" sp");
-            if (feat.level() > 0) sb.append(", level ").append(feat.level());
+                    .append(" §8(").append(lc("hb.grant_sp", "cost", feat.cost()));
+            if (feat.level() > 0) sb.append(", ").append(lc("hb.grant_level", "level", feat.level()));
             sb.append(")");
         });
         ctx.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
@@ -597,8 +595,8 @@ public final class LQCommands {
     private static int karma(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         PlayerCharacter pc = CharacterService.data(player);
-        Feedback.chat(player, "&6Karma: &f" + CharacterService.karmaName(pc.karma())
-                + " &8(" + pc.karma() + ")");
+        Feedback.chat(player, Lang.fmt("msg.karma.show",
+                "name", CharacterService.karmaName(pc.karma()), "value", pc.karma()));
         return 1;
     }
 
@@ -606,8 +604,9 @@ public final class LQCommands {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         int roll = Mechanics.d20(player.getRandom()::nextInt);
         ctx.getSource().getServer().getPlayerList().broadcastSystemMessage(
-                Component.literal("§7" + player.getName().getString() + " rolls a d20: §f" + roll
-                        + (roll == 20 ? " §6— natural 20!" : roll == 1 ? " §c— oof." : "")),
+                Component.literal(lc("msg.roll.broadcast", "player", player.getName().getString(),
+                        "roll", roll,
+                        "flair", roll == 20 ? lc("msg.roll.nat20") : roll == 1 ? lc("msg.roll.nat1") : "")),
                 false);
         return roll;
     }
@@ -634,9 +633,8 @@ public final class LQCommands {
                         .flatMap(id -> CharacterService.charClass(target, classId))
                         .filter(cls -> !CharacterActions.classOpenTo(raceId, race, cls));
                 if (illegal.isPresent()) {
-                    ctx.getSource().sendFailure(Component.literal(
-                            "A " + race.name() + " cannot be a " + illegal.get().name()
-                                    + " — append 'force' to make the illegal combo anyway."));
+                    ctx.getSource().sendFailure(Component.literal(Lang.fmt("msg.admin.race_illegal",
+                            "race", race.name(), "class", illegal.get().name())));
                     return 0;
                 }
             }
@@ -644,9 +642,9 @@ public final class LQCommands {
         CharacterService.data(target).setRace(raceId, false);
         CharacterActions.pruneUnknownSkills(target);
         CharacterService.refresh(target);
-        ctx.getSource().sendSuccess(() -> Component.literal(
-                "Set " + target.getName().getString() + "'s race to " + raceId
-                        + (force ? " (forced)" : "")), true);
+        ctx.getSource().sendSuccess(() -> Component.literal(Lang.fmt("msg.admin.set_race",
+                "player", target.getName().getString(), "id", raceId,
+                "forced", force ? " (forced)" : "")), true);
         return 1;
     }
 
@@ -666,19 +664,18 @@ public final class LQCommands {
                             .map(ref -> !CharacterActions.classOpenTo(rid, ref.value(), cls)))
                     .orElse(false);
             if (raceBlock || cls.eligibility().subOnly()) {
-                ctx.getSource().sendFailure(Component.literal(
-                        (raceBlock ? "That race cannot take " + cls.name()
-                                : cls.name() + " is sub-class only")
-                                + " — append 'force' to make the illegal combo anyway."));
+                ctx.getSource().sendFailure(Component.literal(Lang.fmt(
+                        raceBlock ? "msg.admin.class_blocked" : "msg.admin.class_subonly",
+                        "class", cls.name())));
                 return 0;
             }
         }
         CharacterService.data(target).setMainClass(classId);
         CharacterActions.pruneUnknownSkills(target);
         CharacterService.refresh(target);
-        ctx.getSource().sendSuccess(() -> Component.literal(
-                "Set " + target.getName().getString() + "'s class to " + classId
-                        + (force ? " (forced)" : "")), true);
+        ctx.getSource().sendSuccess(() -> Component.literal(Lang.fmt("msg.admin.set_class",
+                "player", target.getName().getString(), "id", classId,
+                "forced", force ? " (forced)" : "")), true);
         return 1;
     }
 
@@ -688,9 +685,9 @@ public final class LQCommands {
         PlayerCharacter pc = CharacterService.data(target);
         pc.mainClassId().ifPresent(cls -> pc.addXp(cls, amount));
         CharacterService.refresh(target);
-        ctx.getSource().sendSuccess(() -> Component.literal(
-                "Gave " + target.getName().getString() + " " + amount + " class XP (level "
-                        + CharacterService.level(target) + ")"), true);
+        ctx.getSource().sendSuccess(() -> Component.literal(Lang.fmt("msg.admin.gave_xp",
+                "player", target.getName().getString(), "amount", amount,
+                "level", CharacterService.level(target))), true);
         return 1;
     }
 
@@ -699,13 +696,18 @@ public final class LQCommands {
         long amount = LongArgumentType.getLong(ctx, "amount");
         PlayerCharacter pc = CharacterService.data(target);
         pc.addKarma(amount - pc.karma());
-        ctx.getSource().sendSuccess(() -> Component.literal(
-                "Set " + target.getName().getString() + "'s karma to " + amount), true);
+        ctx.getSource().sendSuccess(() -> Component.literal(Lang.fmt("msg.admin.set_karma",
+                "player", target.getName().getString(), "amount", amount)), true);
         return 1;
     }
 
     private static String article(String noun) {
         return noun.isEmpty() || "AEIOU".indexOf(Character.toUpperCase(noun.charAt(0))) < 0 ? "a" : "an";
+    }
+
+    /** Screens built with '§' literals need Lang text converted the same way. */
+    private static String lc(String key, Object... kv) {
+        return Lang.fmt(key, kv).replace('&', '\u00a7');
     }
 
     private LQCommands() {}

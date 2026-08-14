@@ -17,7 +17,7 @@ public final class SkillActions {
         switch (action) {
             case SkillActionPayload.CYCLE -> {
                 if (cycleToUsable(player, pc).isEmpty()) {
-                    Feedback.actionBar(player, "&7Loadout is empty — /loadout add <skill>");
+                    Feedback.actionBar(player, Lang.get("msg.loadout.empty"));
                 } else {
                     Feedback.actionBar(player, LQServerEvents.loadoutBar(player, pc, "&e"));
                 }
@@ -42,8 +42,7 @@ public final class SkillActions {
             }
             case SkillActionPayload.USE_SLOT -> {
                 if (slot < 0 || slot >= pc.loadout().size()) {
-                    Feedback.actionBar(player, "&7Nothing in loadout slot " + (slot + 1)
-                            + " — /loadout add <skill>");
+                    Feedback.actionBar(player, Lang.fmt("msg.loadout.empty_slot", "slot", slot + 1));
                     return;
                 }
                 pc.selectLoadout(slot);
@@ -77,15 +76,13 @@ public final class SkillActions {
             case com.sablednah.legendquest.network.LoadoutEditPayload.SET_ITEM -> {
                 if (payload.skillId().isEmpty()) {
                     pc.setLoadoutItem(java.util.Optional.empty());
-                    Feedback.chat(player, "&6Loadout item unbound (the skill list is kept).");
+                    Feedback.chat(player, Lang.get("msg.loadout.unbound"));
                 } else if (skillId != null) { // an ITEM id in this action
                     if (pc.bindingFor(skillId).isPresent()) {
-                        Feedback.chat(player,
-                                "&cThat item type already has a single-skill /bind — /unbind it first.");
+                        Feedback.chat(player, Lang.get("msg.loadout.bind_clash"));
                     } else {
                         pc.setLoadoutItem(java.util.Optional.of(skillId));
-                        Feedback.chat(player, "&6" + itemName(skillId)
-                                + " is now your spellbook: right-click casts, sneak+right-click cycles.");
+                        Feedback.chat(player, Lang.fmt("msg.loadout.spellbook_set", "item", itemName(skillId)));
                     }
                 }
             }
@@ -122,7 +119,7 @@ public final class SkillActions {
     private static void useSelected(ServerPlayer player, PlayerCharacter pc) {
         var selected = pc.selectedSkill();
         if (selected.isEmpty()) {
-            Feedback.actionBar(player, "&7Loadout is empty — /loadout add <skill>");
+            Feedback.actionBar(player, Lang.get("msg.loadout.empty"));
             return;
         }
         var result = SkillEngine.use(player, selected.get());

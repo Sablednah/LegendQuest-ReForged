@@ -56,7 +56,7 @@ public final class HandbookScreen extends Screen {
     private final List<Hot> hotspots = new ArrayList<>();
 
     private HandbookScreen(String section, String id) {
-        super(Component.literal("LegendQuest Players Handbook"));
+        super(Component.literal(ClientVocab.term("handbook", "LegendQuest Players Handbook")));
         this.section = section;
         this.selectedId = id;
     }
@@ -150,7 +150,7 @@ public final class HandbookScreen extends Screen {
         g.drawString(font, "§6✦", x + BOOK_W - 12, y + h - 13, 0xFFFFFFFF);
 
         // Title with flourishes.
-        String title = "§6§l Players Handbook ";
+        String title = "§6§l " + ClientVocab.term("handbook", "Players Handbook") + " ";
         int titleW = font.width(title);
         int titleX = x + (BOOK_W - titleW) / 2;
         g.drawString(font, "§8── ✦ ──", titleX - 42, y + 7, 0xFFFFFFFF);
@@ -161,11 +161,11 @@ public final class HandbookScreen extends Screen {
         int tabY = y + 19;
         chip(g, x + 8, tabY, 14, "«", !history.isEmpty(), false, mouseX, mouseY, this::goBack);
         int tx = x + 28;
-        tx = tab(g, tx, tabY, "Races", "race", mouseX, mouseY);
-        tx = tab(g, tx, tabY, "Classes", "class", mouseX, mouseY);
-        tx = tab(g, tx, tabY, "Skills", "skill", mouseX, mouseY);
-        tx = tab(g, tx, tabY, "Feats", "feat", mouseX, mouseY);
-        tab(g, tx, tabY, "Gear", "gear", mouseX, mouseY);
+        tx = tab(g, tx, tabY, ClientVocab.term("races", "Races"), "race", mouseX, mouseY);
+        tx = tab(g, tx, tabY, ClientVocab.term("classes", "Classes"), "class", mouseX, mouseY);
+        tx = tab(g, tx, tabY, ClientVocab.term("skills", "Skills"), "skill", mouseX, mouseY);
+        tx = tab(g, tx, tabY, ClientVocab.term("feats", "Feats"), "feat", mouseX, mouseY);
+        tab(g, tx, tabY, ClientVocab.term("gear", "Gear"), "gear", mouseX, mouseY);
         chip(g, x + BOOK_W - 22, tabY, 14, "✕", true, false, mouseX, mouseY, this::onClose);
 
         // Divider under the header, with a centre ornament.
@@ -177,7 +177,7 @@ public final class HandbookScreen extends Screen {
         if (section.equals("feat")) {
             var summary = ClientCharacterState.summary();
             if (summary != null) {
-                String purse = "§7Points to spend: §6§l" + (summary.spTotal() - summary.spSpent());
+                String purse = "§7" + ClientVocab.get("ui.points_to_spend", "Points to spend") + ": §6§l" + (summary.spTotal() - summary.spSpent());
                 g.drawCenteredString(font, purse, x + BOOK_W / 2, y + h - 13, 0xFFFFFFFF);
             }
         }
@@ -227,7 +227,7 @@ public final class HandbookScreen extends Screen {
         }
 
         if (current == null) {
-            g.drawString(font, "§8Nothing here yet.", paneX(), paneY(), 0xFFFFFFFF);
+            g.drawString(font, "§8" + ClientVocab.get("ui.nothing_here", "Nothing here yet."), paneX(), paneY(), 0xFFFFFFFF);
             return;
         }
 
@@ -250,9 +250,10 @@ public final class HandbookScreen extends Screen {
             var summary = ClientCharacterState.summary();
             if (summary != null) {
                 if (summary.ownedFeats().contains(current.id())) {
-                    g.drawString(font, "§a✔ Known", px + pw - font.width("✔ Known"), cy, 0xFFFFFFFF);
+                    String knownLbl = ClientVocab.get("ui.known", "✔ Known");
+                    g.drawString(font, "§a" + knownLbl, px + pw - font.width(knownLbl), cy, 0xFFFFFFFF);
                 } else if (summary.spTotal() - summary.spSpent() >= current.cost()) {
-                    String chip = "Buy " + current.cost();
+                    String chip = ClientVocab.get("ui.buy", "Buy") + " " + current.cost();
                     int cw = font.width("§l" + chip) + 8;
                     int chipX = px + pw - cw - 2;
                     boolean chipHover = mouseX >= chipX && mouseX < chipX + cw
