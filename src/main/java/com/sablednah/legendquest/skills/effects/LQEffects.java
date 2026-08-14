@@ -277,14 +277,26 @@ public final class LQEffects {
         }
     }
 
-    /** Play a sound at the caster. */
-    public record Sound(Holder<SoundEvent> sound, float volume, float pitch) implements SkillEffect {
+    /**
+     * Play a sound at the caster. {@code stop_after} (ms) cuts it off — a
+     * music disc outlives any skill duration by minutes, and nobody wants
+     * Pigstep STILL going when the Battle Hymn's strength ran out. The cut
+     * is a vanilla stop-sound packet, so it works on vanilla clients too.
+     */
+    public record Sound(Holder<SoundEvent> sound, float volume, float pitch, long stopAfterMs)
+            implements SkillEffect {
         public static final Identifier TYPE = id("sound");
         public static final MapCodec<Sound> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 BuiltInRegistries.SOUND_EVENT.holderByNameCodec().fieldOf("sound").forGetter(Sound::sound),
                 Codec.FLOAT.optionalFieldOf("volume", 1.0F).forGetter(Sound::volume),
-                Codec.FLOAT.optionalFieldOf("pitch", 1.0F).forGetter(Sound::pitch))
+                Codec.FLOAT.optionalFieldOf("pitch", 1.0F).forGetter(Sound::pitch),
+                Codec.LONG.optionalFieldOf("stop_after", 0L).forGetter(Sound::stopAfterMs))
                 .apply(i, Sound::new));
+
+        private record PendingStop(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension,
+                Identifier soundId, long atMs) {}
+        private static final java.util.List<PendingStop> STOPS =
+                new java.util.concurrent.CopyOnWriteArrayList<>();
 
         @Override public Identifier type() { return TYPE; }
 
@@ -292,6 +304,30 @@ public final class LQEffects {
         public void apply(SkillContext ctx) {
             ctx.level().playSound(null, ctx.caster().getX(), ctx.caster().getY(), ctx.caster().getZ(),
                     sound.value(), SoundSource.PLAYERS, volume, pitch);
+            if (stopAfterMs > 0) {
+                Identifier soundId = BuiltInRegistries.SOUND_EVENT.getKey(sound.value());
+                if (soundId != null) {
+                    STOPS.add(new PendingStop(ctx.level().dimension(), soundId,
+                            System.currentTimeMillis() + stopAfterMs));
+                }
+            }
+        }
+
+        /** Called from SkillEngine.tick: the needle lifts when the song ends. */
+        public static void tickStops(net.minecraft.server.MinecraftServer server) {
+            if (STOPS.isEmpty()) return;
+            long now = System.currentTimeMillis();
+            for (PendingStop stop : STOPS) {
+                if (stop.atMs() > now) continue;
+                STOPS.remove(stop);
+                var packet = new net.minecraft.network.protocol.game.ClientboundStopSoundPacket(
+                        stop.soundId(), SoundSource.PLAYERS);
+                for (var player : server.getPlayerList().getPlayers()) {
+                    if (player.level().dimension() == stop.dimension()) {
+                        player.connection.send(packet);
+                    }
+                }
+            }
         }
     }
 

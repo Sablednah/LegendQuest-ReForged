@@ -210,6 +210,7 @@ public final class SkillEngine {
     public static void tick(MinecraftServer server) {
         long now = System.currentTimeMillis();
         com.sablednah.legendquest.skills.effects.LQEffects.RunCommand.tickUndos(server);
+        com.sablednah.legendquest.skills.effects.LQEffects.Sound.tickStops(server);
 
         if (!PENDING.isEmpty()) {
             Iterator<Pending> it = PENDING.iterator();

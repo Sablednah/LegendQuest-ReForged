@@ -22,7 +22,8 @@
       "type": "legendquest:sound",
       "sound": "minecraft:music_disc.stal",
       "volume": 0.8,
-      "pitch": 1.2
+      "pitch": 1.2,
+      "stop_after": 15000
     }
   ]
 }
