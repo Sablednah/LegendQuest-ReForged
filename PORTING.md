@@ -40,14 +40,6 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 - Vanilla-XP mirroring with hardcoded 1.8 curve constants → own XP pool fed by vanilla XP pickup.
 
 ### Deferred (revisit after core works)
-- **Terminology / vocabulary system** (needed before the genre packs): server-owner
-  configurable nouns for EVERYTHING — race→Archetype, class→Role, skill→Ability,
-  feat→Perk, mana→Energy/Force, karma→Infection/Reputation/Alignment, party→Crew/
-  Squad. Two layers: (a) ordinary lang-file i18n so players can translate,
-  (b) a server-side vocab config whose terms flow through all server-built text
-  (chat, notices, handbook pages) AND sync to modded clients in a small payload
-  so panel/handbook/HUD labels follow the server's genre. Even within a genre it
-  varies: sci-fi could be Trek, Wars, or Firefly. Zombie pack blocks on this.
 - **Configurable karma triggers**: server owners define what's good/bad (which
   kills/actions move the needle, by how much) — or rename the whole scale and
   repurpose it as infection level, faction reputation, force alignment...
@@ -57,6 +49,19 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 - Party centroid teleport + SafeLoc; parties themselves are in scope.
 
 ### Formerly deferred, now DONE
+- [x] **Terminology / vocabulary system** — `config/legendquest/messages.yml`: a
+  ~280-key catalogue covering every player-facing string. `term.*` renames the
+  nouns (race→Archetype, mana→Energy, karma→Alignment...), `msg.*` are the server
+  messages, `hb.*` the handbook furniture, `ui.*` the client labels. `{term.x}`
+  cross-references, `{placeholder}` runtime values and `&` colours work in every
+  string; the full default file is written on first boot with genre examples,
+  and deleted keys fall back to defaults. Applied on restart AND `/reload`
+  (messages are not a frozen registry). A `legendquest:vocab` payload syncs the
+  resolved `term.*`+`ui.*` map to modded clients on login/reload so panel,
+  handbook and HUD labels follow the server's genre; vanilla clients get
+  server-rendered text so they need nothing. Keybind names still use the
+  standard `assets/.../lang/en_us.json` path (client-side i18n, translators
+  welcome). This unblocks the zombie and sci-fi packs.
 - [x] **Karma-gated skills and feats** — `karma_min`/`karma_max` on `SkillGrant` and `Feat`; out-of-band = suspended (not refunded), so redemption/corruption arcs are real. Cleric ships the paired Holy Light (karma ≥ 50) vs Darkness (karma ≤ -50). Handbook prints soul requirements.
 - [x] **Permskills** — `legendquest:run_command` effect: any command under LQ costs/cooldowns, permission level 2, `%player%` placeholder, optional `undo_command` after `duration` ms (undo waits for offline players; doesn't survive restart). Reference skill: Featherlight (mage 35) — low gravity for 30s via /attribute.
 - [x] **Station gates** — CraftRules enforced: crafting table/crafter, furnaces, brewing stand, enchanting table, anvils/grindstone/smithing table via RightClickBlock; taming via AnimalTameEvent. Deny wins across race+main+sub. Orcs can't enchant; barbarians can't enchant or brew. Handbook lists barred stations.
