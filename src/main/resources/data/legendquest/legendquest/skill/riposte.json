@@ -1,0 +1,26 @@
+{
+  "name": "Riposte",
+  "description": "Answer steel with steel: sometimes the blow that lands on you is immediately repaid with interest.",
+  "icon": "minecraft:iron_sword",
+  "type": "triggered",
+  "cooldown": 4000,
+  "trigger": {
+    "on": "hurt",
+    "chance": 30.0
+  },
+  "effects": [
+    {
+      "type": "legendquest:damage",
+      "amount": 4.0,
+      "target": {
+        "kind": "trigger"
+      }
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:item.shield.block",
+      "volume": 0.8,
+      "pitch": 1.4
+    }
+  ]
+}

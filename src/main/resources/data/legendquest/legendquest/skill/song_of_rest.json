@@ -1,0 +1,25 @@
+{
+  "name": "Song of Rest",
+  "description": "The slow tune for camp and bandages. Wounds knit while the record spins.",
+  "icon": "minecraft:music_disc_strad",
+  "type": "active",
+  "cooldown": 90000,
+  "duration": 30000,
+  "mana_cost": 20,
+  "effects": [
+    {
+      "type": "legendquest:potion_effect",
+      "effect": "minecraft:regeneration",
+      "duration": 30000,
+      "target": {
+        "kind": "party"
+      }
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:music_disc.strad",
+      "volume": 1.0,
+      "pitch": 1.0
+    }
+  ]
+}

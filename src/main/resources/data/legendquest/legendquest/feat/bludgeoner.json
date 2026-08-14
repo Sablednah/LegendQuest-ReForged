@@ -1,0 +1,8 @@
+{
+  "name": "Bludgeoner",
+  "description": "Subtlety is a rumour. The mace answers to you, whatever your calling says.",
+  "icon": "minecraft:mace",
+  "cost": 5,
+  "level": 8,
+  "allowed_weapons": "#legendquest:bludgeon_weapons"
+}

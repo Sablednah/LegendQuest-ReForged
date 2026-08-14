@@ -32,6 +32,10 @@
     "legendquest:smite": {
       "level": 20,
       "cost": 10
+    },
+    "legendquest:riposte": {
+      "level": 5,
+      "cost": 0
     }
   },
   "allowed_tools": "#legendquest:proficiency_tools"

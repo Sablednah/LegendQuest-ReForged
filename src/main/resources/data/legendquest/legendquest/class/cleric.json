@@ -44,6 +44,10 @@
       "level": 12,
       "cost": 0,
       "karma_max": -50
+    },
+    "legendquest:blessing": {
+      "level": 15,
+      "cost": 5
     }
   },
   "allowed_tools": "#legendquest:cleric_tools"

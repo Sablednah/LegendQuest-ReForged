@@ -29,6 +29,10 @@
     "legendquest:summon_wolf": {
       "level": 10,
       "cost": 5
+    },
+    "legendquest:hunters_rhythm": {
+      "level": 12,
+      "cost": 0
     }
   },
   "allowed_tools": "#legendquest:ranger_tools"

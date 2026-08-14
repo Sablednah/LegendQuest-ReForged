@@ -21,8 +21,8 @@
     "Orcoid",
     "Wild"
   ],
-  "skill_points": 8,
-  "skill_points_per_level": 0.15,
+  "skill_points": 9,
+  "skill_points_per_level": 0.18,
   "skills": {
     "legendquest:battle_fury": {
       "level": 10,

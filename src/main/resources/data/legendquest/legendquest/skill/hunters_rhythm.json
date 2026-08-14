@@ -1,0 +1,24 @@
+{
+  "name": "Hunter's Rhythm",
+  "description": "Every kill sharpens the next: a felled quarry quickens your feet and your hands.",
+  "icon": "minecraft:rabbit_hide",
+  "type": "triggered",
+  "cooldown": 8000,
+  "trigger": {
+    "on": "kill",
+    "chance": 100.0
+  },
+  "effects": [
+    {
+      "type": "legendquest:potion_effect",
+      "effect": "minecraft:speed",
+      "duration": 10000,
+      "amplifier": 1
+    },
+    {
+      "type": "legendquest:potion_effect",
+      "effect": "minecraft:haste",
+      "duration": 10000
+    }
+  ]
+}

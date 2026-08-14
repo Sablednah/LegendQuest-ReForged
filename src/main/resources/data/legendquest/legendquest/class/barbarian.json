@@ -32,6 +32,10 @@
     "legendquest:second_wind": {
       "level": 15,
       "cost": 5
+    },
+    "legendquest:rage": {
+      "level": 5,
+      "cost": 0
     }
   },
   "allowed_tools": "#legendquest:barbarian_tools",

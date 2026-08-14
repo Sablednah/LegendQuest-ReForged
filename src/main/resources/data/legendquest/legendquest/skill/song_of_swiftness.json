@@ -1,0 +1,26 @@
+{
+  "name": "Song of Swiftness",
+  "description": "A skipping melody that gets into everyone's boots. The party moves to the beat.",
+  "icon": "minecraft:music_disc_cat",
+  "type": "active",
+  "cooldown": 60000,
+  "duration": 30000,
+  "mana_cost": 15,
+  "effects": [
+    {
+      "type": "legendquest:potion_effect",
+      "effect": "minecraft:speed",
+      "duration": 30000,
+      "amplifier": 1,
+      "target": {
+        "kind": "party"
+      }
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:music_disc.cat",
+      "volume": 1.0,
+      "pitch": 1.0
+    }
+  ]
+}

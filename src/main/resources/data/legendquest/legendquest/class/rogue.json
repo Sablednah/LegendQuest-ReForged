@@ -25,6 +25,10 @@
     "legendquest:shadowstep": {
       "level": 15,
       "cost": 5
+    },
+    "legendquest:smokescreen": {
+      "level": 20,
+      "cost": 5
     }
   },
   "allowed_tools": "#legendquest:rogue_tools"

@@ -1,0 +1,43 @@
+{
+  "name": "Battle Hymn",
+  "description": "PIGSTEP. The forbidden bassline of the nether itself \u2014 the whole party hits harder, digs faster, and fears less while it thunders.",
+  "icon": "minecraft:music_disc_pigstep",
+  "type": "active",
+  "cooldown": 120000,
+  "duration": 30000,
+  "mana_cost": 30,
+  "effects": [
+    {
+      "type": "legendquest:potion_effect",
+      "effect": "minecraft:strength",
+      "duration": 30000,
+      "amplifier": 1,
+      "target": {
+        "kind": "party"
+      }
+    },
+    {
+      "type": "legendquest:potion_effect",
+      "effect": "minecraft:haste",
+      "duration": 30000,
+      "amplifier": 1,
+      "target": {
+        "kind": "party"
+      }
+    },
+    {
+      "type": "legendquest:potion_effect",
+      "effect": "minecraft:resistance",
+      "duration": 30000,
+      "target": {
+        "kind": "party"
+      }
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:music_disc.pigstep",
+      "volume": 1.2,
+      "pitch": 1.0
+    }
+  ]
+}

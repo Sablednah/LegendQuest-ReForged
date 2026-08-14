@@ -1,0 +1,8 @@
+{
+  "name": "Marksman",
+  "description": "Bow, crossbow, thrown trident \u2014 if it flies, you can send it. Whatever your calling says.",
+  "icon": "minecraft:bow",
+  "cost": 6,
+  "level": 8,
+  "allowed_weapons": "#legendquest:marksman_weapons"
+}

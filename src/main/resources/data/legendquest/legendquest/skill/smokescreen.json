@@ -1,0 +1,33 @@
+{
+  "name": "Smokescreen",
+  "description": "A pouch of ash and a whispered word: the whole crew blurs into the shadows and moves like rumours for a while.",
+  "icon": "minecraft:gunpowder",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 15,
+  "effects": [
+    {
+      "type": "legendquest:potion_effect",
+      "effect": "minecraft:invisibility",
+      "duration": 8000,
+      "target": {
+        "kind": "party"
+      }
+    },
+    {
+      "type": "legendquest:potion_effect",
+      "effect": "minecraft:speed",
+      "duration": 15000,
+      "amplifier": 1,
+      "target": {
+        "kind": "party"
+      }
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:entity.puffer_fish.blow_out",
+      "volume": 0.8,
+      "pitch": 0.7
+    }
+  ]
+}

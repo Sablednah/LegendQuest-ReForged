@@ -1,8 +1,12 @@
 {
   "name": "Weapon Master",
-  "description": "Every edge, every haft, every string \u2014 proficiency with the whole armoury, whatever your calling says.",
+  "description": "The whole armoury, mastered. The capstone for those already proficient in blade and bolt alike.",
   "icon": "minecraft:netherite_sword",
-  "cost": 12,
+  "cost": 10,
   "level": 15,
-  "allowed_weapons": "#legendquest:proficiency_weapons"
+  "allowed_weapons": "#legendquest:proficiency_weapons",
+  "requires": [
+    "legendquest:blade_proficiency",
+    "legendquest:marksman"
+  ]
 }

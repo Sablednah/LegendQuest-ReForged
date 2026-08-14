@@ -1,0 +1,8 @@
+{
+  "name": "Blade Proficiency",
+  "description": "Every sword, from splintered wood to netherite, obeys your hand \u2014 whatever your calling says.",
+  "icon": "minecraft:iron_sword",
+  "cost": 6,
+  "level": 8,
+  "allowed_weapons": "#minecraft:swords"
+}

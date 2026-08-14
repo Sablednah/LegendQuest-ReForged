@@ -1,0 +1,8 @@
+{
+  "name": "Axe Proficiency",
+  "description": "The woodsman's argument, mastered: axes swing true in your hands, whatever your calling says.",
+  "icon": "minecraft:iron_axe",
+  "cost": 6,
+  "level": 8,
+  "allowed_weapons": "#minecraft:axes"
+}

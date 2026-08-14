@@ -1,0 +1,28 @@
+{
+  "name": "Encore",
+  "description": "A kill mid-performance earns the crowd a flourish: a burst of golden hearts for everyone in earshot.",
+  "icon": "minecraft:music_disc_stal",
+  "type": "triggered",
+  "cooldown": 20000,
+  "trigger": {
+    "on": "kill",
+    "chance": 40.0
+  },
+  "effects": [
+    {
+      "type": "legendquest:potion_effect",
+      "effect": "minecraft:absorption",
+      "duration": 15000,
+      "amplifier": 1,
+      "target": {
+        "kind": "party"
+      }
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:music_disc.stal",
+      "volume": 0.8,
+      "pitch": 1.2
+    }
+  ]
+}

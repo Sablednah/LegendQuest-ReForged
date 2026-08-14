@@ -1,0 +1,34 @@
+{
+  "name": "Rage",
+  "description": "Pain is fuel. Getting hurt sometimes tips you into a red haze of strength and speed.",
+  "icon": "minecraft:crimson_fungus",
+  "type": "triggered",
+  "cooldown": 15000,
+  "trigger": {
+    "on": "hurt",
+    "chance": 25.0
+  },
+  "effects": [
+    {
+      "type": "legendquest:potion_effect",
+      "effect": "minecraft:strength",
+      "duration": 8000,
+      "amplifier": 1
+    },
+    {
+      "type": "legendquest:potion_effect",
+      "effect": "minecraft:speed",
+      "duration": 8000
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:entity.ravager.roar",
+      "volume": 0.5,
+      "pitch": 1.5
+    },
+    {
+      "type": "legendquest:message",
+      "text": "&cThe red haze takes you."
+    }
+  ]
+}

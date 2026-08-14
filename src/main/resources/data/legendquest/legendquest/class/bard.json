@@ -1,0 +1,41 @@
+{
+  "name": "Bard",
+  "chat_tag": "[Bd]",
+  "description": "Violence, but with a backbeat.",
+  "long_description": "Bards fight the way other people throw parties. Every song is a spinning music disc and a party-wide blessing \u2014 swiftness, rest, or the forbidden nether bassline itself. Open to anyone with charisma and questionable priorities, which is to say: anyone who chooses Bard.",
+  "size": 1.8,
+  "frequency": 200,
+  "health_mod": -1.0,
+  "mana_bonus": 15.0,
+  "mana_per_level": 0.4,
+  "mana_per_second": 1.5,
+  "statmods": {
+    "chr": 2,
+    "wis": 1,
+    "str": -1,
+    "con": -1
+  },
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "allowed_weapons": "#legendquest:bard_weapons",
+  "allowed_armour": "#legendquest:bard_armour",
+  "allowed_tools": "#legendquest:rogue_tools",
+  "skills": {
+    "legendquest:song_of_swiftness": {
+      "level": 1,
+      "cost": 0
+    },
+    "legendquest:song_of_rest": {
+      "level": 8,
+      "cost": 0
+    },
+    "legendquest:encore": {
+      "level": 15,
+      "cost": 5
+    },
+    "legendquest:battle_hymn": {
+      "level": 25,
+      "cost": 8
+    }
+  }
+}

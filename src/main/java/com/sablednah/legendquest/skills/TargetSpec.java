@@ -36,7 +36,13 @@ public record TargetSpec(Kind kind, double range, double radius) {
         /** Every living entity within radius of the caster (not the caster). */
         NEARBY,
         /** For triggered skills: the other party of the trigger event. */
-        TRIGGER;
+        TRIGGER,
+        /**
+         * The caster AND their party members within range (default: the
+         * party XP-share range, so songs and blessings reach exactly as far
+         * as shared glory does). No party = just the caster.
+         */
+        PARTY;
 
         public static final Codec<Kind> CODEC = Codec.STRING.xmap(
                 v -> valueOf(v.toUpperCase(Locale.ROOT)),
@@ -71,6 +77,25 @@ public record TargetSpec(Kind kind, double range, double radius) {
                 for (LivingEntity e : ctx.level().getEntitiesOfClass(LivingEntity.class, box)) {
                     if (e != ctx.caster() && e.isAlive()) out.add(e);
                 }
+                yield out;
+            }
+            case PARTY -> {
+                List<LivingEntity> out = new ArrayList<>();
+                out.add(ctx.caster()); // the bard hears their own song
+                double reach = range > 0 ? range
+                        : com.sablednah.legendquest.LQConfig.PARTY_RANGE.get();
+                var parties = com.sablednah.legendquest.neoforge.Parties
+                        .get(ctx.level().getServer());
+                parties.partyOf(ctx.caster().getUUID()).ifPresent(party -> {
+                    for (var memberId : party.members()) {
+                        if (memberId.equals(ctx.caster().getUUID())) continue;
+                        var member = ctx.level().getServer().getPlayerList().getPlayer(memberId);
+                        if (member != null && member.level() == ctx.caster().level()
+                                && member.distanceTo(ctx.caster()) <= reach) {
+                            out.add(member);
+                        }
+                    }
+                });
                 yield out;
             }
         };
