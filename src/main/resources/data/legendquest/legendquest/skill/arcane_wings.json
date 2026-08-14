@@ -1,0 +1,26 @@
+{
+  "name": "Arcane Wings",
+  "description": "Sixty seconds of true flight on wings of pure will. The permskill promise fulfilled: this skill is just FTB Essentials' /fly with a mana bill and a curfew.",
+  "icon": "minecraft:phantom_membrane",
+  "type": "active",
+  "cooldown": 300000,
+  "mana_cost": 30,
+  "effects": [
+    {
+      "type": "legendquest:run_command",
+      "command": "fly",
+      "undo_command": "fly",
+      "duration": 60000
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:entity.phantom.flap",
+      "volume": 1.0,
+      "pitch": 0.8
+    },
+    {
+      "type": "legendquest:message",
+      "text": "&dWings of will unfold \u2014 one minute aloft."
+    }
+  ]
+}

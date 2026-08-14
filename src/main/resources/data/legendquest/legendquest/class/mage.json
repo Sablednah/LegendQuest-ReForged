@@ -46,6 +46,10 @@
     "legendquest:featherlight": {
       "level": 35,
       "cost": 8
+    },
+    "legendquest:arcane_wings": {
+      "level": 45,
+      "cost": 10
     }
   },
   "allowed_tools": "#legendquest:mage_tools",
