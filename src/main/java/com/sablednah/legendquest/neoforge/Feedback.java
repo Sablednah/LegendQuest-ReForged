@@ -20,7 +20,8 @@ public final class Feedback {
      * ordinary chat.
      */
     public static void notify(ServerPlayer player, String text) {
-        if (player.connection.hasChannel(com.sablednah.legendquest.network.NoticePayload.TYPE)) {
+        if (player.connection != null
+                && player.connection.hasChannel(com.sablednah.legendquest.network.NoticePayload.TYPE)) {
             net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(player,
                     new com.sablednah.legendquest.network.NoticePayload(text));
         } else {

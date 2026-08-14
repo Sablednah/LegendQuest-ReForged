@@ -14,7 +14,11 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class Net {
 
     public static void sendIfAble(ServerPlayer player, CustomPacketPayload payload) {
-        if (player.connection.hasChannel(payload.type())) {
+        // Null check courtesy of the ZombieMod session: fake players (other
+        // mods' automation, headless probes) sit in the player list with no
+        // real connection — an NPE here has the same blast radius as the
+        // original bug, from a different direction.
+        if (player.connection != null && player.connection.hasChannel(payload.type())) {
             PacketDistributor.sendToPlayer(player, payload);
         }
     }
