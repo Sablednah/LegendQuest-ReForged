@@ -301,146 +301,29 @@ public final class LQCommands {
     private static int partyCreate(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         String name = com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "name");
-        var error = Parties.get(ctx.getSource().getServer()).create(name, player);
-        if (error.isPresent()) {
-            Feedback.chat(player, "&c" + error.get());
-            return 0;
-        }
-        Feedback.chat(player, "&6Party &l" + name + "&r&6 created. /party invite <player> to grow it.");
-        return 1;
+        return PartyActions.create(player, name) ? 1 : 0;
     }
 
     private static int partyInvite(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         ServerPlayer invitee = EntityArgument.getPlayer(ctx, "player");
-        var parties = Parties.get(ctx.getSource().getServer());
-        var party = parties.partyOf(player.getUUID());
-        if (party.isEmpty()) {
-            Feedback.chat(player, "&cYou are not in a party. /party create <name> first.");
-            return 0;
-        }
-        if (invitee == player || party.get().isMember(invitee.getUUID())) {
-            Feedback.chat(player, "&7They are already in the party.");
-            return 0;
-        }
-        if (parties.partyOf(invitee.getUUID()).isPresent()) {
-            Feedback.chat(player, "&c" + invitee.getName().getString() + " is already in a party.");
-            return 0;
-        }
-        parties.invite(party.get(), invitee.getUUID());
-        Feedback.chat(player, "&6Invited " + invitee.getName().getString() + ".");
-        Feedback.chat(invitee, "&6" + player.getName().getString() + " invites you to party &l"
-                + party.get().name() + "&r&6 — /party accept or /party decline.");
-        return 1;
+        return PartyActions.invite(player, invitee.getName().getString()) ? 1 : 0;
     }
 
     private static int partyAccept(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ServerPlayer player = ctx.getSource().getPlayerOrException();
-        var parties = Parties.get(ctx.getSource().getServer());
-        var joined = parties.accept(player.getUUID());
-        if (joined.isEmpty()) {
-            Feedback.chat(player, "&cNo open invitation (it may have expired with a restart).");
-            return 0;
-        }
-        Feedback.chat(player, "&6You joined &l" + joined.get().name() + "&r&6.");
-        for (var memberId : joined.get().members()) {
-            if (memberId.equals(player.getUUID())) continue;
-            ServerPlayer member = ctx.getSource().getServer().getPlayerList().getPlayer(memberId);
-            if (member != null) {
-                Feedback.chat(member, "&6" + player.getName().getString() + " joined the party.");
-            }
-        }
-        return 1;
+        return PartyActions.accept(ctx.getSource().getPlayerOrException()) ? 1 : 0;
     }
 
     private static int partyDecline(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ServerPlayer player = ctx.getSource().getPlayerOrException();
-        Parties.get(ctx.getSource().getServer()).decline(player.getUUID());
-        Feedback.chat(player, "&7Invitation declined.");
-        return 1;
+        return PartyActions.decline(ctx.getSource().getPlayerOrException()) ? 1 : 0;
     }
 
-    /** /party tp last-use stamps; in-memory like invites. */
-    private static final java.util.Map<java.util.UUID, Long> PARTY_TP_LAST = new java.util.HashMap<>();
-
-    /**
-     * Teleport to the centroid of your online party-mates (same dimension),
-     * landing on the nearest SafeLoc — the old party gather, minus the
-     * lava surprises.
-     */
     private static int partyTp(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ServerPlayer player = ctx.getSource().getPlayerOrException();
-        int cooldown = LQConfig.PARTY_TP_COOLDOWN.get();
-        if (cooldown <= 0) {
-            Feedback.chat(player, "&cParty teleport is disabled on this server.");
-            return 0;
-        }
-        var party = Parties.get(ctx.getSource().getServer()).partyOf(player.getUUID());
-        if (party.isEmpty()) {
-            Feedback.chat(player, "&7You are not in a party.");
-            return 0;
-        }
-        long now = System.currentTimeMillis();
-        Long last = PARTY_TP_LAST.get(player.getUUID());
-        if (last != null && now - last < cooldown * 1000L) {
-            long wait = (cooldown * 1000L - (now - last)) / 1000 + 1;
-            Feedback.chat(player, "&cThe party bond needs " + wait + "s to regather.");
-            return 0;
-        }
-
-        // Online mates in this dimension, not me.
-        var server = ctx.getSource().getServer();
-        java.util.List<ServerPlayer> mates = new java.util.ArrayList<>();
-        for (var memberId : party.get().members()) {
-            if (memberId.equals(player.getUUID())) continue;
-            ServerPlayer mate = server.getPlayerList().getPlayer(memberId);
-            if (mate != null && mate.level() == player.level()) mates.add(mate);
-        }
-        if (mates.isEmpty()) {
-            Feedback.chat(player, "&7No party members are online in this dimension.");
-            return 0;
-        }
-
-        double cx = 0, cy = 0, cz = 0;
-        for (ServerPlayer mate : mates) {
-            cx += mate.getX();
-            cy += mate.getY();
-            cz += mate.getZ();
-        }
-        var centroid = net.minecraft.core.BlockPos.containing(
-                cx / mates.size(), cy / mates.size(), cz / mates.size());
-        var safe = SafeLoc.find(player.level(), centroid)
-                // Centroid in a wall (mates on a cliff edge)? Land by a mate.
-                .or(() -> SafeLoc.find(player.level(), mates.getFirst().blockPosition()));
-        if (safe.isEmpty()) {
-            Feedback.chat(player, "&cNowhere safe to arrive — your party stands in strange places.");
-            return 0;
-        }
-
-        PARTY_TP_LAST.put(player.getUUID(), now);
-        var from = player.position();
-        player.teleportTo(player.level(),
-                safe.get().getX() + 0.5D, safe.get().getY(), safe.get().getZ() + 0.5D,
-                java.util.Set.of(), player.getYRot(), player.getXRot(), false);
-        player.level().playSound(null, from.x, from.y, from.z,
-                net.minecraft.sounds.SoundEvents.ENDERMAN_TELEPORT,
-                net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 0.8F);
-        player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
-                net.minecraft.sounds.SoundEvents.ENDERMAN_TELEPORT,
-                net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 1.0F);
-        Feedback.chat(player, "&6The party bond draws you across the world.");
-        return 1;
+        return PartyActions.teleport(ctx.getSource().getPlayerOrException()) ? 1 : 0;
     }
 
     private static int partyLeave(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ServerPlayer player = ctx.getSource().getPlayerOrException();
-        var left = Parties.get(ctx.getSource().getServer()).remove(player.getUUID());
-        if (left.isEmpty()) {
-            Feedback.chat(player, "&7You are not in a party.");
-            return 0;
-        }
-        Feedback.chat(player, "&6You left &l" + left.get().name() + "&r&6.");
-        return 1;
+        return PartyActions.leave(ctx.getSource().getPlayerOrException()) ? 1 : 0;
     }
 
     // --- loadout ---

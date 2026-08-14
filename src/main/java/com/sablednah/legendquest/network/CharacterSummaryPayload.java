@@ -40,8 +40,15 @@ public record CharacterSummaryPayload(
         String loadoutItem,    // item id, empty = no spellbook bound
         List<PickEntry> raceChoices,   // empty = race locked in
         List<PickEntry> classChoices,  // empty = class chosen
-        List<String> ownedFeats)       // feat ids already bought
+        List<String> ownedFeats,       // feat ids already bought
+        String partyName,              // "" = not in a party
+        List<PartyMember> partyMembers,
+        String partyInvite,            // party name inviting us, "" = none
+        List<String> partyInvitable)   // online un-partied players (leader only)
         implements CustomPacketPayload {
+
+    /** One row of the party member list. */
+    public record PartyMember(String name, boolean online, boolean leader, boolean self) {}
 
     /** One row of the skill list, ready to render. */
     public record SkillEntry(String id, String name, String type, String description,
@@ -99,6 +106,17 @@ public record CharacterSummaryPayload(
         writePicks(buf, p.classChoices);
         buf.writeVarInt(p.ownedFeats.size());
         for (String feat : p.ownedFeats) buf.writeUtf(feat);
+        buf.writeUtf(p.partyName);
+        buf.writeVarInt(p.partyMembers.size());
+        for (PartyMember m : p.partyMembers) {
+            buf.writeUtf(m.name());
+            buf.writeBoolean(m.online());
+            buf.writeBoolean(m.leader());
+            buf.writeBoolean(m.self());
+        }
+        buf.writeUtf(p.partyInvite);
+        buf.writeVarInt(p.partyInvitable.size());
+        for (String name : p.partyInvitable) buf.writeUtf(name);
     }
 
     private static CharacterSummaryPayload decode(RegistryFriendlyByteBuf buf) {
@@ -134,9 +152,21 @@ public record CharacterSummaryPayload(
         int featCount = buf.readVarInt();
         List<String> ownedFeats = new ArrayList<>(featCount);
         for (int n = 0; n < featCount; n++) ownedFeats.add(buf.readUtf());
+        String partyName = buf.readUtf();
+        int memberCount = buf.readVarInt();
+        List<PartyMember> partyMembers = new ArrayList<>(memberCount);
+        for (int n = 0; n < memberCount; n++) {
+            partyMembers.add(new PartyMember(buf.readUtf(), buf.readBoolean(),
+                    buf.readBoolean(), buf.readBoolean()));
+        }
+        String partyInvite = buf.readUtf();
+        int invitableCount = buf.readVarInt();
+        List<String> partyInvitable = new ArrayList<>(invitableCount);
+        for (int n = 0; n < invitableCount; n++) partyInvitable.add(buf.readUtf());
         return new CharacterSummaryPayload(race, mainClass, subClass, level, xpProgress, karma, mana, maxMana,
                 stats, spSpent, spTotal, statBoostCost, goldToolMana, skills, loadout, loadoutIndex, loadoutItem,
-                raceChoices, classChoices, ownedFeats);
+                raceChoices, classChoices, ownedFeats,
+                partyName, partyMembers, partyInvite, partyInvitable);
     }
 
     private static void writePicks(RegistryFriendlyByteBuf buf, List<PickEntry> picks) {

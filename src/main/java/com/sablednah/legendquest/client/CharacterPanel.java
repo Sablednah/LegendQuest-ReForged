@@ -58,7 +58,10 @@ public final class CharacterPanel {
     private static final int BOOK_SLOT_GAP = 5;
     private static final int ROW_HEIGHT = 18;
 
-    private enum Tab { NONE, STATS, SKILLS }
+    private enum Tab { NONE, STATS, SKILLS, PARTY }
+
+    /** Height of the internal Stats|Skills|Party chip row. */
+    private static final int TAB_BAR = 16;
 
     private static Tab tab = Tab.NONE;
     private static boolean openOnInit = false;
@@ -213,6 +216,11 @@ public final class CharacterPanel {
         return Math.max(0, screen.getGuiLeft() - PANEL_WIDTH - GAP);
     }
 
+    /** Where tab content starts: below the internal chip row. */
+    private static int contentY(InventoryScreen screen) {
+        return panelY(screen) + TAB_BAR;
+    }
+
     /** The stat-boost chip row appears only when the next boost is payable. */
     private static boolean boostRowShown(CharacterSummaryPayload s) {
         return s.spTotal() - s.spSpent() >= s.statBoostCost();
@@ -241,18 +249,24 @@ public final class CharacterPanel {
         if (tab == Tab.SKILLS) {
             // pad + title + slots + hint + divider, then the list.
             h = 8 + 12 + SLOT_SIZE + 4 + 12 + 6 + s.skills().size() * ROW_HEIGHT + 8;
+        } else if (tab == Tab.PARTY) {
+            h = 8 + 14; // pad + header
+            if (!s.partyInvite().isEmpty()) h += 26;
+            h += Math.max(1, s.partyMembers().size()) * 11 + 6 + 18; // members + buttons
+            if (!s.partyInvitable().isEmpty()) h += 13 + s.partyInvitable().size() * 11;
+            h += 8;
         } else {
             h = 8 + 12 + 12 + 12 + 35 + 12 + 12; // core stats block
             if (boostRowShown(s)) h += 24; // label line + chip line
             if (!s.raceChoices().isEmpty()) h += 13 + s.raceChoices().size() * 11 + 4;
             if (!s.classChoices().isEmpty()) h += 13 + s.classChoices().size() * 11 + 4;
         }
-        return Math.max(PANEL_HEIGHT, h);
+        return Math.max(PANEL_HEIGHT, h + TAB_BAR);
     }
 
     /** Y of the loadout slot strip (skills tab). */
     private static int slotsY(InventoryScreen screen) {
-        return panelY(screen) + 8 + 12;
+        return contentY(screen) + 8 + 12;
     }
 
     /** Y of the first skill list row (skills tab). */
@@ -346,6 +360,8 @@ public final class CharacterPanel {
             return;
         }
 
+        if (tab != Tab.STATS) return; // party tab is hotspot-only
+
         // Stats tab: picker rows.
         PickerHit hit = pickerRowAt(screen, mx, my);
         if (hit != null && hit.entry().available()) {
@@ -431,10 +447,19 @@ public final class CharacterPanel {
             g.drawString(font, "No LegendQuest data", x + 8, y + 8, 0xFF8888AA);
             return;
         }
+        // The internal tab chips: Stats | Skills | Party.
+        int chipX = x + 5;
+        chipX = tabChip(g, font, chipX, y + 3, "Stats", Tab.STATS, screen);
+        chipX = tabChip(g, font, chipX, y + 3, "Skills", Tab.SKILLS, screen);
+        tabChip(g, font, chipX, y + 3, "Party", Tab.PARTY, screen);
+
+        int cy = contentY(screen);
         if (tab == Tab.SKILLS) {
-            renderSkillsTab(g, font, screen, s, x, y);
+            renderSkillsTab(g, font, screen, s, x, cy);
+        } else if (tab == Tab.PARTY) {
+            renderPartyTab(g, font, s, x, cy);
         } else {
-            renderStatsTab(g, font, screen, s, x, y);
+            renderStatsTab(g, font, screen, s, x, cy);
         }
 
         // The Players Handbook button, top-right corner (the bottom one sat
@@ -467,6 +492,123 @@ public final class CharacterPanel {
 
         drawPendingTooltip(g, font); // last, so nothing paints over it
         ClientNotices.draw(g, font); // server notices beat even the tooltip
+    }
+
+    /** One internal tab chip; returns the next chip's x. */
+    private static int tabChip(GuiGraphics g, Font font, int x0, int y0, String label,
+            Tab target, InventoryScreen screen) {
+        int w = font.width("§l" + label) + 8;
+        boolean active = tab == target;
+        boolean hover = mouseX >= x0 && mouseX < x0 + w && mouseY >= y0 && mouseY < y0 + 12;
+        g.fill(x0, y0, x0 + w, y0 + 12, active ? 0xFF3A2C10 : hover ? 0xFF33291E : 0xFF221A12);
+        int border = active ? 0xFFDAA520 : hover ? 0x80DAA520 : 0xFF44445A;
+        g.fill(x0, y0, x0 + w, y0 + 1, border);
+        g.fill(x0, y0 + 11, x0 + w, y0 + 12, border);
+        g.fill(x0, y0, x0 + 1, y0 + 12, border);
+        g.fill(x0 + w - 1, y0, x0 + w, y0 + 12, border);
+        String drawn = (active ? "§6§l" : hover ? "§e" : "§7") + label;
+        g.drawString(font, drawn, x0 + (w - font.width(drawn)) / 2, y0 + 2, 0xFFFFFFFF);
+        if (!active) {
+            HOTSPOTS.add(new Hot(x0, y0, x0 + w, y0 + 12, -1, () -> {
+                tab = target;
+                drag = null;
+            }));
+        }
+        return x0 + w + 3;
+    }
+
+    /** The party tab: who you run with, and the buttons to change that. */
+    private static void renderPartyTab(GuiGraphics g, Font font,
+            CharacterSummaryPayload s, int x, int y) {
+        int tx = x + 8;
+        int ty = y + 8;
+
+        // Standing invitation first — it's the thing you'd want to see.
+        if (!s.partyInvite().isEmpty()) {
+            g.drawString(font, "§6Invited to §l" + trim(font, s.partyInvite(), 90), tx, ty, 0xFFFFFFFF);
+            ty += 12;
+            int aw = font.width("§lAccept") + 10;
+            buyButton(g, font, tx, ty, aw, 13, "Accept",
+                    mouseX >= tx && mouseX < tx + aw && mouseY >= ty && mouseY < ty + 13);
+            HOTSPOTS.add(new Hot(tx, ty, tx + aw, ty + 13, 0, () -> send(
+                    new com.sablednah.legendquest.network.PartyActionPayload(
+                            com.sablednah.legendquest.network.PartyActionPayload.ACCEPT, ""))));
+            int dx = tx + aw + 6;
+            int dw = font.width("§lDecline") + 10;
+            boolean dHover = mouseX >= dx && mouseX < dx + dw && mouseY >= ty && mouseY < ty + 13;
+            g.fill(dx, ty, dx + dw, ty + 13, dHover ? 0xFF4A2E1E : 0xFF3A2216);
+            g.fill(dx, ty, dx + dw, ty + 1, 0xFFAA5538);
+            g.fill(dx, ty + 12, dx + dw, ty + 13, 0xFF201008);
+            String dDrawn = (dHover ? "§f§l" : "§c") + "Decline";
+            g.drawString(font, dDrawn, dx + (dw - font.width(dDrawn)) / 2, ty + 3, 0xFFFFFFFF);
+            HOTSPOTS.add(new Hot(dx, ty, dx + dw, ty + 13, 0, () -> send(
+                    new com.sablednah.legendquest.network.PartyActionPayload(
+                            com.sablednah.legendquest.network.PartyActionPayload.DECLINE, ""))));
+            ty += 18;
+        }
+
+        if (s.partyName().isEmpty()) {
+            g.drawString(font, "§7No party.", tx, ty, 0xFFFFFFFF);
+            ty += 14;
+            int cw = font.width("§lCreate party") + 10;
+            buyButton(g, font, tx, ty, cw, 13, "Create party",
+                    mouseX >= tx && mouseX < tx + cw && mouseY >= ty && mouseY < ty + 13);
+            HOTSPOTS.add(new Hot(tx, ty, tx + cw, ty + 13, 0, () -> send(
+                    new com.sablednah.legendquest.network.PartyActionPayload(
+                            com.sablednah.legendquest.network.PartyActionPayload.CREATE, ""))));
+            ty += 18;
+            g.drawString(font, "§8Shared XP, no friendly fire,", tx, ty, 0xFFFFFFFF);
+            g.drawString(font, "§8and /party tp to regroup.", tx, ty + 10, 0xFFFFFFFF);
+            return;
+        }
+
+        g.drawString(font, "§6§l" + trim(font, s.partyName(), PANEL_WIDTH - 20), tx, ty, 0xFFFFFFFF);
+        ty += 14;
+        for (var member : s.partyMembers()) {
+            String line = (member.online() ? "§a" : "§8") + member.name()
+                    + (member.leader() ? " §6★" : "")
+                    + (member.self() ? " §7(you)" : "")
+                    + (member.online() ? "" : " §8(offline)");
+            g.drawString(font, trim(font, line, PANEL_WIDTH - 20), tx, ty, 0xFFFFFFFF);
+            ty += 11;
+        }
+        ty += 6;
+
+        int tw = font.width("§lTeleport") + 10;
+        buyButton(g, font, tx, ty, tw, 13, "Teleport",
+                mouseX >= tx && mouseX < tx + tw && mouseY >= ty && mouseY < ty + 13);
+        HOTSPOTS.add(new Hot(tx, ty, tx + tw, ty + 13, 0, () -> send(
+                new com.sablednah.legendquest.network.PartyActionPayload(
+                        com.sablednah.legendquest.network.PartyActionPayload.TP, ""))));
+        int lx = tx + tw + 6;
+        int lw = font.width("§lLeave") + 10;
+        boolean lHover = mouseX >= lx && mouseX < lx + lw && mouseY >= ty && mouseY < ty + 13;
+        g.fill(lx, ty, lx + lw, ty + 13, lHover ? 0xFF4A2E1E : 0xFF3A2216);
+        g.fill(lx, ty, lx + lw, ty + 1, 0xFFAA5538);
+        g.fill(lx, ty + 12, lx + lw, ty + 13, 0xFF201008);
+        String lDrawn = (lHover ? "§f§l" : "§c") + "Leave";
+        g.drawString(font, lDrawn, lx + (lw - font.width(lDrawn)) / 2, ty + 3, 0xFFFFFFFF);
+        HOTSPOTS.add(new Hot(lx, ty, lx + lw, ty + 13, 0, () -> send(
+                new com.sablednah.legendquest.network.PartyActionPayload(
+                        com.sablednah.legendquest.network.PartyActionPayload.LEAVE, ""))));
+        ty += 19;
+
+        // Leader's invite list: online, un-partied souls one click away.
+        if (!s.partyInvitable().isEmpty()) {
+            g.drawString(font, "§6Invite:", tx, ty, 0xFFFFFFFF);
+            ty += 13;
+            for (String name : s.partyInvitable()) {
+                boolean hover = mouseX >= tx && mouseX < tx + PANEL_WIDTH - 16
+                        && mouseY >= ty - 1 && mouseY < ty + 10;
+                if (hover) g.fill(tx - 2, ty - 1, tx + PANEL_WIDTH - 14, ty + 10, 0x30FFFFFF);
+                g.drawString(font, (hover ? "§e" : "§a") + "▸ " + name, tx, ty, 0xFFFFFFFF);
+                String invitee = name;
+                HOTSPOTS.add(new Hot(tx - 2, ty - 1, tx + PANEL_WIDTH - 14, ty + 10, 0,
+                        () -> send(new com.sablednah.legendquest.network.PartyActionPayload(
+                                com.sablednah.legendquest.network.PartyActionPayload.INVITE, invitee))));
+                ty += 11;
+            }
+        }
     }
 
     /** A proper little button: filled, framed, bevelled — not text in brackets. */
@@ -884,7 +1026,7 @@ public final class CharacterPanel {
         if (s == null) return null;
         int tx = panelX(screen) + 8;
         if (mx < tx - 2 || mx >= tx + PANEL_WIDTH - 14) return null;
-        int ty = panelY(screen) + 8 + 12 + 12 + 12 + 35 + 12 + 12 // top of picker block
+        int ty = contentY(screen) + 8 + 12 + 12 + 12 + 35 + 12 + 12 // top of picker block
                 + (boostRowShown(s) ? 24 : 0);
         if (!s.raceChoices().isEmpty()) {
             ty += 13;

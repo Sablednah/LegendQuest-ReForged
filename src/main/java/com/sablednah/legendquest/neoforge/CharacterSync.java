@@ -95,7 +95,53 @@ public final class CharacterSync {
                 pc.loadoutItem().map(Identifier::toString).orElse(""),
                 raceChoices(player, pc),
                 classChoices(player, pc),
-                List.copyOf(pc.featIds()));
+                List.copyOf(pc.featIds()),
+                partyName(player),
+                partyMembers(player),
+                partyInvite(player),
+                partyInvitable(player));
+    }
+
+    // --- party section ---
+
+    private static String partyName(ServerPlayer player) {
+        return Parties.get(player.level().getServer())
+                .partyOf(player.getUUID()).map(Parties.Party::name).orElse("");
+    }
+
+    private static List<CharacterSummaryPayload.PartyMember> partyMembers(ServerPlayer player) {
+        var server = player.level().getServer();
+        var party = Parties.get(server).partyOf(player.getUUID());
+        if (party.isEmpty()) return List.of();
+        List<CharacterSummaryPayload.PartyMember> out = new ArrayList<>();
+        for (var memberId : party.get().members()) {
+            ServerPlayer online = server.getPlayerList().getPlayer(memberId);
+            String name = online != null ? online.getName().getString()
+                    : memberId.toString().substring(0, 8) + "…";
+            out.add(new CharacterSummaryPayload.PartyMember(name, online != null,
+                    memberId.equals(party.get().owner()), memberId.equals(player.getUUID())));
+        }
+        return out;
+    }
+
+    private static String partyInvite(ServerPlayer player) {
+        return Parties.get(player.level().getServer())
+                .pendingInvite(player.getUUID()).map(Parties.Party::name).orElse("");
+    }
+
+    /** Leaders see who they could invite: online, un-partied, not them. */
+    private static List<String> partyInvitable(ServerPlayer player) {
+        var server = player.level().getServer();
+        var parties = Parties.get(server);
+        var party = parties.partyOf(player.getUUID());
+        if (party.isEmpty() || !party.get().owner().equals(player.getUUID())) return List.of();
+        List<String> out = new ArrayList<>();
+        for (ServerPlayer other : server.getPlayerList().getPlayers()) {
+            if (other == player || parties.partyOf(other.getUUID()).isPresent()) continue;
+            out.add(other.getName().getString());
+            if (out.size() >= 8) break;
+        }
+        return out;
     }
 
     /** How far into the current level, 0..1 (pegged at 1 at the level cap). */

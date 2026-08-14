@@ -30,6 +30,8 @@ public final class LQNetwork {
                 LQNetwork::handleLoadoutEdit);
         registrar.playToServer(ChoosePayload.TYPE, ChoosePayload.CODEC,
                 LQNetwork::handleChoose);
+        registrar.playToServer(PartyActionPayload.TYPE, PartyActionPayload.CODEC,
+                LQNetwork::handlePartyAction);
     }
 
     /**
@@ -67,6 +69,27 @@ public final class LQNetwork {
         context.enqueueWork(() -> {
             if (context.player() instanceof ServerPlayer player) {
                 com.sablednah.legendquest.neoforge.SkillActions.handleLoadoutEdit(player, payload);
+            }
+        });
+    }
+
+    private static void handlePartyAction(PartyActionPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (!(context.player() instanceof ServerPlayer player)) return;
+            switch (payload.action()) {
+                case PartyActionPayload.CREATE ->
+                        com.sablednah.legendquest.neoforge.PartyActions.createAuto(player);
+                case PartyActionPayload.INVITE ->
+                        com.sablednah.legendquest.neoforge.PartyActions.invite(player, payload.name());
+                case PartyActionPayload.ACCEPT ->
+                        com.sablednah.legendquest.neoforge.PartyActions.accept(player);
+                case PartyActionPayload.DECLINE ->
+                        com.sablednah.legendquest.neoforge.PartyActions.decline(player);
+                case PartyActionPayload.LEAVE ->
+                        com.sablednah.legendquest.neoforge.PartyActions.leave(player);
+                case PartyActionPayload.TP ->
+                        com.sablednah.legendquest.neoforge.PartyActions.teleport(player);
+                default -> { }
             }
         });
     }
