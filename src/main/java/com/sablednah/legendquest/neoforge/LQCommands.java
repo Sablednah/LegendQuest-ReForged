@@ -157,7 +157,8 @@ public final class LQCommands {
                                 .executes(LQCommands::partyInvite)))
                 .then(Commands.literal("accept").executes(LQCommands::partyAccept))
                 .then(Commands.literal("decline").executes(LQCommands::partyDecline))
-                .then(Commands.literal("leave").executes(LQCommands::partyLeave));
+                .then(Commands.literal("leave").executes(LQCommands::partyLeave))
+                .then(Commands.literal("tp").executes(LQCommands::partyTp));
 
         // Spend skill points on permanent +1 stats; escalating cost.
         LiteralArgumentBuilder<CommandSourceStack> buystat = Commands.literal("buystat");
@@ -356,6 +357,78 @@ public final class LQCommands {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         Parties.get(ctx.getSource().getServer()).decline(player.getUUID());
         Feedback.chat(player, "&7Invitation declined.");
+        return 1;
+    }
+
+    /** /party tp last-use stamps; in-memory like invites. */
+    private static final java.util.Map<java.util.UUID, Long> PARTY_TP_LAST = new java.util.HashMap<>();
+
+    /**
+     * Teleport to the centroid of your online party-mates (same dimension),
+     * landing on the nearest SafeLoc — the old party gather, minus the
+     * lava surprises.
+     */
+    private static int partyTp(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        int cooldown = LQConfig.PARTY_TP_COOLDOWN.get();
+        if (cooldown <= 0) {
+            Feedback.chat(player, "&cParty teleport is disabled on this server.");
+            return 0;
+        }
+        var party = Parties.get(ctx.getSource().getServer()).partyOf(player.getUUID());
+        if (party.isEmpty()) {
+            Feedback.chat(player, "&7You are not in a party.");
+            return 0;
+        }
+        long now = System.currentTimeMillis();
+        Long last = PARTY_TP_LAST.get(player.getUUID());
+        if (last != null && now - last < cooldown * 1000L) {
+            long wait = (cooldown * 1000L - (now - last)) / 1000 + 1;
+            Feedback.chat(player, "&cThe party bond needs " + wait + "s to regather.");
+            return 0;
+        }
+
+        // Online mates in this dimension, not me.
+        var server = ctx.getSource().getServer();
+        java.util.List<ServerPlayer> mates = new java.util.ArrayList<>();
+        for (var memberId : party.get().members()) {
+            if (memberId.equals(player.getUUID())) continue;
+            ServerPlayer mate = server.getPlayerList().getPlayer(memberId);
+            if (mate != null && mate.level() == player.level()) mates.add(mate);
+        }
+        if (mates.isEmpty()) {
+            Feedback.chat(player, "&7No party members are online in this dimension.");
+            return 0;
+        }
+
+        double cx = 0, cy = 0, cz = 0;
+        for (ServerPlayer mate : mates) {
+            cx += mate.getX();
+            cy += mate.getY();
+            cz += mate.getZ();
+        }
+        var centroid = net.minecraft.core.BlockPos.containing(
+                cx / mates.size(), cy / mates.size(), cz / mates.size());
+        var safe = SafeLoc.find(player.level(), centroid)
+                // Centroid in a wall (mates on a cliff edge)? Land by a mate.
+                .or(() -> SafeLoc.find(player.level(), mates.getFirst().blockPosition()));
+        if (safe.isEmpty()) {
+            Feedback.chat(player, "&cNowhere safe to arrive — your party stands in strange places.");
+            return 0;
+        }
+
+        PARTY_TP_LAST.put(player.getUUID(), now);
+        var from = player.position();
+        player.teleportTo(player.level(),
+                safe.get().getX() + 0.5D, safe.get().getY(), safe.get().getZ() + 0.5D,
+                java.util.Set.of(), player.getYRot(), player.getXRot(), false);
+        player.level().playSound(null, from.x, from.y, from.z,
+                net.minecraft.sounds.SoundEvents.ENDERMAN_TELEPORT,
+                net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 0.8F);
+        player.level().playSound(null, player.getX(), player.getY(), player.getZ(),
+                net.minecraft.sounds.SoundEvents.ENDERMAN_TELEPORT,
+                net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 1.0F);
+        Feedback.chat(player, "&6The party bond draws you across the world.");
         return 1;
     }
 

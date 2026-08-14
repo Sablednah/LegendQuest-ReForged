@@ -51,6 +51,15 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
+        // A second pair of hands: 'runClientBuddy' opens a dev client named
+        // TestBuddy for multiplayer testing (parties!) against the dev
+        // server — no second account needed (dev server is online-mode=false).
+        clientBuddy {
+            client()
+            programArguments.addAll '--username', 'TestBuddy'
+            systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
+        }
+
         server {
             server()
             programArgument '--nogui'

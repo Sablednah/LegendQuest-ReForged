@@ -35,6 +35,7 @@ public final class LQConfig {
     public static final ModConfigSpec.IntValue PARTY_RANGE;
     public static final ModConfigSpec.IntValue PARTY_XP_SHARE;
     public static final ModConfigSpec.BooleanValue BLOCK_PARTY_PVP;
+    public static final ModConfigSpec.IntValue PARTY_TP_COOLDOWN;
 
     static {
         BUILDER.comment("Character statline").push("stats");
@@ -99,6 +100,9 @@ public final class LQConfig {
         BLOCK_PARTY_PVP = BUILDER
                 .comment("Party members cannot damage each other.")
                 .define("blockPartyPvP", true);
+        PARTY_TP_COOLDOWN = BUILDER
+                .comment("Seconds between /party tp uses (0 disables the command).")
+                .defineInRange("tpCooldownSeconds", 60, 0, 86_400);
         BUILDER.pop();
     }
 
