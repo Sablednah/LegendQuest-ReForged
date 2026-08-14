@@ -236,9 +236,8 @@ public final class LQServerEvents {
     /** Floating combat word above the victim, for the attacker's eyes.
      *  Vanilla clients never registered the channel; the send just drops. */
     private static void indicate(ServerPlayer attacker, LivingEntity victim, int kind) {
-        net.neoforged.neoforge.network.PacketDistributor.sendToPlayer(attacker,
-                new CombatIndicatorPayload(victim.getX(),
-                        victim.getY() + victim.getBbHeight() * 0.6, victim.getZ(), kind));
+        Net.sendIfAble(attacker, new CombatIndicatorPayload(victim.getX(),
+                victim.getY() + victim.getBbHeight() * 0.6, victim.getZ(), kind));
     }
 
     // --- restrictions: armour and tools ---

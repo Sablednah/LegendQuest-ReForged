@@ -1,0 +1,23 @@
+package com.sablednah.legendquest.neoforge;
+
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.network.PacketDistributor;
+
+/**
+ * The one true clientbound send. NeoForge does NOT silently drop optional
+ * payloads to clients that never negotiated the channel — it THROWS, which
+ * on the login path kicked vanilla players with "Invalid player data"
+ * (found by the first real vanilla-client test, as such things are).
+ * Every clientbound payload goes through this guard.
+ */
+public final class Net {
+
+    public static void sendIfAble(ServerPlayer player, CustomPacketPayload payload) {
+        if (player.connection.hasChannel(payload.type())) {
+            PacketDistributor.sendToPlayer(player, payload);
+        }
+    }
+
+    private Net() {}
+}

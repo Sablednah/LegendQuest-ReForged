@@ -26,7 +26,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class CharacterSync {
 
     public static void send(ServerPlayer player) {
-        PacketDistributor.sendToPlayer(player, summarize(player));
+        Net.sendIfAble(player, summarize(player));
     }
 
     private static CharacterSummaryPayload summarize(ServerPlayer player) {
