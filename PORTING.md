@@ -137,7 +137,7 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 
 ### Phase 9 — Verification
 - [x] `runServer` boot smoke test (clean boot 9s, all registries parsed, YAML race served) — in-game `/reload` cycle still to verify
-- [ ] Vanilla-client join test against dev server
+- [x] **Vanilla-client join test — PASSED** (2026-08-14): true vanilla 1.21.11 client joined a dev server running LegendQuest + CityWorld (apocalypse preset) + ZombieMod; full RPG playable via chat/action bar; found and fixed the login-kick bug (NeoForge THROWS on optional payloads to un-negotiated channels — every clientbound send now goes through Net.sendIfAble)
 - [ ] README.md (schema reference in the ZombieMod style: every field, default, and rationale)
 
 ---
@@ -153,6 +153,7 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 - Command arg for registry entries: `ResourceKeyArgument.key(...)`; Brigadier unquoted strings stop at `:`.
 - Permission gate: `Commands.hasPermission(Commands.LEVEL_GAMEMASTERS)`.
 - Payload registrar `.optional()` or vanilla clients get kicked. Client classes referenced only inside `enqueueWork` lambdas.
+- `.optional()` is NOT enough: `PacketDistributor.sendToPlayer` THROWS for channels the client never negotiated — guard every clientbound send with `connection.hasChannel` (see `Net.sendIfAble`).
 - No `@OnlyIn`/`DistExecutor`: second `@Mod(dist = Dist.CLIENT)` class for the client entrypoint.
 - Attributes: `Attributes.SCALE` exists (synced); movement speed modifiers multiply — use `ADD_MULTIPLIED_TOTAL` for race speed.
 - `EventHooks.canEntityGrief`, never the gamerule directly (summon/block effects).
