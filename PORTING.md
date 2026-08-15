@@ -148,7 +148,7 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 - [x] Boons engine on race/class/feat: per-level attribute bonuses, enchant XP rebates, smithing material refunds, gold-tool mana mining
 - [x] Skill-point economy: [Buy] chips in the panel, `/lq buystat` +1 stat chips at escalating cost, `/lq respec` (refund all, burn a level, two-step confirm)
 - [x] **Feats** — fourth datapack registry (YAML front door included): purchasable bundles of boons + item proficiencies + skill grants, gated by level/feat chains/race/group/class; bought from the handbook's Feats tab ([Buy] chip on the page) or `/lq feat buy`; 9 starter feats (Toughness→Battle Hardened chain, Weapon Master, Arcane Dabbler, Second Breakfast for the Stout...)
-- [ ] Config screen (`IConfigScreenFactory` + lang keys for every option)
+- [x] Config screen — NeoForge generated `ConfigurationScreen` registered via `IConfigScreenFactory`; lang keys for every option and section.
 - [ ] Action-bar feedback helpers (`&`-code translation, like ZombieMod `Announce`)
 
 ### Phase 8 — Content & packs
@@ -161,7 +161,7 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 - [x] `runServer` boot smoke test (clean boot 9s, all registries parsed, YAML race served)
 - [x] **/reload cycle test — VERIFIED** (2026-08-14): YAML edit → /reload → registry content unchanged (frozen at world load, exactly like vanilla's data-driven enchantments); server restart applies it cleanly. Ops now get a chat notice on /reload explaining this.
 - [x] **Vanilla-client join test — PASSED** (2026-08-14): true vanilla 1.21.11 client joined a dev server running LegendQuest + CityWorld (apocalypse preset) + ZombieMod; full RPG playable via chat/action bar; found and fixed the login-kick bug (NeoForge THROWS on optional payloads to un-negotiated channels — every clientbound send now goes through Net.sendIfAble)
-- [ ] README.md (schema reference in the ZombieMod style: every field, default, and rationale)
+- [x] README.md schema reference — full field-by-field Writing-content section, defaults transcribed from the codecs, traps section included.
 
 ---
 
