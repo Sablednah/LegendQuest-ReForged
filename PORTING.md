@@ -40,6 +40,11 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 - Vanilla-XP mirroring with hardcoded 1.8 curve constants → own XP pool fed by vanilla XP pickup.
 
 ### Deferred (revisit after core works)
+- **LegendQuest-StoryTeller** (separate partner mod, not LQ scope): live-GM
+  toolkit in the VTM: Redemption Storyteller mould — spectate, spawn,
+  possess-an-entity, schematic sets, staged events; NPCs rolled from LQ
+  races/classes using the reserved `frequency` weights. Full notes in
+  [docs/STORYTELLER.md](docs/STORYTELLER.md).
 - **Configurable karma triggers**: server owners define what's good/bad (which
   kills/actions move the needle, by how much) — or rename the whole scale and
   repurpose it as infection level, faction reputation, force alignment...

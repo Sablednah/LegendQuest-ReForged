@@ -152,7 +152,7 @@ levels:
 | `base_speed` | `0.2` | Old-scale walking speed: `0.2` is normal, `0.4` twice as fast. |
 | `statmods` | all 0 | `str/dex/con/int/wis/chr` adjustments to the rolled statline. |
 | `groups` | `[]` | Trait groups (`Arcane`, `Wild`, `Stout`, …) — free-form strings that class `allowed_groups` and feat gates match against. |
-| `frequency` | `100` | Relative weight, reserved for random race assignment. Parsed, not yet consumed. |
+| `frequency` | `100` | Relative population weight — parsed, consumed by nothing yet. Reserved for NPC population rolls in the future [StoryTeller companion](docs/STORYTELLER.md). |
 | `default` | `false` | The starting race players hold before choosing. Exactly one race should say so. |
 | `perm` | *(none)* | Permission node that locks this entry (`legendquest.race.<name>` style, LuckPerms-friendly). |
 | `allow_crafting` … `allow_taming` | all `true` | Station gates — see [Stations](#gear-and-stations). |
