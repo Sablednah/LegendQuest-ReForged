@@ -18,6 +18,11 @@ import net.neoforged.neoforge.common.NeoForge;
 public class LegendQuestClient {
 
     public LegendQuestClient(ModContainer container, IEventBus modEventBus) {
+        // The Mods-list "Config" button: NeoForge's generated screen over
+        // LQConfig's spec — sections, tooltips from comments, live saves.
+        container.registerExtensionPoint(
+                net.neoforged.neoforge.client.gui.IConfigScreenFactory.class,
+                net.neoforged.neoforge.client.gui.ConfigurationScreen::new);
         modEventBus.addListener(LQKeyMappings::register);
         NeoForge.EVENT_BUS.register(CharacterPanel.class);
         NeoForge.EVENT_BUS.register(ClientCharacterState.class);
