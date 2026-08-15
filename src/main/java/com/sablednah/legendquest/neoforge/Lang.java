@@ -123,6 +123,8 @@ public final class Lang {
     // --- msg.* : everything the server says ---
     static {
         def("msg.login", "&6[LegendQuest]&r {race} {class} &7({term.level} {level}, {karma})");
+        def("msg.login.content_gone", "&6This server no longer offers: &c{list}&6. Those choices were "
+                + "reset (your XP is safe) — pick a new {term.race} or {term.class} from the character panel.");
         def("msg.levelup", "&6[LegendQuest]&a {term.level} up! You are now {term.level} {level}.");
         def("msg.reload_notice", "&6[LegendQuest]&7 Tags reloaded. Content changes apply on server RESTART; messages.yml applied now.");
 

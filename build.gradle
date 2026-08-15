@@ -56,7 +56,7 @@ neoForge {
         // server — no second account needed (dev server is online-mode=false).
         clientBuddy {
             client()
-            programArguments.addAll '--username', 'TestBuddy'
+            programArguments.addAll '--username', 'TestBuddy', '--quickPlayMultiplayer', '127.0.0.1:25565'
             // Own game dir: sharing run/ with a live dev server means
             // both fight over logs/latest.log on drvfs.
             gameDirectory = file('runBuddy')

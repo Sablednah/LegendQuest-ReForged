@@ -105,6 +105,33 @@ public final class CharacterService {
     }
 
     /**
+     * Content packs come and go; saved ids can outlive them. Any stored
+     * race/class id that no longer resolves in the registry is reset to the
+     * default entry — the race change unlocked again, since the door they
+     * paid for no longer exists — and a dangling sub class is simply
+     * cleared. XP banks are keyed by id and left untouched, so restoring
+     * the pack (and re-picking) restores the character at full level.
+     * Returns the dropped ids so the login path can say so out loud.
+     */
+    public static java.util.List<String> reconcileMissingContent(ServerPlayer player) {
+        PlayerCharacter pc = data(player);
+        java.util.List<String> dropped = new java.util.ArrayList<>();
+        if (pc.raceId().isPresent() && race(player).isEmpty()) {
+            dropped.add(pc.raceId().get().toString());
+            defaultRace(player).ifPresent(id -> pc.setRace(id, false));
+        }
+        if (pc.mainClassId().isPresent() && mainClass(player).isEmpty()) {
+            dropped.add(pc.mainClassId().get().toString());
+            defaultClass(player).ifPresent(pc::setMainClass);
+        }
+        if (pc.subClassId().isPresent() && subClass(player).isEmpty()) {
+            dropped.add(pc.subClassId().get().toString());
+            pc.setSubClass(Optional.empty());
+        }
+        return dropped;
+    }
+
+    /**
      * The old "random statline based on their uuid": deterministic, so a
      * player re-rolling by deleting data gets the same character back.
      */

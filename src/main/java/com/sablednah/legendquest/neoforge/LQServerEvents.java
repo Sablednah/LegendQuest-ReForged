@@ -51,6 +51,13 @@ public final class LQServerEvents {
     static void onLogin(PlayerEvent.PlayerLoggedInEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         CharacterService.ensureInitialised(player);
+        var dropped = CharacterService.reconcileMissingContent(player);
+        if (!dropped.isEmpty()) {
+            CharacterActions.pruneUnknownSkills(player);
+            com.sablednah.legendquest.LegendQuest.LOGGER.warn(
+                    "{}'s saved character content no longer exists on this server ({}); reset to defaults",
+                    player.getName().getString(), String.join(", ", dropped));
+        }
         sendVocab(player);
         CharacterService.refresh(player);
         HandbookSync.send(player);
@@ -60,6 +67,10 @@ public final class LQServerEvents {
         Feedback.chat(player, Lang.fmt("msg.login", "race", race, "class", cls,
                 "level", CharacterService.level(player),
                 "karma", CharacterService.karmaName(pc.karma())));
+        if (!dropped.isEmpty()) {
+            Feedback.chat(player, Lang.fmt("msg.login.content_gone",
+                    "list", String.join(", ", dropped)));
+        }
     }
 
     /**
