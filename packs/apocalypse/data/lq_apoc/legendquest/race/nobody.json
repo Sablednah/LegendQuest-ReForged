@@ -1,0 +1,12 @@
+{
+  "name": "Nobody",
+  "plural": "Nobodies",
+  "chat_tag": "[?]",
+  "description": "Just another face in the crowd. For now.",
+  "long_description": "Before the world ended you were somebody - everybody was. Whoever that was doesn't matter out here until you decide what mattered enough to keep. Pick an Archetype when you're ready; the Wasteland is patient.",
+  "default": true,
+  "frequency": 0,
+  "base_health": 20.0,
+  "base_mana": 10.0,
+  "groups": [ "Survivor" ]
+}

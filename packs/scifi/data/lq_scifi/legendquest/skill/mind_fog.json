@@ -1,0 +1,13 @@
+{
+  "name": "Mind Fog",
+  "description": "Everyone nearby briefly forgets what they were so angry about.",
+  "icon": "minecraft:gray_dye",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 20,
+  "duration": 8000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:weakness", "duration": 8000, "amplifier": 1, "target": { "kind": "nearby", "radius": 8 } },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:nausea", "duration": 8000, "target": { "kind": "nearby", "radius": 8 } }
+  ]
+}

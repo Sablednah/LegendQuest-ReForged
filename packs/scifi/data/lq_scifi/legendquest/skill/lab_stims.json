@@ -1,0 +1,13 @@
+{
+  "name": "Lab Stims",
+  "description": "Peer-reviewed, self-administered.",
+  "icon": "minecraft:experience_bottle",
+  "type": "active",
+  "cooldown": 40000,
+  "mana_cost": 12,
+  "duration": 15000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:speed", "duration": 15000, "amplifier": 1 },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:haste", "duration": 15000, "particles": false }
+  ]
+}

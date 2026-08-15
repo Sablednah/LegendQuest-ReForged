@@ -1,0 +1,12 @@
+{
+  "name": "Inferno",
+  "description": "Everything within reach learns what the Pyro already knows.",
+  "icon": "minecraft:magma_block",
+  "type": "active",
+  "cooldown": 90000,
+  "mana_cost": 35,
+  "effects": [
+    { "type": "legendquest:ignite", "duration": 8000, "target": { "kind": "nearby", "radius": 5 } },
+    { "type": "legendquest:damage", "amount": 6, "target": { "kind": "nearby", "radius": 5 } }
+  ]
+}

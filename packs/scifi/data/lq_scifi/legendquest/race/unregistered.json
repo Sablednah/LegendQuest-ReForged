@@ -1,0 +1,12 @@
+{
+  "name": "Unregistered",
+  "plural": "Unregistered",
+  "chat_tag": "[--]",
+  "description": "No file on record.",
+  "long_description": "The registry has no species entry for you yet. Out here that's either suspicious or admirable, and usually both. File your paperwork - pick a Species - whenever you're ready to officially exist.",
+  "default": true,
+  "frequency": 0,
+  "base_health": 20.0,
+  "base_mana": 10.0,
+  "groups": [ "Crew" ]
+}

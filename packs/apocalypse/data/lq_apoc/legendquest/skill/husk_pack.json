@@ -1,0 +1,13 @@
+{
+  "name": "Husk Pack",
+  "description": "Three at once. Whatever you traded for this, it wasn't worth it.",
+  "icon": "minecraft:sand",
+  "type": "active",
+  "cooldown": 300000,
+  "mana_cost": 50,
+  "karma_reward": -3,
+  "effects": [
+    { "type": "legendquest:summon", "entity": "minecraft:husk", "count": 3 },
+    { "type": "legendquest:sound", "sound": "minecraft:entity.husk.ambient", "pitch": 0.6 }
+  ]
+}

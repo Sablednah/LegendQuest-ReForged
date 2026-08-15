@@ -1,0 +1,12 @@
+{
+  "name": "Cripple",
+  "description": "They can't chase what they can't stand on.",
+  "icon": "minecraft:iron_sword",
+  "type": "active",
+  "cooldown": 25000,
+  "mana_cost": 15,
+  "effects": [
+    { "type": "legendquest:damage", "amount": 6 },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:slowness", "duration": 5000, "amplifier": 2, "target": { "kind": "looking_at" } }
+  ]
+}

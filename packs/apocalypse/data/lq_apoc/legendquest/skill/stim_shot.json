@@ -1,0 +1,13 @@
+{
+  "name": "Stim Shot",
+  "description": "A cocktail with a kick. Side effects negotiable.",
+  "icon": "minecraft:experience_bottle",
+  "type": "active",
+  "cooldown": 40000,
+  "mana_cost": 12,
+  "duration": 15000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:speed", "duration": 15000, "amplifier": 1 },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:jump_boost", "duration": 15000, "amplifier": 1 }
+  ]
+}

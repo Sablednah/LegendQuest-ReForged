@@ -1,0 +1,14 @@
+{
+  "name": "Smoke Bomb",
+  "description": "The room fills with grey. You fill with elsewhere.",
+  "icon": "minecraft:gunpowder",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 15,
+  "duration": 5000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:blindness", "duration": 5000, "target": { "kind": "nearby", "radius": 6 } },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:invisibility", "duration": 5000 },
+    { "type": "legendquest:sound", "sound": "minecraft:entity.firework_rocket.launch" }
+  ]
+}

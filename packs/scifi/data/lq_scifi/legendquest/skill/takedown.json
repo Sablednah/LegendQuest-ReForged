@@ -1,0 +1,11 @@
+{
+  "name": "Takedown",
+  "description": "Quiet, clinical, deniable.",
+  "icon": "minecraft:netherite_sword",
+  "type": "active",
+  "cooldown": 45000,
+  "mana_cost": 25,
+  "effects": [
+    { "type": "legendquest:damage", "amount": 14, "target": { "kind": "looking_at", "range": 5 } }
+  ]
+}

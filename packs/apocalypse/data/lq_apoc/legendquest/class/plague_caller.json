@@ -1,0 +1,21 @@
+{
+  "name": "Plague Caller",
+  "chat_tag": "[PC]",
+  "description": "The dead listen to those who stopped listening to the living.",
+  "long_description": "Some Scouts spend too long watching the hordes and start seeing patterns. Then rhythms. Then instructions. Plague Callers walk with the dead, curse with a graveside whisper, and raise walkers that follow them home. Every working costs a little more Humanity - and the deepest ones are simply not available to anyone still carrying much.",
+  "frequency": 20,
+  "main_only": true,
+  "requires": [ "lq_apoc:scout" ],
+  "mana_bonus": 20,
+  "mana_per_second": 0.8,
+  "statmods": { "int": 2, "wis": 1, "chr": -2 },
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "skills": {
+    "lq_apoc:dead_calm": { "level": 30, "cost": 5 },
+    "lq_apoc:curse": { "level": 5, "karma_max": -5 },
+    "lq_apoc:rot_bolt": { "level": 15, "cost": 5, "karma_max": -10 },
+    "lq_apoc:raise_walker": { "level": 25, "cost": 10, "karma_max": -20 },
+    "lq_apoc:husk_pack": { "level": 45, "cost": 15, "karma_max": -40 }
+  }
+}

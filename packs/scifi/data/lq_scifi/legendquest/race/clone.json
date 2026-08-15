@@ -1,0 +1,17 @@
+{
+  "name": "Clone",
+  "plural": "Clones",
+  "chat_tag": "[Cl]",
+  "description": "Decanted, trained, shipped. Batch quality may vary.",
+  "long_description": "Grown from licensed templates with the training pre-loaded, Clones hit the deck knowing which end of a rifle is polite. They learn absurdly fast - the template does half the studying for them - and unsettle people who knew the last batch. Each one insists they're different. Each one is right.",
+  "frequency": 100,
+  "base_health": 20.0,
+  "base_mana": 10.0,
+  "statmods": { "con": 1, "chr": -1 },
+  "groups": [ "Crew", "Gene-Modded", "Adaptable" ],
+  "skill_points": 10,
+  "skill_points_per_level": 0.35,
+  "levels": {
+    "25": { "sp": 5 }
+  }
+}

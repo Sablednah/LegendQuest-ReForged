@@ -1,0 +1,10 @@
+{
+  "name": "Spite",
+  "description": "Hit a Veteran, receive a receipt.",
+  "icon": "minecraft:cactus",
+  "type": "triggered",
+  "trigger": { "on": "hurt", "chance": 30.0 },
+  "effects": [
+    { "type": "legendquest:damage", "amount": 4, "target": { "kind": "trigger" } }
+  ]
+}

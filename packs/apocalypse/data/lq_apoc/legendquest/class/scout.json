@@ -1,0 +1,19 @@
+{
+  "name": "Scout",
+  "chat_tag": "[St]",
+  "description": "Sees the horde before the horde sees you.",
+  "long_description": "The crew that knows what's over the ridge outlives the crew that guesses. Scouts travel light, sleep cold and read the Wasteland like a departures board. Mastery opens four very different roads: Sharpshooter, Rancher, Pathfinder - and a darker one for those who've stopped flinching at the dead.",
+  "frequency": 300,
+  "base_speed": 0.2,
+  "speed_mod": 0.01,
+  "statmods": { "dex": 2, "wis": 1, "con": -1 },
+  "skill_points": 10,
+  "skill_points_per_level": 0.2,
+  "allowed_weapons": "#legendquest:marksman_weapons",
+  "skills": {
+    "lq_apoc:sprint": { "level": 3 },
+    "lq_apoc:keen_eyes": { "level": 8 },
+    "lq_apoc:forage": { "level": 12, "cost": 5 },
+    "lq_apoc:slip_away": { "level": 20, "cost": 5 }
+  }
+}

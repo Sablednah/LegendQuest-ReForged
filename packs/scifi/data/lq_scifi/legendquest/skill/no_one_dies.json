@@ -1,0 +1,14 @@
+{
+  "name": "No One Dies",
+  "description": "Stated as an order. Enforced as a fact. Once per very bad day.",
+  "icon": "minecraft:totem_of_undying",
+  "type": "active",
+  "cooldown": 300000,
+  "mana_cost": 50,
+  "duration": 10000,
+  "effects": [
+    { "type": "legendquest:heal", "amount": 10, "target": { "kind": "party" } },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:resistance", "duration": 10000, "amplifier": 1, "target": { "kind": "party" } },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:absorption", "duration": 10000, "amplifier": 1, "target": { "kind": "party" } }
+  ]
+}

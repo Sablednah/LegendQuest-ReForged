@@ -1,0 +1,13 @@
+{
+  "name": "Slip Away",
+  "description": "You were never here.",
+  "icon": "minecraft:gray_dye",
+  "type": "active",
+  "cooldown": 45000,
+  "mana_cost": 12,
+  "duration": 6000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:invisibility", "duration": 6000 },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:speed", "duration": 6000, "amplifier": 1, "particles": false }
+  ]
+}

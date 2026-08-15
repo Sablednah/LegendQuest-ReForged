@@ -1,0 +1,12 @@
+{
+  "name": "Analgesic Field",
+  "description": "Pain is a signal. Signals can be jammed.",
+  "icon": "minecraft:glass_bottle",
+  "type": "active",
+  "cooldown": 45000,
+  "mana_cost": 10,
+  "duration": 20000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:resistance", "duration": 20000 }
+  ]
+}

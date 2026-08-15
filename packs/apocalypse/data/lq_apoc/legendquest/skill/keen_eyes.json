@@ -1,0 +1,12 @@
+{
+  "name": "Keen Eyes",
+  "description": "Dark is just a rumour.",
+  "icon": "minecraft:spyglass",
+  "type": "active",
+  "cooldown": 30000,
+  "mana_cost": 5,
+  "duration": 60000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:night_vision", "duration": 60000, "particles": false }
+  ]
+}

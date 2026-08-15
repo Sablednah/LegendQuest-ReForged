@@ -1,0 +1,13 @@
+{
+  "name": "Adrenal Surge",
+  "description": "The implant opens the tap. Bill the heart later.",
+  "icon": "minecraft:sugar",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 20,
+  "duration": 12000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:strength", "duration": 12000, "amplifier": 1 },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:speed", "duration": 12000, "amplifier": 1 }
+  ]
+}

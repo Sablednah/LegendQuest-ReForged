@@ -1,0 +1,9 @@
+{
+  "name": "Iron Gut",
+  "description": "Expiry dates are for optimists. You keep a stash anyway.",
+  "icon": "minecraft:apple",
+  "cost": 4,
+  "skills": {
+    "lq_apoc:ration": { "level": 0 }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "Rancher",
+  "chat_tag": "[Ra]",
+  "description": "If you see a live cow, a Rancher made that happen.",
+  "long_description": "The dead ate the world's livestock in the first winter. Ranchers are mastered Scouts who bring it back, one stubborn animal at a time - found, coaxed, bred and defended with a shotgun across the knees. A crew with a Rancher eats. Crews without one visit.",
+  "frequency": 60,
+  "main_only": true,
+  "requires": [ "lq_apoc:scout" ],
+  "health_mod": 2.0,
+  "health_per_level": 0.2,
+  "statmods": { "wis": 2, "chr": 1 },
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "skills": {
+    "lq_apoc:forage": { "level": 0 },
+    "lq_apoc:summon_chicken": { "level": 5 },
+    "lq_apoc:summon_sheep": { "level": 12, "cost": 5 },
+    "lq_apoc:summon_pig": { "level": 20, "cost": 5 },
+    "lq_apoc:summon_cow": { "level": 30, "cost": 5 },
+    "lq_apoc:the_herd": { "level": 50, "cost": 10 }
+  }
+}

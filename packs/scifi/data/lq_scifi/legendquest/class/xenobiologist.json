@@ -1,0 +1,24 @@
+{
+  "name": "Xenobiologist",
+  "chat_tag": "[Xb]",
+  "description": "It's not a monster. It's a specimen. The distinction bites.",
+  "long_description": "Rated Scientists who looked at the galaxy's least shakeable hands and gave them a sample kit. Xenobiologists culture spores that end fights, brew serums that shouldn't work, and field gene-hounds that are absolutely not allowed on the furniture.",
+  "frequency": 60,
+  "main_only": true,
+  "requires": [ "lq_scifi:scientist" ],
+  "health_mod": 2.0,
+  "health_per_level": 0.2,
+  "mana_bonus": 15,
+  "mana_per_second": 0.5,
+  "statmods": { "int": 2, "wis": 2 },
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "skills": {
+    "lq_scifi:analyze": { "level": 0 },
+    "lq_scifi:containment_foam": { "level": 0 },
+    "lq_scifi:lab_stims": { "level": 0 },
+    "lq_scifi:spore_cloud": { "level": 15, "cost": 5 },
+    "lq_scifi:regen_serum": { "level": 25, "cost": 5 },
+    "lq_scifi:gene_hound": { "level": 40, "cost": 10 }
+  }
+}

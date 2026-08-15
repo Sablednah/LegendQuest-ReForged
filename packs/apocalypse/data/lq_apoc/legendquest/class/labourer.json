@@ -1,0 +1,16 @@
+{
+  "name": "Labourer",
+  "chat_tag": "[La]",
+  "description": "Somebody has to dig the latrines. And the moat.",
+  "long_description": "No glamour, no glory, no day off. Labourers swing the pick, haul the timber and raise the walls everyone else sleeps behind. Weak in a fight and they know it - but every safehouse standing is standing because of one. Mastery leads to Builder, Miner, or Trader.",
+  "frequency": 300,
+  "statmods": { "str": 1, "con": 1 },
+  "skill_points": 10,
+  "skill_points_per_level": 0.2,
+  "xp_adjust_mine": 20,
+  "allowed_tools": "#legendquest:proficiency_tools",
+  "skills": {
+    "lq_apoc:overdrive": { "level": 8 },
+    "lq_apoc:brace": { "level": 15, "cost": 5 }
+  }
+}

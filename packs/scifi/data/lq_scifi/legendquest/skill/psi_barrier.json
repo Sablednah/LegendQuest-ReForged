@@ -1,0 +1,13 @@
+{
+  "name": "Psi Barrier",
+  "description": "A firm opinion about which photons and shrapnel get through.",
+  "icon": "minecraft:amethyst_cluster",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 15,
+  "duration": 10000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:resistance", "duration": 10000, "amplifier": 1 },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:absorption", "duration": 10000, "target": { "kind": "party" } }
+  ]
+}

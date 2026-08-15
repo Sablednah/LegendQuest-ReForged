@@ -1,0 +1,11 @@
+{
+  "name": "Triage",
+  "description": "Worst first. Everyone gets seen.",
+  "icon": "minecraft:red_dye",
+  "type": "active",
+  "cooldown": 30000,
+  "mana_cost": 20,
+  "effects": [
+    { "type": "legendquest:heal", "amount": 6, "target": { "kind": "party" } }
+  ]
+}

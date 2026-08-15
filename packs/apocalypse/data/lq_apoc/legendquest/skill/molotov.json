@@ -1,0 +1,12 @@
+{
+  "name": "Molotov",
+  "description": "House red, apocalypse vintage. Serve flaming.",
+  "icon": "minecraft:fire_charge",
+  "type": "active",
+  "cooldown": 15000,
+  "mana_cost": 10,
+  "effects": [
+    { "type": "legendquest:projectile", "entity": "minecraft:small_fireball", "speed": 1.5 },
+    { "type": "legendquest:sound", "sound": "minecraft:entity.splash_potion.throw" }
+  ]
+}

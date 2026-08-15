@@ -1,0 +1,12 @@
+{
+  "name": "Crippling Shot",
+  "description": "Kneecaps are a renewable resource. For you, anyway.",
+  "icon": "minecraft:arrow",
+  "type": "active",
+  "cooldown": 25000,
+  "mana_cost": 15,
+  "effects": [
+    { "type": "legendquest:damage", "amount": 6, "target": { "kind": "looking_at", "range": 30 } },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:slowness", "duration": 5000, "amplifier": 2, "target": { "kind": "looking_at", "range": 30 } }
+  ]
+}

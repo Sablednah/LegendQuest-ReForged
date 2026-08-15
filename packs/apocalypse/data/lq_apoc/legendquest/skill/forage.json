@@ -1,0 +1,12 @@
+{
+  "name": "Forage",
+  "description": "The Wasteland feeds those who know where to look.",
+  "icon": "minecraft:sweet_berries",
+  "type": "active",
+  "cooldown": 90000,
+  "mana_cost": 8,
+  "effects": [
+    { "type": "legendquest:give_item", "item": "minecraft:sweet_berries", "count": 3 },
+    { "type": "legendquest:message", "text": "&aYou gather what the dead walked past." }
+  ]
+}

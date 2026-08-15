@@ -1,0 +1,18 @@
+{
+  "name": "Medtech",
+  "chat_tag": "[Md]",
+  "description": "Rated to keep you alive past the interesting part.",
+  "long_description": "Half nurse, half systems admin for human bodies. Medtechs run the autodoc, ration the nanite paste and know every crewmate's blood type, allergy list and pain threshold - the last one professionally. Mastery rates you for Surgeon school.",
+  "frequency": 200,
+  "mana_bonus": 10,
+  "mana_per_second": 0.5,
+  "statmods": { "wis": 2, "str": -1 },
+  "skill_points": 10,
+  "skill_points_per_level": 0.2,
+  "skills": {
+    "lq_scifi:nano_patch": { "level": 3 },
+    "lq_scifi:med_spray": { "level": 8 },
+    "lq_scifi:analgesic_field": { "level": 15, "cost": 5 },
+    "lq_scifi:triage_protocol": { "level": 20, "cost": 5 }
+  }
+}

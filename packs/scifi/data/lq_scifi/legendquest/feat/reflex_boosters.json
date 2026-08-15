@@ -1,0 +1,10 @@
+{
+  "name": "Reflex Boosters",
+  "description": "You twitch first. Always.",
+  "icon": "minecraft:clock",
+  "cost": 8,
+  "level": 10,
+  "attributes": {
+    "minecraft:attack_speed": { "base": 0.4 }
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Night Owl",
+  "description": "The dark shift suits you.",
+  "icon": "minecraft:ender_eye",
+  "cost": 5,
+  "skills": {
+    "lq_apoc:keen_eyes": { "level": 0 }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "Builder",
+  "chat_tag": "[Bu]",
+  "description": "Walls first. Feelings later.",
+  "long_description": "A mastered Labourer who graduated from digging holes to deciding where the holes go. Builders waste nothing, fear nothing they've reinforced, and can hold a breach with a hammer until the wall behind them grows back. The settlement is their character sheet.",
+  "frequency": 60,
+  "main_only": true,
+  "requires": [ "lq_apoc:labourer" ],
+  "health_mod": 4.0,
+  "health_per_level": 0.2,
+  "statmods": { "con": 2, "str": 1 },
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "smith_refund": 0.3,
+  "xp_adjust_mine": 20,
+  "attributes": {
+    "minecraft:armor_toughness": { "base": 1.0 }
+  },
+  "allowed_tools": "#legendquest:proficiency_tools",
+  "skills": {
+    "lq_apoc:overdrive": { "level": 0 },
+    "lq_apoc:brace": { "level": 0 },
+    "lq_apoc:fortify": { "level": 20, "cost": 5 }
+  }
+}

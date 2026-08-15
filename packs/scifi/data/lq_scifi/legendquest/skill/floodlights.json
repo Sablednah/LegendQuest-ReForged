@@ -1,0 +1,12 @@
+{
+  "name": "Floodlights",
+  "description": "Shoulder rig, sixty seconds of honest daylight.",
+  "icon": "minecraft:lantern",
+  "type": "active",
+  "cooldown": 30000,
+  "mana_cost": 5,
+  "duration": 60000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:night_vision", "duration": 60000, "particles": false }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "name": "Pathjumper",
+  "chat_tag": "[Pj]",
+  "description": "Wears a prototype. Is a prototype.",
+  "long_description": "Rated Recon crew fitted with a personal translocation rig the manufacturer still calls 'experimental' and the Pathjumper calls Tuesday. Blink across the gap, phase through the patrol, and be the reason extraction is somehow already there. Side effects include smugness.",
+  "frequency": 60,
+  "main_only": true,
+  "requires": [ "lq_scifi:recon" ],
+  "health_mod": 2.0,
+  "health_per_level": 0.2,
+  "speed_mod": 0.02,
+  "statmods": { "dex": 2, "int": 2 },
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "allowed_weapons": "#legendquest:marksman_weapons",
+  "skills": {
+    "lq_scifi:burst_servos": { "level": 0 },
+    "lq_scifi:low_light_optics": { "level": 0 },
+    "lq_scifi:optic_camo": { "level": 0 },
+    "lq_scifi:jump_rig": { "level": 10, "cost": 5 },
+    "lq_scifi:phase_sprint": { "level": 25, "cost": 5 },
+    "lq_scifi:emergency_jump": { "level": 40, "cost": 10 }
+  }
+}

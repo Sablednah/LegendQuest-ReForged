@@ -1,0 +1,21 @@
+{
+  "name": "Street Kid",
+  "plural": "Street Kids",
+  "chat_tag": "[SK]",
+  "description": "Was surviving before it was mandatory.",
+  "long_description": "Some people lost everything when it fell apart. Street kids mostly noticed the rent stopped. They know which shadows are safe, which strangers aren't, and how to be somewhere else the moment it matters. The apocalypse didn't teach them anything - it just made everyone else catch up.",
+  "frequency": 200,
+  "base_health": 18.0,
+  "base_mana": 10.0,
+  "base_speed": 0.21,
+  "statmods": { "dex": 2, "chr": 1, "con": -1 },
+  "groups": [ "Survivor", "Quick", "Sly" ],
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "attributes": {
+    "minecraft:luck": { "base": 0.5 }
+  },
+  "skills": {
+    "lq_apoc:slip_away": { "level": 10, "cost": 5 }
+  }
+}

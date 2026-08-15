@@ -1,0 +1,9 @@
+{
+  "name": "Mil-Spec License",
+  "description": "Cleared for hardware the customs form calls 'agricultural'.",
+  "icon": "minecraft:netherite_scrap",
+  "cost": 10,
+  "level": 10,
+  "allowed_weapons": "#legendquest:fighter_weapons",
+  "allowed_armour": "#legendquest:heavy_armour"
+}

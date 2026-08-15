@@ -1,0 +1,13 @@
+{
+  "name": "Rail Shot",
+  "description": "The argument arrives before the sound does.",
+  "icon": "minecraft:lightning_rod",
+  "type": "active",
+  "cooldown": 15000,
+  "mana_cost": 12,
+  "effects": [
+    { "type": "legendquest:damage", "amount": 10, "target": { "kind": "looking_at", "range": 50 } },
+    { "type": "legendquest:particle_line", "particle": "minecraft:end_rod", "per_block": 6, "target": { "kind": "looking_at", "range": 50 } },
+    { "type": "legendquest:sound", "sound": "minecraft:entity.lightning_bolt.impact", "pitch": 1.8 }
+  ]
+}

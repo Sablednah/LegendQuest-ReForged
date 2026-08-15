@@ -1,0 +1,13 @@
+{
+  "name": "Called Shot",
+  "description": "Left eye. Wind's from the east. Loose.",
+  "icon": "minecraft:crossbow",
+  "type": "active",
+  "cooldown": 15000,
+  "mana_cost": 10,
+  "effects": [
+    { "type": "legendquest:damage", "amount": 8, "target": { "kind": "looking_at", "range": 40 } },
+    { "type": "legendquest:particle_line", "particle": "minecraft:crit", "target": { "kind": "looking_at", "range": 40 } },
+    { "type": "legendquest:sound", "sound": "minecraft:item.crossbow.shoot" }
+  ]
+}

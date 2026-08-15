@@ -1,0 +1,12 @@
+{
+  "name": "Empathic Mend",
+  "description": "Take their pain. Literally. It has to go somewhere.",
+  "icon": "minecraft:golden_apple",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 30,
+  "karma_reward": 1,
+  "effects": [
+    { "type": "legendquest:heal", "amount": 10, "target": { "kind": "party" } }
+  ]
+}

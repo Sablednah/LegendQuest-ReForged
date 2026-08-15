@@ -1,0 +1,24 @@
+{
+  "name": "Synth",
+  "plural": "Synths",
+  "chat_tag": "[Sy]",
+  "description": "Built, not born. Warranty long expired.",
+  "long_description": "Somebody manufactured the first Synths to work the places flesh couldn't. Then somebody forgot to switch them off, and the courts have been arguing ever since. A Synth doesn't tire, doesn't sicken and doesn't drink anything a still produces - but the chassis is dense, the smile is wrong, and brewing organics is beneath their dignity anyway.",
+  "frequency": 100,
+  "base_health": 24.0,
+  "base_mana": 12.0,
+  "mana_per_second": 1.2,
+  "base_speed": 0.19,
+  "statmods": { "int": 2, "str": 1, "chr": -2 },
+  "groups": [ "Crew", "Synthetic" ],
+  "skill_points": 10,
+  "skill_points_per_level": 0.2,
+  "allow_brewing": false,
+  "attributes": {
+    "minecraft:armor": { "base": 2.0 }
+  },
+  "skills": {
+    "lq_scifi:self_repair": { "level": 5 },
+    "lq_scifi:optic_suite": { "level": 10, "cost": 5 }
+  }
+}

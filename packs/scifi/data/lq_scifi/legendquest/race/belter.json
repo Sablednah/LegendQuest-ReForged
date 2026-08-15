@@ -1,0 +1,18 @@
+{
+  "name": "Belter",
+  "plural": "Belters",
+  "chat_tag": "[Be]",
+  "description": "Born in the rocks. Gravity is a lifestyle choice.",
+  "long_description": "Spaceborn and rock-raised, Belters grew up where 'down' was whichever way the airlock was leaking. Long-boned, quick-handed, allergic to open skies and government inspectors in that order. They fall like they've done it professionally, because they have.",
+  "frequency": 150,
+  "base_health": 18.0,
+  "base_mana": 10.0,
+  "statmods": { "dex": 2, "int": 1, "str": -1 },
+  "groups": [ "Crew", "Voidborn" ],
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "skills": {
+    "lq_scifi:low_g_reflexes": { "level": 5 },
+    "lq_scifi:mag_boots": { "level": 12, "cost": 5 }
+  }
+}

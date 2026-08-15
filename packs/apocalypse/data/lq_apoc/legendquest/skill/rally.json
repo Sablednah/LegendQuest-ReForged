@@ -1,0 +1,12 @@
+{
+  "name": "Rally",
+  "description": "ON YOUR FEET. You can be tired when you're dead.",
+  "icon": "minecraft:goat_horn",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 15,
+  "duration": 20000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:strength", "duration": 20000, "target": { "kind": "party" } }
+  ]
+}

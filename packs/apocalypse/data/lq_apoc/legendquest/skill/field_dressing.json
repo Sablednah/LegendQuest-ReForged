@@ -1,0 +1,11 @@
+{
+  "name": "Field Dressing",
+  "description": "Hold still. This stays on until I say otherwise.",
+  "icon": "minecraft:string",
+  "type": "active",
+  "cooldown": 10000,
+  "mana_cost": 10,
+  "effects": [
+    { "type": "legendquest:heal", "amount": 8, "target": { "kind": "looking_at", "range": 8 } }
+  ]
+}

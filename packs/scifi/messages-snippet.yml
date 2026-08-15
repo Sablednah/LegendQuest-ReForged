@@ -1,0 +1,18 @@
+# LegendQuest: Cold Frontier - vocabulary re-theme.
+# Merge these keys into config/legendquest/messages.yml (server side),
+# then restart or /reload. Modded clients pick the words up on login.
+# The pack is deliberately setting-neutral: retune these words and the
+# same data plays as space-western, fleet-opera or salvage-horror.
+term.race: "Species"
+term.races: "Species"
+term.class: "Profession"
+term.classes: "Professions"
+term.feat: "Augment"
+term.feats: "Augments"
+term.mana: "Charge"
+term.karma: "Standing"
+term.party: "Crew"
+term.spellbook: "Datapad"
+term.handbook: "Ship's Manual"
+term.boon: "Advantage"
+term.soul: "Record"

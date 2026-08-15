@@ -1,0 +1,13 @@
+{
+  "name": "Evac",
+  "description": "We are LEAVING. Grab nothing. Move.",
+  "icon": "minecraft:recovery_compass",
+  "type": "active",
+  "cooldown": 180000,
+  "mana_cost": 30,
+  "duration": 10000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:speed", "duration": 10000, "amplifier": 2, "target": { "kind": "party" } },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:resistance", "duration": 10000, "target": { "kind": "party" } }
+  ]
+}

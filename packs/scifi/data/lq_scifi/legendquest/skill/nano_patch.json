@@ -1,0 +1,11 @@
+{
+  "name": "Nano Patch",
+  "description": "Slap it on. The little ones do the rest.",
+  "icon": "minecraft:paper",
+  "type": "active",
+  "cooldown": 8000,
+  "mana_cost": 8,
+  "effects": [
+    { "type": "legendquest:heal", "amount": 6 }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Military Hardware",
+  "description": "Cleared to carry the good stuff: heavy plate and serious steel.",
+  "icon": "minecraft:netherite_scrap",
+  "cost": 10,
+  "level": 10,
+  "allowed_weapons": "#legendquest:fighter_weapons",
+  "allowed_armour": "#legendquest:heavy_armour"
+}

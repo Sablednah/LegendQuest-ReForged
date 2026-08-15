@@ -1,0 +1,12 @@
+{
+  "name": "Excavate",
+  "description": "The pick sings and the stone gets out of the way.",
+  "icon": "minecraft:diamond_shovel",
+  "type": "active",
+  "cooldown": 120000,
+  "mana_cost": 25,
+  "duration": 30000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:haste", "duration": 30000, "amplifier": 2, "particles": false }
+  ]
+}

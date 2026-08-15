@@ -1,0 +1,12 @@
+{
+  "name": "Optic Suite",
+  "description": "Toggle the eyes to the good spectrum.",
+  "icon": "minecraft:ender_eye",
+  "type": "active",
+  "cooldown": 30000,
+  "mana_cost": 5,
+  "duration": 60000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:night_vision", "duration": 60000, "particles": false }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Garrote",
+  "description": "Wire remembers what mercy forgets.",
+  "icon": "minecraft:string",
+  "type": "active",
+  "cooldown": 30000,
+  "mana_cost": 15,
+  "karma_reward": -1,
+  "effects": [
+    { "type": "legendquest:damage", "amount": 10, "target": { "kind": "looking_at", "range": 4 } },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:weakness", "duration": 5000, "target": { "kind": "looking_at", "range": 4 } }
+  ]
+}

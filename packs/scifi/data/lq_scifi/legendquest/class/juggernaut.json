@@ -1,0 +1,24 @@
+{
+  "name": "Juggernaut",
+  "chat_tag": "[Ju]",
+  "description": "Walking cover.",
+  "long_description": "Rated Marines who traded speed for the kind of armour that gets classified as a structure. A Juggernaut's job description is one word - remain - and they are extremely good at it. Slower to rate up; the paperwork alone weighs kilos.",
+  "frequency": 60,
+  "main_only": true,
+  "requires": [ "lq_scifi:marine" ],
+  "health_mod": 10.0,
+  "health_per_level": 0.4,
+  "statmods": { "con": 3, "str": 1, "dex": -1 },
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "xp_adjust_kill": -20,
+  "allowed_weapons": "#legendquest:fighter_weapons",
+  "allowed_armour": "#legendquest:heavy_armour",
+  "skills": {
+    "lq_scifi:bayonet": { "level": 0 },
+    "lq_scifi:suppression": { "level": 0 },
+    "lq_scifi:powered_plating": { "level": 20, "cost": 5 },
+    "lq_scifi:reactive_armor": { "level": 25, "cost": 5 },
+    "lq_scifi:fortress_mode": { "level": 50, "cost": 15 }
+  }
+}

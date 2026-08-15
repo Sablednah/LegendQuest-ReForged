@@ -1,0 +1,21 @@
+{
+  "name": "Prepper",
+  "plural": "Preppers",
+  "chat_tag": "[Pr]",
+  "description": "Told you so.",
+  "long_description": "They spent years being laughed at for the bunker, the tinned goods, the laminated evacuation plans. Nobody is laughing now. Preppers came into the apocalypse with a full pantry and a fuller sense of vindication, and they are infuriatingly difficult to kill.",
+  "frequency": 100,
+  "base_health": 24.0,
+  "base_mana": 10.0,
+  "statmods": { "con": 2, "wis": 1, "dex": -1 },
+  "groups": [ "Survivor", "Steady", "Handy" ],
+  "skill_points": 10,
+  "skill_points_per_level": 0.2,
+  "skills": {
+    "lq_apoc:ration": { "level": 5 }
+  },
+  "levels": {
+    "20": { "hp": 2 },
+    "40": { "stats": { "con": 1 } }
+  }
+}

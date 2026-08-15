@@ -23,6 +23,14 @@ Elf, Dwarf, Orc, Hobbit, Gnome, Half-Elf, Half-Orc, Tiefling — SRD 5.1
 CC-BY-safe — plus the starting Undecided) and eight classes (Citizen,
 Fighter, Mage, Ranger, Cleric, Rogue, Barbarian, and the earned-only Warlord).
 
+Two full genre packs ship in [`packs/`](packs/) as drop-in world datapacks,
+each with its own vocabulary snippet and a `pack.mcmeta` filter that hides
+the D&D content: **[The Wasteland](packs/apocalypse/README.md)**
+(zombie-apocalypse Archetypes and a mastery-gated Role tree descended from
+the original server's 2012 Heroes config) and
+**[Cold Frontier](packs/scifi/README.md)** (setting-neutral sci-fi Species
+and crew Professions, with a double-gated Psion branch).
+
 ### Characters
 Deterministic 4d6-drop-lowest statline (or flat 12s), D&D-style modifiers,
 race + main class + optional sub class, per-class XP banks with mastery
@@ -250,14 +258,19 @@ levels:
 
 ### Gear and stations
 
-Six list fields control proficiency: `allowed_weapons`,
+Six fields control proficiency: `allowed_weapons`,
 `disallowed_weapons`, `allowed_tools`, `disallowed_tools`,
-`allowed_armour`, `disallowed_armour`. Lists accept item ids and item tags,
-mixed freely:
+`allowed_armour`, `disallowed_armour`. Each takes **either** a single item
+tag as a string **or** a list of item ids — a tag cannot appear inside a
+list (vanilla's registry-list codec rejects it):
 
 ```yaml
-allowed_weapons: ["minecraft:bow", "#legendquest:mage_weapons"]
+allowed_weapons: "#legendquest:mage_weapons"   # tag form: one string
+allowed_tools: ["minecraft:bow", "minecraft:crossbow"]  # list form: ids only
 ```
+
+Need a tag *plus* extra ids? Make a datapack item tag that includes both
+(tags may contain other tags) and reference that.
 
 The semantics are the original plugin's, worth restating because they're
 subtle:

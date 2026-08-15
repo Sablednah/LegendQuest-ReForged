@@ -1,0 +1,22 @@
+{
+  "name": "Infiltrator",
+  "chat_tag": "[In]",
+  "description": "You will not hear the knife.",
+  "long_description": "A mastered Scavenger who stopped stealing things and started stealing moments - the sentry's glance, the gap in the torchlight, the three seconds a throat takes. Infiltrators start where the Scavenger finished: the shiv, the sneak, all of it, day one. What they add is worse.",
+  "frequency": 60,
+  "main_only": true,
+  "requires": [ "lq_apoc:scavenger" ],
+  "health_mod": 2.0,
+  "health_per_level": 0.2,
+  "statmods": { "dex": 2, "str": 1 },
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "allowed_weapons": "#legendquest:rogue_weapons",
+  "skills": {
+    "lq_apoc:shiv": { "level": 0 },
+    "lq_apoc:sneak": { "level": 0 },
+    "lq_apoc:smoke_bomb": { "level": 10, "cost": 5 },
+    "lq_apoc:garrote": { "level": 25, "cost": 5 },
+    "lq_apoc:ghost": { "level": 40, "cost": 10 }
+  }
+}

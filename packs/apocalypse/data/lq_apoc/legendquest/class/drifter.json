@@ -1,0 +1,9 @@
+{
+  "name": "Drifter",
+  "chat_tag": "[D]",
+  "description": "Everyone starts on the road.",
+  "long_description": "No trade, no crew, no plan past sundown. Drifters walk until something gives them a reason to stop. Pick a Role when you find yours - Scavenger, Labourer, Doc, Enforcer or Scout - and master it to unlock the specialists who survive on the far side of it.",
+  "default": true,
+  "frequency": 0,
+  "skill_points": 5
+}

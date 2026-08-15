@@ -1,0 +1,13 @@
+{
+  "name": "Suppression",
+  "description": "Keep their heads down and their options fewer.",
+  "icon": "minecraft:crossbow",
+  "type": "active",
+  "cooldown": 45000,
+  "mana_cost": 15,
+  "duration": 10000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:slowness", "duration": 10000, "target": { "kind": "nearby", "radius": 6 } },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:weakness", "duration": 10000, "target": { "kind": "nearby", "radius": 6 } }
+  ]
+}

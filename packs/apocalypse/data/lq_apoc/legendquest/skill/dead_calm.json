@@ -1,0 +1,13 @@
+{
+  "name": "Dead Calm",
+  "description": "Slow the heart. Smell like the grave. Walk on through.",
+  "icon": "minecraft:wither_rose",
+  "type": "active",
+  "cooldown": 90000,
+  "mana_cost": 15,
+  "duration": 15000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:invisibility", "duration": 15000 },
+    { "type": "legendquest:message", "text": "&8Your pulse fades to nothing. The dead lose interest." }
+  ]
+}

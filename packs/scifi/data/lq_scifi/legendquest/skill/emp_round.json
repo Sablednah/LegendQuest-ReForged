@@ -1,0 +1,13 @@
+{
+  "name": "EMP Round",
+  "description": "Everything electrical takes the rest of the fight off. Nerves count.",
+  "icon": "minecraft:heart_of_the_sea",
+  "type": "active",
+  "cooldown": 25000,
+  "mana_cost": 15,
+  "effects": [
+    { "type": "legendquest:damage", "amount": 4, "target": { "kind": "looking_at", "range": 30 } },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:slowness", "duration": 6000, "amplifier": 2, "target": { "kind": "looking_at", "range": 30 } },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:weakness", "duration": 6000, "target": { "kind": "looking_at", "range": 30 } }
+  ]
+}

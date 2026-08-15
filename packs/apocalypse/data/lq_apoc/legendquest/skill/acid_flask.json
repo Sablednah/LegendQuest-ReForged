@@ -1,0 +1,13 @@
+{
+  "name": "Acid Flask",
+  "description": "Pool supplies plus imagination.",
+  "icon": "minecraft:slime_ball",
+  "type": "active",
+  "cooldown": 20000,
+  "mana_cost": 15,
+  "effects": [
+    { "type": "legendquest:damage", "amount": 5 },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:poison", "duration": 8000, "amplifier": 1, "target": { "kind": "looking_at" } },
+    { "type": "legendquest:particle_line", "particle": "minecraft:item_slime" }
+  ]
+}

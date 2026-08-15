@@ -1,0 +1,12 @@
+{
+  "name": "Print Ammo",
+  "description": "The fabricator owes you a favour.",
+  "icon": "minecraft:dispenser",
+  "type": "active",
+  "cooldown": 120000,
+  "mana_cost": 10,
+  "effects": [
+    { "type": "legendquest:give_item", "item": "minecraft:arrow", "count": 8 },
+    { "type": "legendquest:message", "text": "&7The fabricator spits out a fresh magazine." }
+  ]
+}

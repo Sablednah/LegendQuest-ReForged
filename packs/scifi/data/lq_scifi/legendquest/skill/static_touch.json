@@ -1,0 +1,12 @@
+{
+  "name": "Static Touch",
+  "description": "Whatever hums behind your eyes, it grounds through other people.",
+  "icon": "minecraft:lightning_rod",
+  "type": "active",
+  "cooldown": 15000,
+  "mana_cost": 8,
+  "effects": [
+    { "type": "legendquest:damage", "amount": 4, "target": { "kind": "looking_at", "range": 6 } },
+    { "type": "legendquest:particle_line", "particle": "minecraft:electric_spark" }
+  ]
+}

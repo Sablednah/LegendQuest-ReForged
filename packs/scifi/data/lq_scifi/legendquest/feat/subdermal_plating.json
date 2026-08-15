@@ -1,0 +1,10 @@
+{
+  "name": "Subdermal Plating",
+  "description": "Armour you can't forget in your locker.",
+  "icon": "minecraft:iron_ingot",
+  "cost": 8,
+  "level": 5,
+  "attributes": {
+    "minecraft:armor": { "base": 2.0 }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Flechette Storm",
+  "description": "One trigger pull, statistically unfair.",
+  "icon": "minecraft:spectral_arrow",
+  "type": "active",
+  "cooldown": 45000,
+  "mana_cost": 20,
+  "effects": [
+    { "type": "legendquest:projectile", "entity": "minecraft:arrow", "speed": 1.8 },
+    { "type": "legendquest:projectile", "entity": "minecraft:arrow", "speed": 1.7 },
+    { "type": "legendquest:projectile", "entity": "minecraft:arrow", "speed": 1.6 },
+    { "type": "legendquest:projectile", "entity": "minecraft:arrow", "speed": 1.5 },
+    { "type": "legendquest:projectile", "entity": "minecraft:arrow", "speed": 1.4 }
+  ]
+}

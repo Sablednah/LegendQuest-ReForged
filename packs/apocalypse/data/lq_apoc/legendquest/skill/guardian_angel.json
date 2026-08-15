@@ -1,0 +1,13 @@
+{
+  "name": "Guardian Angel",
+  "description": "Not today. Not on my watch. Not any of you.",
+  "icon": "minecraft:totem_of_undying",
+  "type": "active",
+  "cooldown": 180000,
+  "mana_cost": 40,
+  "duration": 8000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:resistance", "duration": 8000, "amplifier": 1, "target": { "kind": "party" } },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:absorption", "duration": 8000, "amplifier": 1, "target": { "kind": "party" } }
+  ]
+}

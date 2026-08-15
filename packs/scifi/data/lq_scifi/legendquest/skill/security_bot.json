@@ -1,0 +1,12 @@
+{
+  "name": "Security Bot",
+  "description": "Two tonnes of de-escalation.",
+  "icon": "minecraft:iron_block",
+  "type": "active",
+  "cooldown": 600000,
+  "mana_cost": 40,
+  "effects": [
+    { "type": "legendquest:summon", "entity": "minecraft:iron_golem", "count": 1 },
+    { "type": "legendquest:message", "text": "&7Unit deployed. Please do not name it. You will name it." }
+  ]
+}

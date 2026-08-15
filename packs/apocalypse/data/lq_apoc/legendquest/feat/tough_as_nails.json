@@ -1,0 +1,10 @@
+{
+  "name": "Tough as Nails",
+  "description": "Been hit by worse than you.",
+  "icon": "minecraft:iron_nugget",
+  "cost": 8,
+  "level": 5,
+  "attributes": {
+    "minecraft:max_health": { "base": 4 }
+  }
+}

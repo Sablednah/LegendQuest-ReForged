@@ -1,0 +1,19 @@
+{
+  "name": "Vex",
+  "plural": "Vexi",
+  "chat_tag": "[Vx]",
+  "description": "They were out here first. They remember it.",
+  "long_description": "Tall, greyish, unbothered by silence. The Vexi shared star charts before humanity finished arguing about whose flag went on the ship, and they still treat the whole species like a promising intern. Fragile as wet paper in a brawl - but a Vex mind is a cathedral, and psionics is just what thinking feels like from inside one.",
+  "frequency": 60,
+  "base_health": 16.0,
+  "base_mana": 20.0,
+  "mana_per_second": 1.5,
+  "size": 2.0,
+  "statmods": { "int": 2, "wis": 2, "str": -2, "con": -1 },
+  "groups": [ "Crew", "Psionic" ],
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "skills": {
+    "lq_scifi:mind_spike": { "level": 8 }
+  }
+}

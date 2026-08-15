@@ -1,0 +1,24 @@
+{
+  "name": "Trader",
+  "chat_tag": "[Tr]",
+  "description": "The apocalypse is a seller's market.",
+  "long_description": "Bullets are currency, water is gold, and the Trader knows today's exchange rate for both. Open to anyone who has mastered the Scavenger's eye or the Labourer's graft. Traders keep contacts nobody else can raise and muscle nobody else can afford, and they never, ever pay sticker price.",
+  "frequency": 60,
+  "main_only": true,
+  "requires_one": [ "lq_apoc:scavenger", "lq_apoc:labourer" ],
+  "health_mod": 2.0,
+  "health_per_level": 0.1,
+  "statmods": { "chr": 2, "int": 1 },
+  "skill_points": 15,
+  "skill_points_per_level": 0.3,
+  "enchant_rebate": 1,
+  "smith_refund": 0.2,
+  "attributes": {
+    "minecraft:luck": { "base": 1.0 }
+  },
+  "skills": {
+    "lq_apoc:scrounge": { "level": 0 },
+    "lq_apoc:call_contact": { "level": 20, "cost": 10 },
+    "lq_apoc:hired_muscle": { "level": 40, "cost": 15 }
+  }
+}

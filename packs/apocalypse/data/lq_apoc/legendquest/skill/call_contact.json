@@ -1,0 +1,12 @@
+{
+  "name": "Call In a Contact",
+  "description": "Knows a guy. The guy knows a guy. Eventually: goods.",
+  "icon": "minecraft:emerald",
+  "type": "active",
+  "cooldown": 600000,
+  "mana_cost": 20,
+  "effects": [
+    { "type": "legendquest:summon", "entity": "minecraft:wandering_trader", "count": 1 },
+    { "type": "legendquest:message", "text": "&aYour contact shows up. Prices are, as always, an insult." }
+  ]
+}

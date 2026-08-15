@@ -1,0 +1,11 @@
+{
+  "name": "Jump Rig",
+  "description": "Be over there instead. The rig handles the middle part.",
+  "icon": "minecraft:ender_pearl",
+  "type": "active",
+  "cooldown": 12000,
+  "mana_cost": 10,
+  "effects": [
+    { "type": "legendquest:teleport", "max_range": 24 }
+  ]
+}

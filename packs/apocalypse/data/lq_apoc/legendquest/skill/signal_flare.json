@@ -1,0 +1,14 @@
+{
+  "name": "Signal Flare",
+  "description": "One light in the dark: rally on me.",
+  "icon": "minecraft:firework_rocket",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 10,
+  "duration": 10000,
+  "effects": [
+    { "type": "legendquest:lightning", "visual_only": true, "target": { "kind": "looking_at", "range": 30 } },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:glowing", "duration": 10000, "target": { "kind": "nearby", "radius": 20 } },
+    { "type": "legendquest:sound", "sound": "minecraft:entity.firework_rocket.large_blast" }
+  ]
+}

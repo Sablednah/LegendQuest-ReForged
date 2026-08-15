@@ -1,0 +1,23 @@
+{
+  "name": "Quartermaster",
+  "chat_tag": "[Qm]",
+  "description": "An army marches on its stomach. So does a crew.",
+  "long_description": "Mastered Docs who realised prevention beats surgery: feed them, steady them, and shout until they remember they're not dead yet. A Quartermaster turns six frightened survivors into a unit - and their mercy, when they've earned the right to give it, borders on the miraculous.",
+  "frequency": 60,
+  "main_only": true,
+  "requires": [ "lq_apoc:doc" ],
+  "health_mod": 2.0,
+  "health_per_level": 0.1,
+  "mana_bonus": 20,
+  "mana_per_second": 1.0,
+  "statmods": { "chr": 2, "wis": 1 },
+  "skill_points": 15,
+  "skill_points_per_level": 0.3,
+  "skills": {
+    "lq_apoc:first_aid": { "level": 0 },
+    "lq_apoc:rally": { "level": 10 },
+    "lq_apoc:fortify": { "level": 20, "cost": 5 },
+    "lq_apoc:battle_meal": { "level": 30, "cost": 5 },
+    "lq_apoc:mercy": { "level": 45, "cost": 10, "karma_min": 20 }
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Pyro",
+  "chat_tag": "[Py]",
+  "description": "Fire solves everything once.",
+  "long_description": "At the end of the Mercenary's road there is a door, and behind the door there is a flamethrower. Coal in, cleansing out. Pyros are the only tier-three Role in the Wasteland, and the horde has learned the silhouette: the ones who glow. Keep them upwind of the settlement, and keep them fuelled.",
+  "frequency": 20,
+  "main_only": true,
+  "requires": [ "lq_apoc:mercenary" ],
+  "health_mod": 4.0,
+  "health_per_level": 0.2,
+  "statmods": { "str": 1, "dex": 1, "wis": -2 },
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "allowed_weapons": "#legendquest:fighter_weapons",
+  "skills": {
+    "lq_apoc:bash": { "level": 0 },
+    "lq_apoc:charge": { "level": 0 },
+    "lq_apoc:flamethrower": { "level": 5 },
+    "lq_apoc:molotov": { "level": 10 },
+    "lq_apoc:smoke_bomb": { "level": 20, "cost": 5 },
+    "lq_apoc:inferno": { "level": 40, "cost": 15 }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Battle Meal",
+  "description": "Hot food in cold ruins. Morale is a supply too.",
+  "icon": "minecraft:cooked_beef",
+  "type": "active",
+  "cooldown": 120000,
+  "mana_cost": 15,
+  "effects": [
+    { "type": "legendquest:give_item", "item": "minecraft:cooked_beef", "count": 2 },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:regeneration", "duration": 8000, "target": { "kind": "party" } },
+    { "type": "legendquest:message", "text": "&6Mess is served. No complaints about the mystery meat." }
+  ]
+}

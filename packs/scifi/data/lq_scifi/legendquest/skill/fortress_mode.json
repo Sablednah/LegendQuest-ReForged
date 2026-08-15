@@ -1,0 +1,13 @@
+{
+  "name": "Fortress Mode",
+  "description": "Anchor. Endure. Outlast. Ten seconds of being terrain.",
+  "icon": "minecraft:anvil",
+  "type": "active",
+  "cooldown": 300000,
+  "mana_cost": 40,
+  "duration": 10000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:resistance", "duration": 10000, "amplifier": 3 },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:absorption", "duration": 10000, "amplifier": 2 }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Bash",
+  "description": "A length of rebar, applied with feeling. Sometimes they stagger.",
+  "icon": "minecraft:stick",
+  "type": "triggered",
+  "trigger": { "on": "melee_hit", "chance": 20.0 },
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:slowness", "duration": 2500, "amplifier": 2, "target": { "kind": "trigger" } }
+  ]
+}

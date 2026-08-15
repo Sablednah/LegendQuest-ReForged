@@ -1,0 +1,11 @@
+{
+  "name": "Found a Pig",
+  "description": "Bacon: the strongest argument for civilisation.",
+  "icon": "minecraft:porkchop",
+  "type": "active",
+  "cooldown": 240000,
+  "mana_cost": 15,
+  "effects": [
+    { "type": "legendquest:summon", "entity": "minecraft:pig", "count": 1 }
+  ]
+}

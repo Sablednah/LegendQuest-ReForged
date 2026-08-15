@@ -1,0 +1,13 @@
+{
+  "name": "Breach",
+  "description": "Doors are a suggestion. So are the people behind them.",
+  "icon": "minecraft:iron_door",
+  "type": "active",
+  "cooldown": 25000,
+  "mana_cost": 12,
+  "duration": 5000,
+  "effects": [
+    { "type": "legendquest:leap", "power": 2.2, "lift": 0.4 },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:strength", "duration": 5000 }
+  ]
+}

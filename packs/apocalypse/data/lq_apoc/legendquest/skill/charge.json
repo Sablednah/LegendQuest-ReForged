@@ -1,0 +1,13 @@
+{
+  "name": "Charge",
+  "description": "The shortest path to the problem is through it.",
+  "icon": "minecraft:iron_boots",
+  "type": "active",
+  "cooldown": 25000,
+  "mana_cost": 12,
+  "duration": 5000,
+  "effects": [
+    { "type": "legendquest:leap", "power": 2.2, "lift": 0.4 },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:strength", "duration": 5000 }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Scrounge",
+  "description": "One person's ruin is another's shopping list.",
+  "icon": "minecraft:bundle",
+  "type": "active",
+  "cooldown": 120000,
+  "mana_cost": 10,
+  "effects": [
+    { "type": "legendquest:give_item", "item": "minecraft:bread", "count": 1 },
+    { "type": "legendquest:give_item", "item": "minecraft:arrow", "count": 3 },
+    { "type": "legendquest:message", "text": "&7You turn up something useful." }
+  ]
+}

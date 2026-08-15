@@ -1,0 +1,12 @@
+{
+  "name": "Trailblazer",
+  "description": "Single file, my pace, no questions.",
+  "icon": "minecraft:compass",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 15,
+  "duration": 30000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:speed", "duration": 30000, "amplifier": 1, "target": { "kind": "party" } }
+  ]
+}

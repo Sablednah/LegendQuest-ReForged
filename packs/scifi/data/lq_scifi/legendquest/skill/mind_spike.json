@@ -1,0 +1,12 @@
+{
+  "name": "Mind Spike",
+  "description": "A thought, thrown hard enough to bruise.",
+  "icon": "minecraft:amethyst_shard",
+  "type": "active",
+  "cooldown": 12000,
+  "mana_cost": 12,
+  "effects": [
+    { "type": "legendquest:damage", "amount": 7, "target": { "kind": "looking_at", "range": 20 } },
+    { "type": "legendquest:particle_line", "particle": "minecraft:enchant", "target": { "kind": "looking_at", "range": 20 } }
+  ]
+}

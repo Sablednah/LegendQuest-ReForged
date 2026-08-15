@@ -1,0 +1,18 @@
+{
+  "name": "Doc",
+  "chat_tag": "[Dc]",
+  "description": "Keeps the crew breathing. Argue later.",
+  "long_description": "Half medicine, half improvisation, all nerve. A Doc's clinic is wherever somebody fell down, their anaesthetic is a firm voice, and their supply chain is whatever the Scavengers dragged home. Master the trade to specialise as a Combat Medic or Quartermaster.",
+  "frequency": 200,
+  "mana_bonus": 10,
+  "mana_per_second": 0.5,
+  "statmods": { "wis": 2, "str": -1 },
+  "skill_points": 10,
+  "skill_points_per_level": 0.2,
+  "skills": {
+    "lq_apoc:first_aid": { "level": 3 },
+    "lq_apoc:field_dressing": { "level": 8 },
+    "lq_apoc:pain_killers": { "level": 15, "cost": 5 },
+    "lq_apoc:triage": { "level": 20, "cost": 5 }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "Mutant",
+  "plural": "Mutants",
+  "chat_tag": "[Mu]",
+  "description": "The radiation took. It also gave.",
+  "long_description": "Three generations in the drive-belt colonies changes a bloodline. Mutants are heavier-built than baseline and something hums behind their eyes that instruments can't isolate. Polite society stares; the psionics programme sends recruiters. Both are right to.",
+  "frequency": 100,
+  "base_health": 22.0,
+  "base_mana": 14.0,
+  "mana_per_second": 1.0,
+  "statmods": { "wis": 2, "con": 1, "chr": -2 },
+  "groups": [ "Crew", "Psionic", "Touched" ],
+  "skill_points": 10,
+  "skill_points_per_level": 0.2,
+  "skills": {
+    "lq_scifi:static_touch": { "level": 10, "cost": 5 }
+  }
+}

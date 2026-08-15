@@ -1,0 +1,11 @@
+{
+  "name": "Found a Sheep",
+  "description": "Wool means blankets. Blankets mean winter happens to other people.",
+  "icon": "minecraft:white_wool",
+  "type": "active",
+  "cooldown": 180000,
+  "mana_cost": 12,
+  "effects": [
+    { "type": "legendquest:summon", "entity": "minecraft:sheep", "count": 1 }
+  ]
+}

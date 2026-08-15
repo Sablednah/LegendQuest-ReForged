@@ -1,0 +1,24 @@
+{
+  "name": "Surgeon",
+  "chat_tag": "[Su]",
+  "description": "Rebuilds people. Warranty void if you do that again.",
+  "long_description": "A rated Medtech with steadier hands and worse jokes. Surgeons carry the whole Medtech kit from day one and add the heavy interventions: full resuscitation, battlefield reconstruction, and the guardian protocols that keep an entire boarding party breathing through the worst ten seconds of their lives.",
+  "frequency": 60,
+  "main_only": true,
+  "requires": [ "lq_scifi:medtech" ],
+  "health_mod": 4.0,
+  "health_per_level": 0.2,
+  "mana_bonus": 20,
+  "mana_per_second": 0.8,
+  "statmods": { "wis": 2, "int": 1, "con": 1 },
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "skills": {
+    "lq_scifi:nano_patch": { "level": 0 },
+    "lq_scifi:med_spray": { "level": 0 },
+    "lq_scifi:analgesic_field": { "level": 0 },
+    "lq_scifi:triage_protocol": { "level": 0 },
+    "lq_scifi:resuscitate": { "level": 25, "cost": 10 },
+    "lq_scifi:guardian_protocol": { "level": 45, "cost": 15 }
+  }
+}

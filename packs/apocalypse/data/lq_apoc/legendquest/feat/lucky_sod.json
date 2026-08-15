@@ -1,0 +1,9 @@
+{
+  "name": "Lucky Sod",
+  "description": "Statistically, you should be dead. Repeatedly.",
+  "icon": "minecraft:rabbit_foot",
+  "cost": 6,
+  "attributes": {
+    "minecraft:luck": { "base": 1.0 }
+  }
+}

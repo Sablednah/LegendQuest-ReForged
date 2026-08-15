@@ -1,0 +1,10 @@
+{
+  "name": "Redundant Organs",
+  "description": "Two of everything important. Ask the surgeon which ones.",
+  "icon": "minecraft:golden_apple",
+  "cost": 8,
+  "level": 5,
+  "attributes": {
+    "minecraft:max_health": { "base": 4 }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Bullheaded",
+  "description": "Harder to shove than a parked truck.",
+  "icon": "minecraft:anvil",
+  "cost": 8,
+  "level": 10,
+  "attributes": {
+    "minecraft:knockback_resistance": { "base": 0.2 }
+  }
+}

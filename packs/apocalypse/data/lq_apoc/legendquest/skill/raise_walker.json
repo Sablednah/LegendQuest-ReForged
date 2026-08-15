@@ -1,0 +1,13 @@
+{
+  "name": "Raise Walker",
+  "description": "It remembers how to walk. It does not remember you. Stay behind it.",
+  "icon": "minecraft:zombie_head",
+  "type": "active",
+  "cooldown": 90000,
+  "mana_cost": 30,
+  "karma_reward": -2,
+  "effects": [
+    { "type": "legendquest:summon", "entity": "minecraft:zombie", "count": 1 },
+    { "type": "legendquest:sound", "sound": "minecraft:entity.zombie.ambient", "pitch": 0.7 }
+  ]
+}

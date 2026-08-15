@@ -1,0 +1,12 @@
+{
+  "name": "Hired Muscle",
+  "description": "Big, quiet, paid in advance.",
+  "icon": "minecraft:iron_block",
+  "type": "active",
+  "cooldown": 600000,
+  "mana_cost": 40,
+  "effects": [
+    { "type": "legendquest:summon", "entity": "minecraft:iron_golem", "count": 1 },
+    { "type": "legendquest:message", "text": "&7The muscle arrives. It doesn't do small talk." }
+  ]
+}

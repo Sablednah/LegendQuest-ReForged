@@ -1,0 +1,24 @@
+{
+  "name": "Psion",
+  "chat_tag": "[Ps]",
+  "description": "The mind is a weapon. Licensing applies.",
+  "long_description": "The programme only takes rated Scientists whose scans show the receptive architecture - Mutants and the Vexi, mostly; baseline brains just get headaches. Psions spike minds, raise kinetic barriers and call down ion storms, and the deep gates ask questions about your Standing that the polite ones don't.",
+  "frequency": 40,
+  "main_only": true,
+  "requires": [ "lq_scifi:scientist" ],
+  "allowed_groups": [ "Psionic" ],
+  "mana_bonus": 25,
+  "mana_per_second": 1.0,
+  "statmods": { "wis": 2, "int": 2, "con": -1 },
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "skills": {
+    "lq_scifi:analyze": { "level": 0 },
+    "lq_scifi:mind_spike": { "level": 0 },
+    "lq_scifi:psi_barrier": { "level": 10, "cost": 5 },
+    "lq_scifi:mind_fog": { "level": 20, "cost": 5 },
+    "lq_scifi:empathic_mend": { "level": 30, "cost": 5, "karma_min": 20 },
+    "lq_scifi:void_whisper": { "level": 30, "cost": 5, "karma_max": -20 },
+    "lq_scifi:ion_storm": { "level": 45, "cost": 15 }
+  }
+}

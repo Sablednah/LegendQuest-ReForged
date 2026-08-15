@@ -1,0 +1,12 @@
+{
+  "name": "Low-G Reflexes",
+  "description": "Falling is just docking with the floor. Take your time.",
+  "icon": "minecraft:phantom_membrane",
+  "type": "active",
+  "cooldown": 45000,
+  "mana_cost": 8,
+  "duration": 20000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:slow_falling", "duration": 20000, "particles": false }
+  ]
+}

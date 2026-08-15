@@ -1,0 +1,18 @@
+{
+  "name": "Mechanic",
+  "plural": "Mechanics",
+  "chat_tag": "[Mc]",
+  "description": "If it's broken, give it here.",
+  "long_description": "The world is over; the machines just don't know it yet. Mechanics keep generators coughing, blades sharp and doors barred, and can look at a heap of scrap and see next week's fortifications. Not much for conversation - things make more sense than people.",
+  "frequency": 150,
+  "base_health": 20.0,
+  "base_mana": 10.0,
+  "statmods": { "int": 2, "dex": 1, "chr": -1 },
+  "groups": [ "Survivor", "Clever", "Handy" ],
+  "skill_points": 10,
+  "skill_points_per_level": 0.25,
+  "smith_refund": 0.25,
+  "skills": {
+    "lq_apoc:overdrive": { "level": 10, "cost": 5 }
+  }
+}

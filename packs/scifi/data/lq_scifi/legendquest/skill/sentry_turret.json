@@ -1,0 +1,12 @@
+{
+  "name": "Sentry Turret",
+  "description": "Small, cold, and a surprisingly good shot.",
+  "icon": "minecraft:snowball",
+  "type": "active",
+  "cooldown": 120000,
+  "mana_cost": 20,
+  "effects": [
+    { "type": "legendquest:summon", "entity": "minecraft:snow_golem", "count": 1 },
+    { "type": "legendquest:message", "text": "&7Sentry online. It has opinions about movement." }
+  ]
+}

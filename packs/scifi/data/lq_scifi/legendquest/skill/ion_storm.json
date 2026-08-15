@@ -1,0 +1,12 @@
+{
+  "name": "Ion Storm",
+  "description": "The forecast, revised with prejudice.",
+  "icon": "minecraft:trident",
+  "type": "active",
+  "cooldown": 90000,
+  "mana_cost": 40,
+  "effects": [
+    { "type": "legendquest:lightning", "target": { "kind": "looking_at", "range": 30 } },
+    { "type": "legendquest:damage", "amount": 6, "target": { "kind": "nearby", "radius": 5 } }
+  ]
+}

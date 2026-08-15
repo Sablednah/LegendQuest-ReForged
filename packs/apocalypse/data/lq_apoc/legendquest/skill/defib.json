@@ -1,0 +1,13 @@
+{
+  "name": "Defib",
+  "description": "Clear! ...I said CLEAR.",
+  "icon": "minecraft:copper_ingot",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 25,
+  "effects": [
+    { "type": "legendquest:heal", "amount": 12, "target": { "kind": "looking_at", "range": 6 } },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:absorption", "duration": 10000, "amplifier": 1, "target": { "kind": "looking_at", "range": 6 } },
+    { "type": "legendquest:sound", "sound": "minecraft:block.respawn_anchor.charge" }
+  ]
+}

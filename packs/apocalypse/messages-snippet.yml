@@ -1,0 +1,16 @@
+# LegendQuest: The Wasteland - vocabulary re-theme.
+# Merge these keys into config/legendquest/messages.yml (server side),
+# then restart or /reload. Modded clients pick the words up on login.
+term.race: "Archetype"
+term.races: "Archetypes"
+term.class: "Role"
+term.classes: "Roles"
+term.feat: "Perk"
+term.feats: "Perks"
+term.mana: "Stamina"
+term.karma: "Humanity"
+term.party: "Crew"
+term.spellbook: "Field Manual"
+term.handbook: "Survivor's Guide"
+term.boon: "Edge"
+term.soul: "Conscience"

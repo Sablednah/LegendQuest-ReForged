@@ -1,0 +1,18 @@
+{
+  "name": "Paramedic",
+  "plural": "Paramedics",
+  "chat_tag": "[Pm]",
+  "description": "Kept people alive for a living. Still does.",
+  "long_description": "Everyone else's worst day was a Tuesday shift. Paramedics have seen the inside of more people than the dead have, and unlike the dead they know how to put it all back. Steady hands, steadier stomach, and a bag that always has one more dressing in it.",
+  "frequency": 150,
+  "base_health": 20.0,
+  "base_mana": 14.0,
+  "mana_per_second": 1.2,
+  "statmods": { "wis": 2, "int": 1, "str": -1 },
+  "groups": [ "Survivor", "Clever", "Steady" ],
+  "skill_points": 10,
+  "skill_points_per_level": 0.2,
+  "skills": {
+    "lq_apoc:first_aid": { "level": 5 }
+  }
+}

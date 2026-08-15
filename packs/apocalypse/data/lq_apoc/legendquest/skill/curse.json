@@ -1,0 +1,14 @@
+{
+  "name": "Graveside Whisper",
+  "description": "A word the living were never meant to pronounce.",
+  "icon": "minecraft:bone",
+  "type": "active",
+  "cooldown": 20000,
+  "mana_cost": 10,
+  "karma_reward": -1,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:weakness", "duration": 10000, "amplifier": 1, "target": { "kind": "looking_at" } },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:wither", "duration": 5000, "target": { "kind": "looking_at" } },
+    { "type": "legendquest:particle_line", "particle": "minecraft:smoke" }
+  ]
+}

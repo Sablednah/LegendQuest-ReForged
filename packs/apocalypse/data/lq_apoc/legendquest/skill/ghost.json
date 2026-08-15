@@ -1,0 +1,12 @@
+{
+  "name": "Ghost",
+  "description": "Twenty seconds of not existing.",
+  "icon": "minecraft:phantom_membrane",
+  "type": "active",
+  "cooldown": 120000,
+  "mana_cost": 30,
+  "duration": 20000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:invisibility", "duration": 20000 }
+  ]
+}

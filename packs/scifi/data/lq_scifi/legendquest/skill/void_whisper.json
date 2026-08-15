@@ -1,0 +1,14 @@
+{
+  "name": "Void Whisper",
+  "description": "Something out there answers. Stop asking.",
+  "icon": "minecraft:echo_shard",
+  "type": "active",
+  "cooldown": 30000,
+  "mana_cost": 20,
+  "karma_reward": -1,
+  "effects": [
+    { "type": "legendquest:damage", "amount": 8, "target": { "kind": "looking_at", "range": 20 } },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:wither", "duration": 5000, "target": { "kind": "looking_at", "range": 20 } },
+    { "type": "legendquest:particle_line", "particle": "minecraft:sculk_soul", "target": { "kind": "looking_at", "range": 20 } }
+  ]
+}

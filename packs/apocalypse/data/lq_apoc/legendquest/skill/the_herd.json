@@ -1,0 +1,12 @@
+{
+  "name": "The Herd",
+  "description": "A whole herd, driven home ahead of the dust. The settlement eats for a season.",
+  "icon": "minecraft:hay_block",
+  "type": "active",
+  "cooldown": 600000,
+  "mana_cost": 40,
+  "effects": [
+    { "type": "legendquest:summon", "entity": "minecraft:cow", "count": 3 },
+    { "type": "legendquest:summon", "entity": "minecraft:chicken", "count": 2 }
+  ]
+}

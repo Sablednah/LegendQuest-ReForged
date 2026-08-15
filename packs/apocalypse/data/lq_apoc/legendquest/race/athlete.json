@@ -1,0 +1,19 @@
+{
+  "name": "Athlete",
+  "plural": "Athletes",
+  "chat_tag": "[At]",
+  "description": "Fast. The dead are not.",
+  "long_description": "The first rule of the apocalypse is cardio, and athletes wrote it. Sprinters, climbers, parkour kids - the ones who treated their body as equipment and kept it maintained. They can't stitch a wound or strip an engine, but nothing that shambles has ever caught one.",
+  "frequency": 200,
+  "base_health": 22.0,
+  "base_mana": 10.0,
+  "base_speed": 0.22,
+  "statmods": { "dex": 2, "str": 1, "wis": -1 },
+  "groups": [ "Survivor", "Quick", "Tough" ],
+  "skill_points": 10,
+  "skill_points_per_level": 0.2,
+  "skills": {
+    "lq_apoc:sprint": { "level": 5 },
+    "lq_apoc:leap": { "level": 12, "cost": 5 }
+  }
+}

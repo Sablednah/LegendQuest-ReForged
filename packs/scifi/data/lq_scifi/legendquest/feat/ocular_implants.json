@@ -1,0 +1,9 @@
+{
+  "name": "Ocular Implants",
+  "description": "Aftermarket eyes, factory dark-mode.",
+  "icon": "minecraft:ender_eye",
+  "cost": 5,
+  "skills": {
+    "lq_scifi:low_light_optics": { "level": 0 }
+  }
+}

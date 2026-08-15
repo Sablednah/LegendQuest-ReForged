@@ -1,0 +1,12 @@
+{
+  "name": "Safe Fall",
+  "description": "Mineshafts only kill people who fight the drop.",
+  "icon": "minecraft:phantom_membrane",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 10,
+  "duration": 30000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:slow_falling", "duration": 30000, "particles": false }
+  ]
+}

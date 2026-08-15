@@ -1,0 +1,12 @@
+{
+  "name": "Full Deployment",
+  "description": "Everything in the workshop that has legs, gets legs.",
+  "icon": "minecraft:redstone",
+  "type": "active",
+  "cooldown": 600000,
+  "mana_cost": 60,
+  "effects": [
+    { "type": "legendquest:summon", "entity": "minecraft:iron_golem", "count": 1 },
+    { "type": "legendquest:summon", "entity": "minecraft:snow_golem", "count": 2 }
+  ]
+}

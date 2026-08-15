@@ -1,0 +1,12 @@
+{
+  "name": "Optic Camo",
+  "description": "The suit shows the wall behind you. Walls don't fidget - don't you.",
+  "icon": "minecraft:glass",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 15,
+  "duration": 10000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:invisibility", "duration": 10000 }
+  ]
+}

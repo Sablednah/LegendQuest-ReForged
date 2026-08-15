@@ -1,0 +1,23 @@
+{
+  "name": "Chemist",
+  "chat_tag": "[Ch]",
+  "description": "Better living through things that explode.",
+  "long_description": "Scavengers who read the labels on what they stole. From looted pharmacies and swimming-pool supplies a Chemist brews fire, poison, and the stims that keep a crew moving past the point bodies quit. Downwind is the wrong side of one.",
+  "frequency": 60,
+  "main_only": true,
+  "requires": [ "lq_apoc:scavenger" ],
+  "health_per_level": 0.1,
+  "mana_bonus": 10,
+  "mana_per_second": 0.5,
+  "statmods": { "int": 2, "wis": 1 },
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "skills": {
+    "lq_apoc:shiv": { "level": 0 },
+    "lq_apoc:scrounge": { "level": 0 },
+    "lq_apoc:molotov": { "level": 5 },
+    "lq_apoc:acid_flask": { "level": 15, "cost": 5 },
+    "lq_apoc:stim_shot": { "level": 25, "cost": 5 },
+    "lq_apoc:gas_grenade": { "level": 40, "cost": 10 }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "Shield Wall",
+  "description": "Everything they throw, you keep.",
+  "icon": "minecraft:iron_chestplate",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 15,
+  "duration": 8000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:resistance", "duration": 8000, "amplifier": 2 }
+  ]
+}

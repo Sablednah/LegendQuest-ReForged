@@ -1,0 +1,11 @@
+{
+  "name": "Found Chickens",
+  "description": "They were in a culvert. They're yours now.",
+  "icon": "minecraft:egg",
+  "type": "active",
+  "cooldown": 180000,
+  "mana_cost": 10,
+  "effects": [
+    { "type": "legendquest:summon", "entity": "minecraft:chicken", "count": 2 }
+  ]
+}

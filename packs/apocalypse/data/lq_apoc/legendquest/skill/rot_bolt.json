@@ -1,0 +1,14 @@
+{
+  "name": "Rot Bolt",
+  "description": "Decay, expressed as a strong opinion.",
+  "icon": "minecraft:rotten_flesh",
+  "type": "active",
+  "cooldown": 15000,
+  "mana_cost": 15,
+  "karma_reward": -1,
+  "effects": [
+    { "type": "legendquest:damage", "amount": 8 },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:poison", "duration": 6000, "amplifier": 1, "target": { "kind": "looking_at" } },
+    { "type": "legendquest:particle_line", "particle": "minecraft:sculk_soul" }
+  ]
+}

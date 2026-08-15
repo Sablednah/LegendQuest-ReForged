@@ -1,0 +1,9 @@
+{
+  "name": "Crewman",
+  "chat_tag": "[Cr]",
+  "description": "Every ship needs hands. Yours will do.",
+  "long_description": "Unrated, unassigned, and mopping something in the cargo bay. Every legend in the black started as a Crewman; most of the corpses did too. Pick a Profession - Marine, Technician, Medtech, Recon or Scientist - and master it to rate for the specialist billets. Master any of them and the Captain's chair stops being furniture and starts being a possibility.",
+  "default": true,
+  "frequency": 0,
+  "skill_points": 5
+}

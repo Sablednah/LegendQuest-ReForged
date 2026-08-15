@@ -1,0 +1,11 @@
+{
+  "name": "First Aid",
+  "description": "Pressure on the wound. Breathe. You're fine.",
+  "icon": "minecraft:paper",
+  "type": "active",
+  "cooldown": 8000,
+  "mana_cost": 8,
+  "effects": [
+    { "type": "legendquest:heal", "amount": 6 }
+  ]
+}

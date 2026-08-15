@@ -1,0 +1,14 @@
+{
+  "name": "Terran",
+  "plural": "Terrans",
+  "chat_tag": "[Te]",
+  "description": "Baseline human. The galaxy's most invasive species.",
+  "long_description": "Unmodified stock from the old homeworld, or near enough. Terrans have no edge except the one that conquered a planet: they adapt to anything, complain the whole time, and are inexplicably everywhere. Every profession is open and every door half-fits them.",
+  "frequency": 400,
+  "base_health": 20.0,
+  "base_mana": 10.0,
+  "statmods": { "chr": 1 },
+  "groups": [ "Crew", "Adaptable" ],
+  "skill_points": 15,
+  "skill_points_per_level": 0.3
+}

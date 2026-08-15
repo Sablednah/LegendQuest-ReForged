@@ -1,0 +1,9 @@
+{
+  "name": "Field Medicine",
+  "description": "Everyone should know where the pressure points are.",
+  "icon": "minecraft:paper",
+  "cost": 6,
+  "skills": {
+    "lq_apoc:first_aid": { "level": 0 }
+  }
+}

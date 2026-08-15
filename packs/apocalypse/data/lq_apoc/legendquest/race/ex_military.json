@@ -1,0 +1,23 @@
+{
+  "name": "Ex-Military",
+  "plural": "Ex-Military",
+  "chat_tag": "[XM]",
+  "description": "Trained before the fall. The training stuck.",
+  "long_description": "Discipline is the one supply that never runs out. Ex-military survivors keep their boots dry, their weapons cleaner than their conscience, and their heart rate flat while everyone else is screaming. Civilians find them cold. Civilians also follow them anyway.",
+  "frequency": 150,
+  "base_health": 24.0,
+  "base_mana": 10.0,
+  "statmods": { "str": 2, "con": 1, "chr": -1 },
+  "groups": [ "Survivor", "Tough", "Steady" ],
+  "skill_points": 10,
+  "skill_points_per_level": 0.2,
+  "attributes": {
+    "minecraft:armor_toughness": { "base": 0.5 }
+  },
+  "skills": {
+    "lq_apoc:adrenaline": { "level": 8 }
+  },
+  "levels": {
+    "25": { "hp": 2 }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "Immune",
+  "plural": "Immune",
+  "chat_tag": "[Im]",
+  "description": "Got bitten. Got better.",
+  "long_description": "The fever should have finished them; instead it burned through and left something quieter behind. The Immune heal ugly and smell faintly of the grave - other survivors keep their distance, and so, sometimes, do the dead. Nobody knows what it means yet. The Immune try not to think about it.",
+  "frequency": 25,
+  "base_health": 26.0,
+  "base_mana": 8.0,
+  "mana_per_second": 0.8,
+  "statmods": { "con": 2, "chr": -2 },
+  "groups": [ "Survivor", "Tough", "Touched" ],
+  "skill_points": 10,
+  "skill_points_per_level": 0.2,
+  "skills": {
+    "lq_apoc:dead_calm": { "level": 10, "cost": 5 }
+  },
+  "levels": {
+    "30": { "hp": 2 }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "Emergency Shielding",
+  "description": "Field rated for 'briefly'. Make it count.",
+  "icon": "minecraft:shield",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 15,
+  "duration": 20000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:resistance", "duration": 20000, "target": { "kind": "party" } }
+  ]
+}

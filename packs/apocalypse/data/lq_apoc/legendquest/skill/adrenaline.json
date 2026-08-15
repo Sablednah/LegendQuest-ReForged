@@ -1,0 +1,13 @@
+{
+  "name": "Adrenaline",
+  "description": "Training kicks in. Everything slows down except you.",
+  "icon": "minecraft:sugar",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 10,
+  "duration": 15000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:speed", "duration": 15000, "amplifier": 1 },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:strength", "duration": 15000 }
+  ]
+}

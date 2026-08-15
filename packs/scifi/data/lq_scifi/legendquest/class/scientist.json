@@ -1,0 +1,17 @@
+{
+  "name": "Scientist",
+  "chat_tag": "[Si]",
+  "description": "Runs the numbers. Occasionally runs from the results.",
+  "long_description": "Every crew needs one person who reads the manual, and the Scientist wrote a correction to it. Scanners, specimens and a professional relationship with the unknown. Mastery opens two doors: the Xenobiology lab - and, for minds the programme flags as receptive, the Psionics wing.",
+  "frequency": 200,
+  "mana_bonus": 10,
+  "mana_per_second": 0.8,
+  "statmods": { "int": 2, "wis": 1, "str": -1 },
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "skills": {
+    "lq_scifi:analyze": { "level": 5 },
+    "lq_scifi:containment_foam": { "level": 12, "cost": 5 },
+    "lq_scifi:lab_stims": { "level": 20, "cost": 5 }
+  }
+}

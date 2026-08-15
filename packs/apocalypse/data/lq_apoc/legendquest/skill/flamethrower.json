@@ -1,0 +1,12 @@
+{
+  "name": "Flamethrower",
+  "description": "Coal in, cleansing out. Keep the nozzle downwind.",
+  "icon": "minecraft:blaze_rod",
+  "type": "active",
+  "cooldown": 1500,
+  "mana_cost": 2,
+  "consumes": "minecraft:coal",
+  "effects": [
+    { "type": "legendquest:projectile", "entity": "minecraft:small_fireball", "speed": 1.2 }
+  ]
+}

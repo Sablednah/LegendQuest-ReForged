@@ -1,0 +1,10 @@
+{
+  "name": "Reactive Armor",
+  "description": "Hit a Juggernaut, and the plating hits back.",
+  "icon": "minecraft:cactus",
+  "type": "triggered",
+  "trigger": { "on": "hurt", "chance": 30.0 },
+  "effects": [
+    { "type": "legendquest:damage", "amount": 4, "target": { "kind": "trigger" } }
+  ]
+}

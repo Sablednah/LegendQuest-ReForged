@@ -1,0 +1,11 @@
+{
+  "name": "Pounce",
+  "description": "Four metres, standing start, apologies afterwards.",
+  "icon": "minecraft:rabbit_foot",
+  "type": "active",
+  "cooldown": 8000,
+  "mana_cost": 5,
+  "effects": [
+    { "type": "legendquest:leap", "power": 1.8, "lift": 0.8 }
+  ]
+}

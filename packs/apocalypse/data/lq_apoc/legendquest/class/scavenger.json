@@ -1,0 +1,17 @@
+{
+  "name": "Scavenger",
+  "chat_tag": "[Sc]",
+  "description": "Everything is loot if you get there first.",
+  "long_description": "The cities are tombs full of treasure and the Scavenger has the only working map. Quiet feet, quick fingers, and a blade kept for the moments quiet stops working. Master the trade to earn a specialist's spot: Infiltrator, Chemist, or Trader.",
+  "frequency": 300,
+  "health_per_level": 0.1,
+  "statmods": { "dex": 1, "int": 1 },
+  "skill_points": 10,
+  "skill_points_per_level": 0.2,
+  "allowed_weapons": "#legendquest:rogue_weapons",
+  "skills": {
+    "lq_apoc:shiv": { "level": 5 },
+    "lq_apoc:scrounge": { "level": 12, "cost": 5 },
+    "lq_apoc:sneak": { "level": 20, "cost": 5 }
+  }
+}

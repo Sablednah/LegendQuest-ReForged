@@ -1,0 +1,9 @@
+{
+  "name": "Medical Subroutines",
+  "description": "A patch kit and the training wetware to use it.",
+  "icon": "minecraft:paper",
+  "cost": 6,
+  "skills": {
+    "lq_scifi:nano_patch": { "level": 0 }
+  }
+}

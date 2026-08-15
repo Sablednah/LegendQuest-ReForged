@@ -1,0 +1,12 @@
+{
+  "name": "Analyze",
+  "description": "Tag it, scan it, know exactly where it stopped being friendly.",
+  "icon": "minecraft:name_tag",
+  "type": "active",
+  "cooldown": 15000,
+  "mana_cost": 5,
+  "duration": 15000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:glowing", "duration": 15000, "target": { "kind": "looking_at", "range": 30 } }
+  ]
+}

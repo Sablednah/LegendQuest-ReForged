@@ -1,0 +1,19 @@
+{
+  "name": "Recon",
+  "chat_tag": "[Rc]",
+  "description": "First in. First out. First to know.",
+  "long_description": "Recon goes where the sensor coverage isn't and comes back with the shape of the problem. Light gear, long optics, and a sensor pulse that paints every warm body on the deck. Mastery rates you for Pathjumper or Railgunner school.",
+  "frequency": 300,
+  "base_speed": 0.2,
+  "speed_mod": 0.01,
+  "statmods": { "dex": 2, "wis": 1, "con": -1 },
+  "skill_points": 10,
+  "skill_points_per_level": 0.2,
+  "allowed_weapons": "#legendquest:marksman_weapons",
+  "skills": {
+    "lq_scifi:burst_servos": { "level": 3 },
+    "lq_scifi:low_light_optics": { "level": 8 },
+    "lq_scifi:sensor_pulse": { "level": 15, "cost": 5 },
+    "lq_scifi:optic_camo": { "level": 20, "cost": 5 }
+  }
+}

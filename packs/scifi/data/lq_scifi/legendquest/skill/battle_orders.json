@@ -1,0 +1,13 @@
+{
+  "name": "Battle Orders",
+  "description": "Clear assignments, calm voice, moving targets.",
+  "icon": "minecraft:filled_map",
+  "type": "active",
+  "cooldown": 90000,
+  "mana_cost": 20,
+  "duration": 15000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:speed", "duration": 15000, "amplifier": 1, "target": { "kind": "party" } },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:resistance", "duration": 15000, "target": { "kind": "party" } }
+  ]
+}

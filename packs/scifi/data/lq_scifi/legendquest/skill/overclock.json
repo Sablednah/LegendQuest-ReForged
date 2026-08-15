@@ -1,0 +1,12 @@
+{
+  "name": "Overclock",
+  "description": "The tool's rating is a starting bid.",
+  "icon": "minecraft:golden_pickaxe",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 10,
+  "duration": 30000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:haste", "duration": 30000, "amplifier": 1, "particles": false }
+  ]
+}

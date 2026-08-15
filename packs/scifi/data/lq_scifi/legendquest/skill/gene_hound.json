@@ -1,0 +1,12 @@
+{
+  "name": "Gene-Hound",
+  "description": "Loyal, fast, and legally a laboratory instrument.",
+  "icon": "minecraft:bone",
+  "type": "active",
+  "cooldown": 180000,
+  "mana_cost": 30,
+  "effects": [
+    { "type": "legendquest:summon", "entity": "minecraft:wolf", "count": 1 },
+    { "type": "legendquest:message", "text": "&7The hound unfolds from its crate. It is not allowed on the furniture." }
+  ]
+}

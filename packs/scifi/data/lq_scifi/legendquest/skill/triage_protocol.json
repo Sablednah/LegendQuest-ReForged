@@ -1,0 +1,11 @@
+{
+  "name": "Triage Protocol",
+  "description": "The autodoc sorts. You save.",
+  "icon": "minecraft:red_dye",
+  "type": "active",
+  "cooldown": 30000,
+  "mana_cost": 20,
+  "effects": [
+    { "type": "legendquest:heal", "amount": 6, "target": { "kind": "party" } }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "name": "Veteran",
+  "chat_tag": "[Ve]",
+  "description": "Still here. That should worry you.",
+  "long_description": "Every scar is a lesson and Veterans are extremely educated. Mastered Enforcers with nothing left to prove and an unreasonable amount left to survive, they level slower than anyone - and outlast everyone. Taking one down remains a group project.",
+  "frequency": 60,
+  "main_only": true,
+  "requires": [ "lq_apoc:enforcer" ],
+  "health_mod": 10.0,
+  "health_per_level": 0.4,
+  "statmods": { "con": 3, "str": 1, "chr": -1 },
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "xp_adjust_kill": -20,
+  "allowed_weapons": "#legendquest:fighter_weapons",
+  "allowed_armour": "#legendquest:heavy_armour",
+  "skills": {
+    "lq_apoc:bash": { "level": 0 },
+    "lq_apoc:intimidate": { "level": 0 },
+    "lq_apoc:shield_wall": { "level": 20, "cost": 5 },
+    "lq_apoc:spite": { "level": 25, "cost": 5 },
+    "lq_apoc:unbreakable": { "level": 50, "cost": 15 }
+  }
+}

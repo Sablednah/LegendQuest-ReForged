@@ -1,0 +1,12 @@
+{
+  "name": "Ration",
+  "description": "There's always one more tin at the bottom of the pack.",
+  "icon": "minecraft:bread",
+  "type": "active",
+  "cooldown": 180000,
+  "mana_cost": 5,
+  "effects": [
+    { "type": "legendquest:give_item", "item": "minecraft:bread", "count": 2 },
+    { "type": "legendquest:message", "text": "&7You dig out a stashed ration." }
+  ]
+}

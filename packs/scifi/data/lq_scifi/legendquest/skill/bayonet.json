@@ -1,0 +1,10 @@
+{
+  "name": "Bayonet",
+  "description": "When the charge runs dry, the point remains.",
+  "icon": "minecraft:iron_sword",
+  "type": "triggered",
+  "trigger": { "on": "melee_hit", "chance": 25.0 },
+  "effects": [
+    { "type": "legendquest:damage", "amount": 3, "target": { "kind": "trigger" } }
+  ]
+}

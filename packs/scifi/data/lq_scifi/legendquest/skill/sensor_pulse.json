@@ -1,0 +1,13 @@
+{
+  "name": "Sensor Pulse",
+  "description": "One ping. Every warm body on the deck lights up.",
+  "icon": "minecraft:conduit",
+  "type": "active",
+  "cooldown": 45000,
+  "mana_cost": 10,
+  "duration": 10000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:glowing", "duration": 10000, "target": { "kind": "nearby", "radius": 20 } },
+    { "type": "legendquest:sound", "sound": "minecraft:block.conduit.activate" }
+  ]
+}

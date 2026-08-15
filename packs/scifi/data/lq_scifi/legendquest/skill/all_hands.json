@@ -1,0 +1,12 @@
+{
+  "name": "All Hands",
+  "description": "The voice that gets people off the deck and back into the fight.",
+  "icon": "minecraft:goat_horn",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 15,
+  "duration": 20000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:strength", "duration": 20000, "target": { "kind": "party" } }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "Containment Foam",
+  "description": "Standard issue for non-standard specimens.",
+  "icon": "minecraft:slime_ball",
+  "type": "active",
+  "cooldown": 30000,
+  "mana_cost": 15,
+  "duration": 8000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:slowness", "duration": 8000, "amplifier": 2, "target": { "kind": "nearby", "radius": 6 } }
+  ]
+}

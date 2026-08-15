@@ -1,0 +1,7 @@
+{
+  "name": "Scrapper",
+  "description": "Nothing is ever quite used up.",
+  "icon": "minecraft:iron_nugget",
+  "cost": 6,
+  "smith_refund": 0.2
+}

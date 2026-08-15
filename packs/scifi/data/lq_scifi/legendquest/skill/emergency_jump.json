@@ -1,0 +1,12 @@
+{
+  "name": "Emergency Jump",
+  "description": "The long-range setting the manual says doesn't exist.",
+  "icon": "minecraft:end_crystal",
+  "type": "active",
+  "cooldown": 120000,
+  "mana_cost": 30,
+  "effects": [
+    { "type": "legendquest:teleport", "max_range": 64 },
+    { "type": "legendquest:sound", "sound": "minecraft:entity.enderman.teleport", "pitch": 0.6 }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "Regen Serum",
+  "description": "Grows back most things. Ask about the trial data later.",
+  "icon": "minecraft:ghast_tear",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 20,
+  "duration": 10000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:regeneration", "duration": 10000, "amplifier": 1, "target": { "kind": "party" } }
+  ]
+}

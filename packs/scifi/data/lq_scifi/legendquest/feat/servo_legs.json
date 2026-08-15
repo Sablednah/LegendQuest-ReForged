@@ -1,0 +1,10 @@
+{
+  "name": "Servo Legs",
+  "description": "Walk fast enough that meetings can't find you.",
+  "icon": "minecraft:golden_boots",
+  "cost": 8,
+  "level": 5,
+  "attributes": {
+    "minecraft:movement_speed": { "base": 0.01 }
+  }
+}

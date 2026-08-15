@@ -1,0 +1,12 @@
+{
+  "name": "Gas Grenade",
+  "description": "Do not shake. Do not drop. Do not stay.",
+  "icon": "minecraft:lime_dye",
+  "type": "active",
+  "cooldown": 90000,
+  "mana_cost": 30,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:poison", "duration": 8000, "amplifier": 1, "target": { "kind": "nearby", "radius": 6 } },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:nausea", "duration": 8000, "target": { "kind": "nearby", "radius": 6 } }
+  ]
+}

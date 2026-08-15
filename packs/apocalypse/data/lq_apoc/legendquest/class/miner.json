@@ -1,0 +1,22 @@
+{
+  "name": "Miner",
+  "chat_tag": "[Mi]",
+  "description": "The surface is contested. Underneath is not.",
+  "long_description": "Mastered Labourers who decided the safest direction was down. Miners read stone the way Docs read wounds, work in the dark like they were born there, and come home with the ore that becomes everyone else's armour. Just don't ask what they've heard through the deep walls.",
+  "frequency": 60,
+  "main_only": true,
+  "requires": [ "lq_apoc:labourer" ],
+  "health_mod": 2.0,
+  "health_per_level": 0.2,
+  "statmods": { "con": 1, "dex": 1 },
+  "skill_points": 12,
+  "skill_points_per_level": 0.25,
+  "xp_adjust_mine": 40,
+  "allowed_tools": "#legendquest:proficiency_tools",
+  "skills": {
+    "lq_apoc:overdrive": { "level": 0 },
+    "lq_apoc:keen_eyes": { "level": 0 },
+    "lq_apoc:excavate": { "level": 15, "cost": 5 },
+    "lq_apoc:safe_fall": { "level": 25, "cost": 5 }
+  }
+}

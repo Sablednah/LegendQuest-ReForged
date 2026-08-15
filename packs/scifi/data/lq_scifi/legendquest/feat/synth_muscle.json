@@ -1,0 +1,10 @@
+{
+  "name": "Synth-Muscle Weave",
+  "description": "The handshake people remember.",
+  "icon": "minecraft:slime_ball",
+  "cost": 10,
+  "level": 10,
+  "attributes": {
+    "minecraft:attack_damage": { "base": 1.0 }
+  }
+}

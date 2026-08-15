@@ -1,0 +1,12 @@
+{
+  "name": "Redline",
+  "description": "Every safety margin, spent at once.",
+  "icon": "minecraft:redstone_block",
+  "type": "active",
+  "cooldown": 120000,
+  "mana_cost": 25,
+  "duration": 30000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:haste", "duration": 30000, "amplifier": 2, "particles": false }
+  ]
+}

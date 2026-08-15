@@ -1,0 +1,18 @@
+{
+  "name": "Uplift",
+  "plural": "Uplifts",
+  "chat_tag": "[Up]",
+  "description": "Gene-raised from animal stock. Do not mention the lab.",
+  "long_description": "Somewhere between a court ruling and a war crime, the uplift programmes gave animal genomes a seat at the table. Uplifts are stronger than they look and they look very strong; the senses came along for free. They pay for it in paperwork and in people asking what they were 'before', which is a rude question with a short answer.",
+  "frequency": 100,
+  "base_health": 24.0,
+  "base_mana": 8.0,
+  "statmods": { "str": 2, "con": 1, "int": -1 },
+  "groups": [ "Crew", "Gene-Modded", "Tough" ],
+  "skill_points": 10,
+  "skill_points_per_level": 0.2,
+  "skills": {
+    "lq_scifi:predator_senses": { "level": 5 },
+    "lq_scifi:pounce": { "level": 12, "cost": 5 }
+  }
+}

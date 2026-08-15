@@ -1,0 +1,12 @@
+{
+  "name": "Cloak Field",
+  "description": "The sensor log develops a gap, and you are the gap.",
+  "icon": "minecraft:glass",
+  "type": "active",
+  "cooldown": 90000,
+  "mana_cost": 20,
+  "duration": 15000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:invisibility", "duration": 15000 }
+  ]
+}

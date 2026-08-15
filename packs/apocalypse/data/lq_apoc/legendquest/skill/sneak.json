@@ -1,0 +1,12 @@
+{
+  "name": "Sneak",
+  "description": "Ten seconds of being nobody at all.",
+  "icon": "minecraft:leather_boots",
+  "type": "active",
+  "cooldown": 60000,
+  "mana_cost": 15,
+  "duration": 10000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:invisibility", "duration": 10000 }
+  ]
+}

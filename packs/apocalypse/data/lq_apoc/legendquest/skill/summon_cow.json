@@ -1,0 +1,11 @@
+{
+  "name": "Found a Cow",
+  "description": "An actual, walking, pre-war cow. Guard it like a bank vault.",
+  "icon": "minecraft:leather",
+  "type": "active",
+  "cooldown": 240000,
+  "mana_cost": 20,
+  "effects": [
+    { "type": "legendquest:summon", "entity": "minecraft:cow", "count": 1 }
+  ]
+}

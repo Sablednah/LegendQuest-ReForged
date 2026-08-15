@@ -1,0 +1,10 @@
+{
+  "name": "Gyro Stabilizers",
+  "description": "Shove-resistant by design.",
+  "icon": "minecraft:anvil",
+  "cost": 8,
+  "level": 10,
+  "attributes": {
+    "minecraft:knockback_resistance": { "base": 0.2 }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Phase Sprint",
+  "description": "Half here, all fast.",
+  "icon": "minecraft:chorus_fruit",
+  "type": "active",
+  "cooldown": 45000,
+  "mana_cost": 15,
+  "duration": 8000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:invisibility", "duration": 8000 },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:speed", "duration": 8000, "amplifier": 1, "particles": false }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "Sure-Footed",
+  "description": "Rubble, rooftops, rebar - all pavement if you land right.",
+  "icon": "minecraft:rabbit_foot",
+  "type": "active",
+  "cooldown": 45000,
+  "mana_cost": 10,
+  "duration": 20000,
+  "effects": [
+    { "type": "legendquest:potion_effect", "effect": "minecraft:slow_falling", "duration": 20000, "particles": false },
+    { "type": "legendquest:potion_effect", "effect": "minecraft:jump_boost", "duration": 20000, "amplifier": 1, "particles": false }
+  ]
+}
