@@ -30,6 +30,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 
 /**
@@ -217,7 +218,17 @@ public final class LQCommands {
                 .then(Commands.literal("setkarma")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("amount", LongArgumentType.longArg())
-                                        .executes(LQCommands::adminSetKarma))));
+                                        .executes(LQCommands::adminSetKarma))))
+                // Levels for people who would rather not do the XP arithmetic:
+                // /lq admin level set|add|remove @a <n>, plus query to read one
+                // back (command blocks get the level as the command result).
+                .then(Commands.literal("level")
+                        .then(levelVerb("set", LevelOp.SET))
+                        .then(levelVerb("add", LevelOp.ADD))
+                        .then(levelVerb("remove", LevelOp.REMOVE))
+                        .then(Commands.literal("query")
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(LQCommands::adminLevelQuery))));
 
         dispatcher.register(Commands.literal("lq")
                 .executes(LQCommands::stats)
@@ -689,6 +700,95 @@ public final class LQCommands {
                 "player", target.getName().getString(), "amount", amount,
                 "level", CharacterService.level(target))), true);
         return 1;
+    }
+
+    private enum LevelOp { SET, ADD, REMOVE }
+
+    /** {@code <verb> <players> <level>} — the three level verbs are identical but for the arithmetic. */
+    private static LiteralArgumentBuilder<CommandSourceStack> levelVerb(String name, LevelOp op) {
+        return Commands.literal(name)
+                .then(Commands.argument("players", EntityArgument.players())
+                        .then(Commands.argument("level", IntegerArgumentType.integer(0))
+                                .executes(ctx -> adminLevel(ctx, op))));
+    }
+
+    /**
+     * Levels are not stored — they are read back off the main class's XP bank —
+     * so setting one means writing the XP that curve demands. {@code set} snaps
+     * to the exact threshold for the level; {@code add} and {@code remove}
+     * shift by whole levels and carry any progress banked toward the next one,
+     * so {@code add 1} on a half-levelled character leaves them half-levelled.
+     *
+     * <p>Returns the number of players changed, vanilla-style. To read a level
+     * back as a command result, use {@code /lq admin level query}.</p>
+     */
+    private static int adminLevel(CommandContext<CommandSourceStack> ctx, LevelOp op)
+            throws CommandSyntaxException {
+        var targets = EntityArgument.getPlayers(ctx, "players");
+        int amount = IntegerArgumentType.getInteger(ctx, "level");
+        long base = LQConfig.XP_LEVEL_BASE.get();
+        int cap = LQConfig.MAX_LEVEL.get();
+        int changed = 0;
+        String lastName = "";
+        int lastLevel = 0;
+        long lastXp = 0;
+
+        for (ServerPlayer target : targets) {
+            PlayerCharacter pc = CharacterService.data(target);
+            Optional<Identifier> classId = pc.mainClassId();
+            if (classId.isEmpty()) {
+                ctx.getSource().sendFailure(Component.literal(Lang.fmt(
+                        "msg.admin.level_none", "player", target.getName().getString())));
+                continue;
+            }
+            int before = CharacterService.level(target);
+            int after = Math.clamp(switch (op) {
+                case SET -> amount;
+                case ADD -> before + amount;
+                case REMOVE -> before - amount;
+            }, 0, cap);
+            long xp = op == LevelOp.SET
+                    ? Leveling.totalXpForLevel(after, base)
+                    : Math.max(0, pc.xpFor(classId.get())
+                            + Leveling.totalXpForLevel(after, base)
+                            - Leveling.totalXpForLevel(before, base));
+
+            pc.setXp(classId.get(), xp);
+            CharacterService.refresh(target);
+            changed++;
+            lastName = target.getName().getString();
+            lastLevel = CharacterService.level(target);
+            lastXp = xp;
+        }
+
+        if (changed == 1) {
+            final String name = lastName;
+            final int level = lastLevel;
+            final long xp = lastXp;
+            ctx.getSource().sendSuccess(() -> Component.literal(Lang.fmt("msg.admin.set_level",
+                    "player", name, "level", level, "xp", xp)), true);
+        } else if (changed > 1) {
+            final int count = changed;
+            ctx.getSource().sendSuccess(() -> Component.literal(
+                    Lang.fmt("msg.admin.level_many", "count", count)), true);
+        }
+        return changed;
+    }
+
+    private static int adminLevelQuery(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer target = EntityArgument.getPlayer(ctx, "player");
+        PlayerCharacter pc = CharacterService.data(target);
+        Optional<Identifier> classId = pc.mainClassId();
+        if (classId.isEmpty()) {
+            ctx.getSource().sendFailure(Component.literal(Lang.fmt(
+                    "msg.admin.level_none", "player", target.getName().getString())));
+            return 0;
+        }
+        int level = CharacterService.level(target);
+        ctx.getSource().sendSuccess(() -> Component.literal(Lang.fmt("msg.admin.level_query",
+                "player", target.getName().getString(), "level", level,
+                "xp", pc.xpFor(classId.get()), "class", classId.get())), false);
+        return level;
     }
 
     private static int adminSetKarma(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {

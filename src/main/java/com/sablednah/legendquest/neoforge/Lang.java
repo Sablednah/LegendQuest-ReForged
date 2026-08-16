@@ -290,6 +290,10 @@ public final class Lang {
         def("msg.admin.set_class", "Set {player}'s {term.class} to {id}{forced}");
         def("msg.admin.gave_xp", "Gave {player} {amount} {term.class} XP ({term.level} {level})");
         def("msg.admin.set_karma", "Set {player}'s {term.karma} to {amount}");
+        def("msg.admin.set_level", "{player} is now {term.level} {level} ({xp} {term.class} XP)");
+        def("msg.admin.level_many", "Changed the {term.level} of {count} players");
+        def("msg.admin.level_query", "{player} is {term.level} {level} ({xp} XP in {class})");
+        def("msg.admin.level_none", "{player} has no {term.class} — nothing to level");
     }
 
     // --- hb.* : handbook page furniture ---

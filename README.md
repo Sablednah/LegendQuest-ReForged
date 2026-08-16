@@ -514,9 +514,24 @@ so the panel and handbook follow the server's genre too.
 ## Commands
 `/lq` is the root; classic shorthands (`/race`, `/class`, `/skill`, `/stats`,
 `/karma`, `/roll`, `/bind`, `/loadout`, `/party`) are registered as aliases.
-Admin: `/lq admin setrace|setclass|addxp|setkarma` (append `force` to
+Admin: `/lq admin setrace|setclass|addxp|setkarma|level` (append `force` to
 setrace/setclass to allow illegal combos). Bare names work
 everywhere — `dwarf`, not `legendquest:dwarf`.
+
+Levels are derived from the main class's XP bank, so the level verbs do the
+arithmetic for you and accept any entity selector — handy from a command
+block or another mod:
+
+```
+/lq admin level set    @p 20     # exactly level 20, XP snapped to the threshold
+/lq admin level add    @a 1      # everyone up one, part-levelled progress kept
+/lq admin level remove Steve 3   # down three, floor 0
+/lq admin level query  Steve     # prints it, and returns it as the command result
+```
+
+`set`/`add`/`remove` clamp to `maxLevel` and return the number of players
+changed; `query` returns the level itself, so a comparator or
+`execute store result` can read it.
 
 ## Building
 
