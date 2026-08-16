@@ -5,10 +5,14 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
+import org.lwjgl.glfw.GLFW;
+
+import com.mojang.blaze3d.platform.InputConstants;
 import com.sablednah.legendquest.network.HandbookPayload;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -29,8 +33,13 @@ import net.minecraft.world.item.Items;
  */
 public final class HandbookScreen extends Screen {
 
-    private static final int BOOK_W = 306;
-    private static final int LIST_W = 92;
+    // The book sizes itself to its content: a genre pack's vocabulary ("Archetypes",
+    // "Roles") and its entry names ("Call In a Contact") are both longer than the
+    // D&D words this was first laid out for.
+    private static final int BOOK_W_MIN = 306;
+    private static final int LIST_W_MIN = 92;
+    private static final int LIST_W_MAX = 156;
+    private static final int PANE_W_MIN = 190;
     private static final int HEADER_H = 40;
 
     // The tome palette.
@@ -45,6 +54,10 @@ public final class HandbookScreen extends Screen {
 
     private String section; // "race" | "class" | "skill" | "feat" | "gear"
     private String selectedId;
+    private HandbookPayload measuredFor;
+    private int measuredAt = -1;
+    private int bookW = BOOK_W_MIN;
+    private int listW = LIST_W_MIN;
     private double scroll = 0;
     private double maxScroll = 0;
     private double listScroll = 0;
@@ -73,13 +86,57 @@ public final class HandbookScreen extends Screen {
 
     // --- layout ---
 
-    private int bookX() { return (width - BOOK_W) / 2; }
+    private int bookX() { return (width - bookW()) / 2; }
     private int bookH() { return Math.min(226, height - 20); }
     private int bookY() { return (height - bookH()) / 2; }
-    private int paneX() { return bookX() + LIST_W + 12; }
-    private int paneW() { return bookX() + BOOK_W - 12 - paneX(); }
+    private int paneX() { return bookX() + listW() + 12; }
+    private int paneW() { return bookX() + bookW() - 12 - paneX(); }
     private int paneY() { return bookY() + HEADER_H; }
     private int paneH() { return bookY() + bookH() - 10 - paneY(); }
+    private int listTop() { return paneY() - 1; }
+    private int listBottom() { return bookY() + bookH() - 8; }
+
+    private int bookW() { measure(); return bookW; }
+    private int listW() { measure(); return listW; }
+
+    /**
+     * Width is content-driven, but measured once per payload rather than per frame:
+     * the entry column is sized to the longest name in the <em>whole</em> book, so
+     * the layout does not jump as you tab between sections.
+     */
+    private void measure() {
+        HandbookPayload book = ClientHandbook.get();
+        if (book == measuredFor && measuredAt == width) return;
+        measuredFor = book;
+        measuredAt = width;
+
+        int widest = 0;
+        if (book != null) {
+            for (var list : List.of(book.races(), book.classes(), book.skills(),
+                    book.feats(), book.gear())) {
+                for (var entry : list) {
+                    widest = Math.max(widest, font.width("§l" + entry.name()));
+                }
+            }
+        }
+        listW = Math.max(LIST_W_MIN, Math.min(LIST_W_MAX, widest + 24));
+
+        int cap = Math.max(BOOK_W_MIN, width - 20);
+        int needed = Math.max(tabRowWidth(), listW + 12 + PANE_W_MIN);
+        bookW = Math.min(Math.max(BOOK_W_MIN, needed), cap);
+    }
+
+    /** What the header needs: back chip, five tabs at their drawn width, close chip. */
+    private int tabRowWidth() {
+        int w = 28;
+        for (String label : List.of(
+                ClientVocab.term("races", "Races"), ClientVocab.term("classes", "Classes"),
+                ClientVocab.term("skills", "Skills"), ClientVocab.term("feats", "Feats"),
+                ClientVocab.term("gear", "Gear"))) {
+            w += font.width("§l" + label) + 12 + 4;
+        }
+        return w + 24; // the ✕ chip sits at bookW - 22, and wants air before it
+    }
 
     private List<HandbookPayload.Entry> entries() {
         HandbookPayload book = ClientHandbook.get();
@@ -138,21 +195,22 @@ public final class HandbookScreen extends Screen {
         int x = bookX();
         int y = bookY();
         int h = bookH();
+        int bw = bookW();
 
         // The tome: aged leather gradient in a bronze frame with gold inlay.
-        g.fillGradient(x, y, x + BOOK_W, y + h, PARCHMENT_TOP, PARCHMENT_BOTTOM);
-        frame(g, x - 2, y - 2, x + BOOK_W + 2, y + h + 2, BRONZE, 2);
-        frame(g, x + 2, y + 2, x + BOOK_W - 2, y + h - 2, GOLD_DIM, 1);
+        g.fillGradient(x, y, x + bw, y + h, PARCHMENT_TOP, PARCHMENT_BOTTOM);
+        frame(g, x - 2, y - 2, x + bw + 2, y + h + 2, BRONZE, 2);
+        frame(g, x + 2, y + 2, x + bw - 2, y + h - 2, GOLD_DIM, 1);
         // Corner stars, because every proper grimoire has them.
         g.drawString(font, "§6✦", x + 4, y + 4, 0xFFFFFFFF);
-        g.drawString(font, "§6✦", x + BOOK_W - 12, y + 4, 0xFFFFFFFF);
+        g.drawString(font, "§6✦", x + bw - 12, y + 4, 0xFFFFFFFF);
         g.drawString(font, "§6✦", x + 4, y + h - 13, 0xFFFFFFFF);
-        g.drawString(font, "§6✦", x + BOOK_W - 12, y + h - 13, 0xFFFFFFFF);
+        g.drawString(font, "§6✦", x + bw - 12, y + h - 13, 0xFFFFFFFF);
 
         // Title with flourishes.
         String title = "§6§l " + ClientVocab.term("handbook", "Players Handbook") + " ";
         int titleW = font.width(title);
-        int titleX = x + (BOOK_W - titleW) / 2;
+        int titleX = x + (bw - titleW) / 2;
         g.drawString(font, "§8── ✦ ──", titleX - 42, y + 7, 0xFFFFFFFF);
         g.drawString(font, title, titleX, y + 6, 0xFFFFFFFF);
         g.drawString(font, "§8── ✦ ──", titleX + titleW + 2, y + 7, 0xFFFFFFFF);
@@ -166,59 +224,62 @@ public final class HandbookScreen extends Screen {
         tx = tab(g, tx, tabY, ClientVocab.term("skills", "Skills"), "skill", mouseX, mouseY);
         tx = tab(g, tx, tabY, ClientVocab.term("feats", "Feats"), "feat", mouseX, mouseY);
         tab(g, tx, tabY, ClientVocab.term("gear", "Gear"), "gear", mouseX, mouseY);
-        chip(g, x + BOOK_W - 22, tabY, 14, "✕", true, false, mouseX, mouseY, this::onClose);
+        chip(g, x + bw - 22, tabY, 14, "✕", true, false, mouseX, mouseY, this::onClose);
 
         // Divider under the header, with a centre ornament.
         int divY = y + HEADER_H - 5;
-        g.fill(x + 8, divY, x + BOOK_W - 8, divY + 1, INK_DIVIDER);
-        g.drawString(font, "§6❖", x + BOOK_W / 2 - 3, divY - 4, 0xFFFFFFFF);
+        g.fill(x + 8, divY, x + bw - 8, divY + 1, INK_DIVIDER);
+        g.drawString(font, "§6❖", x + bw / 2 - 3, divY - 4, 0xFFFFFFFF);
 
         // The feat shop shows your purse, centred in the book's footer.
         if (section.equals("feat")) {
             var summary = ClientCharacterState.summary();
             if (summary != null) {
                 String purse = "§7" + ClientVocab.get("ui.points_to_spend", "Points to spend") + ": §6§l" + (summary.spTotal() - summary.spSpent());
-                g.drawCenteredString(font, purse, x + BOOK_W / 2, y + h - 13, 0xFFFFFFFF);
+                g.drawCenteredString(font, purse, x + bw / 2, y + h - 13, 0xFFFFFFFF);
             }
         }
 
         // Entry list on its own inset panel — scissored and scrollable, so
         // sixteen gear tags don't spill out of the book's binding.
         int listX = x + 6;
-        int listTop = paneY() - 1;
-        int listBottom = y + h - 8;
+        int listTop = listTop();
+        int listBottom = listBottom();
         int listH = listBottom - listTop;
+        int lw = listW();
         maxListScroll = Math.max(0, entries().size() * 12 + 2 - listH);
         listScroll = Math.max(0, Math.min(listScroll, maxListScroll));
-        g.fill(listX, paneY() - 2, listX + LIST_W - 4, listBottom, 0x30000000);
-        g.enableScissor(listX, listTop, listX + LIST_W - 4, listBottom);
+        g.fill(listX, paneY() - 2, listX + lw - 4, listBottom, 0x30000000);
+        g.enableScissor(listX, listTop, listX + lw - 4, listBottom);
         int ly = paneY() + 1 - (int) listScroll;
         var current = selected();
         for (var entry : entries()) {
             boolean rowVisible = ly + 10 > listTop && ly - 1 < listBottom;
             boolean isSelected = current != null && entry.id().equals(current.id());
-            boolean hover = rowVisible && mouseX >= listX && mouseX < listX + LIST_W - 4
+            boolean hover = rowVisible && mouseX >= listX && mouseX < listX + lw - 4
                     && mouseY >= Math.max(ly - 1, listTop) && mouseY < Math.min(ly + 10, listBottom);
-            if (isSelected) g.fill(listX, ly - 1, listX + LIST_W - 4, ly + 10, 0x40DAA520);
-            else if (hover) g.fill(listX, ly - 1, listX + LIST_W - 4, ly + 10, 0x28FFFFFF);
+            if (isSelected) g.fill(listX, ly - 1, listX + lw - 4, ly + 10, 0x40DAA520);
+            else if (hover) g.fill(listX, ly - 1, listX + lw - 4, ly + 10, 0x28FFFFFF);
             String colour = isSelected ? "§6§l" : hover ? "§e" : "§7";
             String owned = "";
             if (section.equals("feat")) {
                 var summary = ClientCharacterState.summary();
                 if (summary != null && summary.ownedFeats().contains(entry.id())) owned = "§a✔ ";
             }
-            g.drawString(font, owned + colour + trim(entry.name(), LIST_W - 16), listX + 3, ly, 0xFFFFFFFF);
+            // The row you are reading slides its name; the rest keep the tidy ellipsis.
+            drawEntryName(g, owned + colour + entry.name(), listX + 3, ly,
+                    lw - 10 - font.width(owned), isSelected || hover);
             if (!isSelected && rowVisible) {
                 String toId = entry.id();
                 hotspots.add(new Hot(listX, Math.max(ly - 1, listTop),
-                        listX + LIST_W - 4, Math.min(ly + 10, listBottom),
+                        listX + lw - 4, Math.min(ly + 10, listBottom),
                         () -> navigate(section, toId)));
             }
             ly += 12;
         }
         g.disableScissor();
         if (maxListScroll > 0) {
-            int barX = listX + LIST_W - 6;
+            int barX = listX + lw - 6;
             g.fill(barX, listTop, barX + 2, listBottom, 0x50000000);
             int contentH = entries().size() * 12 + 2;
             int thumbH = Math.max(10, listH * listH / contentH);
@@ -357,6 +418,11 @@ public final class HandbookScreen extends Screen {
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         if (super.mouseClicked(event, doubleClick)) return true;
+        // Thumb button 4 is "back" everywhere else; it should be here too.
+        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_4) {
+            goBack();
+            return true;
+        }
         if (event.button() != 0) return false;
         for (Hot hot : hotspots) {
             if (event.x() >= hot.x0() && event.x() < hot.x1()
@@ -380,6 +446,57 @@ public final class HandbookScreen extends Screen {
         return true;
     }
 
+    /** Up/down walk the open section's list, the same as ZombieMod's dex. */
+    @Override
+    public boolean keyPressed(KeyEvent event) {
+        if (super.keyPressed(event)) return true;
+        if (event.key() == InputConstants.KEY_DOWN) {
+            step(1);
+            return true;
+        }
+        if (event.key() == InputConstants.KEY_UP) {
+            step(-1);
+            return true;
+        }
+        if (event.key() == InputConstants.KEY_BACKSPACE) {
+            goBack();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Step the selection within the open section and keep the row on screen.
+     * Deliberately does not push history: arrowing down a list is browsing, and
+     * filling the back stack with it would make « useless for what it is for —
+     * retracing the links you followed between entries.
+     */
+    private void step(int direction) {
+        var list = entries();
+        var current = selected();
+        if (list.isEmpty() || current == null) return;
+        int at = -1;
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).id().equals(current.id())) {
+                at = i;
+                break;
+            }
+        }
+        int next = at < 0 ? (direction > 0 ? 0 : list.size() - 1)
+                : Math.max(0, Math.min(list.size() - 1, at + direction));
+        if (next == at) return;
+        selectedId = list.get(next).id();
+        scroll = 0;
+
+        // Bring the row into the scissored window rather than leaving the keyboard blind.
+        int listH = listBottom() - listTop();
+        int rowTop = next * 12;
+        int rowBottom = rowTop + 14;
+        if (rowTop < listScroll) listScroll = rowTop;
+        else if (rowBottom > listScroll + listH) listScroll = rowBottom - listH;
+        listScroll = Math.max(0, Math.min(listScroll, maxListScroll));
+    }
+
     @Override
     public boolean isPauseScreen() {
         return false;
@@ -393,6 +510,39 @@ public final class HandbookScreen extends Screen {
             return new ItemStack(Items.ENCHANTED_BOOK);
         }
         return new ItemStack(BuiltInRegistries.ITEM.getValue(rl));
+    }
+
+    /**
+     * Draw an entry name in the list column. A name that fits is drawn plainly; one
+     * that does not is trimmed to an ellipsis, unless this is the row under the
+     * cursor or the keyboard, in which case it ping-pongs sideways so the whole
+     * name can be read without widening the book for one long outlier. The list's
+     * scissor does the clipping.
+     */
+    private void drawEntryName(GuiGraphics g, String text, int x, int y, int avail, boolean live) {
+        int over = font.width(text) - avail;
+        if (over <= 0) {
+            g.drawString(font, text, x, y, 0xFFFFFFFF);
+            return;
+        }
+        if (!live) {
+            g.drawString(font, trim(text, avail), x, y, 0xFFFFFFFF);
+            return;
+        }
+        long travel = Math.max(1L, over * 22L); // ~45 px/s
+        long dwell = 900L;                      // pause at each end so it can be read
+        long t = System.currentTimeMillis() % (2 * travel + 2 * dwell);
+        int offset;
+        if (t < dwell) {
+            offset = 0;
+        } else if (t < dwell + travel) {
+            offset = (int) ((t - dwell) * over / travel);
+        } else if (t < 2 * dwell + travel) {
+            offset = over;
+        } else {
+            offset = over - (int) ((t - 2 * dwell - travel) * over / travel);
+        }
+        g.drawString(font, text, x - offset, y, 0xFFFFFFFF);
     }
 
     private String trim(String text, int width) {
