@@ -43,6 +43,30 @@ public final class LQEffects {
         return Identifier.fromNamespaceAndPath(LegendQuest.MODID, path);
     }
 
+    // --- describe() plumbing: the handbook's "what it does" lines are built from
+    // the data, so they can never contradict it. Phrased through Lang so a
+    // re-themed server and a translated server both read correctly.
+
+    private static String fx(String key, Object... kv) {
+        return com.sablednah.legendquest.neoforge.Lang.fmt(key, kv);
+    }
+
+    /** 6.0 reads as "6"; 6.5 stays "6.5". */
+    private static String num(double value) {
+        return TargetSpec.num(value);
+    }
+
+    /** Milliseconds as the seconds a player thinks in. */
+    private static String secs(long ms) {
+        return num(ms / 1000.0D);
+    }
+
+    /** Potion levels are roman in vanilla; match it rather than inventing "Haste 2". */
+    private static String roman(int value) {
+        if (value < 1 || value > 10) return String.valueOf(value);
+        return new String[] {"I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"}[value - 1];
+    }
+
     /** Called once from SkillEffectTypes' static init. */
     public static void registerBuiltin() {
         SkillEffectTypes.register(Damage.TYPE, Damage.CODEC);
@@ -72,6 +96,11 @@ public final class LQEffects {
         @Override public Identifier type() { return TYPE; }
 
         @Override
+        public String describe() {
+            return fx("hb.fx.damage", "amount", num(amount), "at", target.describe());
+        }
+
+        @Override
         public void apply(SkillContext ctx) {
             for (LivingEntity e : target.resolveEntities(ctx)) {
                 e.hurtServer(ctx.level(),
@@ -89,6 +118,11 @@ public final class LQEffects {
                 .apply(i, Heal::new));
 
         @Override public Identifier type() { return TYPE; }
+
+        @Override
+        public String describe() {
+            return fx("hb.fx.heal", "amount", num(amount), "at", target.describe());
+        }
 
         @Override
         public void apply(SkillContext ctx) {
@@ -120,6 +154,14 @@ public final class LQEffects {
         @Override public Identifier type() { return TYPE; }
 
         @Override
+        public String describe() {
+            return fx("hb.fx.potion",
+                    "effect", effect.value().getDisplayName().getString(),
+                    "level", amplifier > 0 ? " " + roman(amplifier + 1) : "",
+                    "at", target.describe(), "time", secs(durationMs));
+        }
+
+        @Override
         public void apply(SkillContext ctx) {
             int ticks = (int) Math.max(1, durationMs / 50);
             for (LivingEntity e : target.resolveEntities(ctx)) {
@@ -140,6 +182,11 @@ public final class LQEffects {
         @Override public Identifier type() { return TYPE; }
 
         @Override
+        public String describe() {
+            return fx("hb.fx.leap");
+        }
+
+        @Override
         public void apply(SkillContext ctx) {
             Vec3 look = ctx.caster().getLookAngle();
             ctx.caster().setDeltaMovement(look.x * power, lift, look.z * power);
@@ -155,6 +202,11 @@ public final class LQEffects {
                 .apply(i, Teleport::new));
 
         @Override public Identifier type() { return TYPE; }
+
+        @Override
+        public String describe() {
+            return fx("hb.fx.teleport", "range", num(maxRange));
+        }
 
         @Override
         public void apply(SkillContext ctx) {
@@ -183,6 +235,12 @@ public final class LQEffects {
         @Override public Identifier type() { return TYPE; }
 
         @Override
+        public String describe() {
+            return fx(visualOnly ? "hb.fx.lightning_visual" : "hb.fx.lightning",
+                    "at", target.describe());
+        }
+
+        @Override
         public void apply(SkillContext ctx) {
             target.resolvePos(ctx).ifPresent(pos -> {
                 LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(ctx.level(), EntitySpawnReason.TRIGGERED);
@@ -204,6 +262,12 @@ public final class LQEffects {
                 .apply(i, Summon::new));
 
         @Override public Identifier type() { return TYPE; }
+
+        @Override
+        public String describe() {
+            return fx("hb.fx.summon", "count", count,
+                    "entity", entity.getDescription().getString());
+        }
 
         @Override
         public void apply(SkillContext ctx) {
@@ -234,6 +298,11 @@ public final class LQEffects {
         @Override public Identifier type() { return TYPE; }
 
         @Override
+        public String describe() {
+            return ""; // flavour the player is about to read anyway
+        }
+
+        @Override
         public void apply(SkillContext ctx) {
             ctx.caster().displayClientMessage(Component.literal(text.replace('&', '§')), actionBar);
         }
@@ -248,6 +317,11 @@ public final class LQEffects {
                 .apply(i, Ignite::new));
 
         @Override public Identifier type() { return TYPE; }
+
+        @Override
+        public String describe() {
+            return fx("hb.fx.ignite", "at", target.describe(), "time", secs(durationMs));
+        }
 
         @Override
         public void apply(SkillContext ctx) {
@@ -266,6 +340,12 @@ public final class LQEffects {
                 .apply(i, GiveItem::new));
 
         @Override public Identifier type() { return TYPE; }
+
+        @Override
+        public String describe() {
+            return fx("hb.fx.give_item", "count", count,
+                    "item", new ItemStack(item).getHoverName().getString());
+        }
 
         @Override
         public void apply(SkillContext ctx) {
@@ -299,6 +379,11 @@ public final class LQEffects {
                 new java.util.concurrent.CopyOnWriteArrayList<>();
 
         @Override public Identifier type() { return TYPE; }
+
+        @Override
+        public String describe() {
+            return ""; // audible, not readable
+        }
 
         @Override
         public void apply(SkillContext ctx) {
@@ -369,6 +454,11 @@ public final class LQEffects {
         @Override public Identifier type() { return TYPE; }
 
         @Override
+        public String describe() {
+            return ""; // decoration; the effect it accompanies is the story
+        }
+
+        @Override
         public void apply(SkillContext ctx) {
             // Start ahead of and below the eyes — wand height, not eyeball
             // height — so the caster's own screen isn't full of sparkle.
@@ -404,6 +494,11 @@ public final class LQEffects {
                 .apply(i, ProjectileEffect::new));
 
         @Override public Identifier type() { return TYPE; }
+
+        @Override
+        public String describe() {
+            return fx("hb.fx.projectile", "entity", entity.getDescription().getString());
+        }
 
         @Override
         public void apply(SkillContext ctx) {
@@ -455,6 +550,15 @@ public final class LQEffects {
                 new java.util.concurrent.CopyOnWriteArrayList<>();
 
         @Override public Identifier type() { return TYPE; }
+
+        @Override
+        public String describe() {
+            // Deliberately vague: the command can name spoilers, or plainly be
+            // none of a player's business.
+            return fx(durationMs > 0 && !undoCommand.isEmpty()
+                    ? "hb.fx.run_command_timed" : "hb.fx.run_command",
+                    "time", secs(durationMs));
+        }
 
         @Override
         public void apply(SkillContext ctx) {

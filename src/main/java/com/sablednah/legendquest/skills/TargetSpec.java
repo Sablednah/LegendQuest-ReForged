@@ -55,6 +55,26 @@ public record TargetSpec(Kind kind, double range, double radius) {
             Codec.DOUBLE.optionalFieldOf("radius", 4.0D).forGetter(TargetSpec::radius))
             .apply(i, TargetSpec::new));
 
+    /**
+     * Who this reads as in the handbook — "you", "your target", "everything
+     * within 4 blocks". Phrased through Lang so the vocabulary follows.
+     */
+    public String describe() {
+        return switch (kind) {
+            case SELF -> com.sablednah.legendquest.neoforge.Lang.get("hb.fx.at.self");
+            case LOOKING_AT -> com.sablednah.legendquest.neoforge.Lang.get("hb.fx.at.looking_at");
+            case TRIGGER -> com.sablednah.legendquest.neoforge.Lang.get("hb.fx.at.trigger");
+            case NEARBY -> com.sablednah.legendquest.neoforge.Lang.fmt(
+                    "hb.fx.at.nearby", "radius", num(radius));
+            case PARTY -> com.sablednah.legendquest.neoforge.Lang.get("hb.fx.at.party");
+        };
+    }
+
+    /** 4.0 reads as "4"; 4.5 stays "4.5". */
+    public static String num(double value) {
+        return value == Math.rint(value) ? String.valueOf((long) value) : String.valueOf(value);
+    }
+
     /** Codec with a different default kind, for effects that naturally aim outward. */
     public static Codec<TargetSpec> codecDefaulting(Kind defaultKind) {
         return CODEC; // kind default handled at field level; see fieldOf helpers below

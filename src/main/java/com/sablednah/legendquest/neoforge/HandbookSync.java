@@ -244,6 +244,14 @@ public final class HandbookSync {
         return new Entry(id.toString(), charClass.name(), "", 0, lines);
     }
 
+    /**
+     * Built-ins that stay silent on purpose — sound, particles and the caster's
+     * own flourish message are things you experience, not things you need told.
+     * Silence from anything else means an author forgot, so it gets named.
+     */
+    private static final java.util.Set<String> DECORATIVE = java.util.Set.of(
+            "legendquest:sound", "legendquest:particle_line", "legendquest:message");
+
     // --- skill pages ---
 
     private static Entry skillPage(Identifier id, com.sablednah.legendquest.data.SkillDefinition def,
@@ -268,6 +276,25 @@ public final class HandbookSync {
             lines.add(Line.text("§7" + hbf(costs.karmaRequired() > 0
                     ? "hb.karma_needs_at_least" : "hb.karma_needs_at_most",
                     "value", costs.karmaRequired())));
+        }
+
+        // What it actually does, straight from the effects. Flavour text is the
+        // author's job; the numbers are ours, and generating them means the book
+        // cannot drift from the data the way a hand-written line would.
+        List<String> doings = new ArrayList<>();
+        for (var effect : def.effects()) {
+            String said = effect.describe();
+            if (said.isBlank() && !DECORATIVE.contains(effect.type().toString())) {
+                // A third-party effect that has not overridden describe(): name it
+                // rather than let the skill read as though it does nothing.
+                said = hbf("hb.fx.unknown", "type", effect.type());
+            }
+            if (!said.isBlank()) doings.add(said);
+        }
+        if (!doings.isEmpty()) {
+            lines.add(Line.text(""));
+            lines.add(Line.text("§6" + hb("hb.effects")));
+            for (String said : doings) lines.add(Line.text("  §f" + said));
         }
 
         // Who teaches it, and when?

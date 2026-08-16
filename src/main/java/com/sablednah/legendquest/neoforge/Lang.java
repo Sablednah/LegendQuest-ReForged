@@ -336,6 +336,29 @@ public final class Lang {
         def("hb.delay", "Delay");
         def("hb.lasts", "Lasts");
         def("hb.consumes", "Consumes");
+
+        // What it does: one line per effect, generated from the skill's data so
+        // the book can never disagree with the rules. {at} is a target phrase.
+        def("hb.effects", "What it does:");
+        def("hb.fx.unknown", "{type} — no description offered");
+        def("hb.fx.at.self", "you");
+        def("hb.fx.at.looking_at", "your target");
+        def("hb.fx.at.trigger", "whoever set it off");
+        def("hb.fx.at.nearby", "everything within {radius} blocks");
+        def("hb.fx.at.party", "you and your {term.party}");
+        def("hb.fx.damage", "Deals {amount} damage to {at}.");
+        def("hb.fx.heal", "Heals {at} for {amount}.");
+        def("hb.fx.potion", "Gives {at} {effect}{level} for {time}s.");
+        def("hb.fx.leap", "Launches you the way you are facing.");
+        def("hb.fx.teleport", "Blinks you to the block you are looking at, up to {range} away.");
+        def("hb.fx.lightning", "Calls lightning down on {at}.");
+        def("hb.fx.lightning_visual", "Calls down lightning that only looks the part.");
+        def("hb.fx.summon", "Summons {count}x {entity}.");
+        def("hb.fx.ignite", "Sets {at} on fire for {time}s.");
+        def("hb.fx.give_item", "Puts {count}x {item} in your pack.");
+        def("hb.fx.projectile", "Launches {entity}.");
+        def("hb.fx.run_command", "Runs a command on the server.");
+        def("hb.fx.run_command_timed", "Runs a command on the server, undone {time}s later.");
         def("hb.size", "Size");
         def("hb.karma_needs_at_least", "{term.karma}: needs at least {value}");
         def("hb.karma_needs_at_most", "{term.karma}: needs at most {value}");
