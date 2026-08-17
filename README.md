@@ -170,6 +170,20 @@ levels:
 | `skill_points_per_level` | `0` | Fractional accrual is fine: `0.25` is one point every 4 levels. |
 | `levels` | `{}` | Milestone rewards — see [Level rewards](#level-rewards). |
 | `xp_adjust_kill` / `_mine` / `_smelt` | `0` | Percentage tweak to class XP from that source; race and class adjustments sum. |
+
+Class XP comes from three kinds of work, each with its own config knob (set
+any to `0` to switch that source off):
+
+| Source | Config | Default |
+|---|---|---|
+| Killing something | — | the mob's own dropped XP |
+| Breaking an ore (`#c:ores`, so modded ores count) | `mineXpOre` | 4 |
+| Breaking any other block that needs a tool | `mineXpBlock` | 1 |
+| Taking an item out of a furnace | `smeltXpItem` | 1 |
+
+Instant-break blocks (crops, grass, torches) pay nothing, or a wheat field
+would be an XP farm; anything you can place and re-break still is one, at
+`mineXpBlock` a swing, which is why it is a config value.
 | `attributes`, `enchant_rebate`, `smith_refund`, `gold_tool_mana` | — | Boons — see [Boons](#boons). |
 
 ### Classes
