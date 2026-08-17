@@ -14,7 +14,11 @@ ${mod_description}
 '''
 displayURL="https://github.com/Sablednah/LegendQuest-ReForged"
 logoFile="legendquest.png"
-logoBlur=false
+# The white wordmark, because the mods list paints on a dark panel; the black
+# variant for light backgrounds lives in docs/branding. Smoothed rather than
+# nearest-neighbour: this is antialiased artwork at 1100px being scaled down to
+# fit a small panel, and point sampling shreds the thin serifs.
+logoBlur=true
 
 # The mod is server-authoritative: vanilla clients can join and play. The
 # optional client entrypoint adds the mana/skill HUD for modded clients.
