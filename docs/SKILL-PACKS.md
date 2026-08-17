@@ -100,6 +100,6 @@ Use the same ModDevGradle scaffold as LegendQuest itself and add:
 ```groovy
 dependencies {
     // consume the published LegendQuest jar (or a maven repo / jarInJar later)
-    implementation files("libs/legendquest-2.0.0-alpha.1.jar")
+    implementation files("libs/legendquest-2.0.0.jar")
 }
 ```

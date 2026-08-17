@@ -460,6 +460,13 @@ and the worked example at
 `SkillEffectTypes.register()` in the mod constructor is the entire API
 surface.
 
+`examplepack-1.0.0.jar` ships alongside the mod on each release (and on the
+CurseForge files page). Drop it in `mods/` next to LegendQuest to see custom
+effect types working; it also carries a Stormcaller class under `examples/`
+in the jar — outside `data/`, so it never auto-loads. Copy it into a datapack
+if you want it. A skill-pack jar must be installed on the **server and on every
+modded client**, or clients fail registry sync with "Unknown skill effect type".
+
 ### Feats
 
 A feat is a purchasable bundle of character, bought with skill points. It
