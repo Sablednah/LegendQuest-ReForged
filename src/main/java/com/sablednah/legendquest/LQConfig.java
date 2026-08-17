@@ -24,6 +24,9 @@ public final class LQConfig {
     public static final ModConfigSpec.IntValue XP_LEVEL_BASE;
     public static final ModConfigSpec.IntValue MAX_LEVEL;
     public static final ModConfigSpec.BooleanValue LEVEL_UP_FANFARE;
+    public static final ModConfigSpec.IntValue MINE_XP_ORE;
+    public static final ModConfigSpec.IntValue MINE_XP_BLOCK;
+    public static final ModConfigSpec.IntValue SMELT_XP_ITEM;
     public static final ModConfigSpec.IntValue PASSIVE_TICK_MS;
     public static final ModConfigSpec.IntValue STAT_BOOST_BASE_COST;
     public static final ModConfigSpec.IntValue RESPEC_LEVEL_COST;
@@ -67,6 +70,18 @@ public final class LQConfig {
                 .comment("Announce a level with a title card and the toast chime, not just a",
                         "chat line. Off leaves the chat line alone.")
                 .define("levelUpFanfare", true);
+        MINE_XP_ORE = BUILDER
+                .comment("Class XP for breaking an ore (anything tagged #c:ores, so modded",
+                        "ores count). A race or class's xp_adjust_mine applies on top. 0 disables.")
+                .defineInRange("mineXpOre", 4, 0, 10_000);
+        MINE_XP_BLOCK = BUILDER
+                .comment("Class XP for breaking any other block that needs a tool and is not",
+                        "instant-break — the mundane graft of digging out a mine. 0 disables.")
+                .defineInRange("mineXpBlock", 1, 0, 10_000);
+        SMELT_XP_ITEM = BUILDER
+                .comment("Class XP per item taken out of a furnace. A race or class's",
+                        "xp_adjust_smelt applies on top. 0 disables.")
+                .defineInRange("smeltXpItem", 1, 0, 10_000);
         BUILDER.pop();
 
         BUILDER.comment("Skills").push("skills");

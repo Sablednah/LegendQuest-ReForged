@@ -193,6 +193,73 @@ public final class LQServerEvents {
         });
     }
 
+    // --- honest work: mining and smelting also pay ---
+
+    /**
+     * Breaking a block earns class XP: ore money, or the smaller wage of the
+     * mundane graft that got you to it. Tiered by tag rather than by a hardcoded
+     * block list, so a modded ore counts the day it is added, and a server that
+     * disagrees can retag rather than recompile.
+     *
+     * <p>Instant-break blocks (grass, crops, torches) pay nothing — otherwise a
+     * wheat field is an XP farm. Anything you can place and re-break still is
+     * one, at {@code mineXpBlock} a swing; that number is a config for a
+     * reason.</p>
+     */
+    @SubscribeEvent
+    static void onBlockMined(net.neoforged.neoforge.event.level.BlockEvent.BreakEvent event) {
+        if (!(event.getPlayer() instanceof ServerPlayer player)) return;
+        if (player.isCreative() || player.isSpectator()) return;
+
+        var state = event.getState();
+        long base;
+        if (state.is(net.neoforged.neoforge.common.Tags.Blocks.ORES)) {
+            base = LQConfig.MINE_XP_ORE.get();
+        } else if (needsATool(state)
+                && state.getDestroySpeed(event.getLevel(), event.getPos()) > 0.0F) {
+            base = LQConfig.MINE_XP_BLOCK.get();
+        } else {
+            return;
+        }
+        awardWorkXp(player, base,
+                CharacterService.race(player)
+                        .map(r -> r.progression().xpAdjustMine()).orElse(0.0D)
+                        + CharacterService.mainClass(player)
+                                .map(c -> c.progression().xpAdjustMine()).orElse(0.0D));
+    }
+
+    private static boolean needsATool(net.minecraft.world.level.block.state.BlockState state) {
+        return state.is(net.minecraft.tags.BlockTags.MINEABLE_WITH_PICKAXE)
+                || state.is(net.minecraft.tags.BlockTags.MINEABLE_WITH_AXE)
+                || state.is(net.minecraft.tags.BlockTags.MINEABLE_WITH_SHOVEL);
+    }
+
+    /** Pulling smelted goods out of a furnace pays the smith. */
+    @SubscribeEvent
+    static void onItemSmelted(net.neoforged.neoforge.event.entity.player.PlayerEvent.ItemSmeltedEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        long per = LQConfig.SMELT_XP_ITEM.get();
+        if (per <= 0) return;
+        awardWorkXp(player, per * Math.max(1, event.getAmountRemoved()),
+                CharacterService.race(player)
+                        .map(r -> r.progression().xpAdjustSmelt()).orElse(0.0D)
+                        + CharacterService.mainClass(player)
+                                .map(c -> c.progression().xpAdjustSmelt()).orElse(0.0D));
+    }
+
+    /** Shared tail for the non-combat XP sources: apply the trade bonus, then bank it. */
+    private static void awardWorkXp(ServerPlayer player, long base, double adjustPercent) {
+        if (base <= 0) return;
+        PlayerCharacter pc = CharacterService.data(player);
+        pc.mainClassId().ifPresent(cls -> {
+            long amount = Math.round(base * (1.0D + adjustPercent / 100.0D));
+            if (amount <= 0) return;
+            int before = CharacterService.level(player);
+            pc.addXp(cls, amount);
+            CharacterService.afterXpChange(player, before);
+        });
+    }
+
     // --- combat: d20 hit/dodge, weapon gate, triggers ---
 
     @SubscribeEvent(priority = EventPriority.LOW)
