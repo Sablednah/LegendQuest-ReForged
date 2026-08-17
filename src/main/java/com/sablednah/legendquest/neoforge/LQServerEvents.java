@@ -189,11 +189,7 @@ public final class LQServerEvents {
             if (amount <= 0) return;
             int before = CharacterService.level(player);
             pc.addXp(cls, amount);
-            int after = CharacterService.level(player);
-            if (after > before) {
-                CharacterService.refresh(player);
-                Feedback.chat(player, Lang.fmt("msg.levelup", "level", after));
-            }
+            CharacterService.afterXpChange(player, before);
         });
     }
 

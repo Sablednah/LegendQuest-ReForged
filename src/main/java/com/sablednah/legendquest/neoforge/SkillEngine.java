@@ -182,8 +182,10 @@ public final class SkillEngine {
         SkillContext ctx = SkillContext.of(player, CharacterService.level(player));
         runEffects(def, ctx, skillId);
         if (def.costs().xpAward() > 0) {
+            int before = CharacterService.level(player);
             CharacterService.data(player).mainClassId()
                     .ifPresent(cls -> CharacterService.data(player).addXp(cls, def.costs().xpAward()));
+            CharacterService.afterXpChange(player, before);
         }
     }
 

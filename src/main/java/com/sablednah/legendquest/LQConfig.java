@@ -23,6 +23,7 @@ public final class LQConfig {
     public static final ModConfigSpec.BooleanValue USE_SIZE_IN_COMBAT;
     public static final ModConfigSpec.IntValue XP_LEVEL_BASE;
     public static final ModConfigSpec.IntValue MAX_LEVEL;
+    public static final ModConfigSpec.BooleanValue LEVEL_UP_FANFARE;
     public static final ModConfigSpec.IntValue PASSIVE_TICK_MS;
     public static final ModConfigSpec.IntValue STAT_BOOST_BASE_COST;
     public static final ModConfigSpec.IntValue RESPEC_LEVEL_COST;
@@ -62,6 +63,10 @@ public final class LQConfig {
         MAX_LEVEL = BUILDER
                 .comment("Level cap. Reaching it masters the class (unlocks dependant classes).")
                 .defineInRange("maxLevel", 150, 1, 10_000);
+        LEVEL_UP_FANFARE = BUILDER
+                .comment("Announce a level with a title card and the toast chime, not just a",
+                        "chat line. Off leaves the chat line alone.")
+                .define("levelUpFanfare", true);
         BUILDER.pop();
 
         BUILDER.comment("Skills").push("skills");

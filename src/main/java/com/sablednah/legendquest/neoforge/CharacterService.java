@@ -160,6 +160,23 @@ public final class CharacterService {
         return Leveling.levelForXp(xp, LQConfig.XP_LEVEL_BASE.get(), LQConfig.MAX_LEVEL.get());
     }
 
+    /**
+     * Re-apply the character's numbers after an XP change and, if that crossed a
+     * level, make an occasion of it. Every path that moves XP goes through here,
+     * so a level earned by a skill's own reward or handed out by an admin is
+     * announced exactly like one earned in a fight.
+     *
+     * @param before the level read <em>before</em> the XP moved
+     */
+    public static void afterXpChange(ServerPlayer player, int before) {
+        refresh(player);
+        int after = level(player);
+        if (after > before) {
+            Feedback.levelUp(player, after,
+                    mainClass(player).map(CharClass::name).orElse(Lang.get("msg.stats.citizen")));
+        }
+    }
+
     /** Effective stat line: rolled base + race mods + combined class mods + level bonuses. */
     public static StatBlock effectiveStats(ServerPlayer player) {
         PlayerCharacter pc = data(player);

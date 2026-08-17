@@ -66,13 +66,23 @@ public final class HandbookSync {
                 .forEach(ref -> classes.add(classPage(ref.key().identifier(), ref.value(),
                         raceLookup, gear)));
 
+        var featLookup = access.lookupOrThrow(LQRegistries.FEAT);
+
+        // Only skills something can actually teach you. The built-in D&D skills stay
+        // registered under a genre pack (a pack filter hides races and classes, not
+        // skills), and listing spells no Role grants is just a longer book to search.
+        java.util.Set<Identifier> obtainable = new java.util.HashSet<>();
+        raceLookup.listElements().forEach(ref -> obtainable.addAll(ref.value().skills().keySet()));
+        classLookup.listElements().forEach(ref -> obtainable.addAll(ref.value().skills().keySet()));
+        featLookup.listElements().forEach(ref -> obtainable.addAll(ref.value().skills().keySet()));
+
         List<Entry> skills = new ArrayList<>();
         skillLookup.listElements()
+                .filter(ref -> obtainable.contains(ref.key().identifier()))
                 .sorted(Comparator.comparing(ref -> ref.value().name()))
                 .forEach(ref -> skills.add(skillPage(ref.key().identifier(), ref.value(),
                         raceLookup, classLookup)));
 
-        var featLookup = access.lookupOrThrow(LQRegistries.FEAT);
         List<Entry> feats = new ArrayList<>();
         featLookup.listElements()
                 .sorted(Comparator.comparing(ref -> ref.value().name()))

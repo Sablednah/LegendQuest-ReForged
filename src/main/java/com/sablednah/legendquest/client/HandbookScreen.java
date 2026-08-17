@@ -446,9 +446,24 @@ public final class HandbookScreen extends Screen {
         return true;
     }
 
+    /** The five tabs in the order they are drawn, for Tab-key cycling. */
+    private static final List<String> SECTIONS = List.of("race", "class", "skill", "feat", "gear");
+
     /** Up/down walk the open section's list, the same as ZombieMod's dex. */
     @Override
     public boolean keyPressed(KeyEvent event) {
+        // Ahead of super: vanilla Screen eats Tab for focus cycling, and there is
+        // nothing here to focus.
+        if (event.key() == InputConstants.KEY_TAB) {
+            int at = SECTIONS.indexOf(section);
+            int next = Math.floorMod(at + (event.hasShiftDown() ? -1 : 1), SECTIONS.size());
+            pushHistory(); // same bookkeeping as clicking the tab
+            section = SECTIONS.get(next);
+            selectedId = null;
+            scroll = 0;
+            listScroll = 0;
+            return true;
+        }
         if (super.keyPressed(event)) return true;
         if (event.key() == InputConstants.KEY_DOWN) {
             step(1);

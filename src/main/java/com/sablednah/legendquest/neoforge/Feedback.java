@@ -29,6 +29,33 @@ public final class Feedback {
         }
     }
 
+    /**
+     * A level-up, made an occasion of: the chat line, a title card over the
+     * world, and the toast chime. All three are vanilla packets, so a vanilla
+     * client gets the whole show — and the sound goes to the one player rather
+     * than to everyone standing near them.
+     */
+    public static void levelUp(ServerPlayer player, int level, String className) {
+        chat(player, Lang.fmt("msg.levelup", "level", level));
+        if (!com.sablednah.legendquest.LQConfig.LEVEL_UP_FANFARE.get()) return;
+
+        player.connection.send(new net.minecraft.network.protocol.game
+                .ClientboundSetTitlesAnimationPacket(5, 40, 10));
+        player.connection.send(new net.minecraft.network.protocol.game
+                .ClientboundSetTitleTextPacket(
+                        colored(Lang.fmt("msg.levelup.title", "level", level))));
+        player.connection.send(new net.minecraft.network.protocol.game
+                .ClientboundSetSubtitleTextPacket(
+                        colored(Lang.fmt("msg.levelup.subtitle", "class", className))));
+        // Sent straight down this player's connection rather than played into the
+        // world: their level-up is not the business of everyone standing nearby.
+        player.connection.send(new net.minecraft.network.protocol.game.ClientboundSoundPacket(
+                net.minecraft.core.registries.BuiltInRegistries.SOUND_EVENT.wrapAsHolder(
+                        net.minecraft.sounds.SoundEvents.UI_TOAST_CHALLENGE_COMPLETE),
+                net.minecraft.sounds.SoundSource.PLAYERS,
+                player.getX(), player.getY(), player.getZ(), 1.0F, 1.0F, 0L));
+    }
+
     public static Component colored(String text) {
         return Component.literal(text.replace('&', '§'));
     }

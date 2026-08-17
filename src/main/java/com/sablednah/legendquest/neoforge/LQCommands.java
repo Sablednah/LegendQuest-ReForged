@@ -694,8 +694,9 @@ public final class LQCommands {
         ServerPlayer target = EntityArgument.getPlayer(ctx, "player");
         long amount = LongArgumentType.getLong(ctx, "amount");
         PlayerCharacter pc = CharacterService.data(target);
+        int before = CharacterService.level(target);
         pc.mainClassId().ifPresent(cls -> pc.addXp(cls, amount));
-        CharacterService.refresh(target);
+        CharacterService.afterXpChange(target, before);
         ctx.getSource().sendSuccess(() -> Component.literal(Lang.fmt("msg.admin.gave_xp",
                 "player", target.getName().getString(), "amount", amount,
                 "level", CharacterService.level(target))), true);
@@ -754,7 +755,7 @@ public final class LQCommands {
                             - Leveling.totalXpForLevel(before, base));
 
             pc.setXp(classId.get(), xp);
-            CharacterService.refresh(target);
+            CharacterService.afterXpChange(target, before);
             changed++;
             lastName = target.getName().getString();
             lastLevel = CharacterService.level(target);

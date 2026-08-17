@@ -126,6 +126,8 @@ public final class Lang {
         def("msg.login.content_gone", "&6This server no longer offers: &c{list}&6. Those choices were "
                 + "reset (your XP is safe) — pick a new {term.race} or {term.class} from the character panel.");
         def("msg.levelup", "&6[LegendQuest]&a {term.level} up! You are now {term.level} {level}.");
+        def("msg.levelup.title", "&6&l{term.level} {level}");
+        def("msg.levelup.subtitle", "&e{class}");
         def("msg.reload_notice", "&6[LegendQuest]&7 Tags reloaded. Content changes apply on server RESTART; messages.yml applied now.");
 
         def("msg.skill.not_known", "&cYou don't know that {term.skill}.");
