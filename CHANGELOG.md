@@ -10,7 +10,8 @@ This project follows [Semantic Versioning](https://semver.org/).
 - **Handbook class pages ignored the vocabulary setting for mana.** The mana
   bonus was labelled "Mana" no matter what the server called it, so under Cold
   Frontier a Species page read "Charge 10" while a Profession page read
-  "Mana +15". Every label on that line now goes through the vocabulary system.
+  "Mana +15". Every label on that line now goes through the vocabulary system,
+  and a Profession page reads "Charge +15" as it always should have.
 - The same line opened with a stray `·` separator when a class had no health
   modifier.
 - `Regen` and `Speed` on class pages are now translatable (`hb.regen`,

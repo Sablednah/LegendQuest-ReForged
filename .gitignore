@@ -40,6 +40,12 @@ bin/
 ### Local editor/agent settings ###
 /.claude/settings.local.json
 
+### Store screenshots (kept local, uploaded to the store listings directly) ###
+# ~34MB of PNGs that only ever get dragged into a CurseForge/Modrinth page.
+# Tracking them would put that in every clone forever to save nobody any work.
+# The upload order and captions ARE tracked, in docs/store-copy.md.
+/screenshots/
+
 ### Minecraft Modding ###
 run/
 !**/src/**/run/

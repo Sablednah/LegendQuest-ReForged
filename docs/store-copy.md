@@ -178,10 +178,14 @@ content-pack contributions are welcome on the
 
 ## Screenshots
 
-Captured 2026-08-18, in `screenshots/`. Each setting was shot in a world that
-suits it — ruined overgrown city for The Wasteland, an intact one for Cold
-Frontier — so the three sets read as three different games rather than one mod
-with the nouns swapped.
+Captured 2026-08-18. The PNGs live in `screenshots/` **locally and are not in
+git** (see `.gitignore`) — they go straight from disk into the store listing,
+and 34MB of images in every clone would buy nobody anything. This table is the
+tracked part: it is the record of which shot goes where and what it says.
+
+Each setting was shot in a world that suits it — ruined overgrown city for The
+Wasteland, an intact one for Cold Frontier — so the three sets read as three
+different games rather than one mod with the nouns swapped.
 
 ### Upload order for the listing
 
@@ -195,13 +199,20 @@ does the explaining by itself.
 | 1 | `fantasy-handbook-skills-battle-hymn.png` | Every skill explains itself — cost, cooldown, and what it actually does. |
 | 2 | `fantasy-handbook-races-dwarf.png` | The Players Handbook: ten races, nine classes, all defined in datapacks. |
 | 3 | `wasteland-guide-archetypes-athlete.png` | The same screen under The Wasteland pack — Races became Archetypes, Mana became Stamina. Every word is yours. |
-| 4 | `fantasy-panel-stats-race-class-pickers.png` | Roll your stats, pick a race and class from the inventory screen. |
-| 5 | `fantasy-cast-fireball.png` | Skills you buy with points you earn. |
-| 6 | `fantasy-hud-loadout-cooldown.png` | A five-slot loadout bar with live cooldowns. |
-| 7 | `fantasy-levelup-title-card-150-mage.png` | 150 levels per class, each with its own XP bank. |
-| 8 | `scifi-manual-species-belter.png` | Cold Frontier: a second complete setting, included. |
-| 9 | `wasteland-guide-roles-builder.png` | Roles that must be earned — master the Labourer before you can be a Builder. |
-| 10 | `fantasy-handbook-gear-barbarian-tools.png` | Item proficiency per class, driven by item tags. |
+| 4 | `vanilla-client-character-sheet.png` | An unmodded vanilla client, playing. No mod install, no modpack — the whole RPG runs on the server. |
+| 5 | `fantasy-panel-stats-race-class-pickers.png` | Roll your stats, pick a race and class from the inventory screen. |
+| 6 | `fantasy-cast-fireball.png` | Skills you buy with points you earn. |
+| 7 | `fantasy-hud-loadout-cooldown.png` | A five-slot loadout bar with live cooldowns. |
+| 8 | `fantasy-levelup-title-card-150-mage.png` | 150 levels per class, each with its own XP bank. |
+| 9 | `scifi-manual-species-belter.png` | Cold Frontier: a second complete setting, included. |
+| 10 | `wasteland-guide-roles-builder.png` | Roles that must be earned — master the Labourer before you can be a Builder. |
+| 11 | `fantasy-handbook-gear-barbarian-tools.png` | Item proficiency per class, driven by item tags. |
+
+Shot 4 earns its high placement: "vanilla clients can join" is the line that
+separates this from every other RPG mod, and it is the one claim a reader will
+assume is marketing until they see it. Caption it explicitly as an unmodded
+client — the image is only convincing if the viewer is told what they are
+looking at, since a plain HUD is exactly what it looks like.
 
 ### Everything captured
 
@@ -218,7 +229,7 @@ Humanity Saintly" with a Crew tab.
 **Cold Frontier** — `scifi-*`: the Ship's Manual across Species, Professions,
 Skills and Augments, plus the Species/Profession picker.
 
-### Still missing
-
-A vanilla client sitting on the server playing through chat, captioned as such
-— proof of the headline claim. Worth capturing before the Modrinth listing.
+**Vanilla client** — `vanilla-client-*`: a genuinely unmodded 1.21.11 client
+(official launcher, no mod loader) connected to a LegendQuest server, showing
+the character sheet and the class list in chat. Captured 2026-08-18 against the
+`v2.0.0` release.
