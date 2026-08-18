@@ -305,6 +305,8 @@ public final class Lang {
         def("hb.starting_class", "The starting {term.class}, until you choose.");
         def("hb.no_description", "(No description — add one in the YAML!)");
         def("hb.health", "Health");
+        def("hb.regen", "Regen");
+        def("hb.speed", "Speed");
         def("hb.lineage", "Lineage");
         def("hb.open_classes", "Open {term.classes}:");
         def("hb.open_to", "Open to:");

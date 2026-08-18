@@ -202,14 +202,25 @@ public final class HandbookSync {
         lines.add(Line.text(""));
 
         var growth = charClass.growth();
-        StringBuilder vitals = new StringBuilder("§7");
-        if (growth.healthMod() != 0) vitals.append("Health ").append(signed(growth.healthMod())).append(" ");
-        if (growth.healthPerLevel() != 0) vitals.append("(+").append(trim(growth.healthPerLevel())).append("/lvl) ");
-        if (growth.manaBonus() != 0) vitals.append("· Mana ").append(signed(growth.manaBonus())).append(" ");
-        if (growth.manaPerLevel() != 0) vitals.append("(+").append(trim(growth.manaPerLevel())).append("/lvl) ");
-        if (growth.manaPerSecond() != 0) vitals.append("· Regen ").append(signed(growth.manaPerSecond())).append("/s ");
-        if (growth.speedMod() != 0) vitals.append("· Speed ").append(signed(growth.speedMod()));
-        if (vitals.length() > 2) lines.add(Line.text(vitals.toString().strip()));
+        // Every label goes through Lang: a pack that renames mana to "Charge"
+        // must see "Charge" here too, and this line used to be the one place
+        // that said "Mana" regardless. Collected as parts and joined rather
+        // than appended with leading separators, so a class with no health
+        // modifier no longer opens the line with a stray "·".
+        List<String> vitals = new ArrayList<>();
+        if (growth.healthMod() != 0 || growth.healthPerLevel() != 0) {
+            vitals.add(hb("hb.health") + " " + perLevel(growth.healthMod(), growth.healthPerLevel()));
+        }
+        if (growth.manaBonus() != 0 || growth.manaPerLevel() != 0) {
+            vitals.add(Lang.term("mana") + " " + perLevel(growth.manaBonus(), growth.manaPerLevel()));
+        }
+        if (growth.manaPerSecond() != 0) {
+            vitals.add(hb("hb.regen") + " " + signed(growth.manaPerSecond()) + "/s");
+        }
+        if (growth.speedMod() != 0) {
+            vitals.add(hb("hb.speed") + " " + signed(growth.speedMod()));
+        }
+        if (!vitals.isEmpty()) lines.add(Line.text("§7" + String.join(" · ", vitals)));
         statLine(lines, charClass.statmods());
 
         var el = charClass.eligibility();
@@ -496,6 +507,17 @@ public final class HandbookSync {
 
     private static String signed(double value) {
         return (value > 0 ? "+" : "") + trim(value);
+    }
+
+    /** "+6 (+0.3/lvl)", or whichever half is non-zero. */
+    private static String perLevel(double base, double perLevel) {
+        StringBuilder sb = new StringBuilder();
+        if (base != 0) sb.append(signed(base));
+        if (perLevel != 0) {
+            if (sb.length() > 0) sb.append(' ');
+            sb.append("(+").append(trim(perLevel)).append("/lvl)");
+        }
+        return sb.toString();
     }
 
     /** hb.* strings render client-side without Feedback, so convert '&' here. */

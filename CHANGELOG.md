@@ -3,6 +3,19 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 2.0.1 — 2026-08-18
+
+### Fixed
+
+- **Handbook class pages ignored the vocabulary setting for mana.** The mana
+  bonus was labelled "Mana" no matter what the server called it, so under Cold
+  Frontier a Species page read "Charge 10" while a Profession page read
+  "Mana +15". Every label on that line now goes through the vocabulary system.
+- The same line opened with a stray `·` separator when a class had no health
+  modifier.
+- `Regen` and `Speed` on class pages are now translatable (`hb.regen`,
+  `hb.speed`); they had been hardcoded English.
+
 ## 2.0.0 — 2026-08-17
 
 First public release, and a complete rewrite. LegendQuest began as a Bukkit RPG

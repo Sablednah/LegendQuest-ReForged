@@ -176,23 +176,49 @@ content-pack contributions are welcome on the
 
 ---
 
-## Screenshot shot-list (still to capture)
+## Screenshots
 
-The listing needs images; these are the shots that would sell it, roughly in
-order of value:
+Captured 2026-08-18, in `screenshots/`. Each setting was shot in a world that
+suits it — ruined overgrown city for The Wasteland, an intact one for Cold
+Frontier — so the three sets read as three different games rather than one mod
+with the nouns swapped.
 
-1. **The Players Handbook** open on a class page — this is the most
-   screenshot-worthy thing in the mod.
-2. **The character panel** on the inventory screen, Stats tab, showing rolled
-   stats and boost chips.
-3. **The same handbook page under a genre pack**, so the re-theming is visible
-   side by side with shot 1 — "Race → Archetype", "Mana → Stamina". Pair these
-   two next to each other; the vocabulary system is the hardest feature to
-   convey in words and the easiest to show.
-4. **The skills tab with a loadout** being dragged into place, cooldowns
-   showing.
-5. **The HUD in play** — mana, XP bar and loadout strip, mid-combat.
-6. **A level-up** with the title card on screen.
-7. **The Wasteland class list** in chat, to show a full alternative setting.
-8. Optional: a vanilla client sitting on the server playing via chat, captioned
-   as such — proof of the headline claim.
+### Upload order for the listing
+
+The first three carry the whole pitch: *this is a real RPG*, and *the words are
+yours*. Shots 2 and 3 must sit next to each other — the vocabulary system is the
+hardest feature to explain in prose and the easiest to show, and the pairing
+does the explaining by itself.
+
+| # | File | Caption |
+|---|---|---|
+| 1 | `fantasy-handbook-skills-battle-hymn.png` | Every skill explains itself — cost, cooldown, and what it actually does. |
+| 2 | `fantasy-handbook-races-dwarf.png` | The Players Handbook: ten races, nine classes, all defined in datapacks. |
+| 3 | `wasteland-guide-archetypes-athlete.png` | The same screen under The Wasteland pack — Races became Archetypes, Mana became Stamina. Every word is yours. |
+| 4 | `fantasy-panel-stats-race-class-pickers.png` | Roll your stats, pick a race and class from the inventory screen. |
+| 5 | `fantasy-cast-fireball.png` | Skills you buy with points you earn. |
+| 6 | `fantasy-hud-loadout-cooldown.png` | A five-slot loadout bar with live cooldowns. |
+| 7 | `fantasy-levelup-title-card-150-mage.png` | 150 levels per class, each with its own XP bank. |
+| 8 | `scifi-manual-species-belter.png` | Cold Frontier: a second complete setting, included. |
+| 9 | `wasteland-guide-roles-builder.png` | Roles that must be earned — master the Labourer before you can be a Builder. |
+| 10 | `fantasy-handbook-gear-barbarian-tools.png` | Item proficiency per class, driven by item tags. |
+
+### Everything captured
+
+**Fantasy (built-in D&D set)** — `fantasy-*`: handbook pages for races,
+classes, skills, feats and gear; the character panel across its Stats, Skills
+and Party tabs, including race/class tooltips and the buy chips; the loadout and
+spellbook slot; the HUD mid-combat; Magic Missile and Fireball being cast; the
+level-up title card; and the class list in chat.
+
+**The Wasteland** — `wasteland-*`: the Survivor's Guide across Archetypes,
+Roles, Skills and Perks, plus a character panel reading "Mechanic Miner —
+Humanity Saintly" with a Crew tab.
+
+**Cold Frontier** — `scifi-*`: the Ship's Manual across Species, Professions,
+Skills and Augments, plus the Species/Profession picker.
+
+### Still missing
+
+A vanilla client sitting on the server playing through chat, captioned as such
+— proof of the headline claim. Worth capturing before the Modrinth listing.
