@@ -40,6 +40,15 @@ The intent, from the recovered docs (`../LegendQuest/docs/legacy-bukkit-docs/`):
 - Vanilla-XP mirroring with hardcoded 1.8 curve constants → own XP pool fed by vanilla XP pickup.
 
 ### Deferred (revisit after core works)
+- **Party chat** (agreed 2026-08-18, to start once 2.0.1 is deployed
+  everywhere): a channel that only your party sees. Parties already exist —
+  membership, invites, leader, rename, shared XP, teleport — so this is a
+  message-routing feature on top of them rather than new state. Worth settling
+  up front: how you address it (a `/p <msg>` command, a toggle that captures
+  normal chat, or both), what the line looks like and whether its prefix is
+  another `messages.yml` term so a Crew reads "[Crew]" rather than "[Party]",
+  and whether ops/spies can see it. Vanilla clients must be able to use it —
+  it has to work as plain chat, not a GUI-only feature.
 - **LegendQuest-StoryTeller** (separate partner mod, not LQ scope): live-GM
   toolkit in the VTM: Redemption Storyteller mould — spectate, spawn,
   possess-an-entity, schematic sets, staged events; NPCs rolled from LQ
