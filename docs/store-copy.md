@@ -98,6 +98,13 @@ Scavenger, Enforcer, Doc, Scout, Labourer, and the harder roles behind them.
 hard sci-fi frontier. Deliberately setting-neutral: retune the vocabulary and
 the same data plays as space-western, fleet-opera or salvage-horror.
 
+Both are datapacks rather than mods, and CurseForge only hosts `.jar` files on
+a mod project, so they are downloaded from the GitHub release:
+
+> **[Download the genre packs](https://github.com/Sablednah/LegendQuest-ReForged/releases/latest)**
+> — `legendquest-apocalypse.zip` and `legendquest-scifi.zip`, attached to every
+> release alongside the mod.
+
 ---
 
 ### Re-theme every word in the game
@@ -152,12 +159,14 @@ template for your own.
 
 ### Installing
 
-1. Put `legendquest-2.0.0.jar` in your server's `mods/` folder.
+1. Put the LegendQuest jar in your server's `mods/` folder.
 2. Start the server. That is genuinely it — the built-in fantasy content works
    out of the box.
-3. Want a different setting? Drop `legendquest-apocalypse.zip` or
-   `legendquest-scifi.zip` into `<world>/datapacks/` and restart, then paste
-   that pack's vocabulary snippet into `config/legendquest/messages.yml`.
+3. Want a different setting? Grab `legendquest-apocalypse.zip` or
+   `legendquest-scifi.zip` from the
+   [GitHub release](https://github.com/Sablednah/LegendQuest-ReForged/releases/latest),
+   drop it into `<world>/datapacks/` and restart, then paste that pack's
+   vocabulary snippet into `config/legendquest/messages.yml`.
 
 **Requires NeoForge 21.11.42+ on Minecraft 1.21.11.**
 

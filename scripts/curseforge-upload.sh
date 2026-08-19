@@ -12,6 +12,15 @@
 # name is derived from the filename below rather than passed in, so the list cannot drift from what
 # was actually uploaded. Set RELEASE_VERSION to stamp the packs, which carry no version of their own.
 #
+# ONLY JARS GO TO CURSEFORGE. A mod project accepts jar/litemod and nothing else - not as a
+# top-level file, and not via "Add Additional File" either, which states ".jar format only". The
+# upload API nonetheless accepts a .zip with HTTP 200 and moderation kills it afterwards with
+# "Invalid file extension, expected jar, litemod", so a zip upload looks completely successful until
+# you check the authors file list. Verified the hard way on 2026-08-19 with both genre packs.
+#
+# The genre packs are therefore distributed from the GitHub release only, and the CurseForge
+# description links there. The workflow filters to *.jar so this cannot silently regress.
+#
 # The Minecraft version defaults to `minecraft_version` in gradle.properties, so a single-version
 # mod needs no argument and cannot drift from what was actually built.
 #

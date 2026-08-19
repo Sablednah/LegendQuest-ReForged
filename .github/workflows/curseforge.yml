@@ -1,11 +1,17 @@
 name: Publish to CurseForge
 
-# Publishing a GitHub release publishes to CurseForge too. Every jar AND zip attached to the release
-# is uploaded, with the release body used as the changelog.
+# Publishing a GitHub release publishes to CurseForge too. Every jar attached to the release is
+# uploaded, with the release body used as the changelog.
 #
-# LegendQuest ships four artifacts: the mod jar, the two genre packs as datapack ZIPs, and the
-# example skill-pack jar. The ZIPs are the reason this matches more than '*.jar' - a mod-only
-# pattern would silently ship the mod and leave both settings behind.
+# JARS ONLY, deliberately. LegendQuest ships four artifacts, but only two are jars: the mod and the
+# example skill pack. The two genre packs are datapack ZIPs, and a CurseForge *mod* project accepts
+# jar/litemod and nothing else - not top-level, and not via "Add Additional File", which states
+# ".jar format only". The upload API still returns HTTP 200 for a zip and lets moderation kill it
+# later with "Invalid file extension, expected jar, litemod", so uploading them looks entirely
+# successful until you read the authors file list. Learned on 2026-08-19 by doing exactly that.
+#
+# The genre packs are distributed from the GitHub release instead, and the CurseForge description
+# links there. Filtering to '*.jar' here is what stops that regressing into silent rejections again.
 #
 # Setup, once:
 #   1. Create an API token at https://legacy.curseforge.com/account/api-tokens
@@ -77,10 +83,8 @@ jobs:
           TAG: ${{ github.event.release.tag_name || inputs.tag }}
         run: |
           mkdir -p dist
-          # Two patterns, not one: the genre packs are ZIPs. --archive is NOT passed, so the
-          # source tarball/zipball are not fetched - only real release assets.
-          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" \
-              --pattern '*.jar' --pattern '*.zip' --dir dist
+          # Jars only - see the header. The genre pack ZIPs are deliberately not fetched.
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern '*.jar' --dir dist
           gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq '.body' > dist/changelog.md
           ls -la dist
 
@@ -96,13 +100,12 @@ jobs:
         run: |
           shopt -s nullglob
           # The mod jar first, so it lands at the top of the files list and is what the project
-          # page offers by default. The packs are useless without it.
-          ordered=(dist/legendquest-*.jar dist/legendquest-*.zip dist/examplepack-*.jar)
+          # page offers by default. The example pack is useless without it.
+          ordered=(dist/legendquest-*.jar dist/examplepack-*.jar)
           if [ ${#ordered[@]} -eq 0 ]; then
-            echo "::error::No jars or zips attached to the release - nothing to upload."
+            echo "::error::No jars attached to the release - nothing to upload."
             exit 1
           fi
-          # The packs carry no version of their own; stamp them with the release's.
           export RELEASE_VERSION="${TAG#v}"
           failed=0
           for file in "${ordered[@]}"; do
