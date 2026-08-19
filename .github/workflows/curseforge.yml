@@ -1,0 +1,119 @@
+name: Publish to CurseForge
+
+# Publishing a GitHub release publishes to CurseForge too. Every jar AND zip attached to the release
+# is uploaded, with the release body used as the changelog.
+#
+# LegendQuest ships four artifacts: the mod jar, the two genre packs as datapack ZIPs, and the
+# example skill-pack jar. The ZIPs are the reason this matches more than '*.jar' - a mod-only
+# pattern would silently ship the mod and leave both settings behind.
+#
+# Setup, once:
+#   1. Create an API token at https://legacy.curseforge.com/account/api-tokens
+#   2. Add it as the repository secret CURSEFORGE_TOKEN
+#      (Settings -> Secrets and variables -> Actions -> New repository secret)
+#   3. Add the numeric project ID, shown on the CurseForge project page, as the repository
+#      variable CURSEFORGE_PROJECT_ID (same screen, "Variables" tab)
+#
+# The CurseForge project must already exist - the upload API can only add files to one, and unlike
+# Modrinth it has no create-project endpoint.
+#
+# Until the secret exists this workflow skips rather than fails, so it will not redden the release.
+
+on:
+  release:
+    types: [published]
+  # Re-upload an existing release by hand, e.g. after fixing a changelog, or to publish a release
+  # that was tagged before this workflow existed.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to upload (e.g. v2.0.1)
+        required: true
+      release_type:
+        description: CurseForge release type
+        required: false
+        default: release
+        type: choice
+        options: [release, beta, alpha]
+      debug:
+        description: Print the upload metadata (contains no credentials)
+        required: false
+        default: false
+        type: boolean
+      minimal:
+        description: "Diagnostic: upload with a one-line changelog and only the MC+loader tags"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the CurseForge token is configured
+        id: guard
+        env:
+          TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+          PROJECT_ID: ${{ vars.CURSEFORGE_PROJECT_ID }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$PROJECT_ID" ]; then
+            echo "CURSEFORGE_TOKEN secret or CURSEFORGE_PROJECT_ID variable not set - skipping."
+            echo "See the comments at the top of .github/workflows/curseforge.yml for setup."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.guard.outputs.configured == 'true'
+
+      - name: Download the release artifacts and changelog
+        if: steps.guard.outputs.configured == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: |
+          mkdir -p dist
+          # Two patterns, not one: the genre packs are ZIPs. --archive is NOT passed, so the
+          # source tarball/zipball are not fetched - only real release assets.
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" \
+              --pattern '*.jar' --pattern '*.zip' --dir dist
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq '.body' > dist/changelog.md
+          ls -la dist
+
+      - name: Upload each artifact
+        if: steps.guard.outputs.configured == 'true'
+        env:
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+          CURSEFORGE_PROJECT_ID: ${{ vars.CURSEFORGE_PROJECT_ID }}
+          RELEASE_TYPE: ${{ inputs.release_type || 'release' }}
+          CURSEFORGE_DEBUG: ${{ inputs.debug && '1' || '' }}
+          CURSEFORGE_MINIMAL: ${{ inputs.minimal && '1' || '' }}
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: |
+          shopt -s nullglob
+          # The mod jar first, so it lands at the top of the files list and is what the project
+          # page offers by default. The packs are useless without it.
+          ordered=(dist/legendquest-*.jar dist/legendquest-*.zip dist/examplepack-*.jar)
+          if [ ${#ordered[@]} -eq 0 ]; then
+            echo "::error::No jars or zips attached to the release - nothing to upload."
+            exit 1
+          fi
+          # The packs carry no version of their own; stamp them with the release's.
+          export RELEASE_VERSION="${TAG#v}"
+          failed=0
+          for file in "${ordered[@]}"; do
+            echo "::group::$(basename "$file")"
+            # Keep going if one fails, so a single bad upload does not strand the others, then fail
+            # the job at the end so the failure is not silent.
+            # Invoked via bash rather than as ./script: this repo lives on an NTFS drive with
+            # core.fileMode=false, so exec bits are easily lost again on a future commit.
+            # No Minecraft version argument - the script reads minecraft_version from
+            # gradle.properties, which is what the jar was actually built against.
+            bash scripts/curseforge-upload.sh "$file" dist/changelog.md "" "$RELEASE_TYPE" || failed=1
+            echo "::endgroup::"
+          done
+          [ "$failed" -eq 0 ] || { echo "::error::At least one upload failed."; exit 1; }
