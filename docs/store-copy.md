@@ -43,6 +43,17 @@ MIT — link to https://github.com/Sablednah/LegendQuest-ReForged/blob/main/LICE
 | Issues | https://github.com/Sablednah/LegendQuest-ReForged/issues |
 | Wiki / docs | https://github.com/Sablednah/LegendQuest-ReForged#readme |
 
+## Where it lives
+
+| Platform | URL | State |
+|---|---|---|
+| GitHub | https://github.com/Sablednah/LegendQuest-ReForged | live |
+| CurseForge | https://www.curseforge.com/minecraft/mc-mods/legendquest-reforged | awaiting moderation — add `/preview` to view it until then |
+| Modrinth | — | not listed yet |
+
+CurseForge project ID **1658748** (used by `CURSEFORGE_PROJECT_ID`, see
+`.github/workflows/curseforge.yml`).
+
 ---
 
 ## Description
