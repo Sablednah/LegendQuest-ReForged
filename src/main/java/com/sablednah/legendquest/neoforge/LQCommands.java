@@ -165,7 +165,20 @@ public final class LQCommands {
                                 .executes(ctx -> PartyActions.rename(
                                         ctx.getSource().getPlayerOrException(),
                                         com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "name"))
-                                        ? 1 : 0)));
+                                        ? 1 : 0)))
+                // greedyString so a sentence needs no quoting -- this is chat.
+                .then(Commands.literal("chat")
+                        .then(Commands.argument("message",
+                                com.mojang.brigadier.arguments.StringArgumentType.greedyString())
+                                .executes(ctx -> PartyChat.send(
+                                        ctx.getSource().getPlayerOrException(),
+                                        com.mojang.brigadier.arguments.StringArgumentType
+                                                .getString(ctx, "message")) ? 1 : 0)))
+                .then(Commands.literal("spy")
+                        .then(Commands.literal("on").executes(ctx -> PartyChat.setSpying(
+                                ctx.getSource().getPlayerOrException(), true) ? 1 : 0))
+                        .then(Commands.literal("off").executes(ctx -> PartyChat.setSpying(
+                                ctx.getSource().getPlayerOrException(), false) ? 1 : 0)));
 
         // Spend skill points on permanent +1 stats; escalating cost.
         LiteralArgumentBuilder<CommandSourceStack> buystat = Commands.literal("buystat");
@@ -256,6 +269,16 @@ public final class LQCommands {
         dispatcher.register(Commands.literal("unlink").executes(LQCommands::unbind));
         dispatcher.register(loadout);
         dispatcher.register(party);
+        // /pc rather than /p: party chat is typed constantly and wants a short
+        // name, but /p is the one every other mod also wants, and the loser of
+        // that fight is whichever registered first.
+        dispatcher.register(Commands.literal("pc")
+                .then(Commands.argument("message",
+                        com.mojang.brigadier.arguments.StringArgumentType.greedyString())
+                        .executes(ctx -> PartyChat.send(
+                                ctx.getSource().getPlayerOrException(),
+                                com.mojang.brigadier.arguments.StringArgumentType
+                                        .getString(ctx, "message")) ? 1 : 0)));
         dispatcher.register(stats);
         dispatcher.register(karma);
         dispatcher.register(roll);

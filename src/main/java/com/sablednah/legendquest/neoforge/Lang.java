@@ -186,6 +186,15 @@ public final class Lang {
         def("msg.respec.done", "&6The past unravels: &f{points}&6 {term.skill_points} refunded, {term.level} {level} — spend wiser this time.");
 
         def("msg.party.not_in_one", "&7You are not in a {term.party}.");
+        // Party chat. The channel tag is {term.party}, so a server that renamed
+        // parties to "Crew" shows [Crew] here without editing these lines.
+        def("msg.party.chat.no_party", "&cYou are not in a {term.party} to talk to.");
+        def("msg.party.chat.line", "&9[{term.party}] &f{player}&7: &f{message}");
+        // A listener hears every party at once, so their copy names which one.
+        def("msg.party.chat.spy_line", "&8[&7spy&8] &9[{party}] &f{player}&7: &7{message}");
+        def("msg.party.spy.on", "&7You are now listening to {term.party} chat.");
+        def("msg.party.spy.off", "&7You have stopped listening to {term.party} chat.");
+        def("msg.party.spy.denied", "&cYou do not have permission to listen to {term.party} chat.");
         def("msg.party.created", "&6{term.party} &l{name}&r&6 created. Invite from the {term.party} tab or /party invite.");
         def("msg.party.not_online", "&c{name} is not online.");
         def("msg.party.create_first", "&cYou are not in a {term.party}. Create one first.");

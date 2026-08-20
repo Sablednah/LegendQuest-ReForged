@@ -54,6 +54,9 @@ public final class PlayerCharacter {
     /** Per-player opt-out of the floating nameplate. Persisted: a toggle that
      *  forgets itself every relog is worse than no toggle. */
     private boolean nameplateHidden = false;
+    /** Listening in on other parties' chat. Meaningless without the
+     *  legendquest.party.spy permission, which is rechecked per message. */
+    private boolean partySpy = false;
 
     public PlayerCharacter() {}
 
@@ -81,7 +84,7 @@ public final class PlayerCharacter {
             Optional<StatBlock> baseStats, Map<String, Long> classXp, Purchases purchases,
             Map<String, Long> lastUse, Map<String, String> bindings,
             List<String> loadout, int loadoutIndex, Optional<Identifier> loadoutItem,
-            boolean nameplateHidden) {
+            boolean nameplateHidden, boolean partySpy) {
         this.raceId = raceId;
         this.mainClassId = mainClassId;
         this.subClassId = subClassId;
@@ -100,6 +103,7 @@ public final class PlayerCharacter {
         this.loadoutIndex = loadoutIndex;
         this.loadoutItem = loadoutItem;
         this.nameplateHidden = nameplateHidden;
+        this.partySpy = partySpy;
     }
 
     public static final MapCodec<PlayerCharacter> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -123,13 +127,19 @@ public final class PlayerCharacter {
                     .forGetter(c -> List.copyOf(c.loadout)),
             Codec.INT.optionalFieldOf("loadout_index", 0).forGetter(c -> c.loadoutIndex),
             Identifier.CODEC.optionalFieldOf("loadout_item").forGetter(c -> c.loadoutItem),
-            Codec.BOOL.optionalFieldOf("nameplate_hidden", false).forGetter(c -> c.nameplateHidden))
+            Codec.BOOL.optionalFieldOf("nameplate_hidden", false).forGetter(c -> c.nameplateHidden),
+            Codec.BOOL.optionalFieldOf("party_spy", false).forGetter(c -> c.partySpy))
             .apply(i, PlayerCharacter::new));
 
     /** True when this player has switched their own floating nameplate off. */
     public boolean nameplateHidden() { return nameplateHidden; }
 
     public void setNameplateHidden(boolean hidden) { this.nameplateHidden = hidden; }
+
+    /** True when this player is listening in on other parties' chat. */
+    public boolean partySpy() { return partySpy; }
+
+    public void setPartySpy(boolean listening) { this.partySpy = listening; }
 
     // --- race / classes ---
     public Optional<Identifier> raceId() { return raceId; }

@@ -45,12 +45,22 @@ public final class LQPermissions {
             LegendQuest.MODID, "admin", PermissionTypes.BOOLEAN,
             (player, uuid, context) -> false);
 
+    /**
+     * Read other players' party chat. Defaults to false <em>including for
+     * ops</em>: listening in is something a server owner grants deliberately,
+     * not something that arrives with an op level. Even holding it, a listener
+     * still has to switch themselves on with {@code /lq party spy on}.
+     */
+    public static final PermissionNode<Boolean> PARTY_SPY = new PermissionNode<>(
+            LegendQuest.MODID, "party.spy", PermissionTypes.BOOLEAN,
+            (player, uuid, context) -> false);
+
     private static final Map<Identifier, PermissionNode<Boolean>> RACE_NODES = new HashMap<>();
     private static final Map<Identifier, PermissionNode<Boolean>> CLASS_NODES = new HashMap<>();
 
     @SubscribeEvent
     static void onGather(PermissionGatherEvent.Nodes event) {
-        event.addNodes(ADMIN);
+        event.addNodes(ADMIN, PARTY_SPY);
 
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) {
@@ -94,6 +104,11 @@ public final class LQPermissions {
 
     public static boolean canSelectClass(ServerPlayer player, Identifier classId) {
         return check(player, CLASS_NODES.get(classId));
+    }
+
+    /** May this player listen in on other people's party chat? */
+    public static boolean canPartySpy(ServerPlayer player) {
+        return PermissionAPI.getPermission(player, PARTY_SPY);
     }
 
     public static boolean isAdmin(ServerPlayer player) {
