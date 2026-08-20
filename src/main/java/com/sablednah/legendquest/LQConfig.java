@@ -126,14 +126,14 @@ public final class LQConfig {
                 .comment("Show character info above players' heads.",
                         "The wording lives in config/legendquest/messages.yml as nameplate.prefix",
                         "and nameplate.suffix, so it re-themes with the rest of the vocabulary.",
+                        "Placeholders: {name} {race} {class} {sub_class} {level} {karma} {title}",
+                        "{epithet}. Players can hide their own with /lq nameplate off.",
                         "",
-                        "HOW IT WORKS, and the one thing to know before enabling it: this uses a",
-                        "scoreboard team per player, because that is the only way to decorate a",
-                        "nameplate that an UNMODDED client will render. A player can be in exactly",
-                        "one team, so this WILL fight any other mod that colours names the same way",
-                        "- LuckPerms, FTB Ranks, and most chat-prefix plugins do. Whoever writes",
-                        "last wins. Turn this off if your ranks matter more, or leave it off and",
-                        "let a rank mod own the nameplate.")
+                        "HOW IT WORKS: a text display entity above each player, which an UNMODDED",
+                        "client renders because it is an ordinary vanilla entity. It occupies only",
+                        "the space above the head -- chat, the tab list and /list are untouched,",
+                        "and it does NOT use the scoreboard team slot, so it does not compete with",
+                        "LuckPerms, FTB Ranks or any chat-prefix mod for a player's team.")
                 .define("enabled", true);
         BUILDER.pop();
 

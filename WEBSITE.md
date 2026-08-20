@@ -8,7 +8,50 @@ This follows the shape proven for CityWorld (`../CityWorld-ReForged/WEBSITE.md`)
 (`../ZombieMod/ZombieMod/WEBSITE.md`). Read one of those first if you are the site session — the
 conventions below are theirs.
 
-## Status — NOT BUILT YET
+## Status — ✅ BUILT AND DEPLOYED (2026-08-20) by the site session
+
+All six pages are live at the proposed URLs, plus a card on `/game-plugins/`. What the site session
+did, for the record:
+
+- `/legendquest-reforged/` and its five children exist as real WP pages (ids 140–145, children on
+  `post_parent = 140`), each on its own theme template, sharing a `legendquest-subnav.php` tab strip
+  — the same shape as CityWorld's and ZombieMod's.
+- **Version facts are on the landing page only**, and the hero tags are version-agnostic
+  ("10 races, 9 classes" / "NeoForge" / "MIT" / "No client mod required") as recommended.
+- All five "careful to get right" points are honoured: the landing page leads with *"your players do
+  not need the mod"* rather than "server-side only"; `/packs/` states in a callout that the packs are
+  **not on CurseForge** and links `/releases/latest`; the restart rule is called out on `/content/`
+  **and** `/settings/`; the server-and-every-modded-client rule is a bordered callout on
+  `/skill-packs/`; and both datapack traps (zip root, and tags only in the bare string form) are
+  stated on `/content/` and `/packs/`.
+- Both "known limitations" are stated honestly rather than omitted — the mining-XP farm note is on
+  `/settings/` next to `mineXpBlock`.
+- The screenshot pair is adjacent and captioned as a pair on the landing page, and
+  `vanilla-client-character-sheet.png` is captioned as **a genuinely unmodded client** in bold.
+- Artwork used: `legendquest-reforged-white (850px).png` as the landing wordmark and the
+  `/game-plugins/` card logo, plus 23 of the 33 screenshots resized to 1200px JPEG.
+- The old Bukkit card on `/game-plugins/` was renamed **LegendQuest (Legacy)** with a line pointing
+  at the successor, matching how MobHealth's two cards already read.
+
+### ⚠ Two counts in this file were wrong — corrected below from source
+
+Both were caught by counting off the source as this file instructs, and the site uses the corrected
+numbers:
+
+| | This file said | Source says | Counted from |
+|---|---:|---:|---|
+| Config settings | 24 | **25** | `.define*(` in `LQConfig.java` |
+| Built-in effect types listed in `docs/SKILL-PACKS.md` | 11 | **14** | `SkillEffectTypes.register(` in `LQEffects.java` |
+
+`docs/SKILL-PACKS.md` is missing `particle_line`, `projectile` and `run_command` from its built-in
+list — worth fixing there, since it is the page a pack author reads first. `README.md` has all 14.
+
+Also note `docs/store-copy.md` says "roughly 280 player-facing strings" where `Lang.java` has **318**;
+the site uses 318.
+
+---
+
+## Original brief (kept for reference)
 
 LegendQuest ReForged **2.0.1** is published and live:
 
@@ -114,6 +157,22 @@ Requirements block for the landing page:
 > Mojang launcher and play the whole game. Installing it client-side too is optional and adds the
 > handbook, character panel and HUD; people with and without it play together on the same server.
 
+## ⚠ Correction issued 2026-08-20 — the `[nameplate]` setting text
+
+The `enabled` comment in `LQConfig.java` described a **scoreboard team**. That
+implementation was replaced by a **text display entity** before release, and the config comment was
+not updated with it — so the site's `/settings/` page faithfully reproduced a stale description, as
+did the generated TOML on every server.
+
+Fixed in the config. The corrected text: it is a text display entity above the player, an unmodded
+client renders it because it is an ordinary vanilla entity, it occupies only the space above the
+head — chat, tab list and `/list` are untouched — and it does **not** use the scoreboard team slot,
+so it does **not** compete with LuckPerms, FTB Ranks or chat-prefix mods.
+
+**The old text said the opposite of the truth on the one point a server owner would act on.** Anyone
+who read it would have left the feature off to protect their ranks, for a conflict that does not
+exist. Rebuild `/settings/` from the current `LQConfig.java`.
+
 ## Five things the site should be careful to get right
 
 These are the points where a casual summary would say something false.
@@ -170,7 +229,7 @@ Correct as of 2026-08-20, counted off the source:
 | Combat triggers | **3** | `TriggerSpec.java` — melee hit, hurt, kill |
 | Message keys | **318** | `def("` in `Lang.java` |
 | Vocabulary terms | **20** | `def("term.` in `Lang.java` |
-| Config settings | **24** in 7 sections | `.define*(` in `LQConfig.java` |
+| Config settings | **25** in 7 sections | `.define*(` in `LQConfig.java` |
 | **The Wasteland** | 8 Archetypes, 20 Roles, 61 skills, 10 Perks | `packs/apocalypse/data/lq_apoc/legendquest/` |
 | **Cold Frontier** | 8 Species, 16 Professions, 55 skills, 10 Augments | `packs/scifi/data/lq_scifi/legendquest/` |
 
