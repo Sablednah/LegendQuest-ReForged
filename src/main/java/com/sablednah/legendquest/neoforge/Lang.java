@@ -305,8 +305,10 @@ public final class Lang {
     // and both are empty when unset - so putting them in the default costs
     // nothing to a pack that has not defined any.
     static {
-        def("nameplate.prefix", "&7[&f{race} &f{class} &7| &fLvl {level}&7] ");
+        def("nameplate.prefix", "&7[&f{race} &f{class} &7| &fLvl {level}&7]");
         def("nameplate.suffix", "");
+        def("msg.nameplate.on", "&6Your nameplate is showing.");
+        def("msg.nameplate.off", "&6Your nameplate is hidden.");
     }
 
     // --- hb.* : handbook page furniture ---

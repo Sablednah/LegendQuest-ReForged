@@ -51,6 +51,9 @@ public final class PlayerCharacter {
     private final java.util.List<String> loadout = new java.util.ArrayList<>();
     private int loadoutIndex = 0;
     private Optional<Identifier> loadoutItem = Optional.empty();
+    /** Per-player opt-out of the floating nameplate. Persisted: a toggle that
+     *  forgets itself every relog is worse than no toggle. */
+    private boolean nameplateHidden = false;
 
     public PlayerCharacter() {}
 
@@ -77,7 +80,8 @@ public final class PlayerCharacter {
             Optional<Identifier> subClassId, boolean raceChanged, long karma, double mana,
             Optional<StatBlock> baseStats, Map<String, Long> classXp, Purchases purchases,
             Map<String, Long> lastUse, Map<String, String> bindings,
-            List<String> loadout, int loadoutIndex, Optional<Identifier> loadoutItem) {
+            List<String> loadout, int loadoutIndex, Optional<Identifier> loadoutItem,
+            boolean nameplateHidden) {
         this.raceId = raceId;
         this.mainClassId = mainClassId;
         this.subClassId = subClassId;
@@ -95,6 +99,7 @@ public final class PlayerCharacter {
         this.loadout.addAll(loadout);
         this.loadoutIndex = loadoutIndex;
         this.loadoutItem = loadoutItem;
+        this.nameplateHidden = nameplateHidden;
     }
 
     public static final MapCodec<PlayerCharacter> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -117,8 +122,14 @@ public final class PlayerCharacter {
             Codec.STRING.listOf().optionalFieldOf("loadout", List.of())
                     .forGetter(c -> List.copyOf(c.loadout)),
             Codec.INT.optionalFieldOf("loadout_index", 0).forGetter(c -> c.loadoutIndex),
-            Identifier.CODEC.optionalFieldOf("loadout_item").forGetter(c -> c.loadoutItem))
+            Identifier.CODEC.optionalFieldOf("loadout_item").forGetter(c -> c.loadoutItem),
+            Codec.BOOL.optionalFieldOf("nameplate_hidden", false).forGetter(c -> c.nameplateHidden))
             .apply(i, PlayerCharacter::new));
+
+    /** True when this player has switched their own floating nameplate off. */
+    public boolean nameplateHidden() { return nameplateHidden; }
+
+    public void setNameplateHidden(boolean hidden) { this.nameplateHidden = hidden; }
 
     // --- race / classes ---
     public Optional<Identifier> raceId() { return raceId; }

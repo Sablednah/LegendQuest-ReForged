@@ -115,6 +115,10 @@ public final class LQServerEvents {
     @SubscribeEvent
     static void onServerTick(ServerTickEvent.Post event) {
         SkillEngine.tick(event.getServer());
+        // Every tick, not once a second: the plate is a separate entity that
+        // has to be moved to stay over its owner's head, and a walking player
+        // outruns a once-a-second update by whole blocks.
+        Nameplate.follow(event.getServer());
 
         if (++tickCounter >= 20) { // once a second
             tickCounter = 0;

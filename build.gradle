@@ -109,6 +109,16 @@ dependencies {
             prefer '2.2'
         }
     }
+
+    // Standards supplies the chat name-decorator API. compileOnly and NOT
+    // jarJar'd: it is a SOFT dependency, so LegendQuest builds against the API
+    // and must run perfectly well without the mod present. ChatSupport is the
+    // only class that imports it, and is only loaded when standards is.
+    //
+    // A local file rather than a maven coordinate because Standards is not
+    // published anywhere yet. fileTree so an absent jar just leaves the API off
+    // the classpath instead of failing project configuration outright.
+    compileOnly fileTree(dir: '../SableCraft-Standards/build/libs', include: ['standards-*.jar'])
 }
 
 // Expand mod metadata properties into the generated neoforge.mods.toml.

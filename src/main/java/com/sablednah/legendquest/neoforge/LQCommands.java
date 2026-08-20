@@ -186,6 +186,12 @@ public final class LQCommands {
         LiteralArgumentBuilder<CommandSourceStack> respec = Commands.literal("respec")
                 .executes(ctx -> CharacterActions.respec(ctx.getSource().getPlayerOrException()) ? 1 : 0);
 
+        // A floating stat block over your head is the sort of thing players
+        // either like or want gone immediately, so it is theirs to switch off.
+        LiteralArgumentBuilder<CommandSourceStack> nameplate = Commands.literal("nameplate")
+                .then(Commands.literal("on").executes(ctx -> nameplate(ctx, true)))
+                .then(Commands.literal("off").executes(ctx -> nameplate(ctx, false)));
+
         LiteralArgumentBuilder<CommandSourceStack> stats =
                 Commands.literal("stats").executes(LQCommands::stats);
         LiteralArgumentBuilder<CommandSourceStack> karma =
@@ -235,7 +241,7 @@ public final class LQCommands {
                 .then(race).then(charClass).then(skill)
                 .then(bind).then(unbind).then(loadout).then(party)
                 .then(buystat).then(respec).then(feat)
-                .then(stats).then(karma).then(roll).then(admin));
+                .then(stats).then(karma).then(roll).then(nameplate).then(admin));
 
         // Classic shorthands.
         dispatcher.register(race);
@@ -608,6 +614,17 @@ public final class LQCommands {
         PlayerCharacter pc = CharacterService.data(player);
         Feedback.chat(player, Lang.fmt("msg.karma.show",
                 "name", CharacterService.karmaName(pc.karma()), "value", pc.karma()));
+        return 1;
+    }
+
+    private static int nameplate(CommandContext<CommandSourceStack> ctx, boolean show)
+            throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        CharacterService.data(player).setNameplateHidden(!show);
+        // Apply it now rather than waiting up to a second for the sync tick:
+        // a toggle that appears not to have worked gets typed again.
+        Nameplate.refresh(player);
+        Feedback.chat(player, Lang.get(show ? "msg.nameplate.on" : "msg.nameplate.off"));
         return 1;
     }
 
