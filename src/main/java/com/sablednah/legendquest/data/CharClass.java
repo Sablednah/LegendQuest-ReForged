@@ -31,7 +31,8 @@ public record CharClass(
         CraftRules craftRules,
         ItemRules itemRules,
         Race.Progression progression,
-        Boons boons) {
+        Boons boons,
+        LevelTitles titles) {
 
     /** How the class scales the race's base numbers. */
     public record Growth(double healthMod, double healthPerLevel, double manaBonus,
@@ -84,10 +85,14 @@ public record CharClass(
             CraftRules.MAP_CODEC.forGetter(CharClass::craftRules),
             ItemRules.MAP_CODEC.forGetter(CharClass::itemRules),
             Race.Progression.MAP_CODEC.forGetter(CharClass::progression),
-            Boons.MAP_CODEC.forGetter(CharClass::boons))
+            Boons.MAP_CODEC.forGetter(CharClass::boons),
+            LevelTitles.CODEC.optionalFieldOf("titles", LevelTitles.NONE).forGetter(CharClass::titles))
             .apply(i, CharClass::new));
 
     public String name() { return identity.name(); }
     public Map<Identifier, SkillGrant> skills() { return progression.skills(); }
     public LevelBonuses levels() { return progression.levels(); }
+
+    /** What a character of this class is called at {@code level}, if anything. */
+    public Optional<String> titleAt(int level) { return titles.titleFor(level); }
 }

@@ -36,6 +36,9 @@ public final class LQConfig {
     public static final ModConfigSpec.LongValue KARMA_KILL_MONSTER;
     public static final ModConfigSpec.ConfigValue<String> KARMA_POSITIVE_NAMES;
     public static final ModConfigSpec.ConfigValue<String> KARMA_NEGATIVE_NAMES;
+    public static final ModConfigSpec.ConfigValue<String> KARMA_POSITIVE_EPITHETS;
+    public static final ModConfigSpec.ConfigValue<String> KARMA_NEGATIVE_EPITHETS;
+    public static final ModConfigSpec.BooleanValue NAMEPLATE_ENABLED;
     public static final ModConfigSpec.IntValue PARTY_RANGE;
     public static final ModConfigSpec.IntValue PARTY_XP_SHARE;
     public static final ModConfigSpec.BooleanValue BLOCK_PARTY_PVP;
@@ -108,6 +111,30 @@ public final class LQConfig {
         KARMA_NEGATIVE_NAMES = BUILDER
                 .comment("Comma-separated titles on the dark side of the log scale.")
                 .define("negativeNames", "Neutral,Rascal,Rogue,Villainous,Diabolic");
+        KARMA_POSITIVE_EPITHETS = BUILDER
+                .comment("Epithets matching positiveNames, for {epithet} on the nameplate:",
+                        "\"the good\", \"the saintly\". Leave an entry blank for no epithet -",
+                        "the first band is blank on purpose, since nobody is 'the neutral'.")
+                .define("positiveEpithets", ",the kind,the good,the samaritan,the saintly");
+        KARMA_NEGATIVE_EPITHETS = BUILDER
+                .comment("Epithets matching negativeNames.")
+                .define("negativeEpithets", ",the rascal,the rogue,the villainous,the diabolic");
+        BUILDER.pop();
+
+        BUILDER.comment("The name shown above a player's head.").push("nameplate");
+        NAMEPLATE_ENABLED = BUILDER
+                .comment("Show character info above players' heads.",
+                        "The wording lives in config/legendquest/messages.yml as nameplate.prefix",
+                        "and nameplate.suffix, so it re-themes with the rest of the vocabulary.",
+                        "",
+                        "HOW IT WORKS, and the one thing to know before enabling it: this uses a",
+                        "scoreboard team per player, because that is the only way to decorate a",
+                        "nameplate that an UNMODDED client will render. A player can be in exactly",
+                        "one team, so this WILL fight any other mod that colours names the same way",
+                        "- LuckPerms, FTB Ranks, and most chat-prefix plugins do. Whoever writes",
+                        "last wins. Turn this off if your ranks matter more, or leave it off and",
+                        "let a rank mod own the nameplate.")
+                .define("enabled", true);
         BUILDER.pop();
 
         BUILDER.comment("Parties").push("party");

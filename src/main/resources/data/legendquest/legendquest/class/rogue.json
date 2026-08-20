@@ -2,7 +2,7 @@
   "name": "Rogue",
   "chat_tag": "[Ro]",
   "description": "Anything not nailed down is legally yours.",
-  "long_description": "Rogues believe locked doors are a puzzle, pockets are community property, and fair fights are a failure of preparation. Leather only \u2014 you can't sneak in a bucket. Open to anyone with flexible morals, which is everyone, eventually.",
+  "long_description": "Rogues believe locked doors are a puzzle, pockets are community property, and fair fights are a failure of preparation. Leather only — you can't sneak in a bucket. Open to anyone with flexible morals, which is everyone, eventually.",
   "size": 1.8,
   "frequency": 300,
   "mana_bonus": 4.0,
@@ -31,5 +31,12 @@
       "cost": 5
     }
   },
-  "allowed_tools": "#legendquest:rogue_tools"
+  "allowed_tools": "#legendquest:rogue_tools",
+  "titles": {
+    "1": "Cutpurse",
+    "25": "Footpad",
+    "50": "Burglar",
+    "100": "Shadow",
+    "140": "Master Thief"
+  }
 }

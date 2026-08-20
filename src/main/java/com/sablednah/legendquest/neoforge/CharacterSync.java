@@ -27,6 +27,11 @@ public final class CharacterSync {
 
     public static void send(ServerPlayer player) {
         Net.sendIfAble(player, summarize(player));
+        // Every meaningful character change already funnels through here, so
+        // this is where the plate stays honest. refresh() no-ops unless the
+        // rendered text actually changed -- this also runs on the 1/s mana
+        // tick, which must not become a team packet per player per second.
+        Nameplate.refresh(player);
     }
 
     private static CharacterSummaryPayload summarize(ServerPlayer player) {

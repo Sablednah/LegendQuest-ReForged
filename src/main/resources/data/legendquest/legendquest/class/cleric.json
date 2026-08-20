@@ -2,7 +2,7 @@
   "name": "Cleric",
   "chat_tag": "[C]",
   "description": "Faith as a weapon, mercy as a shield.",
-  "long_description": "Clerics negotiate with higher powers on behalf of people currently bleeding. The faithful races only \u2014 and the gods are traditionalists about edges: maces and hammers crush, they do not cut. Somehow this satisfies everyone.",
+  "long_description": "Clerics negotiate with higher powers on behalf of people currently bleeding. The faithful races only — and the gods are traditionalists about edges: maces and hammers crush, they do not cut. Somehow this satisfies everyone.",
   "size": 1.8,
   "frequency": 250,
   "health_mod": 2.0,
@@ -50,5 +50,12 @@
       "cost": 5
     }
   },
-  "allowed_tools": "#legendquest:cleric_tools"
+  "allowed_tools": "#legendquest:cleric_tools",
+  "titles": {
+    "1": "Acolyte",
+    "25": "Initiate",
+    "50": "Priest",
+    "100": "High Priest",
+    "140": "Hierophant"
+  }
 }

@@ -298,6 +298,17 @@ public final class Lang {
         def("msg.admin.level_none", "{player} has no {term.class} — nothing to level");
     }
 
+    // --- nameplate.* : what floats above a player's head ---
+    // Placeholders: {name} {race} {class} {sub_class} {level} {karma} {title} {epithet}
+    // A blank value switches that half off. {title} comes from the class's own
+    // `titles` block and {epithet} from the karma epithet lists in the config,
+    // and both are empty when unset - so putting them in the default costs
+    // nothing to a pack that has not defined any.
+    static {
+        def("nameplate.prefix", "&7[&f{race} &f{class} &7| &fLvl {level}&7] ");
+        def("nameplate.suffix", "");
+    }
+
     // --- hb.* : handbook page furniture ---
     static {
         def("hb.title", "{term.handbook}");

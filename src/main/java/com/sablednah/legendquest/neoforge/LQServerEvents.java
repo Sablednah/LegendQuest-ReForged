@@ -74,6 +74,17 @@ public final class LQServerEvents {
     }
 
     /**
+     * Take the nameplate team away with the player. Teams live in the world's
+     * scoreboard forever otherwise, so a server that has seen a few thousand
+     * players would carry a few thousand dead teams in its save and sync every
+     * one of them to every client on join.
+     */
+    @SubscribeEvent
+    static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) Nameplate.clear(player);
+    }
+
+    /**
      * Truth in reloading: /reload rebuilds the YAML→datapack conversion and
      * refreshes tags, but Minecraft freezes dynamic registries at world
      * load — race/class/skill/feat content applies on RESTART (verified

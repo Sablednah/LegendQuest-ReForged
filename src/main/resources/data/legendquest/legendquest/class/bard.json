@@ -2,7 +2,7 @@
   "name": "Bard",
   "chat_tag": "[Bd]",
   "description": "Violence, but with a backbeat.",
-  "long_description": "Bards fight the way other people throw parties. Every song is a spinning music disc and a party-wide blessing \u2014 swiftness, rest, or the forbidden nether bassline itself. Open to anyone with charisma and questionable priorities, which is to say: anyone who chooses Bard.",
+  "long_description": "Bards fight the way other people throw parties. Every song is a spinning music disc and a party-wide blessing — swiftness, rest, or the forbidden nether bassline itself. Open to anyone with charisma and questionable priorities, which is to say: anyone who chooses Bard.",
   "size": 1.8,
   "frequency": 200,
   "health_mod": -1.0,
@@ -37,5 +37,12 @@
       "level": 25,
       "cost": 8
     }
+  },
+  "titles": {
+    "1": "Busker",
+    "25": "Minstrel",
+    "50": "Troubadour",
+    "100": "Balladeer",
+    "140": "Maestro"
   }
 }

@@ -2,7 +2,7 @@
   "name": "Mage",
   "chat_tag": "[M]",
   "description": "Knowledge is power; mana is ammunition.",
-  "long_description": "The arcane is a language, and mages are the only ones rude enough to interrupt reality in it. It takes a bloodline with the gift \u2014 dwarves, orcs and hobbits need not apply. Robes and a good book only; armour muddles the diction.",
+  "long_description": "The arcane is a language, and mages are the only ones rude enough to interrupt reality in it. It takes a bloodline with the gift — dwarves, orcs and hobbits need not apply. Robes and a good book only; armour muddles the diction.",
   "size": 1.8,
   "frequency": 300,
   "health_mod": -2.0,
@@ -53,5 +53,12 @@
     }
   },
   "allowed_tools": "#legendquest:mage_tools",
-  "gold_tool_mana": 5.0
+  "gold_tool_mana": 5.0,
+  "titles": {
+    "1": "Apprentice",
+    "25": "Adept",
+    "50": "Magus",
+    "100": "Archmage",
+    "140": "Sorcerer Supreme"
+  }
 }

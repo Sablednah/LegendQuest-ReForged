@@ -2,7 +2,7 @@
   "name": "Barbarian",
   "chat_tag": "[B]",
   "description": "Armour is for people who plan to get hit.",
-  "long_description": "Civilisation is a rumour barbarians decline to confirm. The wild races only: rage is an inheritance, not a curriculum. Heavy plate is refused on principle \u2014 speed, fury and an axe answer most philosophical questions.",
+  "long_description": "Civilisation is a rumour barbarians decline to confirm. The wild races only: rage is an inheritance, not a curriculum. Heavy plate is refused on principle — speed, fury and an axe answer most philosophical questions.",
   "size": 1.8,
   "frequency": 200,
   "health_mod": 6.0,
@@ -40,5 +40,12 @@
   },
   "allowed_tools": "#legendquest:barbarian_tools",
   "allow_enchanting": false,
-  "allow_brewing": false
+  "allow_brewing": false,
+  "titles": {
+    "1": "Brawler",
+    "25": "Raider",
+    "50": "Berserker",
+    "100": "Warchief",
+    "140": "Destroyer"
+  }
 }

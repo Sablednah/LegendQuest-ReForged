@@ -2,7 +2,7 @@
   "name": "Ranger",
   "chat_tag": "[R]",
   "description": "At home in the wild, deadly at range.",
-  "long_description": "Rangers read forests the way scholars read footnotes. A bow, a knife, leather that doesn't creak, and a wolf who thinks you're family \u2014 everything else is dead weight on a long trail.",
+  "long_description": "Rangers read forests the way scholars read footnotes. A bow, a knife, leather that doesn't creak, and a wolf who thinks you're family — everything else is dead weight on a long trail.",
   "size": 1.8,
   "frequency": 350,
   "health_mod": 1.0,
@@ -35,5 +35,12 @@
       "cost": 0
     }
   },
-  "allowed_tools": "#legendquest:ranger_tools"
+  "allowed_tools": "#legendquest:ranger_tools",
+  "titles": {
+    "1": "Tracker",
+    "25": "Outrider",
+    "50": "Strider",
+    "100": "Warden",
+    "140": "Huntmaster"
+  }
 }

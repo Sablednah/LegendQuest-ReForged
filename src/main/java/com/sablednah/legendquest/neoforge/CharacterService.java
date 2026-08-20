@@ -384,12 +384,41 @@ public final class CharacterService {
 
     /** Log-scale karma title from the config name lists. */
     public static String karmaName(long karma) {
-        String csv = karma >= 0 ? LQConfig.KARMA_POSITIVE_NAMES.get() : LQConfig.KARMA_NEGATIVE_NAMES.get();
-        String[] names = csv.split(",");
+        return karmaBand(karma, LQConfig.KARMA_POSITIVE_NAMES.get(), LQConfig.KARMA_NEGATIVE_NAMES.get());
+    }
+
+    /**
+     * The karma epithet — "the saintly" — for name decoration, from the lists
+     * that run parallel to the band names. Empty when a band has no epithet,
+     * which is the normal state of the neutral band: nobody is "the neutral".
+     */
+    public static String karmaEpithet(long karma) {
+        return karmaBand(karma, LQConfig.KARMA_POSITIVE_EPITHETS.get(), LQConfig.KARMA_NEGATIVE_EPITHETS.get());
+    }
+
+    /**
+     * Picks a band from a comma-separated list by the order of magnitude of
+     * {@code karma}, so each band covers ten times the range of the one below.
+     * Splitting with a -1 limit keeps trailing empties, so a list may end in a
+     * blank band; a list shorter than the number of bands saturates at its last
+     * entry rather than throwing, which is what lets the epithet lists be
+     * edited without having to stay the same length as the names.
+     */
+    private static String karmaBand(long karma, String positiveCsv, String negativeCsv) {
+        String[] bands = (karma >= 0 ? positiveCsv : negativeCsv).split(",", -1);
+        if (bands.length == 0) return "";
         long magnitude = Math.abs(karma);
         int index = magnitude == 0 ? 0 : (int) Math.floor(Math.log10(magnitude));
-        index = Math.min(index, names.length - 1);
-        return names[Math.max(0, index)].trim();
+        index = Math.max(0, Math.min(index, bands.length - 1));
+        return bands[index].trim();
+    }
+
+    /**
+     * What this character is currently called by their main class — "Squire",
+     * "Knight" — or empty when the class defines no title for their level.
+     */
+    public static String classTitle(ServerPlayer player) {
+        return mainClass(player).flatMap(c -> c.titleAt(level(player))).orElse("");
     }
 
     /** ToIntFunction getters for LevelBonuses sums (avoids lambda clutter above). */

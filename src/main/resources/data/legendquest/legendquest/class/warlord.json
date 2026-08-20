@@ -3,7 +3,7 @@
   "name": "Warlord",
   "chat_tag": "[W]",
   "description": "A master of war. Only proven veterans need apply.",
-  "long_description": "Nobody is born a warlord. Master the sword or master the trail first \u2014 then come back and learn what command costs. Warlords hit like a landslide and expect to be obeyed like one.",
+  "long_description": "Nobody is born a warlord. Master the sword or master the trail first — then come back and learn what command costs. Warlords hit like a landslide and expect to be obeyed like one.",
   "size": 1.8,
   "frequency": 50,
   "main_only": true,
@@ -38,5 +38,12 @@
       "cost": 0
     }
   },
-  "allowed_tools": "#legendquest:proficiency_tools"
+  "allowed_tools": "#legendquest:proficiency_tools",
+  "titles": {
+    "1": "Captain",
+    "25": "Commander",
+    "50": "General",
+    "100": "Overlord",
+    "140": "Conqueror"
+  }
 }
