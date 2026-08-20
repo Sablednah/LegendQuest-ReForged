@@ -1,0 +1,103 @@
+name: Publish to Modrinth
+
+# Publishing a GitHub release publishes to Modrinth too, with the release body as the changelog.
+#
+# ALL FOUR ARTIFACTS go here, jars and zips alike. A Modrinth version holds many files of any type,
+# so the mod jar, both genre pack ZIPs and the example skill pack ship together as one version -
+# which is exactly what CurseForge cannot do (a mod project there takes jar/litemod only, and killed
+# both packs in moderation; see .github/workflows/curseforge.yml).
+#
+# Setup, once:
+#   1. Create the project at https://modrinth.com/ - unlike CurseForge, a draft project can receive
+#      versions before it is approved.
+#   2. Create a PAT at https://modrinth.com/settings/pats with "Create versions" scope, and add it
+#      as the repository secret MODRINTH_TOKEN
+#   3. Add the project ID (Settings -> General on the project) as the repository variable
+#      MODRINTH_PROJECT_ID
+#
+# Set the project's environment flags on the website, not here - they are project-level, not
+# per-version, and they are the field people filter on:
+#   Client: optional   (a client install adds the handbook, character panel and HUD)
+#   Server: required   (the mod is server-authoritative; vanilla clients can join and play)
+#
+# Until the secret exists this workflow skips rather than fails, so it will not redden the release.
+
+on:
+  release:
+    types: [published]
+  # Re-publish an existing release by hand, or publish one tagged before this workflow existed.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to upload (e.g. v2.0.1)
+        required: true
+      release_type:
+        description: Modrinth release type
+        required: false
+        default: release
+        type: choice
+        options: [release, beta, alpha]
+      debug:
+        description: Print the version metadata (contains no credentials)
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the Modrinth token is configured
+        id: guard
+        env:
+          TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
+        run: |
+          if [ -z "$TOKEN" ] || [ -z "$PROJECT_ID" ]; then
+            echo "MODRINTH_TOKEN secret or MODRINTH_PROJECT_ID variable not set - skipping."
+            echo "See the comments at the top of .github/workflows/modrinth.yml for setup."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.guard.outputs.configured == 'true'
+
+      - name: Download the release artifacts and changelog
+        if: steps.guard.outputs.configured == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: |
+          mkdir -p dist
+          # Both patterns: the genre packs are ZIPs and Modrinth is happy to host them.
+          # --archive is NOT passed, so the source tarball/zipball are not fetched.
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" \
+              --pattern '*.jar' --pattern '*.zip' --dir dist
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body --jq '.body' > dist/changelog.md
+          ls -la dist
+
+      - name: Publish the version
+        if: steps.guard.outputs.configured == 'true'
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
+          RELEASE_TYPE: ${{ inputs.release_type || 'release' }}
+          MODRINTH_DEBUG: ${{ inputs.debug && '1' || '' }}
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: |
+          shopt -s nullglob
+          # The mod jar FIRST - the script makes the first file the primary one, which is what the
+          # big download button on the version page offers. Everything else follows it.
+          ordered=(dist/legendquest-*.jar dist/legendquest-*.zip dist/examplepack-*.jar)
+          if [ ${#ordered[@]} -eq 0 ]; then
+            echo "::error::No artifacts attached to the release - nothing to upload."
+            exit 1
+          fi
+          # Invoked via bash rather than as ./script: this repo lives on an NTFS drive with
+          # core.fileMode=false, so exec bits are easily lost again on a future commit.
+          bash scripts/modrinth-upload.sh "${TAG#v}" dist/changelog.md "${ordered[@]}"
