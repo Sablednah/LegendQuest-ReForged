@@ -43,15 +43,19 @@ public class LegendQuest {
         // Game bus: character lifecycle, combat, skills, commands, permissions.
         NeoForge.EVENT_BUS.register(LQServerEvents.class);
         NeoForge.EVENT_BUS.register(com.sablednah.legendquest.neoforge.LQPermissions.class);
-        // Kept out of LQServerEvents because it is the one listener whose
-        // priority carries meaning: it has to reach the chat event before
-        // Standards cancels it. See PartyChat#onChat.
+        // Party-chat capture for servers with no Standards installed. Kept out
+        // of LQServerEvents because it is the one listener that stands itself
+        // down: when Standards is present its router takes the job below, and
+        // this becomes a no-op. Both are armed here in the constructor, well
+        // before any player exists to type, so there is no window in which the
+        // two could both deliver. See PartyChat#onChat.
         NeoForge.EVENT_BUS.register(com.sablednah.legendquest.neoforge.PartyChat.class);
         NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent event) ->
                 LQCommands.register(event.getDispatcher()));
 
         // Standards is a SOFT dependency: it supplies the chat name-decorator
-        // API, and without it LegendQuest simply does not decorate chat. The
+        // and chat-router APIs, and without it LegendQuest decorates nothing
+        // and routes party chat through its own listener above. The
         // isLoaded check has to sit here, outside ChatSupport, because naming
         // that class is what triggers loading it -- and it is the one class
         // that imports com.sablednah.standards. Calling it unguarded would be

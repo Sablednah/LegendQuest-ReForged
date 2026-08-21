@@ -8,78 +8,74 @@ remark and miserable for a conversation.
 This file is about the seam it sits on, because that seam is shared with
 Standards and one part of it is knowingly wrong.
 
-## How it works today
+## How it works
 
-`PartyChat.onChat` subscribes to `ServerChatEvent` at `HIGH`, cancels the
-event, and hands the text to `PartyChat.send` — the same path `/pc <message>`
-uses, so both produce the same line, the same spy copy, and the same log entry.
+There are two delivery paths and exactly one is ever live.
 
-`HIGH` is not a preference. Standards' `onChat` sits at `NORMAL`, and once any
-registered decorator has something to say about the speaker it cancels the
-event and delivers the formatted line itself. After that, redirecting is too
-late. Getting in first is the only lever the event model offers.
+**With Standards** — the normal case. `ChatSupport` registers a `ChatRouter`
+as `legendquest:party` at priority 0, and Standards' `onChat` runs in order:
+`Afk.onActivity`, mute gate, offer to routers by priority, default broadcast if
+nobody claimed it. By the time `route` is called the sender is known not to be
+muted and their AFK is already cleared, so party chat inherits both for free.
+Registering also sets `PartyChat.routed`, which stands the listener below down.
 
-## The gap
+**Without Standards** — `PartyChat.onChat` on `ServerChatEvent` at `HIGH`.
+Standards is a soft dependency and capture is not allowed to need it. On a
+plain NeoForge server there is no mute to respect and nothing to collide with.
 
-Cancelling ahead of Standards skips the rest of Standards' handler:
-
-| What is skipped | Consequence |
-|---|---|
-| `Mutes` gate | **A muted player can talk to their party.** |
-| `Afk.onActivity` | They stay flagged AFK while chatting. |
-
-The mute one is the real defect, and it is a defect by Standards' own
-semantics rather than a matter of opinion: `MessageCommands` gates `/msg` on
-mutes at two separate call sites, so a mute is plainly meant to silence every
-channel, not just public chat.
-
-Two things worth being precise about:
-
-- **Capture did not create this.** `/pc` has never gone through
-  `ServerChatEvent` at all, so party chat has always escaped mutes. Capture
-  makes the hole far easier to reach — it turns a command you must remember
-  into the default destination for everything you type.
-- **It cannot be closed from this side.** `Mutes` lives in
-  `com.sablednah.standards.neoforge`, not in `...standards.api`. Reaching into
-  another mod's internals to enforce its own rule is exactly the arrangement
-  that breaks silently on their next refactor, and the thing it would break is
-  a moderation control.
-
-## The fix, agreed in principle
-
-Standards proposed and prefers a routing seam. Their shape, not ours:
+Both call `PartyChat.claim`, and nothing else decides, so the two paths cannot
+disagree about what capture means. Both are registered in the mod constructor,
+long before a player exists to type, so there is no window where both are armed.
 
 ```java
 public interface ChatRouter {
     String id();
+    default int priority() { return 0; }
     /** True = claimed and delivered; Standards will not broadcast it. */
     boolean route(ServerPlayer sender, String message);
 }
-Chat.registerRouter(ChatRouter);   // plus priority; first claimant wins
+Chat.registerRouter(ChatRouter);
 ```
 
-Standards' `onChat` then runs unchanged and in order — AFK, mute gate, offer to
-routers by priority, default broadcast if nobody claimed it. LegendQuest
-renders its own `[Party]` line and spy copy exactly as it does now, and deletes
-`PartyChat.onChat` entirely.
+### Priority runs the opposite way to NameDecorator
 
-Two details from that exchange worth keeping:
+**Higher wins here.** A router is offered the message before lower-priority
+ones and the first to claim it ends the matter, so LegendQuest sits at 0 — the
+weak end — and a staffchat or dedicated channel mod registering at 100 takes a
+message ahead of the party. That is deliberate: a party is a mild claim.
 
-- **It returns a boolean, not an audience.** A party line *should* look
-  different from public chat, so handing Standards a Component would be
-  Standards holding a value it cannot improve on.
-- **First-claimant-wins, unlike `NameDecorator`.** Decorators are additive
-  because a name can carry a rank and a faction tag without contradiction. A
-  message goes to exactly one audience, so two routers claiming it is a
-  conflict to resolve, not a merge — the same rule the economy provider uses.
+In `NameDecorator`, higher priority means *nearer the name*. Neither is a
+mistake. There, priority orders a list everyone appears in; here it decides who
+is asked first, and a message has exactly one destination.
 
-It also leaves `/ignore` where it belongs: LegendQuest decides whether an
-ignore applies to party chat, because that is an open design question, and a
-seam should not pre-empt it.
+For the same reason routing is **first-claimant-wins** rather than additive: a
+name can carry a rank and a faction tag without contradiction, but two routers
+claiming one message is a conflict to resolve, not a merge — the rule the
+economy provider already uses.
 
-**Not built.** Sable decides whether Standards grows this, and until he does,
-the `HIGH`-priority listener above stays. It is deliberately one method behind
-one call so that swapping it costs almost nothing.
+### What this fixed
+
+The first implementation cancelled `ServerChatEvent` at `HIGH` to beat
+Standards to it, which skipped the rest of their handler — the mute gate and
+`Afk.onActivity` along with the delivery. **A muted player could talk to their
+party.** That was a defect by Standards' own semantics, not a grey area:
+`MessageCommands` gates `/msg` on mutes at two separate call sites, so a mute
+is plainly meant to silence every channel.
+
+Worth recording that `/pc` had that hole from the day it was written — it never
+touched `ServerChatEvent` at all. Capture did not create the bypass; it turned
+a command you had to remember into the default destination for everything you
+type, which is what made it worth fixing rather than noting.
+
+It could not be closed from this side: `Mutes` lives in
+`com.sablednah.standards.neoforge`, not `...standards.api`, and reaching into
+another mod's internals to enforce that mod's own rule is the arrangement that
+breaks silently on their next refactor — with a moderation control as the thing
+that breaks.
+
+`/ignore` stays LegendQuest's decision, which is why the seam takes the message
+rather than an audience. Whether an ignore should reach party chat is an open
+design question and a seam should not pre-empt it.
 
 ## Unrelated fixes this work forced
 
@@ -92,8 +88,20 @@ through machinery that had only ever seen our own lang templates:
   ampersand followed by a real format character.
 - `PartyChat.strip` removes format codes from what a player typed, because
   `Lang.fmt` substitutes before `colored` runs — which made an untreated
-  message a formatting injection, `&k` and all. Server text keeps its codes
-  because the server wrote it; player text does not, because the player did.
+  message a formatting injection. The obvious half is griefing: `&k` for
+  unreadable text, a wall of `&l&n`. The worse half is impersonation — `&r`
+  and a plausible prefix dresses your words up as somebody else's or as a
+  server message. Server text keeps its codes because the server wrote it;
+  player text does not, because the player did.
+- The literal section sign is stripped too, not just the ampersand form. A
+  client cannot type one, but this text also arrives from books, signs and
+  command blocks, and "the client cannot send that" is the sort of assumption
+  that quietly stops being true.
+
+Standards had the identical blind replace and the identical ordering trap
+across chat, `/me`, `/msg`, mail and moderation reasons. Both were found by
+comparing notes rather than by either mod's tests, because a path that has only
+ever run on text we wrote ourselves is a path that has never really run.
 
 ## One thing to know about signed chat
 

@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.sablednah.legendquest.LegendQuest;
 import com.sablednah.standards.api.chat.Chat;
+import com.sablednah.standards.api.chat.ChatRouter;
 import com.sablednah.standards.api.chat.NameDecorator;
 
 import net.minecraft.server.level.ServerPlayer;
@@ -66,7 +67,48 @@ public final class ChatSupport {
             }
         });
         PartyChat.setNameStyler(ChatSupport::decorated);
+        registerRouter();
         LegendQuest.LOGGER.info("Registered the LegendQuest chat decorator with Standards");
+    }
+
+    /**
+     * Hands party-chat capture to Standards' router, and stands LegendQuest's
+     * own chat listener down.
+     *
+     * <p>The listener could only ever cancel {@code ServerChatEvent} ahead of
+     * Standards, which meant jumping their mute gate — party chat became a way
+     * to talk while muted. By the time {@code route} is called the sender is
+     * known not to be muted and their AFK is already cleared, so the thing that
+     * could not be fixed by racing is simply not a question any more.</p>
+     *
+     * <p>Priority 0, the weak end: <b>higher wins here</b>, and a party is a
+     * mild claim on a message. A staffchat or a dedicated channel mod
+     * registering above us should take a message first, and does.</p>
+     *
+     * <p>Note this is the opposite sense to {@link NameDecorator}, where higher
+     * priority sits nearer the name. Not a mistake in either: there priority
+     * orders a list everyone appears in, here it decides who is asked first —
+     * and a message has exactly one destination, so the first to claim it ends
+     * the matter.</p>
+     */
+    private static void registerRouter() {
+        Chat.registerRouter(new ChatRouter() {
+            @Override
+            public String id() {
+                return "legendquest:party";
+            }
+
+            @Override
+            public int priority() {
+                return 0;
+            }
+
+            @Override
+            public boolean route(ServerPlayer sender, String message) {
+                return PartyChat.claim(sender, message);
+            }
+        });
+        PartyChat.setRouted(true);
     }
 
     /**

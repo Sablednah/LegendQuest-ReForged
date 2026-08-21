@@ -119,22 +119,33 @@ public final class PartyChat {
      * Drop format codes from what a player typed.
      *
      * <p>Lang substitutes placeholders before {@link Feedback#colored} runs, so
-     * an untreated message is a formatting injection: {@code &k} obfuscates,
-     * and a wall of {@code &l&n} is the oldest chat griefing there is. Server
-     * text keeps its codes because the server wrote it; player text does not,
-     * because the player did.</p>
+     * an untreated message is a formatting injection. The obvious half is
+     * griefing — {@code &k} for unreadable text, a wall of {@code &l&n}. The
+     * worse half is impersonation: {@code &r} and a plausible prefix dresses
+     * your words up as somebody else's, or as the server's. Server text keeps
+     * its codes because the server wrote it; player text does not, because the
+     * player did.</p>
+     *
+     * <p>The literal section sign goes too, not just the ampersand form. A
+     * client cannot type one — but this text also arrives from books, signs and
+     * command blocks, and "the client cannot send that" is exactly the kind of
+     * assumption that quietly stops being true. (Credit to the Standards
+     * session, which found this half after we compared notes on the other.)</p>
      */
     private static String strip(String message) {
         StringBuilder out = new StringBuilder(message.length());
         for (int i = 0; i < message.length(); i++) {
             char c = message.charAt(i);
-            // Drop the pair, not just the ampersand -- leaving the letter turns
+            // Drop the pair, not just the marker -- leaving the letter turns
             // "&cred" into "cred" and quietly edits what they said.
-            if (c == '&' && i + 1 < message.length()
+            if ((c == '&' || c == '§') && i + 1 < message.length()
                     && "0123456789abcdefklmnorABCDEFKLMNOR".indexOf(message.charAt(i + 1)) >= 0) {
                 i++;
                 continue;
             }
+            // A trailing marker with nothing after it cannot colour anything,
+            // but a bare section sign has no business in player text either.
+            if (c == '§') continue;
             out.append(c);
         }
         return out.toString();
@@ -188,32 +199,62 @@ public final class PartyChat {
     }
 
     /**
-     * Ordinary chat, on its way to the party instead of the server.
+     * The one routing decision: is this message the party's, and did we take it?
      *
-     * <p>{@code HIGH} so this lands before Standards' {@code NORMAL} handler,
-     * which cancels the event and delivers the line itself once any decorator
-     * has something to say — after which redirecting is far too late. Getting
-     * in first is the only lever available, and it costs what the class javadoc
-     * says it costs: Standards' mute gate and AFK clear are skipped along with
-     * its delivery. A routing seam on the Standards side would replace this
-     * whole method; until then this is the honest version of the trade.</p>
+     * <p>Both delivery paths call this and nothing else decides, so the two can
+     * never disagree about what capture means.</p>
+     *
+     * @return true when the party has taken the message and nobody else should
+     *         deliver it
      */
-    @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onChat(ServerChatEvent event) {
-        ServerPlayer player = event.getPlayer();
-        if (!capturing(player)) return;
+    public static boolean claim(ServerPlayer player, String message) {
+        if (!capturing(player)) return false;
 
         MinecraftServer server = player.level().getServer();
         if (server == null || Parties.get(server).partyOf(player.getUUID()).isEmpty()) {
-            // The party vanished in a way partyEnded did not see. Let the line
-            // go public -- swallowing it would be worse -- but never silently:
-            // they are owed the knowledge that this one was heard by everyone.
+            // The party went away by a route partyEnded did not see. Let the
+            // line go public -- swallowing it would be worse -- but never
+            // silently: they are owed the knowledge that this one was heard.
             partyEnded(player);
-            return;
+            return false;
         }
+        return send(player, message);
+    }
 
-        event.setCanceled(true);
-        send(player, event.getRawText());
+    /**
+     * Set once Standards' router has the job, which makes {@link #onChat} stand
+     * down. Exactly one of the two paths is ever live.
+     */
+    private static boolean routed = false;
+
+    static void setRouted(boolean handled) {
+        routed = handled;
+    }
+
+    /**
+     * Ordinary chat, on its way to the party — the path for servers with no
+     * Standards installed.
+     *
+     * <p>{@code HIGH} because on a server that <em>does</em> have Standards this
+     * would otherwise be a race it has to win: their handler sits at
+     * {@code NORMAL} and cancels the event to deliver the line itself, after
+     * which redirecting is too late. That race is no longer run — Standards
+     * ships a {@link com.sablednah.standards.api.chat.ChatRouter} seam and
+     * {@link ChatSupport} registers for it, which sets {@link #routed} and
+     * stands this listener down. Going through their router means the message
+     * has already passed the mute gate and cleared AFK before it arrives, which
+     * cancelling ahead of them could never achieve.</p>
+     *
+     * <p>This remains for the plain-NeoForge case, where there is no mute to
+     * respect and nothing to collide with. Standards is a soft dependency and
+     * capture is not allowed to need it.</p>
+     */
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void onChat(ServerChatEvent event) {
+        if (routed) return;
+        if (claim(event.getPlayer(), event.getRawText())) {
+            event.setCanceled(true);
+        }
     }
 
     /** Switches a listener on or off, refusing without the permission. */
