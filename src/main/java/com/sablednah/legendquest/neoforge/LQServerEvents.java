@@ -105,15 +105,43 @@ public final class LQServerEvents {
      *
      * <p>Returning from the End is left alone. That path keeps everything on
      * purpose, so the player arrives with the health they left with, and
-     * topping them up would be a free heal for walking through a portal.</p>
+     * topping them up would be a free heal for walking through a portal —
+     * which is what {@code isWasDeath()} distinguishes.</p>
+     *
+     * <p><b>Why {@code Clone} and not {@code PlayerRespawnEvent}.</b> Both work,
+     * but only one is invisible. {@code PlayerList.respawn} calls
+     * {@code restoreFrom} (which ends by firing this event), sends the
+     * {@code ClientboundRespawnPacket} twenty lines later, and fires
+     * {@code PlayerRespawnEvent} only after that. Repairing on the later hook
+     * left the client showing 10 hearts for about a tick before it snapped to
+     * 28½ — correct, and visibly a correction. Doing it here means the client
+     * is never told the wrong number in the first place. (Spotted in play by
+     * Sable, who watched the bar jump.)</p>
+     */
+    @SubscribeEvent
+    static void onClone(PlayerEvent.Clone event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        // applyModifiers, not refresh: refresh also pushes a sync packet, and
+        // at this point the player is not in a level yet and has no business
+        // being sent anything. The sync happens on respawn below.
+        CharacterService.applyModifiers(player);
+        if (event.isWasDeath()) {
+            player.setHealth(player.getMaxHealth());
+        }
+    }
+
+    /**
+     * The sync push, and a safety net for the attributes.
+     *
+     * <p>{@link #onClone} has already applied them by now. This runs anyway
+     * because it is idempotent and because {@code PlayerRespawnEvent} covers
+     * respawn paths that do not clone a player at all — and because the modded
+     * client's character panel needs the values pushed once the connection is
+     * really ready for them.</p>
      */
     @SubscribeEvent
     static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        if (!(event.getEntity() instanceof ServerPlayer player)) return;
-        CharacterService.refresh(player);
-        if (!event.isEndConquered()) {
-            player.setHealth(player.getMaxHealth());
-        }
+        if (event.getEntity() instanceof ServerPlayer player) CharacterService.refresh(player);
     }
 
     /**
