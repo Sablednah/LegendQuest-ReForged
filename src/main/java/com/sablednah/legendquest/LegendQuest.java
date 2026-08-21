@@ -43,6 +43,10 @@ public class LegendQuest {
         // Game bus: character lifecycle, combat, skills, commands, permissions.
         NeoForge.EVENT_BUS.register(LQServerEvents.class);
         NeoForge.EVENT_BUS.register(com.sablednah.legendquest.neoforge.LQPermissions.class);
+        // Kept out of LQServerEvents because it is the one listener whose
+        // priority carries meaning: it has to reach the chat event before
+        // Standards cancels it. See PartyChat#onChat.
+        NeoForge.EVENT_BUS.register(com.sablednah.legendquest.neoforge.PartyChat.class);
         NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent event) ->
                 LQCommands.register(event.getDispatcher()));
 

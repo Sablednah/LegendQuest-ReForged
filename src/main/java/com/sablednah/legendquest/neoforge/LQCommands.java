@@ -174,6 +174,17 @@ public final class LQCommands {
                                         ctx.getSource().getPlayerOrException(),
                                         com.mojang.brigadier.arguments.StringArgumentType
                                                 .getString(ctx, "message")) ? 1 : 0)))
+                // A sibling of "chat" rather than a child of it: "/lq party chat
+                // on" would be ambiguous against the greedyString above, and the
+                // reading Brigadier picked would not be the one the player meant
+                // half the time they typed the word "on".
+                .then(Commands.literal("capture")
+                        .executes(ctx -> PartyChat.toggleCapture(
+                                ctx.getSource().getPlayerOrException()) ? 1 : 0)
+                        .then(Commands.literal("on").executes(ctx -> PartyChat.setCapture(
+                                ctx.getSource().getPlayerOrException(), true) ? 1 : 0))
+                        .then(Commands.literal("off").executes(ctx -> PartyChat.setCapture(
+                                ctx.getSource().getPlayerOrException(), false) ? 1 : 0)))
                 .then(Commands.literal("spy")
                         .then(Commands.literal("on").executes(ctx -> PartyChat.setSpying(
                                 ctx.getSource().getPlayerOrException(), true) ? 1 : 0))
@@ -272,7 +283,12 @@ public final class LQCommands {
         // /pc rather than /p: party chat is typed constantly and wants a short
         // name, but /p is the one every other mod also wants, and the loser of
         // that fight is whichever registered first.
+        // Bare "/pc" flips capture, "/pc <message>" says one thing. No ambiguity
+        // between them -- an empty tail and a greedy one cannot both match -- and
+        // it puts the toggle on the key people already reach for.
         dispatcher.register(Commands.literal("pc")
+                .executes(ctx -> PartyChat.toggleCapture(
+                        ctx.getSource().getPlayerOrException()) ? 1 : 0)
                 .then(Commands.argument("message",
                         com.mojang.brigadier.arguments.StringArgumentType.greedyString())
                         .executes(ctx -> PartyChat.send(

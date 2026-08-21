@@ -65,7 +65,35 @@ public final class ChatSupport {
                 return nonBlank(CharacterService.karmaEpithet(karma)).map(word -> "&7" + word);
             }
         });
+        PartyChat.setNameStyler(ChatSupport::decorated);
         LegendQuest.LOGGER.info("Registered the LegendQuest chat decorator with Standards");
+    }
+
+    /**
+     * A player's name wearing everything every decorator has to say about it.
+     *
+     * <p>Party chat renders itself instead of going through Standards, which
+     * left it the one channel on the server showing an undressed name: a player
+     * was "Lord Sablednah the saintly" in public chat and plain "Sablednah" to
+     * their own party. Reading the same seam here keeps one identity across
+     * both, and picks up faction or guild tags from mods this one has never
+     * heard of for free.</p>
+     *
+     * <p>Built from {@link Chat}'s collected list rather than from LegendQuest's
+     * own title and epithet directly — asking the registry is precisely what
+     * makes the other mods' contributions appear.</p>
+     */
+    private static String decorated(ServerPlayer player) {
+        StringBuilder out = new StringBuilder();
+        for (String prefix : Chat.prefixes(player)) {
+            out.append(prefix).append(' ');
+        }
+        // &f before the name so a prefix's colour cannot bleed into it.
+        out.append("&f").append(player.getName().getString());
+        for (String suffix : Chat.suffixes(player)) {
+            out.append(' ').append(suffix);
+        }
+        return out.toString();
     }
 
     /**

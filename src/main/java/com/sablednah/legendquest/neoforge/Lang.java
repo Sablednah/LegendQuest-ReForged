@@ -192,6 +192,14 @@ public final class Lang {
         def("msg.party.chat.line", "&9[{term.party}] &f{player}&7: &f{message}");
         // A listener hears every party at once, so their copy names which one.
         def("msg.party.chat.spy_line", "&8[&7spy&8] &9[{party}] &f{player}&7: &7{message}");
+        // Capture: plain chat routed to the party. The "on" line names the way
+        // back out in the same breath -- the whole danger of this toggle is
+        // forgetting it is on, so the reminder ships with the switch.
+        def("msg.party.capture.on",
+                "&9Your chat now goes to your {term.party} only. &7/pc again to stop.");
+        def("msg.party.capture.off", "&7Your chat goes to the whole server again.");
+        def("msg.party.capture.dropped",
+                "&cYour {term.party} is gone — your chat is public again.");
         def("msg.party.spy.on", "&7You are now listening to {term.party} chat.");
         def("msg.party.spy.off", "&7You have stopped listening to {term.party} chat.");
         def("msg.party.spy.denied", "&cYou do not have permission to listen to {term.party} chat.");

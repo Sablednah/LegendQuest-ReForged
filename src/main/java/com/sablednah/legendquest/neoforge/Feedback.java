@@ -56,8 +56,32 @@ public final class Feedback {
                 player.getX(), player.getY(), player.getZ(), 1.0F, 1.0F, 0L));
     }
 
+    /** The format codes Minecraft actually knows: colours, styles, and reset. */
+    private static final String CODES = "0123456789abcdefklmnorABCDEFKLMNOR";
+
+    /**
+     * Translate '&amp;' colour codes, but only where one really is a code.
+     *
+     * <p>This used to be a blind {@code replace('&', '§')}, which was fine while
+     * every string came from a lang template written by us and correct by
+     * construction. Party chat put <em>player</em> text through the same path
+     * and the assumption broke: "Tom &amp; Jerry" arrived as "Tom § Jerry", the
+     * space swallowed as though it were a code. Requiring a valid code character
+     * after the ampersand costs our own templates nothing and stops that.</p>
+     *
+     * <p>This only rescues stray ampersands. Whether players may use codes
+     * deliberately is a different question, answered where their text enters —
+     * see {@link PartyChat}.</p>
+     */
     public static Component colored(String text) {
-        return Component.literal(text.replace('&', '§'));
+        StringBuilder out = new StringBuilder(text.length());
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            boolean isCode = c == '&' && i + 1 < text.length()
+                    && CODES.indexOf(text.charAt(i + 1)) >= 0;
+            out.append(isCode ? '§' : c);
+        }
+        return Component.literal(out.toString());
     }
 
     private Feedback() {}

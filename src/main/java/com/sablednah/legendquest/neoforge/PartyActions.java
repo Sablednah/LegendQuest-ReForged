@@ -97,6 +97,9 @@ public final class PartyActions {
             return false;
         }
         Feedback.notify(player, Lang.fmt("msg.party.left", "name", left.get().name()));
+        // Before anything else they might type: capture outliving the party is
+        // how a private remark ends up in public chat.
+        PartyChat.partyEnded(player);
         CharacterSync.send(player);
         for (var memberId : left.get().members()) {
             ServerPlayer member = server.getPlayerList().getPlayer(memberId);

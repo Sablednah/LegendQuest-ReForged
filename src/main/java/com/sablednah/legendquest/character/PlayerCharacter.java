@@ -57,6 +57,10 @@ public final class PlayerCharacter {
     /** Listening in on other parties' chat. Meaningless without the
      *  legendquest.party.spy permission, which is rechecked per message. */
     private boolean partySpy = false;
+    /** Ordinary chat goes to the party instead of the server. Persisted for the
+     *  same reason as the others, but with a sharper edge: a player who thought
+     *  this was still on has just said something private to everybody. */
+    private boolean partyChatCapture = false;
 
     public PlayerCharacter() {}
 
@@ -79,12 +83,30 @@ public final class PlayerCharacter {
                 .apply(i, Purchases::new));
     }
 
+    /**
+     * The per-player switches, grouped for the same reason {@link Purchases} is:
+     * the main codec was sitting on exactly 16 fields, which is
+     * RecordCodecBuilder's ceiling, so the third toggle had nowhere to go. A
+     * MapCodec reads sibling keys, so the saved NBT layout is unchanged and
+     * existing characters load with their switches intact.
+     */
+    private record Toggles(boolean nameplateHidden, boolean partySpy, boolean partyChatCapture) {
+
+        static final MapCodec<Toggles> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+                Codec.BOOL.optionalFieldOf("nameplate_hidden", false)
+                        .forGetter(Toggles::nameplateHidden),
+                Codec.BOOL.optionalFieldOf("party_spy", false).forGetter(Toggles::partySpy),
+                Codec.BOOL.optionalFieldOf("party_chat_capture", false)
+                        .forGetter(Toggles::partyChatCapture))
+                .apply(i, Toggles::new));
+    }
+
     private PlayerCharacter(Optional<Identifier> raceId, Optional<Identifier> mainClassId,
             Optional<Identifier> subClassId, boolean raceChanged, long karma, double mana,
             Optional<StatBlock> baseStats, Map<String, Long> classXp, Purchases purchases,
             Map<String, Long> lastUse, Map<String, String> bindings,
             List<String> loadout, int loadoutIndex, Optional<Identifier> loadoutItem,
-            boolean nameplateHidden, boolean partySpy) {
+            Toggles toggles) {
         this.raceId = raceId;
         this.mainClassId = mainClassId;
         this.subClassId = subClassId;
@@ -102,8 +124,9 @@ public final class PlayerCharacter {
         this.loadout.addAll(loadout);
         this.loadoutIndex = loadoutIndex;
         this.loadoutItem = loadoutItem;
-        this.nameplateHidden = nameplateHidden;
-        this.partySpy = partySpy;
+        this.nameplateHidden = toggles.nameplateHidden();
+        this.partySpy = toggles.partySpy();
+        this.partyChatCapture = toggles.partyChatCapture();
     }
 
     public static final MapCodec<PlayerCharacter> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -127,8 +150,8 @@ public final class PlayerCharacter {
                     .forGetter(c -> List.copyOf(c.loadout)),
             Codec.INT.optionalFieldOf("loadout_index", 0).forGetter(c -> c.loadoutIndex),
             Identifier.CODEC.optionalFieldOf("loadout_item").forGetter(c -> c.loadoutItem),
-            Codec.BOOL.optionalFieldOf("nameplate_hidden", false).forGetter(c -> c.nameplateHidden),
-            Codec.BOOL.optionalFieldOf("party_spy", false).forGetter(c -> c.partySpy))
+            Toggles.MAP_CODEC.forGetter(c ->
+                    new Toggles(c.nameplateHidden, c.partySpy, c.partyChatCapture)))
             .apply(i, PlayerCharacter::new));
 
     /** True when this player has switched their own floating nameplate off. */
@@ -140,6 +163,11 @@ public final class PlayerCharacter {
     public boolean partySpy() { return partySpy; }
 
     public void setPartySpy(boolean listening) { this.partySpy = listening; }
+
+    /** True when this player's ordinary chat is being routed to their party. */
+    public boolean partyChatCapture() { return partyChatCapture; }
+
+    public void setPartyChatCapture(boolean capturing) { this.partyChatCapture = capturing; }
 
     // --- race / classes ---
     public Optional<Identifier> raceId() { return raceId; }
