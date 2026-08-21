@@ -85,6 +85,51 @@ public final class LQServerEvents {
     }
 
     /**
+     * Put a character's attribute bonuses back after they respawn.
+     *
+     * <p>Respawning builds a <em>new</em> {@code ServerPlayer}, and
+     * {@code ServerPlayer.restoreFrom} copies base values always but modifiers
+     * only when everything is kept — and ours are transient, so they are copied
+     * in neither case. Without this a Dwarf Fighter's 57 max health silently
+     * became vanilla 20 the moment they clicked respawn, and stayed there until
+     * they relogged. Reported from play, after a test using
+     * {@code doImmediateRespawn} wrongly said it was fine: the automatic path
+     * and the click-the-button path are not the same path.</p>
+     *
+     * <p><b>Health has to be set again too</b>, and that is the half worth
+     * spelling out. Vanilla already did {@code setHealth(getMaxHealth())} during
+     * the respawn — while the maximum was still 20, because we had not applied
+     * anything yet. Refreshing alone would leave a full-looking character at
+     * 20 of 57, which is arguably worse than the original bug: their bar reads
+     * a third full for no reason a player can see.</p>
+     *
+     * <p>Returning from the End is left alone. That path keeps everything on
+     * purpose, so the player arrives with the health they left with, and
+     * topping them up would be a free heal for walking through a portal.</p>
+     */
+    @SubscribeEvent
+    static void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        CharacterService.refresh(player);
+        if (!event.isEndConquered()) {
+            player.setHealth(player.getMaxHealth());
+        }
+    }
+
+    /**
+     * The same repair after a dimension change, for the same reason.
+     *
+     * <p>Cheap and idempotent — {@code addOrUpdateTransientModifier} replaces
+     * rather than stacks — so it costs nothing on the paths that did not need
+     * it, and covers the ones that do without having to enumerate exactly which
+     * of them rebuild the player.</p>
+     */
+    @SubscribeEvent
+    static void onChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) CharacterService.refresh(player);
+    }
+
+    /**
      * Truth in reloading: /reload rebuilds the YAML→datapack conversion and
      * refreshes tags, but Minecraft freezes dynamic registries at world
      * load — race/class/skill/feat content applies on RESTART (verified
