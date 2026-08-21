@@ -19,6 +19,15 @@ if not exist "%JAVA_HOME%\bin\java.exe" (
     pause
     exit /b 1
 )
+rem Silence every sound category before launching. The buddy exists to be
+rem driven from a script while its owner is doing something else -- quite
+rem possibly on a call -- and a dev client that starts playing the Minecraft
+rem menu music into a meeting is its own kind of bug. The client rewrites
+rem options.txt on exit, so this is enforced on every launch rather than set
+rem once. Bumping master alone would do it, but zeroing each category means
+rem nudging the master slider in-game does not undo the whole thing.
+if exist "runBuddy\options.txt" powershell -NoProfile -Command "$f='runBuddy\options.txt'; (Get-Content $f) -replace '^(soundCategory_[a-zA-Z]+):.*$', '$1:0.0' | Set-Content $f"
+
 echo Starting TestBuddy dev client (first run compiles - be patient)...
 call gradlew.bat runClientBuddy --project-cache-dir .gradle-win
 pause

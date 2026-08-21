@@ -73,9 +73,22 @@ another mod's internals to enforce that mod's own rule is the arrangement that
 breaks silently on their next refactor — with a moderation control as the thing
 that breaks.
 
-`/ignore` stays LegendQuest's decision, which is why the seam takes the message
-rather than an audience. Whether an ignore should reach party chat is an open
-design question and a seam should not pre-empt it.
+## `/ignore` does not apply inside party chat
+
+A claimed message never reaches Standards' `deliver()`, so their `/ignore` has
+no effect on party chat. That is deliberate, and as of 2026-08-21 it is a
+ruling rather than an oversight — Sable's: *"if you want to /ignore a player in
+party, boot them from the party."*
+
+The reasoning holds up. A party is small, opt-in, and has a leader with a kick
+command; ignoring someone you chose to team up with, while still sharing their
+XP and their teleports, is a state that solves nothing. `/ignore` exists for
+people you cannot get away from in public chat. In a party you can.
+
+This is also why the seam takes the message rather than an audience — the
+decision stays on LegendQuest's side of the line. If the ruling ever reverses,
+the change is a call to Standards' ignore check from inside `route()`, and the
+seam does not change either way.
 
 ## Unrelated fixes this work forced
 
