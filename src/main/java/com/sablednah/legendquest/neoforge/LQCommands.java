@@ -355,7 +355,7 @@ public final class LQCommands {
             sb.append("\n §7-§r ").append(online != null ? "§a" : "§8").append(name);
             if (memberId.equals(p.owner())) sb.append(" §6").append(lc("msg.list.leader"));
         }
-        ctx.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
+        ctx.getSource().sendSuccess(() -> Feedback.colored(sb.toString()), false);
         return 1;
     }
 
@@ -508,7 +508,7 @@ public final class LQCommands {
                             .append(ref.value().isDefault() ? " " + lc("msg.list.default_tag") : "")
                             .append(locked ? " " + lc("msg.list.locked_tag") : "");
                 });
-        ctx.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
+        ctx.getSource().sendSuccess(() -> Feedback.colored(sb.toString()), false);
         return 1;
     }
 
@@ -519,7 +519,7 @@ public final class LQCommands {
                 .forEach(ref -> sb.append("\n §7-§r ").append(ref.value().name())
                         .append(" §8(").append(ref.key().identifier()).append(")")
                         .append(ref.value().isDefault() ? " " + lc("msg.list.default_tag") : ""));
-        ctx.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
+        ctx.getSource().sendSuccess(() -> Feedback.colored(sb.toString()), false);
         return 1;
     }
 
@@ -565,7 +565,7 @@ public final class LQCommands {
                 "maxmana", String.format("%.0f", CharacterService.maxMana(player))));
         sb.append("\n").append(lc("msg.stats.points", "spent", pc.skillPointsSpent(),
                 "total", CharacterService.skillPointsTotal(player)));
-        ctx.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
+        ctx.getSource().sendSuccess(() -> Feedback.colored(sb.toString()), false);
         return 1;
     }
 
@@ -600,7 +600,7 @@ public final class LQCommands {
                 sb.append(" §c").append(phase.name().toLowerCase());
             }
         });
-        ctx.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
+        ctx.getSource().sendSuccess(() -> Feedback.colored(sb.toString()), false);
         return 1;
     }
 
@@ -636,7 +636,7 @@ public final class LQCommands {
             if (feat.level() > 0) sb.append(", ").append(lc("hb.grant_level", "level", feat.level()));
             sb.append(")");
         });
-        ctx.getSource().sendSuccess(() -> Component.literal(sb.toString()), false);
+        ctx.getSource().sendSuccess(() -> Feedback.colored(sb.toString()), false);
         return 1;
     }
 
@@ -709,7 +709,7 @@ public final class LQCommands {
         CharacterService.data(target).setRace(raceId, false);
         CharacterActions.pruneUnknownSkills(target);
         CharacterService.refresh(target);
-        ctx.getSource().sendSuccess(() -> Component.literal(Lang.fmt("msg.admin.set_race",
+        ctx.getSource().sendSuccess(() -> Feedback.colored(Lang.fmt("msg.admin.set_race",
                 "player", target.getName().getString(), "id", raceId,
                 "forced", force ? " (forced)" : "")), true);
         return 1;
@@ -740,7 +740,7 @@ public final class LQCommands {
         CharacterService.data(target).setMainClass(classId);
         CharacterActions.pruneUnknownSkills(target);
         CharacterService.refresh(target);
-        ctx.getSource().sendSuccess(() -> Component.literal(Lang.fmt("msg.admin.set_class",
+        ctx.getSource().sendSuccess(() -> Feedback.colored(Lang.fmt("msg.admin.set_class",
                 "player", target.getName().getString(), "id", classId,
                 "forced", force ? " (forced)" : "")), true);
         return 1;
@@ -753,7 +753,7 @@ public final class LQCommands {
         int before = CharacterService.level(target);
         pc.mainClassId().ifPresent(cls -> pc.addXp(cls, amount));
         CharacterService.afterXpChange(target, before);
-        ctx.getSource().sendSuccess(() -> Component.literal(Lang.fmt("msg.admin.gave_xp",
+        ctx.getSource().sendSuccess(() -> Feedback.colored(Lang.fmt("msg.admin.gave_xp",
                 "player", target.getName().getString(), "amount", amount,
                 "level", CharacterService.level(target))), true);
         return 1;
@@ -822,11 +822,11 @@ public final class LQCommands {
             final String name = lastName;
             final int level = lastLevel;
             final long xp = lastXp;
-            ctx.getSource().sendSuccess(() -> Component.literal(Lang.fmt("msg.admin.set_level",
+            ctx.getSource().sendSuccess(() -> Feedback.colored(Lang.fmt("msg.admin.set_level",
                     "player", name, "level", level, "xp", xp)), true);
         } else if (changed > 1) {
             final int count = changed;
-            ctx.getSource().sendSuccess(() -> Component.literal(
+            ctx.getSource().sendSuccess(() -> Feedback.colored(
                     Lang.fmt("msg.admin.level_many", "count", count)), true);
         }
         return changed;
@@ -842,7 +842,7 @@ public final class LQCommands {
             return 0;
         }
         int level = CharacterService.level(target);
-        ctx.getSource().sendSuccess(() -> Component.literal(Lang.fmt("msg.admin.level_query",
+        ctx.getSource().sendSuccess(() -> Feedback.colored(Lang.fmt("msg.admin.level_query",
                 "player", target.getName().getString(), "level", level,
                 "xp", pc.xpFor(classId.get()), "class", classId.get())), false);
         return level;
@@ -853,7 +853,7 @@ public final class LQCommands {
         long amount = LongArgumentType.getLong(ctx, "amount");
         PlayerCharacter pc = CharacterService.data(target);
         pc.addKarma(amount - pc.karma());
-        ctx.getSource().sendSuccess(() -> Component.literal(Lang.fmt("msg.admin.set_karma",
+        ctx.getSource().sendSuccess(() -> Feedback.colored(Lang.fmt("msg.admin.set_karma",
                 "player", target.getName().getString(), "amount", amount)), true);
         return 1;
     }
@@ -863,8 +863,17 @@ public final class LQCommands {
     }
 
     /** Screens built with '§' literals need Lang text converted the same way. */
+    /**
+     * A lang line for a command reply, colour codes left as '&amp;'.
+     *
+     * <p>This used to translate to '\u00a7' here, which put section signs into the
+     * string that {@link Component#literal} was handed \u2014 rendering correctly in
+     * game and reaching the console, the log and every RCON tool as raw codes.
+     * The codes now survive as '&amp;' until {@link Feedback#colored} turns them
+     * into real styles at the point of sending.</p>
+     */
     private static String lc(String key, Object... kv) {
-        return Lang.fmt(key, kv).replace('&', '\u00a7');
+        return Lang.fmt(key, kv);
     }
 
     private LQCommands() {}
