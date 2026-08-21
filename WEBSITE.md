@@ -33,6 +33,24 @@ did, for the record:
 - The old Bukkit card on `/game-plugins/` was renamed **LegendQuest (Legacy)** with a line pointing
   at the successor, matching how MobHealth's two cards already read.
 
+### Nameplate correction — applied to the site 2026-08-21
+
+`0972a97` corrected the `[nameplate]` config comment, which still described the first
+implementation's scoreboard team. The site's `/settings/` page had been built from that stale comment
+and so carried the same wrong warning; it is now rewritten from the corrected source and redeployed.
+
+The section no longer reads as a caution. It now says the nameplate is a **text display entity** an
+unmodded client renders as an ordinary vanilla entity, that chat / tab list / `/list` are untouched,
+and that it does **not** take the scoreboard team slot, so it does not compete with LuckPerms, FTB
+Ranks or any chat-prefix mod. The `enabled` row gained the `{name} {race} {class} {sub_class} {level}
+{karma} {title} {epithet}` placeholder list and the `/lq nameplate off` note, and `/commands/` now
+describes that verb as showing or hiding the text display above your head.
+
+Worth noting for future releases, since it is the failure mode this file already warns about: the
+site's settings page is generated from the `.comment(...)` strings, so **a stale config comment
+becomes a stale public page**. The `/skill-packs/` page happened to escape the parallel
+`SKILL-PACKS.md` drift only because it was built by counting `LQEffects.java` instead.
+
 ### ⚠ Two counts in this file were wrong — corrected below from source
 
 Both were caught by counting off the source as this file instructs, and the site uses the corrected
