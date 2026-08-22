@@ -44,12 +44,17 @@ import net.neoforged.neoforge.event.ServerChatEvent;
  * way in, the state clearing itself when the party goes away, and capture
  * never silently activating.</p>
  *
- * <p><b>Known gap, deliberately not hidden.</b> Capture cancels
- * {@code ServerChatEvent} ahead of Standards, so a Standards mute does not
- * reach it — the same hole {@code /pc} has always had, now much easier to
- * reach. Standards owns mutes and exposes no way to ask, so this cannot be
- * closed from here; the fix is a routing seam in Standards, agreed in
- * principle and awaiting a decision. See {@code docs/CHAT-ROUTING.md}.</p>
+ * <p><b>Mutes are honoured.</b> Where Standards is installed, capture goes
+ * through its {@code ChatRouter} seam, which offers a message to routers only
+ * after the mute gate has already turned it away — so a muted player cannot
+ * talk to their party, and {@link #claim} is never even called for them.
+ * Without Standards there is no mute to honour and the listener in
+ * {@link #onChat} does the routing instead. See {@code docs/CHAT-ROUTING.md}.</p>
+ *
+ * <p>An earlier version of this class cancelled {@code ServerChatEvent} ahead
+ * of Standards and did bypass mutes — the hole {@code /pc} had carried from the
+ * day it was written, made far easier to reach. That is fixed rather than
+ * outstanding; the seam was built for it.</p>
  */
 public final class PartyChat {
 

@@ -51,6 +51,39 @@ site's settings page is generated from the `.comment(...)` strings, so **a stale
 becomes a stale public page**. The `/skill-packs/` page happened to escape the parallel
 `SKILL-PACKS.md` drift only because it was built by counting `LQEffects.java` instead.
 
+## 2.1.0 (2026-08-22) — ✅ DONE, deployed by the site session
+
+Verified every claim against source before writing it (`LQCommands.java`, `PartyChat.java`,
+`CharClass.java`/`LevelTitles.java`, `LQPermissions.java`, `CHANGELOG.md`) rather than trusting the
+handover message alone — it was accurate, this is just the record of what was checked and where.
+
+- **`/commands/`** — party table rewritten: `/pc <message>` and `/lq party chat <message>` for one
+  line, `/pc` alone / `/lq party capture [on|off]` for the sibling capture toggle (with a callout
+  explaining *why* it is a sibling, not a child, of `chat` — the greedy-string ambiguity), and
+  `/lq party spy on|off` reworded to say it is off by default *even for operators*. Added prose
+  covering the capture safety behaviour, the "can staff read my party chat" honesty answer (two
+  locks: the permission node, defaulting false even for ops, plus a per-player toggle), and the
+  `/ignore` ruling.
+- **`/content/`** — added the class `titles` field (a real schema addition that predates 2.1.0,
+  landed in `e70d377`, and had been missing from the page since the original build — this release
+  is what surfaced it, not what added it). Fighter's chain used as the worked example, verified
+  against the actual JSON rather than the handover's paraphrase.
+- **Landing page** — two new feature cards, Nameplates and Titled ranks, in the "what your players
+  get" grid; the Parties card now mentions capture by name instead of a bare "party chat".
+- **`/settings/` left untouched**, as instructed — it was already built from the corrected
+  `LQConfig.java` during yesterday's nameplate fix and needed nothing for 2.1.0.
+- No version-number text exists anywhere on the site outside the landing page's MC/NeoForge/Java
+  table, so there was nothing to bump for 2.1.0 — the `/skill-packs/` Gradle snippet already used
+  `legendquest-<version>.jar` for exactly this reason.
+- The bug fix (race/class bonuses lost on respawn) is not listed anywhere on the site. None of the
+  three product hubs on this domain carry a changelog/fixes section — CurseForge's own changelog is
+  the fix's natural home. Flagging the omission here in case that's wrong for this one.
+
+**⚠ `/legendquest-reforged/` (the hub) is a stale Cloudflare HIT — verified serving the OLD "party
+chat" wording to real visitors as of this deploy.** `/commands/` and `/content/` are already fresh
+(one had already gone MISS-and-refilled by the time this was checked, the other was a live MISS).
+Purge the hub URL specifically, or Purge Everything.
+
 ### ⚠ Two counts in this file were wrong — corrected below from source
 
 Both were caught by counting off the source as this file instructs, and the site uses the corrected
