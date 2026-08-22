@@ -3,6 +3,79 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 2.1.0 — 2026-08-22
+
+Two features, and one fix that matters more than either.
+
+### Fixed
+
+- **Race and class bonuses were lost on death.** Max health and speed are
+  applied as transient attribute modifiers, and respawning builds a new player
+  entity that copies base values but not those modifiers — so a Dwarf Fighter
+  with 57 max health respawned on vanilla 20 and stayed there until they logged
+  out and back in. This has been true for the entire life of the mod. Bonuses
+  are now restored during the respawn itself, before the client is told
+  anything, so the health bar is simply correct rather than visibly corrected.
+  Dimension changes get the same repair.
+- **Colour codes reached consoles and RCON as raw section signs.** Command
+  output was built with the codes inside the text, which renders correctly in
+  game and hands `§7CHR: §f14 §8(+2)` to anything that is not a client. They
+  are real component styles now, so a server console, the log and any admin
+  tool read plain sentences. In-game appearance is unchanged.
+- An ampersand in ordinary text no longer eats the character after it — "Tom &
+  Jerry" survives as written. Format codes in *player*-typed text are stripped
+  rather than honoured, which closes an impersonation route: `&r` and a
+  plausible prefix could dress a player's words up as a server message.
+
+### Added
+
+- **Nameplates.** Character info floats above each player's head — by default
+  `[Race Class | Lvl N]`, worded by `nameplate.prefix` and `nameplate.suffix`
+  in `messages.yml`, so it re-themes with the rest of the vocabulary.
+  Placeholders: `{name} {race} {class} {sub_class} {level} {karma} {title}
+  {epithet}`. Players can hide their own with `/lq nameplate off`.
+
+  It is a text display entity, which an **unmodded client renders** because it
+  is an ordinary vanilla entity. It occupies only the space above the head —
+  chat, the tab list and `/list` are untouched — and it does **not** use the
+  scoreboard team slot, so it does not compete with LuckPerms, FTB Ranks or any
+  chat-prefix mod.
+
+- **Class titles and karma epithets.** A class can name its ranks by level
+  (`titles`: Squire → Man-at-Arms → Knight → Champion → Lord), and karma earns
+  an epithet — "the good", "the saintly", "the diabolic". Both feed the
+  nameplate, and chat where Standards is installed.
+
+- **Party chat.** `/pc <message>` or `/lq party chat <message>` talks to your
+  party alone. **`/pc` on its own toggles capture**, after which everything you
+  type goes to the party until you switch it off — typing `/pc` before every
+  line is fine for a remark and miserable for a conversation.
+
+  Capture will not switch on without a party, names the way out in the same
+  breath as confirming it, and clears itself if the party goes away, because
+  the way this feature hurts someone is being on when they have forgotten it.
+
+  Operators can listen in, but only deliberately: the
+  `legendquest.party.spy` permission defaults to false *even for operators*,
+  and there is a per-player toggle on top of it. A listener's copy names which
+  party is speaking; a member's copy does not. Party chat is echoed to the
+  server log, because a channel that never reaches the log cannot be moderated
+  afterwards.
+
+### Changed
+
+- **Optional Standards integration.** With
+  [Standards](https://github.com/Sablednah/SableCraft-Standards) installed,
+  class titles and karma epithets decorate chat, and party lines wear the same
+  name as public chat — including tags contributed by other mods, since it
+  reads the shared registry rather than its own fields. Party chat routes
+  through Standards' chat seam, so a muted player cannot talk to their party.
+  Standards stays entirely optional; without it, party chat and nameplates work
+  exactly as described above.
+- `/ignore` deliberately does not apply inside party chat. A party is small,
+  opt-in and has a leader with a kick command, so the better remedy already
+  exists.
+
 ## 2.0.1 — 2026-08-18
 
 ### Fixed
