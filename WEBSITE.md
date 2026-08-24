@@ -64,10 +64,14 @@ handover message alone — it was accurate, this is just the record of what was 
   covering the capture safety behaviour, the "can staff read my party chat" honesty answer (two
   locks: the permission node, defaulting false even for ops, plus a per-player toggle), and the
   `/ignore` ruling.
-- **`/content/`** — added the class `titles` field (a real schema addition that predates 2.1.0,
-  landed in `e70d377`, and had been missing from the page since the original build — this release
-  is what surfaced it, not what added it). Fighter's chain used as the worked example, verified
-  against the actual JSON rather than the handover's paraphrase.
+- **`/content/`** — added the class `titles` field. **This is genuinely new in 2.1.0** — `e70d377`
+  sits between `v2.0.1` and `v2.1.0` (`git merge-base --is-ancestor e70d377 v2.0.1` fails), so no
+  released version before this one ever contained it. An earlier draft of this note said it predated
+  2.1.0 and had merely gone undocumented; that was wrong, caught and corrected by the peer session
+  that filed the 2.1.0 brief. Dating a feature by its commit rather than by the release boundary it
+  landed inside is the trap — worth remembering for any repo where work sits on `main` unreleased for
+  a few days. Fighter's chain used as the worked example, verified against the actual JSON rather
+  than the handover's paraphrase.
 - **Landing page** — two new feature cards, Nameplates and Titled ranks, in the "what your players
   get" grid; the Parties card now mentions capture by name instead of a bare "party chat".
 - **`/settings/` left untouched**, as instructed — it was already built from the corrected
