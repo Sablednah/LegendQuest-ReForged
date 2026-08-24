@@ -86,6 +86,16 @@ public final class CharacterActions {
             return false;
         }
 
+        // Captured before the switch: what they are walking away from, and how
+        // far they had got. Only worth saying for a DIFFERENT main class that
+        // has actually been played.
+        Optional<Identifier> leaving = asSub ? Optional.empty()
+                : pc.mainClassId().filter(id -> !id.equals(classId)).filter(id -> pc.xpFor(id) > 0L);
+        int leavingLevel = leaving
+                .map(id -> Leveling.levelForXp(pc.xpFor(id),
+                        LQConfig.XP_LEVEL_BASE.get(), LQConfig.MAX_LEVEL.get()))
+                .orElse(0);
+
         if (asSub) {
             pc.setSubClass(Optional.of(classId));
         } else {
@@ -95,6 +105,17 @@ public final class CharacterActions {
         CharacterService.refresh(player);
         Feedback.notify(player, Lang.fmt("msg.choose.class_done", "article", article(target.name()),
                 "class", target.name(), "suffix", asSub ? " (sub)." : "."));
+
+        // Switching main class is alarming and harmless, which is the worst
+        // combination to leave unexplained: level, max health, title and skills
+        // all drop to the new class's level 0 in the same instant, and it reads
+        // exactly like having lost the character. XP is banked PER CLASS and
+        // nothing ever clears a bank, so the old life is intact and one command
+        // away. Say so at the moment the bar drops, not in the documentation.
+        leaving.ifPresent(id -> Feedback.notify(player, Lang.fmt("msg.choose.class_banked",
+                "class", CharacterService.charClass(player, Optional.of(id)).map(CharClass::name)
+                        .orElse(id.getPath()),
+                "level", leavingLevel, "id", id.toString())));
         return true;
     }
 

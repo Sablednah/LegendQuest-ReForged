@@ -178,6 +178,12 @@ public final class Lang {
         def("msg.choose.race_cannot", "&cA {race} cannot become {article} {class}.");
         def("msg.choose.requires_mastering", "&c{class} requires mastering: {requires}");
         def("msg.choose.class_done", "&6You are now {article} &l{class}&r&6{suffix}");
+        // Shown only when leaving a main class that has been played. The point
+        // is reassurance, not warning: the level, health and title all drop at
+        // once and it looks like loss, when nothing has been lost at all.
+        def("msg.choose.class_banked",
+                "&7Your &f{class}&7 is kept at {term.level} &f{level}&7 — "
+                        + "&f/lq class choose {id}&7 goes back to it.");
 
         def("msg.respec.nothing", "&7Nothing to respec — no {term.skill_points} are spent.");
         def("msg.respec.offer", "&6Respec refunds &l{points}&r&6 {term.skill_points} (forgetting bought {term.skills} and stat boosts){levelcost}");

@@ -12,7 +12,11 @@ authors="${mod_authors}"
 description='''
 ${mod_description}
 '''
-displayURL="https://github.com/Sablednah/LegendQuest-ReForged"
+# The site, not the repo: this is the link in the mods list, and the people
+# who click it want to know what the mod does, not how it is built. The repo
+# is still one click away from there, and issueTrackerURL above goes straight
+# to GitHub for the people who want that.
+displayURL="https://sablecraft.co.uk/legendquest-reforged/"
 logoFile="legendquest.png"
 # The white wordmark, because the mods list paints on a dark panel; the black
 # variant for light backgrounds lives in docs/branding. Smoothed rather than
