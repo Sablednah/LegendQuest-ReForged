@@ -3,6 +3,59 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 2.2.0 — 2026-08-24
+
+The titles release. 2.1.0 added class ranks; this is the release where you
+can actually see them.
+
+### Added
+
+- **Rank titles for all 34 classes in both genre packs.** 2.1.0 shipped the
+  titles feature with no pack content using it — 8 of 9 built-in classes had a
+  chain and none of the 36 pack classes did, so on a Wasteland or Cold Frontier
+  server the feature existed and was invisible. Every class now has five bands
+  at levels 1, 25, 50, 100 and 140, tiered so a specialisation ends grander
+  than the base it grew from. A Wasteland Veteran runs Still Here →
+  Old Hand → Veteran → Grizzled → Legend.
+
+  Drifter and Crewman are deliberately left untitled, as Citizen is: they are
+  the default classes, so no title reliably means "has not chosen a role yet".
+
+- **The class title now appears on the nameplate by default.** The shipped
+  format contained neither `{title}` nor `{epithet}`, so without the optional
+  Standards integration the whole feature had nowhere to show. It is appended
+  as `nameplate.suffix`, which was previously empty — additive, so no existing
+  plate changes shape — and gold, matching what Standards already puts on a
+  title in chat, so a Knight reads the same on both surfaces.
+
+  **Existing servers pick this up automatically.** `messages.yml` only pins the
+  keys it actually contains, and a file generated before 2.1.0 has no
+  `nameplate.*` entries. A server whose `messages.yml` was created fresh under
+  2.1.0 will have `nameplate.suffix: ""` pinned; delete that line to get the
+  new default.
+
+- **Switching main class now says the old one is kept.** Changing class drops
+  your level, max health, title and skills to the new class's level 0 in the
+  same instant, which reads exactly like losing the character — but class XP is
+  banked per class and nothing ever clears a bank. The old life is intact and
+  one command away, and the game now says so at the moment the bar drops
+  instead of leaving you to find out. Sub-class changes stay silent, since they
+  do not move your level.
+
+### Fixed
+
+- A nameplate line that resolves to nothing but colour codes is no longer
+  drawn. Previously a format ending in `{title}` left a dangling code for any
+  character below their first band — invisible, but it would have bitten any
+  owner writing `{title}` into their own format.
+
+### Changed
+
+- `displayURL` points at <https://sablecraft.co.uk/legendquest-reforged/>
+  rather than the repository. It is the link in the mods list, and the people
+  who click it want to know what the mod does; `issueTrackerURL` still goes
+  straight to GitHub.
+
 ## 2.1.0 — 2026-08-22
 
 Two features, and one fix that matters more than either.
