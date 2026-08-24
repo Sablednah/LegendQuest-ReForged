@@ -198,16 +198,45 @@ public final class Nameplate {
     }
 
     /**
+     * True when a rendered template would show nothing — empty, whitespace, or
+     * nothing but colour codes.
+     *
+     * <p>The last case is the one that matters. A template like
+     * {@code " &6{title}"} is exactly right for a character who has a title and
+     * leaves a dangling {@code &6} for one who does not, because {@code trim()}
+     * removes the space and has no opinion about the code still attached to it.
+     * Harmless to look at and wrong in principle: a line that renders to pure
+     * formatting is not a line.</p>
+     */
+    private static boolean rendersToNothing(String text) {
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == '&' && i + 1 < text.length()
+                    && "0123456789abcdefklmnorABCDEFKLMNOR".indexOf(text.charAt(i + 1)) >= 0) {
+                i++;
+                continue;
+            }
+            if (!Character.isWhitespace(c)) return false;
+        }
+        return true;
+    }
+
+    /**
      * Fills one of the two templates. Every placeholder is always substituted,
      * including the ones that resolve to nothing: an owner who writes
      * {@code {title}} into the format on a pack that defines no titles should
      * get an empty gap, not the literal text "{title}".
+     *
+     * <p>And if what comes back is only punctuation-free formatting, it comes
+     * back as nothing at all — see {@link #rendersToNothing}. That is what lets
+     * the shipped suffix carry {@code {title}} without every untitled character
+     * paying for it.</p>
      */
     private static String render(String key, ServerPlayer player) {
         String template = Lang.get(key);
         if (template.isBlank()) return "";
         PlayerCharacter pc = CharacterService.data(player);
-        return Lang.fmt(key,
+        String filled = Lang.fmt(key,
                 "name", player.getName().getString(),
                 "race", CharacterService.race(player).map(Race::name)
                         .orElseGet(() -> Lang.get("msg.stats.undecided")),
@@ -218,6 +247,7 @@ public final class Nameplate {
                 "karma", CharacterService.karmaName(pc.karma()),
                 "title", CharacterService.classTitle(player),
                 "epithet", CharacterService.karmaEpithet(pc.karma()));
+        return rendersToNothing(filled) ? "" : filled;
     }
 
     private Nameplate() {}

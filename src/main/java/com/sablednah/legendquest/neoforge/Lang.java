@@ -329,7 +329,12 @@ public final class Lang {
     // nothing to a pack that has not defined any.
     static {
         def("nameplate.prefix", "&7[&f{race} &f{class} &7| &fLvl {level}&7]");
-        def("nameplate.suffix", "");
+        // The class title, gold to match the prefix Standards puts on it in
+        // chat, so a Knight is a Knight on both surfaces. Renders as nothing
+        // for a character below their first band or in a class with no titles
+        // at all -- Nameplate drops a line that is only formatting -- so this
+        // costs an untitled player no stray gap.
+        def("nameplate.suffix", " &6{title}");
         def("msg.nameplate.on", "&6Your nameplate is showing.");
         def("msg.nameplate.off", "&6Your nameplate is hidden.");
     }
