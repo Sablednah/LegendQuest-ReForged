@@ -19,5 +19,12 @@
     "lq_apoc:molotov": { "level": 10 },
     "lq_apoc:smoke_bomb": { "level": 20, "cost": 5 },
     "lq_apoc:inferno": { "level": 40, "cost": 15 }
+  },
+  "titles": {
+    "1": "Sparker",
+    "25": "Torch",
+    "50": "Burner",
+    "100": "Firestarter",
+    "140": "Inferno"
   }
 }

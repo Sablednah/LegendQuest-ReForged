@@ -20,5 +20,12 @@
     "lq_apoc:scrounge": { "level": 0 },
     "lq_apoc:call_contact": { "level": 20, "cost": 10 },
     "lq_apoc:hired_muscle": { "level": 40, "cost": 15 }
+  },
+  "titles": {
+    "1": "Hawker",
+    "25": "Pedlar",
+    "50": "Trader",
+    "100": "Broker",
+    "140": "Magnate"
   }
 }

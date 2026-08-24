@@ -17,5 +17,12 @@
     "lq_apoc:rot_bolt": { "level": 15, "cost": 5, "karma_max": -10 },
     "lq_apoc:raise_walker": { "level": 25, "cost": 10, "karma_max": -20 },
     "lq_apoc:husk_pack": { "level": 45, "cost": 15, "karma_max": -40 }
+  },
+  "titles": {
+    "1": "Whisperer",
+    "25": "Carrion Caller",
+    "50": "Rotspeaker",
+    "100": "Plaguebearer",
+    "140": "Herald of the Dead"
   }
 }

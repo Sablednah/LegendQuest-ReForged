@@ -20,5 +20,12 @@
     "lq_apoc:shield_wall": { "level": 20, "cost": 5 },
     "lq_apoc:spite": { "level": 25, "cost": 5 },
     "lq_apoc:unbreakable": { "level": 50, "cost": 15 }
+  },
+  "titles": {
+    "1": "Still Here",
+    "25": "Old Hand",
+    "50": "Veteran",
+    "100": "Grizzled",
+    "140": "Legend"
   }
 }

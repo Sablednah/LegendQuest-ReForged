@@ -21,5 +21,12 @@
     "lq_apoc:overdrive": { "level": 0 },
     "lq_apoc:brace": { "level": 0 },
     "lq_apoc:fortify": { "level": 20, "cost": 5 }
+  },
+  "titles": {
+    "1": "Nailer",
+    "25": "Framer",
+    "50": "Mason",
+    "100": "Architect",
+    "140": "Wallwright"
   }
 }

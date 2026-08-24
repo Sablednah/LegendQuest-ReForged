@@ -20,5 +20,12 @@
     "lq_scifi:empathic_mend": { "level": 30, "cost": 5, "karma_min": 20 },
     "lq_scifi:void_whisper": { "level": 30, "cost": 5, "karma_max": -20 },
     "lq_scifi:ion_storm": { "level": 45, "cost": 15 }
+  },
+  "titles": {
+    "1": "Sensitive",
+    "25": "Psion",
+    "50": "Mindwalker",
+    "100": "Adept",
+    "140": "Licensed Weapon"
   }
 }

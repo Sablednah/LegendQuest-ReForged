@@ -13,5 +13,12 @@
     "lq_scifi:overclock": { "level": 8 },
     "lq_scifi:floodlights": { "level": 12, "cost": 5 },
     "lq_scifi:print_ammo": { "level": 18, "cost": 5 }
+  },
+  "titles": {
+    "1": "Rating",
+    "25": "Tech Mate",
+    "50": "Technician",
+    "100": "Chief Tech",
+    "140": "Chief of the Boat"
   }
 }

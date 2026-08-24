@@ -19,5 +19,12 @@
     "lq_apoc:acid_flask": { "level": 15, "cost": 5 },
     "lq_apoc:stim_shot": { "level": 25, "cost": 5 },
     "lq_apoc:gas_grenade": { "level": 40, "cost": 10 }
+  },
+  "titles": {
+    "1": "Cooker",
+    "25": "Mixer",
+    "50": "Chemist",
+    "100": "Reagent Master",
+    "140": "Detonator"
   }
 }

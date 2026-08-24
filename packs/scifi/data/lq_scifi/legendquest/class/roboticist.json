@@ -19,5 +19,12 @@
     "lq_scifi:sentry_turret": { "level": 15, "cost": 5 },
     "lq_scifi:security_bot": { "level": 30, "cost": 10 },
     "lq_scifi:full_deployment": { "level": 50, "cost": 15 }
+  },
+  "titles": {
+    "1": "Handler",
+    "25": "Roboticist",
+    "50": "Drone Lead",
+    "100": "Swarmmaster",
+    "140": "Iron Choir"
   }
 }

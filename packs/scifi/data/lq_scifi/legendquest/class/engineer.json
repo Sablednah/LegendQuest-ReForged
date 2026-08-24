@@ -23,5 +23,12 @@
     "lq_scifi:print_ammo": { "level": 0 },
     "lq_scifi:emergency_shielding": { "level": 20, "cost": 5 },
     "lq_scifi:redline": { "level": 35, "cost": 10 }
+  },
+  "titles": {
+    "1": "Fitter",
+    "25": "Engineer",
+    "50": "Chief Engineer",
+    "100": "Miracle Worker",
+    "140": "Realist"
   }
 }

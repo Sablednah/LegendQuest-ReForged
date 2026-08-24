@@ -13,5 +13,12 @@
     "lq_scifi:analyze": { "level": 5 },
     "lq_scifi:containment_foam": { "level": 12, "cost": 5 },
     "lq_scifi:lab_stims": { "level": 20, "cost": 5 }
+  },
+  "titles": {
+    "1": "Intern",
+    "25": "Analyst",
+    "50": "Researcher",
+    "100": "Senior Researcher",
+    "140": "Director"
   }
 }

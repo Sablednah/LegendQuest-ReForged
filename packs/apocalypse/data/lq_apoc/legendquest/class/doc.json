@@ -14,5 +14,12 @@
     "lq_apoc:field_dressing": { "level": 8 },
     "lq_apoc:pain_killers": { "level": 15, "cost": 5 },
     "lq_apoc:triage": { "level": 20, "cost": 5 }
+  },
+  "titles": {
+    "1": "Bandager",
+    "25": "Stitcher",
+    "50": "Doc",
+    "100": "Surgeon",
+    "140": "Lifeline"
   }
 }

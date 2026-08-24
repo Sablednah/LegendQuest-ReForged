@@ -18,5 +18,12 @@
     "lq_apoc:keen_eyes": { "level": 0 },
     "lq_apoc:excavate": { "level": 15, "cost": 5 },
     "lq_apoc:safe_fall": { "level": 25, "cost": 5 }
+  },
+  "titles": {
+    "1": "Mucker",
+    "25": "Tunneller",
+    "50": "Pitman",
+    "100": "Deep Digger",
+    "140": "Underking"
   }
 }

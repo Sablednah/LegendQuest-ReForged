@@ -19,5 +19,12 @@
     "lq_apoc:cripple": { "level": 15, "cost": 5 },
     "lq_apoc:onslaught": { "level": 30, "cost": 10 },
     "lq_apoc:execute": { "level": 45, "cost": 10 }
+  },
+  "titles": {
+    "1": "Hired Gun",
+    "25": "Freelance",
+    "50": "Contractor",
+    "100": "Captain",
+    "140": "Warlord"
   }
 }

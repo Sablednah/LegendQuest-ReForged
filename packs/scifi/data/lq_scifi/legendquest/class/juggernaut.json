@@ -20,5 +20,12 @@
     "lq_scifi:powered_plating": { "level": 20, "cost": 5 },
     "lq_scifi:reactive_armor": { "level": 25, "cost": 5 },
     "lq_scifi:fortress_mode": { "level": 50, "cost": 15 }
+  },
+  "titles": {
+    "1": "Heavy",
+    "25": "Bulwark",
+    "50": "Juggernaut",
+    "100": "Breaker",
+    "140": "Walking Cover"
   }
 }

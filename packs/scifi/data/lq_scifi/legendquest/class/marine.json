@@ -15,5 +15,12 @@
     "lq_scifi:bayonet": { "level": 5 },
     "lq_scifi:breach": { "level": 10, "cost": 5 },
     "lq_scifi:suppression": { "level": 20, "cost": 5 }
+  },
+  "titles": {
+    "1": "Recruit",
+    "25": "Trooper",
+    "50": "Lance",
+    "100": "Sergeant",
+    "140": "Master Sergeant"
   }
 }

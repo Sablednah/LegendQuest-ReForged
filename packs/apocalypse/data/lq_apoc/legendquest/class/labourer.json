@@ -12,5 +12,12 @@
   "skills": {
     "lq_apoc:overdrive": { "level": 8 },
     "lq_apoc:brace": { "level": 15, "cost": 5 }
+  },
+  "titles": {
+    "1": "Hand",
+    "25": "Digger",
+    "50": "Grafter",
+    "100": "Foreman",
+    "140": "Pit Boss"
   }
 }

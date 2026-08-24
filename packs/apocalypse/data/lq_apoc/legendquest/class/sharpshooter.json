@@ -18,5 +18,12 @@
     "lq_apoc:called_shot": { "level": 10, "cost": 5 },
     "lq_apoc:crippling_shot": { "level": 20, "cost": 5 },
     "lq_apoc:volley": { "level": 40, "cost": 10 }
+  },
+  "titles": {
+    "1": "Plinker",
+    "25": "Marksman",
+    "50": "Sharpshooter",
+    "100": "Deadeye",
+    "140": "Ghost Trigger"
   }
 }

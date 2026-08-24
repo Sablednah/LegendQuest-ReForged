@@ -17,5 +17,12 @@
     "lq_scifi:all_hands": { "level": 5 },
     "lq_scifi:battle_orders": { "level": 20, "cost": 5 },
     "lq_scifi:no_one_dies": { "level": 45, "cost": 15 }
+  },
+  "titles": {
+    "1": "Bridge Hand",
+    "25": "Acting Captain",
+    "50": "Captain",
+    "100": "Commodore",
+    "140": "Admiral"
   }
 }

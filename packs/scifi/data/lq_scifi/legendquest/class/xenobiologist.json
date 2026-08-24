@@ -20,5 +20,12 @@
     "lq_scifi:spore_cloud": { "level": 15, "cost": 5 },
     "lq_scifi:regen_serum": { "level": 25, "cost": 5 },
     "lq_scifi:gene_hound": { "level": 40, "cost": 10 }
+  },
+  "titles": {
+    "1": "Cataloguer",
+    "25": "Xenobiologist",
+    "50": "Field Specialist",
+    "100": "Specimen Lead",
+    "140": "The Distinction"
   }
 }

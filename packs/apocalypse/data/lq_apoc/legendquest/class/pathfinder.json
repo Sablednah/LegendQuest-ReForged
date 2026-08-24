@@ -21,5 +21,12 @@
     "lq_apoc:sure_footed": { "level": 15, "cost": 5 },
     "lq_apoc:signal_flare": { "level": 25, "cost": 5 },
     "lq_apoc:evac": { "level": 40, "cost": 10 }
+  },
+  "titles": {
+    "1": "Trailhand",
+    "25": "Wayfinder",
+    "50": "Pathfinder",
+    "100": "Trailblazer",
+    "140": "Northstar"
   }
 }

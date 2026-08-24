@@ -13,5 +13,12 @@
     "lq_apoc:shiv": { "level": 5 },
     "lq_apoc:scrounge": { "level": 12, "cost": 5 },
     "lq_apoc:sneak": { "level": 20, "cost": 5 }
+  },
+  "titles": {
+    "1": "Picker",
+    "25": "Forager",
+    "50": "Salvager",
+    "100": "Prospector",
+    "140": "Magpie"
   }
 }

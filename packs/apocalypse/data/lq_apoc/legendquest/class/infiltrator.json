@@ -18,5 +18,12 @@
     "lq_apoc:smoke_bomb": { "level": 10, "cost": 5 },
     "lq_apoc:garrote": { "level": 25, "cost": 5 },
     "lq_apoc:ghost": { "level": 40, "cost": 10 }
+  },
+  "titles": {
+    "1": "Sneak",
+    "25": "Prowler",
+    "50": "Cutpurse",
+    "100": "Shadow",
+    "140": "Whisper"
   }
 }

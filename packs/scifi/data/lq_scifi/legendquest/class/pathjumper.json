@@ -20,5 +20,12 @@
     "lq_scifi:jump_rig": { "level": 10, "cost": 5 },
     "lq_scifi:phase_sprint": { "level": 25, "cost": 5 },
     "lq_scifi:emergency_jump": { "level": 40, "cost": 10 }
+  },
+  "titles": {
+    "1": "Test Pilot",
+    "25": "Jumper",
+    "50": "Pathjumper",
+    "100": "Slipwalker",
+    "140": "Prototype"
   }
 }

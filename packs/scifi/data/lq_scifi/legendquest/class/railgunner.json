@@ -18,5 +18,12 @@
     "lq_scifi:rail_shot": { "level": 10, "cost": 5 },
     "lq_scifi:emp_round": { "level": 20, "cost": 5 },
     "lq_scifi:flechette_storm": { "level": 40, "cost": 10 }
+  },
+  "titles": {
+    "1": "Loader",
+    "25": "Gunner",
+    "50": "Railgunner",
+    "100": "Long Shot",
+    "140": "Orbital Fire"
   }
 }

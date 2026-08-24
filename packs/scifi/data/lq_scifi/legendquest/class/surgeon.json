@@ -20,5 +20,12 @@
     "lq_scifi:triage_protocol": { "level": 0 },
     "lq_scifi:resuscitate": { "level": 25, "cost": 10 },
     "lq_scifi:guardian_protocol": { "level": 45, "cost": 15 }
+  },
+  "titles": {
+    "1": "Cutter",
+    "25": "Surgeon",
+    "50": "Reconstructor",
+    "100": "Chief Surgeon",
+    "140": "Lifewright"
   }
 }

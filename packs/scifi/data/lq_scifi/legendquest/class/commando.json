@@ -18,5 +18,12 @@
     "lq_scifi:cloak_field": { "level": 10, "cost": 5 },
     "lq_scifi:takedown": { "level": 25, "cost": 5 },
     "lq_scifi:adrenal_surge": { "level": 40, "cost": 10 }
+  },
+  "titles": {
+    "1": "Operator",
+    "25": "Commando",
+    "50": "Spectre",
+    "100": "Shadow Lead",
+    "140": "Deniable Asset"
   }
 }

@@ -15,5 +15,12 @@
     "lq_apoc:bash": { "level": 5 },
     "lq_apoc:charge": { "level": 10, "cost": 5 },
     "lq_apoc:intimidate": { "level": 20, "cost": 5 }
+  },
+  "titles": {
+    "1": "Muscle",
+    "25": "Bouncer",
+    "50": "Enforcer",
+    "100": "Warden",
+    "140": "Bulwark"
   }
 }

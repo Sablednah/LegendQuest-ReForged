@@ -21,5 +21,12 @@
     "lq_apoc:stim_shot": { "level": 10, "cost": 5 },
     "lq_apoc:defib": { "level": 25, "cost": 10 },
     "lq_apoc:guardian_angel": { "level": 45, "cost": 15 }
+  },
+  "titles": {
+    "1": "Corpsman",
+    "25": "Field Medic",
+    "50": "Trauma Hand",
+    "100": "Triage Chief",
+    "140": "Angel of the Line"
   }
 }

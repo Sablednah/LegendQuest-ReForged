@@ -18,5 +18,12 @@
     "lq_apoc:summon_pig": { "level": 20, "cost": 5 },
     "lq_apoc:summon_cow": { "level": 30, "cost": 5 },
     "lq_apoc:the_herd": { "level": 50, "cost": 10 }
+  },
+  "titles": {
+    "1": "Herder",
+    "25": "Drover",
+    "50": "Rancher",
+    "100": "Stockman",
+    "140": "Cattle Baron"
   }
 }
