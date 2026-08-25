@@ -4,10 +4,9 @@ Minecraft moved to calendar versioning with quarterly drops. Supporting 1.21.11,
 26.1 and 26.2 is therefore not a port to be finished — it is a treadmill to be
 made cheap. This is the plan for making it cheap, and the evidence it rests on.
 
-**Status: nothing built yet.** The numbers below for 1.21.11 are measured; the
-26.x costs are *predicted* from CityWorld's experience and from counting our own
-call sites. Nobody has compiled this mod against 26.1 yet, and until somebody
-has, every estimate here should be read as a hypothesis.
+**Status: 26.1 measured (2026-08-25). 26.2 not attempted.** See "The measured
+26.1 delta" below — it is the section that matters, and it corrected the
+prediction the rest of this document was built on.
 
 ## The targets
 
@@ -87,6 +86,72 @@ concentrated further:
 Known concrete breaks today: **5 `setScreen` call sites** and **2 position
 field accesses** of the `pos.x` → `pos.x()` kind that bit CityWorld.
 
+## The measured 26.1 delta
+
+Branch `mc26.1`, versions and toolchain set from the table above, `compileJava`.
+**36 errors across 10 files.** But the raw count is the wrong number — the
+distinct API changes behind it are about eight, and one of them accounts for 23
+of the errors.
+
+### The rendering pipeline moved, and that is the whole story
+
+`GuiGraphics` is gone. 26.1 splits GUI drawing into extract-then-render:
+
+| 1.21.11 | 26.1 |
+|---|---|
+| `GuiGraphics` | `GuiGraphicsExtractor` |
+| `Renderable.render(GuiGraphics, int, int, float)` | `Renderable.extractRenderState(GuiGraphicsExtractor, int, int, float)` |
+
+That single change produced 23 of the 36 errors and every one of them is in
+`client/`. The good news is that the drawing surface came across nearly intact
+— of 112 call sites, all but four map to a method that still exists:
+
+| ours | 26.1 | sites |
+|---|---|---|
+| `fill` | `fill` | 87 |
+| `drawString` | `text` | 59 |
+| `renderItem` | `item` | 8 |
+| `guiWidth` / `guiHeight` | unchanged | 10 |
+| `enableScissor` / `disableScissor` | unchanged | 4 |
+| `fillGradient` | `fillGradient` | 3 |
+| `renderItemDecorations` | `itemDecorations` | 1 |
+| `drawCenteredString` | `centeredText` | 1 |
+| **`pose()`** | **no equivalent** | **4** |
+
+The four `pose()` calls are one block in `CombatIndicators` —
+`pushMatrix/translate/scale/popMatrix` around the floating damage numbers. The
+extractor exposes no transform stack, so that is the one piece needing thought
+rather than a rename.
+
+### Everything outside the client is small
+
+Six errors across four files, all ordinary API moves:
+
+- `displayClientMessage(Component, boolean)` — 3 sites (`Feedback` ×2, `Nameplate`)
+- `BreakEvent` relocated — 2 sites in `LQServerEvents`
+- `SavedDataType<>` no longer infers in `Parties`
+- `getTags()`, `getProjectionMatrix(Integer)`, `getItemHolder()` — one each
+
+### What this changes about the plan
+
+**The prediction was right about the location and wrong about the size.**
+Divergence does concentrate in `client/` — 30 of 36 errors — but it is not "five
+`setScreen` call sites". It is the signature of every render method in every
+screen.
+
+**That kills the compat-shim idea, at least for the client.** A
+`src/compat/<version>/java` holding a few diverging methods works when the
+divergence is a few methods. It cannot work when the divergence is the
+*supertype signature* of five whole screens: there is no shared code left to
+keep in the common tree.
+
+**But it points at something better, and the mod's own design principle already
+argues for it.** The client is optional sugar — vanilla clients play the whole
+game. The *server* costs six errors to cross a version. So the split that
+matters is not per-version source sets; it is **server-common, client-per-version**.
+Whether that is worth restructuring for is the real Stage 3 question, and it
+should not be answered on one data point.
+
 ## Recommended mechanism
 
 **Adopt branch-per-version now, exactly as CityWorld runs it. Decide the steady
@@ -133,9 +198,27 @@ the substitution runs.
 
 ## What would change the recommendation
 
-- If step 1 shows the 26.1 delta is genuinely trivial (single figures) **and**
-  confined to `client/`, skip straight to the single tree with a compat source
-  set — the branch overhead would cost more than it saves.
-- If step 2 shows 26.2 breaks the networking or registry layers rather than just
-  the screens, the shim boundary is wrong and branch-per-version should stay
-  until the shape is clearer.
+**Answered for 26.1 (see above):** the delta was not trivial and the compat-shim
+idea does not survive it. Branch-per-version stands.
+
+Still open:
+
+- If 26.2 also leaves the server side near-untouched, **server-common /
+  client-per-version** becomes the serious candidate for the steady state, and it
+  fits the mod's vanilla-first design rather than fighting it.
+- If 26.2 breaks networking, registries or the datapack front door, the server
+  side is not the stable core this measurement suggests, and branch-per-version
+  is simply the answer rather than a holding position.
+
+## A note on counting
+
+The first number out of this exercise was "36 errors", and it was nearly the
+number reported. It would have been misleading in both directions: 23 of the 36
+are one class rename, and the 59 `drawString` calls that also need changing
+produced *no* error at all, because the class they hang off had already failed
+to resolve.
+
+So the error count overstated the distinct problems by roughly four times, and
+simultaneously understated the edit count by about half. Neither figure is the
+cost. The cost is the eight API changes and the ~112 call sites they touch —
+which is a day of mechanical work plus one genuine puzzle in `CombatIndicators`.
