@@ -28,7 +28,7 @@ base {
 }
 
 // Mojang ships Java 21 to end users, so mods should target Java 21.
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 neoForge {
     version = project.neo_version

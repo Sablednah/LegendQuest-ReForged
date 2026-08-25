@@ -88,6 +88,37 @@ chat" wording to real visitors as of this deploy.** `/commands/` and `/content/`
 (one had already gone MISS-and-refilled by the time this was checked, the other was a live MISS).
 Purge the hub URL specifically, or Purge Everything.
 
+## 2.2.0 (2026-08-25) — ✅ DONE, deployed by the site session
+
+Verified every claim against source before writing it (class JSON in both packs, `Lang.java`,
+`LQConfig.java`, `LQCommands.java`, `neoforge.mods.toml`, and `git diff v2.1.0..v2.2.0`) — the
+handover message was accurate throughout; nothing needed correcting this time.
+
+- **`/content/`** — Titled ranks section now shows two worked examples side by side, Fighter
+  (built-in) and Veteran (The Wasteland's `"Still Here" → "Old Hand" → "Veteran" → "Grizzled" →
+  "Legend"`), with a line noting the starting classes in each set (Fighter's Citizen-equivalent,
+  Drifter, Crewman) are the ones that opt out. Also states titles show on the nameplate **by
+  default now** — no configuration needed — while keeping "Standards is optional" for the
+  chat-decoration half specifically, since those are no longer the same claim.
+- **`/packs/`** — added a standing callout: updating the LegendQuest jar does not update an
+  installed pack, because pack content lives entirely in the pack ZIP. Written as a general rule
+  rather than "as of 2.2.0", since child pages stay version-agnostic — but it exists because this is
+  the first release where pack *content* (not just the mod) changed since 2.0.0, so "just grab the
+  jar" habits would have left every pack server's classes without titles.
+- **`/commands/`** — `/lq class choose` and `/lq class sub` rows now say what changing class does to
+  level/health/title/skills, and a callout below the table gives the reassurance the game itself now
+  gives at the moment of the switch: XP is banked per class, nothing is lost, one command goes back.
+- **Not changed:** `/settings/` (no new config settings, still 25 — confirmed via
+  `git diff v2.1.0..v2.2.0 -- LQConfig.java`, empty). No commands added or removed
+  (`LQCommands.java` diff also empty) beyond the wording above. The `displayURL` → sablecraft.co.uk
+  change is metadata the mod carries itself; no site-side action needed for it.
+
+**⚠ `/legendquest-reforged/commands/` is a stale Cloudflare HIT as of this deploy** — verified
+serving the old class-choose row with none of the new reassurance text. `/content/` and `/packs/`
+already refreshed themselves (both were live MISSes that filled with the new content on the
+verification fetch). The hub itself was already flagged stale after 2.1.0 and may still be, depending
+on whether that purge happened — check all three before assuming only `/commands/` needs it.
+
 ### ⚠ Two counts in this file were wrong — corrected below from source
 
 Both were caught by counting off the source as this file instructs, and the site uses the corrected
