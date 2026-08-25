@@ -9,7 +9,11 @@ tasks.named('wrapper', Wrapper).configure {
     distributionType = Wrapper.DistributionType.BIN
 }
 
-version = mod_version
+// The jar carries the Minecraft version it was built against. All three lines share a
+// mod version, and two files both called legendquest-2.2.0.jar are indistinguishable in a
+// mods folder or on a releases page. The mod's own version (in neoforge.mods.toml) stays
+// a plain ${mod_version}.
+version = "${mod_version}+mc${minecraft_version}"
 group = mod_group_id
 
 sourceSets.main.resources {

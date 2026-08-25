@@ -3,7 +3,7 @@ package com.sablednah.legendquest.client;
 import com.sablednah.legendquest.network.NoticePayload;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 
@@ -30,7 +30,7 @@ public final class ClientNotices {
     }
 
     /** Draw the active notice, if any. Call late so nothing paints over it. */
-    public static void draw(GuiGraphics g, Font font) {
+    public static void draw(GuiGraphicsExtractor g, Font font) {
         String text = message;
         if (text == null) return;
         long age = System.currentTimeMillis() - since;
@@ -45,7 +45,7 @@ public final class ClientNotices {
         int gold = (a << 24) | 0xDAA520;
         g.fill(x - 5, y - 4, x + w + 5, y - 3, gold);
         g.fill(x - 5, y + 11, x + w + 5, y + 12, gold);
-        g.drawString(font, text, x, y, (a << 24) | 0xFFFFFF);
+        g.text(font, text, x, y, (a << 24) | 0xFFFFFF);
     }
 
     private ClientNotices() {}

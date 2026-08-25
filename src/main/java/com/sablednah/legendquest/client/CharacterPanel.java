@@ -11,7 +11,7 @@ import com.sablednah.legendquest.network.ChoosePayload;
 import com.sablednah.legendquest.network.LoadoutEditPayload;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
@@ -434,7 +434,7 @@ public final class CharacterPanel {
     @SubscribeEvent
     static void onScreenRender(ScreenEvent.Render.Post event) {
         if (tab == Tab.NONE || !(event.getScreen() instanceof InventoryScreen screen)) return;
-        GuiGraphics g = event.getGuiGraphics();
+        GuiGraphicsExtractor g = event.getGuiGraphics();
         Font font = screen.getMinecraft().font;
         mouseX = event.getMouseX();
         mouseY = event.getMouseY();
@@ -453,7 +453,7 @@ public final class CharacterPanel {
 
         CharacterSummaryPayload s = summary();
         if (s == null) {
-            g.drawString(font, ClientVocab.get("ui.no_data", "No LegendQuest data"), x + 8, y + 8, 0xFF8888AA);
+            g.text(font, ClientVocab.get("ui.no_data", "No LegendQuest data"), x + 8, y + 8, 0xFF8888AA);
             return;
         }
         // The internal tab chips: Stats | Skills | Party.
@@ -483,7 +483,7 @@ public final class CharacterPanel {
             g.fill(bx, by + 11, bx + 14, by + 12, 0xFFDAA520);
             g.fill(bx, by, bx + 1, by + 12, 0xFFDAA520);
             g.fill(bx + 13, by, bx + 14, by + 12, 0xFFDAA520);
-            g.drawString(font, "§6?", bx + 5, by + 2, 0xFFFFFFFF);
+            g.text(font, "§6?", bx + 5, by + 2, 0xFFFFFFFF);
             HOTSPOTS.add(new Hot(bx, by, bx + 14, by + 12, -1, HandbookScreen::open));
             if (hover) {
                 tooltip(g, font, ClientVocab.term("handbook", "Players Handbook"),
@@ -498,8 +498,8 @@ public final class CharacterPanel {
         // to vanish the moment it crossed onto the panel.
         ItemStack carried = screen.getMenu().getCarried();
         if (!carried.isEmpty() && mouseX < screen.getGuiLeft()) {
-            g.renderItem(carried, (int) mouseX - 8, (int) mouseY - 8);
-            g.renderItemDecorations(font, carried, (int) mouseX - 8, (int) mouseY - 8);
+            g.item(carried, (int) mouseX - 8, (int) mouseY - 8);
+            g.itemDecorations(font, carried, (int) mouseX - 8, (int) mouseY - 8);
         }
 
         drawPendingTooltip(g, font); // last, so nothing paints over it
@@ -507,7 +507,7 @@ public final class CharacterPanel {
     }
 
     /** One internal tab chip; returns the next chip's x. */
-    private static int tabChip(GuiGraphics g, Font font, int x0, int y0, String label,
+    private static int tabChip(GuiGraphicsExtractor g, Font font, int x0, int y0, String label,
             Tab target, InventoryScreen screen) {
         int w = font.width("§l" + label) + 8;
         boolean active = tab == target;
@@ -519,7 +519,7 @@ public final class CharacterPanel {
         g.fill(x0, y0, x0 + 1, y0 + 12, border);
         g.fill(x0 + w - 1, y0, x0 + w, y0 + 12, border);
         String drawn = (active ? "§6§l" : hover ? "§e" : "§7") + label;
-        g.drawString(font, drawn, x0 + (w - font.width(drawn)) / 2, y0 + 2, 0xFFFFFFFF);
+        g.text(font, drawn, x0 + (w - font.width(drawn)) / 2, y0 + 2, 0xFFFFFFFF);
         if (!active) {
             HOTSPOTS.add(new Hot(x0, y0, x0 + w, y0 + 12, -1, () -> {
                 tab = target;
@@ -530,14 +530,14 @@ public final class CharacterPanel {
     }
 
     /** The party tab: who you run with, and the buttons to change that. */
-    private static void renderPartyTab(GuiGraphics g, Font font,
+    private static void renderPartyTab(GuiGraphicsExtractor g, Font font,
             CharacterSummaryPayload s, int x, int y) {
         int tx = x + 8;
         int ty = y + 8;
 
         // Standing invitation first — it's the thing you'd want to see.
         if (!s.partyInvite().isEmpty()) {
-            g.drawString(font, "§6" + ClientVocab.get("ui.invited_to", "Invited to") + " §l" + trim(font, s.partyInvite(), 90), tx, ty, 0xFFFFFFFF);
+            g.text(font, "§6" + ClientVocab.get("ui.invited_to", "Invited to") + " §l" + trim(font, s.partyInvite(), 90), tx, ty, 0xFFFFFFFF);
             ty += 12;
             String acceptLbl = ClientVocab.get("ui.accept", "Accept");
             int aw = font.width("§l" + acceptLbl) + 10;
@@ -554,7 +554,7 @@ public final class CharacterPanel {
             g.fill(dx, ty, dx + dw, ty + 1, 0xFFAA5538);
             g.fill(dx, ty + 12, dx + dw, ty + 13, 0xFF201008);
             String dDrawn = (dHover ? "§f§l" : "§c") + declineLbl;
-            g.drawString(font, dDrawn, dx + (dw - font.width(dDrawn)) / 2, ty + 3, 0xFFFFFFFF);
+            g.text(font, dDrawn, dx + (dw - font.width(dDrawn)) / 2, ty + 3, 0xFFFFFFFF);
             HOTSPOTS.add(new Hot(dx, ty, dx + dw, ty + 13, 0, () -> send(
                     new com.sablednah.legendquest.network.PartyActionPayload(
                             com.sablednah.legendquest.network.PartyActionPayload.DECLINE, ""))));
@@ -562,7 +562,7 @@ public final class CharacterPanel {
         }
 
         if (s.partyName().isEmpty()) {
-            g.drawString(font, "§7" + ClientVocab.get("ui.no_party", "No party."), tx, ty, 0xFFFFFFFF);
+            g.text(font, "§7" + ClientVocab.get("ui.no_party", "No party."), tx, ty, 0xFFFFFFFF);
             ty += 14;
             String createLbl = ClientVocab.get("ui.create_party", "Create party");
             int cw = font.width("§l" + createLbl) + 10;
@@ -580,24 +580,24 @@ public final class CharacterPanel {
             g.fill(nx, ty, nx + nw, ty + 1, nHover ? 0xFFDAA520 : 0xFF44445A);
             g.fill(nx, ty + 12, nx + nw, ty + 13, 0xFF14100C);
             String nDrawn = (nHover ? "§e§l" : "§7") + nameLbl;
-            g.drawString(font, nDrawn, nx + (nw - font.width(nDrawn)) / 2, ty + 3, 0xFFFFFFFF);
+            g.text(font, nDrawn, nx + (nw - font.width(nDrawn)) / 2, ty + 3, 0xFFFFFFFF);
             HOTSPOTS.add(new Hot(nx, ty, nx + nw, ty + 13, 0, () ->
                     net.minecraft.client.Minecraft.getInstance().setScreen(
                             new net.minecraft.client.gui.screens.ChatScreen("/party create ", false))));
             ty += 18;
-            g.drawString(font, "§8" + ClientVocab.get("ui.party_pitch_1", "Shared XP, no friendly fire,"), tx, ty, 0xFFFFFFFF);
-            g.drawString(font, "§8" + ClientVocab.get("ui.party_pitch_2", "and /party tp to regroup."), tx, ty + 10, 0xFFFFFFFF);
+            g.text(font, "§8" + ClientVocab.get("ui.party_pitch_1", "Shared XP, no friendly fire,"), tx, ty, 0xFFFFFFFF);
+            g.text(font, "§8" + ClientVocab.get("ui.party_pitch_2", "and /party tp to regroup."), tx, ty + 10, 0xFFFFFFFF);
             return;
         }
 
         String shownName = "§6§l" + trim(font, s.partyName(), PANEL_WIDTH - 36);
-        g.drawString(font, shownName, tx, ty, 0xFFFFFFFF);
+        g.text(font, shownName, tx, ty, 0xFFFFFFFF);
         // The leader gets a rename pencil (chat handoff, like Name it…).
         boolean amLeader = s.partyMembers().stream().anyMatch(m -> m.self() && m.leader());
         if (amLeader) {
             int px = tx + font.width(shownName) + 6;
             boolean pHover = mouseX >= px - 1 && mouseX < px + 10 && mouseY >= ty - 1 && mouseY < ty + 10;
-            g.drawString(font, (pHover ? "§e" : "§8") + "✎", px, ty, 0xFFFFFFFF);
+            g.text(font, (pHover ? "§e" : "§8") + "✎", px, ty, 0xFFFFFFFF);
             HOTSPOTS.add(new Hot(px - 1, ty - 1, px + 10, ty + 10, 0, () ->
                     net.minecraft.client.Minecraft.getInstance().setScreen(
                             new net.minecraft.client.gui.screens.ChatScreen("/party rename ", false))));
@@ -609,7 +609,7 @@ public final class CharacterPanel {
                     + (member.leader() ? " §6★" : "")
                     + (member.self() ? " §7" + ClientVocab.get("ui.you", "(you)") : "")
                     + (member.online() ? "" : " §8" + ClientVocab.get("ui.offline", "(offline)"));
-            g.drawString(font, trim(font, line, PANEL_WIDTH - 20), tx, ty, 0xFFFFFFFF);
+            g.text(font, trim(font, line, PANEL_WIDTH - 20), tx, ty, 0xFFFFFFFF);
             ty += 11;
         }
         ty += 6;
@@ -629,7 +629,7 @@ public final class CharacterPanel {
         g.fill(lx, ty, lx + lw, ty + 1, 0xFFAA5538);
         g.fill(lx, ty + 12, lx + lw, ty + 13, 0xFF201008);
         String lDrawn = (lHover ? "§f§l" : "§c") + leaveLbl;
-        g.drawString(font, lDrawn, lx + (lw - font.width(lDrawn)) / 2, ty + 3, 0xFFFFFFFF);
+        g.text(font, lDrawn, lx + (lw - font.width(lDrawn)) / 2, ty + 3, 0xFFFFFFFF);
         HOTSPOTS.add(new Hot(lx, ty, lx + lw, ty + 13, 0, () -> send(
                 new com.sablednah.legendquest.network.PartyActionPayload(
                         com.sablednah.legendquest.network.PartyActionPayload.LEAVE, ""))));
@@ -637,13 +637,13 @@ public final class CharacterPanel {
 
         // Leader's invite list: online, un-partied souls one click away.
         if (!s.partyInvitable().isEmpty()) {
-            g.drawString(font, "§6" + ClientVocab.get("ui.invite", "Invite:"), tx, ty, 0xFFFFFFFF);
+            g.text(font, "§6" + ClientVocab.get("ui.invite", "Invite:"), tx, ty, 0xFFFFFFFF);
             ty += 13;
             for (String name : s.partyInvitable()) {
                 boolean hover = mouseX >= tx && mouseX < tx + PANEL_WIDTH - 16
                         && mouseY >= ty - 1 && mouseY < ty + 10;
                 if (hover) g.fill(tx - 2, ty - 1, tx + PANEL_WIDTH - 14, ty + 10, 0x30FFFFFF);
-                g.drawString(font, (hover ? "§e" : "§a") + "▸ " + name, tx, ty, 0xFFFFFFFF);
+                g.text(font, (hover ? "§e" : "§a") + "▸ " + name, tx, ty, 0xFFFFFFFF);
                 String invitee = name;
                 HOTSPOTS.add(new Hot(tx - 2, ty - 1, tx + PANEL_WIDTH - 14, ty + 10, 0,
                         () -> send(new com.sablednah.legendquest.network.PartyActionPayload(
@@ -654,7 +654,7 @@ public final class CharacterPanel {
     }
 
     /** A proper little button: filled, framed, bevelled — not text in brackets. */
-    static void buyButton(GuiGraphics g, Font font, int x0, int y0, int w, int h,
+    static void buyButton(GuiGraphicsExtractor g, Font font, int x0, int y0, int w, int h,
             String label, boolean hover) {
         g.fill(x0, y0, x0 + w, y0 + h, hover ? 0xFF2E4A1E : 0xFF223A18);
         g.fill(x0, y0, x0 + w, y0 + 1, hover ? 0xFF8CD05A : 0xFF5A9038);   // top bevel
@@ -662,7 +662,7 @@ public final class CharacterPanel {
         g.fill(x0, y0, x0 + 1, y0 + h, hover ? 0xFF8CD05A : 0xFF5A9038);
         g.fill(x0 + w - 1, y0, x0 + w, y0 + h, 0xFF12200C);
         String drawn = (hover ? "§f§l" : "§a") + label;
-        g.drawString(font, drawn, x0 + (w - font.width(drawn)) / 2, y0 + (h - 8) / 2 + 1, 0xFFFFFFFF);
+        g.text(font, drawn, x0 + (w - font.width(drawn)) / 2, y0 + (h - 8) / 2 + 1, 0xFFFFFFFF);
     }
 
     /** Open the handbook at the entry whose display name matches. */
@@ -683,7 +683,7 @@ public final class CharacterPanel {
         HandbookScreen.open(section, null);
     }
 
-    private static void renderStatsTab(GuiGraphics g, Font font, InventoryScreen screen,
+    private static void renderStatsTab(GuiGraphicsExtractor g, Font font, InventoryScreen screen,
             CharacterSummaryPayload s, int x, int y) {
         int tx = x + 8;
         int ty = y + 8;
@@ -698,8 +698,8 @@ public final class CharacterPanel {
                 && mouseY >= ty - 1 && mouseY < ty + 10;
         String raceName = s.raceName();
         String className = s.mainClassName();
-        g.drawString(font, raceHover ? "§e§l§n" + raceName : raceText, tx, ty, 0xFFFFFFFF);
-        g.drawString(font, classHover ? "§e§l§n" + s.mainClassName()
+        g.text(font, raceHover ? "§e§l§n" + raceName : raceText, tx, ty, 0xFFFFFFFF);
+        g.text(font, classHover ? "§e§l§n" + s.mainClassName()
                 + (s.subClassName().isEmpty() ? "" : "/" + s.subClassName()) : classText,
                 tx + raceW + 4, ty, 0xFFFFFFFF);
         if (ClientHandbook.get() != null) {
@@ -711,7 +711,7 @@ public final class CharacterPanel {
             if (classHover) tooltip(g, font, className, "§7" + ClientVocab.get("ui.open_in_handbook", "Open in the Players Handbook"));
         }
         ty += 12;
-        g.drawString(font, "§7" + ClientVocab.term("level", "Level") + " §f" + s.level() + "  §7" + ClientVocab.term("karma", "Karma") + " §f" + s.karmaName(),
+        g.text(font, "§7" + ClientVocab.term("level", "Level") + " §f" + s.level() + "  §7" + ClientVocab.term("karma", "Karma") + " §f" + s.karmaName(),
                 tx, ty, 0xFFFFFFFF);
         ty += 12;
 
@@ -721,7 +721,7 @@ public final class CharacterPanel {
         g.fill(tx, ty, tx + barW, ty + 8, 0xFF16163A);
         g.fill(tx, ty, tx + filled, ty + 8, 0xFF3355FF);
         String manaText = (int) s.mana() + "/" + (int) s.maxMana();
-        g.drawString(font, manaText, tx + (barW - font.width(manaText)) / 2, ty, 0xFFBBCCFF);
+        g.text(font, manaText, tx + (barW - font.width(manaText)) / 2, ty, 0xFFBBCCFF);
         ty += 12;
 
         // Stats: two roomy columns, three rows.
@@ -731,17 +731,17 @@ public final class CharacterPanel {
             int mod = (score / 2) - 5;
             String text = "§7" + names[n] + " §f" + score
                     + " §8(" + (mod >= 0 ? "+" : "") + mod + ")";
-            g.drawString(font, text, tx + (n % 2) * 66, ty + (n / 2) * 11, 0xFFFFFFFF);
+            g.text(font, text, tx + (n % 2) * 66, ty + (n / 2) * 11, 0xFFFFFFFF);
         }
         ty += 35;
-        g.drawString(font, "§7" + ClientVocab.term("skill_points", "Skill points") + " §f" + (s.spTotal() - s.spSpent()) + "§7/§f" + s.spTotal(),
+        g.text(font, "§7" + ClientVocab.term("skill_points", "Skill points") + " §f" + (s.spTotal() - s.spSpent()) + "§7/§f" + s.spTotal(),
                 tx, ty, 0xFFFFFFFF);
         ty += 12;
 
         // Stat boost chips: a +1 wherever it hurts least, at a stinging price.
         // Label and chips on separate lines — six chips never fit beside it.
         if (boostRowShown(s)) {
-            g.drawString(font, "§7" + ClientVocab.get("ui.boost_a_stat", "Boost a stat") + " §8(" + s.statBoostCost() + ClientVocab.get("ui.sp_short", "sp") + "):", tx, ty, 0xFFFFFFFF);
+            g.text(font, "§7" + ClientVocab.get("ui.boost_a_stat", "Boost a stat") + " §8(" + s.statBoostCost() + ClientVocab.get("ui.sp_short", "sp") + "):", tx, ty, 0xFFFFFFFF);
             ty += 11;
             int bx = tx + 4;
             String[] keys = {"str", "dex", "con", "int", "wis", "chr"};
@@ -770,7 +770,7 @@ public final class CharacterPanel {
             ty += 13;
         }
 
-        g.drawString(font, "§8" + ClientVocab.get("ui.skills_live_hint", "Skills live on the ✦ tab"), tx, ty, 0xFFFFFFFF);
+        g.text(font, "§8" + ClientVocab.get("ui.skills_live_hint", "Skills live on the ✦ tab"), tx, ty, 0xFFFFFFFF);
         ty += 12;
 
         // Race/class pickers, while those choices are open.
@@ -778,17 +778,17 @@ public final class CharacterPanel {
         renderPicker(g, font, s.classChoices(), false, tx, ty);
     }
 
-    private static int renderPicker(GuiGraphics g, Font font,
+    private static int renderPicker(GuiGraphicsExtractor g, Font font,
             List<CharacterSummaryPayload.PickEntry> choices, boolean race, int tx, int ty) {
         if (choices.isEmpty()) return ty;
-        g.drawString(font, "§6§l" + (race ? ClientVocab.get("ui.choose_your_race", "Choose your race:") : ClientVocab.get("ui.choose_your_class", "Choose your class:")), tx, ty, 0xFFFFFFFF);
+        g.text(font, "§6§l" + (race ? ClientVocab.get("ui.choose_your_race", "Choose your race:") : ClientVocab.get("ui.choose_your_class", "Choose your class:")), tx, ty, 0xFFFFFFFF);
         ty += 13;
         for (CharacterSummaryPayload.PickEntry entry : choices) {
             boolean hover = mouseX >= tx && mouseX < tx + PANEL_WIDTH - 16
                     && mouseY >= ty - 1 && mouseY < ty + 10;
             if (hover) g.fill(tx - 2, ty - 1, tx + PANEL_WIDTH - 14, ty + 10, 0x30FFFFFF);
             String colour = !entry.available() ? "§8" : hover ? "§e" : "§a";
-            g.drawString(font, colour + "▸ " + entry.name()
+            g.text(font, colour + "▸ " + entry.name()
                     + (entry.available() ? "" : " §8" + ClientVocab.get("ui.locked", "[locked]")), tx, ty, 0xFFFFFFFF);
             HOTSPOTS.add(new Hot(tx - 2, ty - 1, tx + PANEL_WIDTH - 14, ty + 10, 1,
                     () -> HandbookScreen.open(race ? "race" : "class", entry.id())));
@@ -804,10 +804,10 @@ public final class CharacterPanel {
         return ty + 4;
     }
 
-    private static void renderSkillsTab(GuiGraphics g, Font font, InventoryScreen screen,
+    private static void renderSkillsTab(GuiGraphicsExtractor g, Font font, InventoryScreen screen,
             CharacterSummaryPayload s, int x, int y) {
         int tx = x + 8;
-        g.drawString(font, "§6§l" + ClientVocab.term("loadout", "Loadout"), tx, y + 8, 0xFFFFFFFF);
+        g.text(font, "§6§l" + ClientVocab.term("loadout", "Loadout"), tx, y + 8, 0xFFFFFFFF);
 
         // The slot strip.
         int sy = slotsY(screen);
@@ -826,10 +826,10 @@ public final class CharacterPanel {
                 var entry = findSkill(s, id);
                 boolean beingDragged = drag != null && drag.fromSlot() == i;
                 if (!beingDragged) {
-                    g.renderItem(icon(entry != null ? entry.icon() : ""), sx + 2, sy + 2);
+                    g.item(icon(entry != null ? entry.icon() : ""), sx + 2, sy + 2);
                     if (entry != null && !entry.owned()) {
                         g.fill(sx + 1, sy + 1, sx + SLOT_SIZE - 1, sy + SLOT_SIZE - 1, 0xB8101018);
-                        g.drawString(font, "§8✖", sx + (SLOT_SIZE - font.width("✖")) / 2, sy + 6, 0xFFFFFFFF);
+                        g.text(font, "§8✖", sx + (SLOT_SIZE - font.width("✖")) / 2, sy + 6, 0xFFFFFFFF);
                     } else if (entry != null && entry.activeForSec() > 0 && entry.durationSec() > 0) {
                         float frac = Math.min(1.0F, entry.activeForSec() / (float) entry.durationSec());
                         g.fill(sx + 2, sy + SLOT_SIZE - 4, sx + SLOT_SIZE - 2, sy + SLOT_SIZE - 2, 0x80000000);
@@ -838,7 +838,7 @@ public final class CharacterPanel {
                     } else if (entry != null && entry.readyInSec() > 0) {
                         g.fill(sx + 1, sy + 1, sx + SLOT_SIZE - 1, sy + SLOT_SIZE - 1, 0x90000000);
                         String secs = LQHud.cooldownText(entry.readyInSec());
-                        g.drawString(font, secs, sx + (SLOT_SIZE - font.width(secs)) / 2, sy + 6, 0xFFFF5555);
+                        g.text(font, secs, sx + (SLOT_SIZE - font.width(secs)) / 2, sy + 6, 0xFFFF5555);
                     }
                 }
                 boolean hover = mouseX >= sx && mouseX < sx + SLOT_SIZE
@@ -866,9 +866,9 @@ public final class CharacterPanel {
         g.fill(bx, sy, bx + 1, sy + SLOT_SIZE, bBorder);
         g.fill(bx + SLOT_SIZE - 1, sy, bx + SLOT_SIZE, sy + SLOT_SIZE, bBorder);
         if (bookSet) {
-            g.renderItem(icon(s.loadoutItem()), bx + 2, sy + 2);
+            g.item(icon(s.loadoutItem()), bx + 2, sy + 2);
         } else {
-            g.drawString(font, "?", bx + 8, sy + 6, 0xFF9060C0);
+            g.text(font, "?", bx + 8, sy + 6, 0xFF9060C0);
         }
         boolean bookHover = mouseX >= bx && mouseX < bx + SLOT_SIZE
                 && mouseY >= sy && mouseY < sy + SLOT_SIZE;
@@ -886,7 +886,7 @@ public final class CharacterPanel {
         String book = bookSet
                 ? "§7" + ClientVocab.get("ui.spellbook_label", "Spellbook") + ": §f" + itemName(s.loadoutItem())
                 : "§8" + ClientVocab.get("ui.no_spellbook", "No spellbook — drop an item on the ? slot");
-        g.drawString(font, trim(font, book, PANEL_WIDTH - 16), tx, hy, 0xFFFFFFFF);
+        g.text(font, trim(font, book, PANEL_WIDTH - 16), tx, hy, 0xFFFFFFFF);
 
         g.fill(x + 4, hy + 12, x + PANEL_WIDTH - 4, hy + 13, 0xFF44445A);
 
@@ -900,7 +900,7 @@ public final class CharacterPanel {
             boolean inLoadout = s.loadout().contains(skill.id());
             if (hover) g.fill(x + 4, ry, x + PANEL_WIDTH - 4, ry + ROW_HEIGHT, 0x28FFFFFF);
 
-            g.renderItem(icon(skill.icon()), tx, ry + 1);
+            g.item(icon(skill.icon()), tx, ry + 1);
             if (!skill.owned()) {
                 g.fill(tx, ry + 1, tx + 16, ry + 17, 0xA0101018); // greyed-out icon
             }
@@ -927,7 +927,7 @@ public final class CharacterPanel {
                     && (s.spTotal() - s.spSpent()) >= skill.cost();
             // Text never runs under the button: reserve its width up front.
             int reserved = buyable ? font.width("§l" + ClientVocab.get("ui.buy", "Buy") + " " + skill.cost()) + 18 : 10;
-            g.drawString(font, trim(font, line, PANEL_WIDTH - 24 - reserved), tx + 20, ry + 5, 0xFFFFFFFF);
+            g.text(font, trim(font, line, PANEL_WIDTH - 24 - reserved), tx + 20, ry + 5, 0xFFFFFFFF);
             if (buyable) {
                 String chip = ClientVocab.get("ui.buy", "Buy") + " " + skill.cost();
                 int cw = font.width("§l" + chip) + 8;
@@ -954,7 +954,7 @@ public final class CharacterPanel {
         if (drag != null) {
             var entry = findSkill(s, drag.skillId());
             if (entry != null) {
-                g.renderItem(icon(entry.icon()), (int) mouseX - 8, (int) mouseY - 8);
+                g.item(icon(entry.icon()), (int) mouseX - 8, (int) mouseY - 8);
             }
         }
     }
@@ -993,11 +993,11 @@ public final class CharacterPanel {
      */
     private static String[] pendingTooltip;
 
-    private static void tooltip(GuiGraphics g, Font font, String title, String body) {
+    private static void tooltip(GuiGraphicsExtractor g, Font font, String title, String body) {
         pendingTooltip = new String[] {title, body};
     }
 
-    private static void drawPendingTooltip(GuiGraphics g, Font font) {
+    private static void drawPendingTooltip(GuiGraphicsExtractor g, Font font) {
         if (pendingTooltip == null) return;
         String title = pendingTooltip[0];
         String body = pendingTooltip[1];
@@ -1024,7 +1024,7 @@ public final class CharacterPanel {
         g.fill(x + w + 2, y - 3, x + w + 3, y + h - 1, 0xFFDAA520);
         int ty = y;
         for (FormattedCharSequence line : lines) {
-            g.drawString(font, line, x, ty, 0xFFFFFFFF);
+            g.text(font, line, x, ty, 0xFFFFFFFF);
             ty += 10;
         }
     }

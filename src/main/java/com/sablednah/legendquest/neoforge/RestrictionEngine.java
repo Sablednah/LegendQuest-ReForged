@@ -57,7 +57,7 @@ public final class RestrictionEngine {
         // Not on the proficiency list = not a skill item = free for everyone.
         if (slot == ItemRules.Slot.WEAPON && !stack.is(PROFICIENCY_WEAPONS)) return true;
         if (slot == ItemRules.Slot.TOOL && !stack.is(PROFICIENCY_TOOLS)) return true;
-        Holder<Item> item = stack.getItemHolder();
+        Holder<Item> item = stack.typeHolder();
 
         List<ItemRules> sources = new ArrayList<>(4);
         CharacterService.race(player).ifPresent(r -> sources.add(r.itemRules()));

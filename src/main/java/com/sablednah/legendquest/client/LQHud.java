@@ -4,7 +4,7 @@ import com.sablednah.legendquest.network.CharacterSummaryPayload;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
 
@@ -40,7 +40,7 @@ public final class LQHud {
         if (s == null || mc.player == null || mc.options.hideGui || mc.screen != null) return;
         if (mc.getDebugOverlay().showDebugScreen()) return;
 
-        GuiGraphics g = event.getGuiGraphics();
+        GuiGraphicsExtractor g = event.getGuiGraphics();
         Font font = mc.font;
 
         // Loadout strip, bottom-RIGHT (the left corner belongs to chat).
@@ -60,12 +60,12 @@ public final class LQHud {
 
                 var entry = find(s, s.loadout().get(i));
                 if (entry != null) {
-                    g.renderItem(icon(entry.icon()), cx + 4, y + 4);
+                    g.item(icon(entry.icon()), cx + 4, y + 4);
                     if (!entry.owned()) {
                         // Suspended (karma out of band, level lost): asleep,
                         // greyed, and the cycle skips it server-side too.
                         g.fill(cx + 1, y + 1, cx + CHIP - 1, y + CHIP - 1, 0xB8101018);
-                        g.drawString(font, "§8✖", cx + (CHIP - font.width("✖")) / 2, y + 8, 0xFFFFFFFF);
+                        g.text(font, "§8✖", cx + (CHIP - font.width("✖")) / 2, y + 8, 0xFFFFFFFF);
                     } else if (entry.activeForSec() > 0 && entry.durationSec() > 0) {
                         // Running skill: a shrinking bar along the chip's foot.
                         float frac = Math.min(1.0F, entry.activeForSec() / (float) entry.durationSec());
@@ -75,7 +75,7 @@ public final class LQHud {
                     } else if (entry.readyInSec() > 0) {
                         g.fill(cx + 1, y + 1, cx + CHIP - 1, y + CHIP - 1, 0xA0000000);
                         String secs = cooldownText(entry.readyInSec());
-                        g.drawString(font, secs, cx + (CHIP - font.width(secs)) / 2, y + 8, 0xFFFF5555);
+                        g.text(font, secs, cx + (CHIP - font.width(secs)) / 2, y + 8, 0xFFFF5555);
                     }
                 }
             }
@@ -84,7 +84,7 @@ public final class LQHud {
             if (selected != null) {
                 String name = selected.owned() ? "§6" + selected.name()
                         : "§8§m" + selected.name();
-                g.drawString(font, name, g.guiWidth() - MARGIN - font.width(name), y - 10, 0xFFFFFFFF);
+                g.text(font, name, g.guiWidth() - MARGIN - font.width(name), y - 10, 0xFFFFFFFF);
             }
         }
 
@@ -99,8 +99,8 @@ public final class LQHud {
             g.fill(x, manaY, x + BAR_WIDTH, manaY + 7, 0xFF16163A);
             g.fill(x, manaY, x + filled, manaY + 7, 0xFF3355FF);
             String text = (int) s.mana() + "/" + (int) s.maxMana();
-            g.drawString(font, text, x + (BAR_WIDTH - font.width(text)) / 2, manaY, 0xFFBBCCFF);
-            g.drawString(font, "§7L" + s.level(), x + BAR_WIDTH + 5, manaY, 0xFFFFFFFF);
+            g.text(font, text, x + (BAR_WIDTH - font.width(text)) / 2, manaY, 0xFFBBCCFF);
+            g.text(font, "§7L" + s.level(), x + BAR_WIDTH + 5, manaY, 0xFFFFFFFF);
         } else {
             g.fill(x - 1, xpY - 1, x + BAR_WIDTH + 1, xpY + 4, 0x90000000);
         }

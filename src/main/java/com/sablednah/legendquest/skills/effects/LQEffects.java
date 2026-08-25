@@ -275,9 +275,9 @@ public final class LQEffects {
             for (int n = 0; n < count; n++) {
                 var spawned = entity.create(ctx.level(), EntitySpawnReason.MOB_SUMMONED);
                 if (spawned == null) return;
-                spawned.snapTo(pos.getX() + 0.5D + (ctx.level().random.nextDouble() - 0.5D),
-                        pos.getY(), pos.getZ() + 0.5D + (ctx.level().random.nextDouble() - 0.5D),
-                        ctx.level().random.nextFloat() * 360.0F, 0.0F);
+                spawned.snapTo(pos.getX() + 0.5D + (ctx.level().getRandom().nextDouble() - 0.5D),
+                        pos.getY(), pos.getZ() + 0.5D + (ctx.level().getRandom().nextDouble() - 0.5D),
+                        ctx.level().getRandom().nextFloat() * 360.0F, 0.0F);
                 if (spawned instanceof Mob mob) {
                     EventHooks.finalizeMobSpawn(mob, ctx.level(),
                             ctx.level().getCurrentDifficultyAt(pos), EntitySpawnReason.MOB_SUMMONED, null);
@@ -304,7 +304,8 @@ public final class LQEffects {
 
         @Override
         public void apply(SkillContext ctx) {
-            ctx.caster().displayClientMessage(Component.literal(text.replace('&', '§')), actionBar);
+            net.minecraft.network.chat.Component line = Component.literal(text.replace('&', '§'));
+            if (actionBar) ctx.caster().sendOverlayMessage(line); else ctx.caster().sendSystemMessage(line);
         }
     }
 

@@ -136,7 +136,7 @@ public final class Nameplate {
             for (Entity entity : level.getEntities(
                     EntityTypeTest.forClass(Display.TextDisplay.class),
                     player.getBoundingBox().inflate(8.0D),
-                    e -> e.getTags().contains(TAG))) {
+                    e -> e.entityTags().contains(TAG))) {
                 entity.discard();
             }
         }
