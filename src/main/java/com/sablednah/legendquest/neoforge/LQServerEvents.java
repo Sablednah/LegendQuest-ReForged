@@ -295,7 +295,7 @@ public final class LQServerEvents {
      * reason.</p>
      */
     @SubscribeEvent
-    static void onBlockMined(net.neoforged.neoforge.event.level.BlockEvent.BreakEvent event) {
+    static void onBlockMined(net.neoforged.neoforge.event.level.block.BreakBlockEvent event) {
         if (!(event.getPlayer() instanceof ServerPlayer player)) return;
         if (player.isCreative() || player.isSpectator()) return;
 
@@ -621,7 +621,7 @@ public final class LQServerEvents {
     }
 
     @SubscribeEvent
-    static void onBlockBreak(net.neoforged.neoforge.event.level.BlockEvent.BreakEvent event) {
+    static void onBlockBreak(net.neoforged.neoforge.event.level.block.BreakBlockEvent event) {
         if (!(event.getPlayer() instanceof ServerPlayer player)) return;
         if (!arcaneConduitDig(player, event.getState())) return;
         double cost = CharacterService.totalBoon(player, b -> b.goldToolMana());

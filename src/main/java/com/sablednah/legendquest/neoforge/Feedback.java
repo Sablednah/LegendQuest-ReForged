@@ -10,11 +10,11 @@ import net.minecraft.server.level.ServerPlayer;
 public final class Feedback {
 
     public static void actionBar(ServerPlayer player, String text) {
-        player.displayClientMessage(colored(text), true);
+        player.sendOverlayMessage(colored(text));
     }
 
     public static void chat(ServerPlayer player, String text) {
-        player.displayClientMessage(colored(text), false);
+        player.sendSystemMessage(colored(text));
     }
 
     /**

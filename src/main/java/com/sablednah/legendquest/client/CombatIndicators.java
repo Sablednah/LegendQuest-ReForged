@@ -8,8 +8,12 @@ import com.sablednah.legendquest.network.CombatIndicatorPayload;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.ActiveTextCollector;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.TextAlignment;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
@@ -86,11 +90,19 @@ public final class CombatIndicators {
         long now = System.currentTimeMillis();
         Camera camera = mc.gameRenderer.getMainCamera();
         Vec3 camPos = camera.position();
-        Quaternionf viewRotation = camera.rotation().conjugate(new Quaternionf());
-        Matrix4f projView = mc.gameRenderer.getProjectionMatrix(mc.options.fov().get())
-                .mul(new Matrix4f().rotation(viewRotation), new Matrix4f());
+        // 26.1 dropped GameRenderer.getProjectionMatrix(fov) and put the
+        // combined view-rotation-and-projection matrix on the Camera instead,
+        // which is what vanilla's own projectPointToScreen now uses. Building
+        // it by hand from the fov option is no longer possible, and no longer
+        // necessary.
+        //
+        // Deliberately NOT switching to projectPointToScreen itself: it returns
+        // projected coordinates with no way to tell that a point was behind the
+        // camera, and the w <= 0.05 test below is what stops damage numbers
+        // from things behind you being drawn mirrored across the screen.
+        Matrix4f projView = camera.getViewRotationProjectionMatrix(new Matrix4f());
 
-        GuiGraphics g = event.getGuiGraphics();
+        GuiGraphicsExtractor g = event.getGuiGraphics();
         Font font = mc.font;
         int screenW = g.guiWidth();
         int screenH = g.guiHeight();
@@ -119,15 +131,28 @@ public final class CombatIndicators {
             sy -= rise * DRIFT_PX;
             // Opaque for the first 40% of life, then fade to nothing.
             float alpha = age < 0.4F ? 1.0F : 1.0F - (age - 0.4F) / 0.6F;
-            int a = Math.max(8, Math.round(alpha * 255));
-            int color = (a << 24) | (f.color() & 0x00FFFFFF);
 
-            g.pose().pushMatrix();
-            g.pose().translate(sx, sy);
-            g.pose().scale(f.scale(), f.scale());
-            String text = f.scale() > 1.0F ? "§l" + f.text() : f.text();
-            g.drawString(font, text, -font.width(text) / 2, -4, color);
-            g.pose().popMatrix();
+            // 26.1 removed the GUI transform stack, so a crit's larger number
+            // cannot be drawn by pushing a scaled pose around an ordinary text
+            // call. Scale lives on the text renderer's parameters instead, and
+            // opacity comes with it -- which is actually better than packing
+            // alpha into the colour's high byte the way the pose version did.
+            //
+            // The catch is that the scale transforms the coordinate space, so
+            // the anchor has to be divided by it: at 2x, screen x 400 is anchor
+            // 200. Vanilla's DeathScreen does exactly this with its title.
+            float scale = f.scale();
+            ActiveTextCollector text = g.textRenderer();
+            ActiveTextCollector.Parameters normal = text.defaultParameters();
+            text.defaultParameters(normal.withScale(scale).withOpacity(alpha));
+            MutableComponent line = Component.literal(f.text())
+                    .withStyle(style -> style.withColor(f.color() & 0x00FFFFFF)
+                            .withBold(scale > 1.0F));
+            // TextAlignment.CENTER earns its keep here: the pose version had to
+            // subtract half the measured string width by hand.
+            text.accept(TextAlignment.CENTER, Math.round(sx / scale),
+                    Math.round((sy - 4.0F) / scale), line);
+            text.defaultParameters(normal);
         }
     }
 

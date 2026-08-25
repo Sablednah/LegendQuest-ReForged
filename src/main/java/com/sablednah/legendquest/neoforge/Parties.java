@@ -43,7 +43,8 @@ public final class Parties extends SavedData {
             .fieldOf("parties").codec();
 
     public static final SavedDataType<Parties> TYPE =
-            new SavedDataType<>("legendquest_parties", Parties::new, CODEC, null);
+            new SavedDataType<>(net.minecraft.resources.Identifier.fromNamespaceAndPath(
+                    com.sablednah.legendquest.LegendQuest.MODID, "parties"), Parties::new, CODEC, null);
 
     /** Lowercased party name → party. */
     private final Map<String, Party> parties;

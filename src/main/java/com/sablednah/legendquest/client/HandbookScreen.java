@@ -11,7 +11,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.sablednah.legendquest.network.HandbookPayload;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.gui.screens.Screen;
@@ -188,8 +188,8 @@ public final class HandbookScreen extends Screen {
     // --- rendering ---
 
     @Override
-    public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
-        super.render(g, mouseX, mouseY, partialTick); // dimmed background
+    public void extractRenderState(GuiGraphicsExtractor g, int mouseX, int mouseY, float partialTick) {
+        super.extractRenderState(g, mouseX, mouseY, partialTick); // dimmed background
         hotspots.clear();
 
         int x = bookX();
@@ -202,18 +202,18 @@ public final class HandbookScreen extends Screen {
         frame(g, x - 2, y - 2, x + bw + 2, y + h + 2, BRONZE, 2);
         frame(g, x + 2, y + 2, x + bw - 2, y + h - 2, GOLD_DIM, 1);
         // Corner stars, because every proper grimoire has them.
-        g.drawString(font, "§6✦", x + 4, y + 4, 0xFFFFFFFF);
-        g.drawString(font, "§6✦", x + bw - 12, y + 4, 0xFFFFFFFF);
-        g.drawString(font, "§6✦", x + 4, y + h - 13, 0xFFFFFFFF);
-        g.drawString(font, "§6✦", x + bw - 12, y + h - 13, 0xFFFFFFFF);
+        g.text(font, "§6✦", x + 4, y + 4, 0xFFFFFFFF);
+        g.text(font, "§6✦", x + bw - 12, y + 4, 0xFFFFFFFF);
+        g.text(font, "§6✦", x + 4, y + h - 13, 0xFFFFFFFF);
+        g.text(font, "§6✦", x + bw - 12, y + h - 13, 0xFFFFFFFF);
 
         // Title with flourishes.
         String title = "§6§l " + ClientVocab.term("handbook", "Players Handbook") + " ";
         int titleW = font.width(title);
         int titleX = x + (bw - titleW) / 2;
-        g.drawString(font, "§8── ✦ ──", titleX - 42, y + 7, 0xFFFFFFFF);
-        g.drawString(font, title, titleX, y + 6, 0xFFFFFFFF);
-        g.drawString(font, "§8── ✦ ──", titleX + titleW + 2, y + 7, 0xFFFFFFFF);
+        g.text(font, "§8── ✦ ──", titleX - 42, y + 7, 0xFFFFFFFF);
+        g.text(font, title, titleX, y + 6, 0xFFFFFFFF);
+        g.text(font, "§8── ✦ ──", titleX + titleW + 2, y + 7, 0xFFFFFFFF);
 
         // Tabs, back and close — hand-drawn chips, no vanilla grey here.
         int tabY = y + 19;
@@ -229,14 +229,14 @@ public final class HandbookScreen extends Screen {
         // Divider under the header, with a centre ornament.
         int divY = y + HEADER_H - 5;
         g.fill(x + 8, divY, x + bw - 8, divY + 1, INK_DIVIDER);
-        g.drawString(font, "§6❖", x + bw / 2 - 3, divY - 4, 0xFFFFFFFF);
+        g.text(font, "§6❖", x + bw / 2 - 3, divY - 4, 0xFFFFFFFF);
 
         // The feat shop shows your purse, centred in the book's footer.
         if (section.equals("feat")) {
             var summary = ClientCharacterState.summary();
             if (summary != null) {
                 String purse = "§7" + ClientVocab.get("ui.points_to_spend", "Points to spend") + ": §6§l" + (summary.spTotal() - summary.spSpent());
-                g.drawCenteredString(font, purse, x + bw / 2, y + h - 13, 0xFFFFFFFF);
+                g.centeredText(font, purse, x + bw / 2, y + h - 13, 0xFFFFFFFF);
             }
         }
 
@@ -288,7 +288,7 @@ public final class HandbookScreen extends Screen {
         }
 
         if (current == null) {
-            g.drawString(font, "§8" + ClientVocab.get("ui.nothing_here", "Nothing here yet."), paneX(), paneY(), 0xFFFFFFFF);
+            g.text(font, "§8" + ClientVocab.get("ui.nothing_here", "Nothing here yet."), paneX(), paneY(), 0xFFFFFFFF);
             return;
         }
 
@@ -301,10 +301,10 @@ public final class HandbookScreen extends Screen {
         int cy = py - (int) scroll;
 
         if (!current.icon().isEmpty()) {
-            g.renderItem(iconStack(current.icon()), px, cy - 3);
-            g.drawString(font, "§6§l" + current.name(), px + 20, cy, 0xFFFFFFFF);
+            g.item(iconStack(current.icon()), px, cy - 3);
+            g.text(font, "§6§l" + current.name(), px + 20, cy, 0xFFFFFFFF);
         } else {
-            g.drawString(font, "§6§l" + current.name(), px, cy, 0xFFFFFFFF);
+            g.text(font, "§6§l" + current.name(), px, cy, 0xFFFFFFFF);
         }
         // Feat pages are shops: a live Buy chip (or a proud ✔) beside the title.
         if (section.equals("feat")) {
@@ -312,7 +312,7 @@ public final class HandbookScreen extends Screen {
             if (summary != null) {
                 if (summary.ownedFeats().contains(current.id())) {
                     String knownLbl = ClientVocab.get("ui.known", "✔ Known");
-                    g.drawString(font, "§a" + knownLbl, px + pw - font.width(knownLbl), cy, 0xFFFFFFFF);
+                    g.text(font, "§a" + knownLbl, px + pw - font.width(knownLbl), cy, 0xFFFFFFFF);
                 } else if (summary.spTotal() - summary.spSpent() >= current.cost()) {
                     String chip = ClientVocab.get("ui.buy", "Buy") + " " + current.cost();
                     int cw = font.width("§l" + chip) + 8;
@@ -338,21 +338,21 @@ public final class HandbookScreen extends Screen {
                         && mouseY >= cy - 1 && mouseY < cy + 10
                         && mouseY >= py && mouseY < py + ph;
                 if (hover) g.fill(px - 1, cy - 1, px + pw, cy + 10, 0x28FFFFFF);
-                g.drawString(font, (hover ? "§b§n" : "§b") + line.text(), px, cy, 0xFFFFFFFF);
+                g.text(font, (hover ? "§b§n" : "§b") + line.text(), px, cy, 0xFFFFFFFF);
                 String toSection = line.linkSection();
                 String toId = line.linkId();
                 hotspots.add(new Hot(px, cy - 1, px + pw, cy + 10,
                         () -> navigate(toSection, toId)));
                 cy += 11;
             } else if (hasIcon) {
-                g.renderItem(iconStack(line.icon()), px + 2, cy - 2);
-                g.drawString(font, line.text(), px + 22, cy + 2, 0xFFFFFFFF);
+                g.item(iconStack(line.icon()), px + 2, cy - 2);
+                g.text(font, line.text(), px + 22, cy + 2, 0xFFFFFFFF);
                 cy += 15;
             } else if (line.text().isEmpty()) {
                 cy += 5;
             } else {
                 for (FormattedCharSequence wrapped : font.split(FormattedText.of(line.text()), pw)) {
-                    g.drawString(font, wrapped, px, cy, 0xFFFFFFFF);
+                    g.text(font, wrapped, px, cy, 0xFFFFFFFF);
                     cy += 10;
                 }
             }
@@ -378,7 +378,7 @@ public final class HandbookScreen extends Screen {
     }
 
     /** A tab chip; returns the next tab's x. */
-    private int tab(GuiGraphics g, int x, int y, String label, String target,
+    private int tab(GuiGraphicsExtractor g, int x, int y, String label, String target,
             int mouseX, int mouseY) {
         int w = font.width("§l" + label) + 12; // sized for the bold active state
         chip(g, x, y, w, label, true, section.equals(target), mouseX, mouseY, () -> {
@@ -392,7 +392,7 @@ public final class HandbookScreen extends Screen {
         return x + w + 4;
     }
 
-    private void chip(GuiGraphics g, int x, int y, int w, String label, boolean enabled,
+    private void chip(GuiGraphicsExtractor g, int x, int y, int w, String label, boolean enabled,
             boolean active, int mouseX, int mouseY, Runnable action) {
         int h = 14;
         boolean hover = enabled && mouseX >= x && mouseX < x + w && mouseY >= y && mouseY < y + h;
@@ -401,12 +401,12 @@ public final class HandbookScreen extends Screen {
         frame(g, x, y, x + w, y + h, active ? GOLD : hover ? GOLD_DIM : BRONZE, 1);
         String colour = !enabled ? "§8" : active ? "§6§l" : hover ? "§e" : "§7";
         String drawn = colour + label;
-        g.drawString(font, drawn, x + (w - font.width(drawn)) / 2, y + 3, 0xFFFFFFFF);
+        g.text(font, drawn, x + (w - font.width(drawn)) / 2, y + 3, 0xFFFFFFFF);
         if (enabled) hotspots.add(new Hot(x, y, x + w, y + h, action));
     }
 
     /** A hollow rectangle of the given line thickness. */
-    private static void frame(GuiGraphics g, int x0, int y0, int x1, int y1, int colour, int t) {
+    private static void frame(GuiGraphicsExtractor g, int x0, int y0, int x1, int y1, int colour, int t) {
         g.fill(x0, y0, x1, y0 + t, colour);
         g.fill(x0, y1 - t, x1, y1, colour);
         g.fill(x0, y0, x0 + t, y1, colour);
@@ -534,14 +534,14 @@ public final class HandbookScreen extends Screen {
      * name can be read without widening the book for one long outlier. The list's
      * scissor does the clipping.
      */
-    private void drawEntryName(GuiGraphics g, String text, int x, int y, int avail, boolean live) {
+    private void drawEntryName(GuiGraphicsExtractor g, String text, int x, int y, int avail, boolean live) {
         int over = font.width(text) - avail;
         if (over <= 0) {
-            g.drawString(font, text, x, y, 0xFFFFFFFF);
+            g.text(font, text, x, y, 0xFFFFFFFF);
             return;
         }
         if (!live) {
-            g.drawString(font, trim(text, avail), x, y, 0xFFFFFFFF);
+            g.text(font, trim(text, avail), x, y, 0xFFFFFFFF);
             return;
         }
         long travel = Math.max(1L, over * 22L); // ~45 px/s
@@ -557,7 +557,7 @@ public final class HandbookScreen extends Screen {
         } else {
             offset = over - (int) ((t - 2 * dwell - travel) * over / travel);
         }
-        g.drawString(font, text, x - offset, y, 0xFFFFFFFF);
+        g.text(font, text, x - offset, y, 0xFFFFFFFF);
     }
 
     private String trim(String text, int width) {
