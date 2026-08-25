@@ -4,9 +4,9 @@ Minecraft moved to calendar versioning with quarterly drops. Supporting 1.21.11,
 26.1 and 26.2 is therefore not a port to be finished — it is a treadmill to be
 made cheap. This is the plan for making it cheap, and the evidence it rests on.
 
-**Status: 26.1 measured (2026-08-25). 26.2 not attempted.** See "The measured
-26.1 delta" below — it is the section that matters, and it corrected the
-prediction the rest of this document was built on.
+**Status: 26.1 and 26.2 both measured (2026-08-25).** See "The measured deltas"
+below — that section is the point of this document, and it corrected the
+prediction the rest of it was built on.
 
 ## The targets
 
@@ -86,12 +86,27 @@ concentrated further:
 Known concrete breaks today: **5 `setScreen` call sites** and **2 position
 field accesses** of the `pos.x` → `pos.x()` kind that bit CityWorld.
 
-## The measured 26.1 delta
+## The measured deltas
 
-Branch `mc26.1`, versions and toolchain set from the table above, `compileJava`.
-**36 errors across 10 files.** But the raw count is the wrong number — the
-distinct API changes behind it are about eight, and one of them accounts for 23
-of the errors.
+Branch, set versions and toolchain from the table above, `compileJava`. Both
+drops measured the same way:
+
+| | 26.1 | 26.2 |
+|---|---|---|
+| `client/` errors | 25 | 37 |
+| server errors | 11 | 16 |
+| **total** | **36** | **53** |
+| files touched | 10 | 12 |
+
+**The same six server files break in both drops**, and no others:
+`LQEffects`, `Feedback`, `Nameplate`, `LQServerEvents`, `Parties`,
+`RestrictionEngine`. That stability is the most useful thing either
+measurement produced — see "What this means for the mechanism".
+
+### 26.1: the rendering pipeline moved
+
+The raw count is the wrong number — the distinct API changes behind it are about
+eight, and one accounts for 23 of the errors.
 
 ### The rendering pipeline moved, and that is the whole story
 
@@ -123,14 +138,27 @@ The four `pose()` calls are one block in `CombatIndicators` —
 extractor exposes no transform stack, so that is the one piece needing thought
 rather than a rename.
 
-### Everything outside the client is small
+### Outside the client, 26.1 is eleven ordinary moves
 
-Six errors across four files, all ordinary API moves:
+`displayClientMessage(Component, boolean)`, a relocated `BreakEvent`,
+`SavedDataType<>` no longer inferring in `Parties`, `getTags()`,
+`getProjectionMatrix(Integer)`, `getItemHolder()`, and four in `LQEffects`.
 
-- `displayClientMessage(Component, boolean)` — 3 sites (`Feedback` ×2, `Nameplate`)
-- `BreakEvent` relocated — 2 sites in `LQServerEvents`
-- `SavedDataType<>` no longer infers in `Parties`
-- `getTags()`, `getProjectionMatrix(Integer)`, `getItemHolder()` — one each
+### 26.2: the same pipeline change, plus a holder split
+
+26.2 carries the whole 26.1 rendering change *and* adds its own:
+
+- **`Minecraft.setScreen` is gone** — 5 call sites, plus the `screen` field (4)
+  and `hideGui` (2) moving with it. This is the change CityWorld hit.
+- **`EntityType` split into `EntityType` and `EntityTypes`.** The constants moved
+  to a holder class, `Blocks`-style, so `EntityType.LIGHTNING_BOLT` becomes
+  `EntityTypes.LIGHTNING_BOLT`. Four sites — `Nameplate` spawning its display and
+  `LQEffects` doing lightning and fireballs. Mechanical, but it is the same
+  *class* of change that cost CityWorld its material table, arriving in the one
+  place we do name vanilla content.
+- **`ChatFormatting.isFormat()` is gone**, which lands squarely in the colour-code
+  fix made earlier the same week. Worth noting as a reminder that new code is not
+  safer code.
 
 ### What this changes about the plan
 
@@ -147,10 +175,33 @@ keep in the common tree.
 
 **But it points at something better, and the mod's own design principle already
 argues for it.** The client is optional sugar — vanilla clients play the whole
-game. The *server* costs six errors to cross a version. So the split that
-matters is not per-version source sets; it is **server-common, client-per-version**.
-Whether that is worth restructuring for is the real Stage 3 question, and it
-should not be answered on one data point.
+game — while the server is the part everyone runs.
+
+## What this means for the mechanism
+
+Two drops now agree on the thing that matters:
+
+- **The client cannot be shared.** `Renderable`'s method signature changed, so
+  every screen's override changed with it. There is no common code left to keep
+  in a shared tree, which rules out a `src/compat/<version>/java` shim for
+  `client/` — a shim holds the diverging *methods*, and here the divergence is
+  the supertype.
+- **The server can be.** 11 errors then 16, in **the same six files both times**,
+  and every one of them a rename or a moved member rather than a reshaped API.
+  That is precisely the "handful of diverging call sites" case a compat shim
+  exists for.
+
+So the steady state to aim at is **server-common with a small per-version compat
+shim, and `client/` per-version**. That is not a compromise between the two
+measurements; it is what both of them say, and it happens to fall along the line
+the mod is already designed on — the seam between "what every server runs" and
+"what a modded client adds".
+
+**Not adopting it yet.** Two drops is two, the restructure is not free, and
+branch-per-version costs nothing to keep while 26.3 arrives (~Sept 2026) to test
+whether the six-file server set holds. If it does, restructure. If a third drop
+reshapes something server-side, branch-per-version was the right answer all
+along and the shim would have been a trap.
 
 ## Recommended mechanism
 
@@ -222,3 +273,10 @@ So the error count overstated the distinct problems by roughly four times, and
 simultaneously understated the edit count by about half. Neither figure is the
 cost. The cost is the eight API changes and the ~112 call sites they touch —
 which is a day of mechanical work plus one genuine puzzle in `CombatIndicators`.
+
+**And the first report of the 26.1 server figure was simply wrong** — "six errors
+in four files", when it is eleven in six. The error list was read through
+`head -30` on a 36-line output, and the visible part was reported as the whole.
+The conclusion happened to survive; the number did not. Both halves of that are
+worth remembering, because a truncated command is a much quieter way to get a
+number wrong than a bad measurement is.
