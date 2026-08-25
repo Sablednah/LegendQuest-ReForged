@@ -19,6 +19,7 @@ import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.storage.TagValueInput;
 
@@ -92,7 +93,7 @@ public final class Nameplate {
 
         Display.TextDisplay display = live(player);
         if (display == null) {
-            display = EntityType.TEXT_DISPLAY.create(level, EntitySpawnReason.COMMAND);
+            display = EntityTypes.TEXT_DISPLAY.create(level, EntitySpawnReason.COMMAND);
             if (display == null) return;
             display.snapTo(player.getX(), player.getY() + Y_OFFSET, player.getZ(), 0.0F, 0.0F);
             display.addTag(TAG);

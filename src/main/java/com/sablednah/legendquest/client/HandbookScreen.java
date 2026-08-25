@@ -77,7 +77,7 @@ public final class HandbookScreen extends Screen {
     /** Open at a section (id may be null = first entry). No-op without data. */
     public static void open(String section, String id) {
         if (ClientHandbook.get() == null) return;
-        Minecraft.getInstance().setScreen(new HandbookScreen(section, id));
+        Minecraft.getInstance().gui.setScreen(new HandbookScreen(section, id));
     }
 
     public static void open() {

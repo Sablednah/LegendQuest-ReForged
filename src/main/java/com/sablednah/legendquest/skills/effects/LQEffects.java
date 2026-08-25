@@ -21,6 +21,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -243,7 +244,7 @@ public final class LQEffects {
         @Override
         public void apply(SkillContext ctx) {
             target.resolvePos(ctx).ifPresent(pos -> {
-                LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(ctx.level(), EntitySpawnReason.TRIGGERED);
+                LightningBolt bolt = EntityTypes.LIGHTNING_BOLT.create(ctx.level(), EntitySpawnReason.TRIGGERED);
                 if (bolt == null) return;
                 bolt.snapTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, 0.0F, 0.0F);
                 bolt.setVisualOnly(visualOnly);
@@ -506,10 +507,10 @@ public final class LQEffects {
             Vec3 look = ctx.caster().getLookAngle();
             Vec3 spawn = ctx.caster().getEyePosition().add(look.scale(1.2D));
             net.minecraft.world.entity.Entity launched;
-            if (entity == EntityType.FIREBALL) {
+            if (entity == EntityTypes.FIREBALL) {
                 launched = new net.minecraft.world.entity.projectile.hurtingprojectile.LargeFireball(
                         ctx.level(), ctx.caster(), look, power);
-            } else if (entity == EntityType.SMALL_FIREBALL) {
+            } else if (entity == EntityTypes.SMALL_FIREBALL) {
                 launched = new net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball(
                         ctx.level(), ctx.caster(), look);
             } else {

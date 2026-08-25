@@ -582,7 +582,7 @@ public final class CharacterPanel {
             String nDrawn = (nHover ? "§e§l" : "§7") + nameLbl;
             g.text(font, nDrawn, nx + (nw - font.width(nDrawn)) / 2, ty + 3, 0xFFFFFFFF);
             HOTSPOTS.add(new Hot(nx, ty, nx + nw, ty + 13, 0, () ->
-                    net.minecraft.client.Minecraft.getInstance().setScreen(
+                    net.minecraft.client.Minecraft.getInstance().gui.setScreen(
                             new net.minecraft.client.gui.screens.ChatScreen("/party create ", false))));
             ty += 18;
             g.text(font, "§8" + ClientVocab.get("ui.party_pitch_1", "Shared XP, no friendly fire,"), tx, ty, 0xFFFFFFFF);
@@ -599,7 +599,7 @@ public final class CharacterPanel {
             boolean pHover = mouseX >= px - 1 && mouseX < px + 10 && mouseY >= ty - 1 && mouseY < ty + 10;
             g.text(font, (pHover ? "§e" : "§8") + "✎", px, ty, 0xFFFFFFFF);
             HOTSPOTS.add(new Hot(px - 1, ty - 1, px + 10, ty + 10, 0, () ->
-                    net.minecraft.client.Minecraft.getInstance().setScreen(
+                    net.minecraft.client.Minecraft.getInstance().gui.setScreen(
                             new net.minecraft.client.gui.screens.ChatScreen("/party rename ", false))));
             if (pHover) tooltip(g, font, ClientVocab.get("ui.rename_party", "Rename party"), ClientVocab.get("ui.rename_party_tip", "Opens chat pre-filled with /party rename"));
         }

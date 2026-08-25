@@ -67,18 +67,18 @@ public final class LQKeyMappings {
         if (mc.player == null) return;
 
         while (OPEN_SHEET.consumeClick()) {
-            if (mc.screen == null) {
+            if (mc.gui.screen() == null) {
                 CharacterPanel.openOnNextInit();
-                mc.setScreen(new InventoryScreen(mc.player));
+                mc.gui.setScreen(new InventoryScreen(mc.player));
             }
         }
         while (HANDBOOK.consumeClick()) {
-            if (mc.screen == null) HandbookScreen.open();
+            if (mc.gui.screen() == null) HandbookScreen.open();
         }
         while (PARTY.consumeClick()) {
-            if (mc.screen == null) {
+            if (mc.gui.screen() == null) {
                 CharacterPanel.openPartyOnNextInit();
-                mc.setScreen(new InventoryScreen(mc.player));
+                mc.gui.setScreen(new InventoryScreen(mc.player));
             }
         }
         while (USE_SELECTED.consumeClick()) {

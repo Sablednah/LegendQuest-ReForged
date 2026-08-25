@@ -85,10 +85,10 @@ public final class CombatIndicators {
     static void onRenderGui(RenderGuiEvent.Post event) {
         if (ACTIVE.isEmpty()) return;
         Minecraft mc = Minecraft.getInstance();
-        if (mc.level == null || mc.player == null || mc.options.hideGui) return;
+        if (mc.level == null || mc.player == null || mc.gui.hud.isHidden()) return;
 
         long now = System.currentTimeMillis();
-        Camera camera = mc.gameRenderer.getMainCamera();
+        Camera camera = mc.gameRenderer.mainCamera();
         Vec3 camPos = camera.position();
         // 26.1 dropped GameRenderer.getProjectionMatrix(fov) and put the
         // combined view-rotation-and-projection matrix on the Camera instead,

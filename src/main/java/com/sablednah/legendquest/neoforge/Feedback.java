@@ -105,7 +105,7 @@ public final class Feedback {
                 out.append(Component.literal(run.toString()).withStyle(style));
                 run.setLength(0);
             }
-            style = advance(style, code);
+            style = advance(style, code, text.charAt(i + 1));
             i++; // consume the code letter
         }
         if (!run.isEmpty()) {
@@ -114,15 +114,26 @@ public final class Feedback {
         return out;
     }
 
+    /** The five codes that are styles rather than colours. */
+    private static final String FORMAT_CODES = "klmno";
+
     /**
      * Legacy rule: a colour clears any formatting before it, {@code &r} clears
      * everything, and bold/italic/underline/strike/obfuscated accumulate.
+     *
+     * <p>Classified from the code character rather than by asking the enum.
+     * 26.2 removed {@code ChatFormatting.isFormat()} — the enum there carries
+     * little more than its character and a lookup — so the distinction has to
+     * live here now. It is a fixed set that has not changed since the codes were
+     * invented, which makes it a safe thing to own.</p>
      */
-    private static Style advance(Style style, ChatFormatting code) {
+    private static Style advance(Style style, ChatFormatting code, char letter) {
         if (code == ChatFormatting.RESET) {
             return Style.EMPTY;
         }
-        return code.isFormat() ? style.applyFormat(code) : Style.EMPTY.withColor(code);
+        return FORMAT_CODES.indexOf(Character.toLowerCase(letter)) >= 0
+                ? style.applyFormat(code)
+                : Style.EMPTY.withColor(code);
     }
 
     private Feedback() {}

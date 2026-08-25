@@ -37,7 +37,7 @@ public final class LQHud {
     static void onRenderGui(RenderGuiEvent.Post event) {
         Minecraft mc = Minecraft.getInstance();
         CharacterSummaryPayload s = ClientCharacterState.summary();
-        if (s == null || mc.player == null || mc.options.hideGui || mc.screen != null) return;
+        if (s == null || mc.player == null || mc.gui.hud.isHidden() || mc.gui.screen() != null) return;
         if (mc.getDebugOverlay().showDebugScreen()) return;
 
         GuiGraphicsExtractor g = event.getGuiGraphics();
