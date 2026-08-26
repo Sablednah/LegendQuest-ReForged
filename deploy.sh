@@ -38,11 +38,17 @@ JARNAME="$(basename "$JAR")"
 # Pick the instance from the jar's +mcX.Y tag. That tag exists precisely so
 # three same-named jars cannot be confused with each other, so it may as well
 # do the routing too.
-if [[ "$JARNAME" =~ \+mc([0-9.]+)\.jar$ ]]; then
-    TARGET="$INSTANCES/${BASH_REMATCH[1]}"
-else
-    TARGET="$INSTANCES/MobHealth - Forge"   # the stock-fantasy 1.21.11 instance
-fi
+#
+# The 26.x instances are named after their version, so they map directly. The
+# 1.21.11 line has three instances (fantasy, wasteland, sci-fi) named after
+# their CONTENT rather than their version, so it needs a mapping; the fantasy
+# one is the default and LQ_INSTANCE picks either of the others.
+MC_TAG=""
+[[ "$JARNAME" =~ \+mc([0-9.]+)\.jar$ ]] && MC_TAG="${BASH_REMATCH[1]}"
+case "$MC_TAG" in
+    ""|1.21.11) TARGET="$INSTANCES/MobHealth - Forge" ;;  # stock fantasy
+    *)          TARGET="$INSTANCES/$MC_TAG" ;;
+esac
 INSTANCE="${LQ_INSTANCE:-$TARGET}"
 MODS="$INSTANCE/mods"
 NAME="$(basename "$INSTANCE")"
