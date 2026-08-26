@@ -79,7 +79,14 @@ public final class Nameplate {
     public static void refresh(ServerPlayer player) {
         if (!(player.level() instanceof ServerLevel level)) return;
 
-        if (!LQConfig.NAMEPLATE_ENABLED.get() || CharacterService.data(player).nameplateHidden()) {
+        // Dead counts as "no plate" for the same reason switched-off does. This
+        // check belongs HERE and not only in follow(): the per-second character
+        // sync calls refresh() for every online player, so clearing the plate
+        // in follow() alone just meant rebuilding it a fraction of a second
+        // later, for as long as the death screen stayed up. Two paths decide
+        // whether a plate exists, and both have to agree.
+        if (!LQConfig.NAMEPLATE_ENABLED.get() || CharacterService.data(player).nameplateHidden()
+                || !player.isAlive()) {
             clear(player);
             return;
         }
