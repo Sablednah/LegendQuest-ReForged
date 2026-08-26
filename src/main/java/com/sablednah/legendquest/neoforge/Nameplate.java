@@ -118,9 +118,22 @@ public final class Nameplate {
         if (PLATES.isEmpty()) return;
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             Display.TextDisplay display = live(player);
-            if (display != null) {
-                display.snapTo(player.getX(), player.getY() + Y_OFFSET, player.getZ(), 0.0F, 0.0F);
+            if (display == null) continue;
+            // A dead player stays in the player list until they click respawn,
+            // so without this the plate carries on tracking their corpse: a
+            // name badge hovering over a body, reading as "here I am, fine" at
+            // the exact moment neither is true.
+            //
+            // Cleared rather than hidden, and it costs one pass: clear() drops
+            // the PLATES entry, so live() returns null on every tick after and
+            // this branch is never reached again. The plate returns by itself
+            // on respawn, when PlayerRespawnEvent refreshes the character and
+            // CharacterSync rebuilds it.
+            if (!player.isAlive()) {
+                clear(player);
+                continue;
             }
+            display.snapTo(player.getX(), player.getY() + Y_OFFSET, player.getZ(), 0.0F, 0.0F);
         }
     }
 
