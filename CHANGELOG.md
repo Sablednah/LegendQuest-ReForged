@@ -3,6 +3,39 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 2.2.1 — 2026-08-26
+
+**Now built for three Minecraft versions.** Same mod, same features, three
+jars — pick the one matching your server:
+
+| Jar | Minecraft | NeoForge |
+|---|---|---|
+| `legendquest-2.2.1.jar` | 1.21.11 | 21.11.42+ |
+| `legendquest-2.2.1+mc26.1.2.jar` | 26.1.2 | 26.1.2.95+ |
+| `legendquest-2.2.1+mc26.2.jar` | 26.2 | 26.2.0.59+ |
+
+The Minecraft version is in the filename because all three share a mod version
+and would otherwise be indistinguishable in a mods folder. Each jar's declared
+version range is exclusive, so a jar will refuse to load on the wrong one
+rather than misbehaving. Both 26.x builds were play-tested — skills, loadouts,
+classes, the handbook and character panel, nameplates and combat indicators.
+
+### Fixed
+
+- **The nameplate stayed above a player's corpse after they died.** A dead
+  player remains in the player list until they click respawn, so the plate kept
+  tracking the body — a name badge hovering over a corpse, reading as "here I
+  am, fine" at the moment neither was true. It now disappears on death and
+  returns on respawn. Present since nameplates shipped in 2.1.0, on every
+  version.
+
+### Added
+
+- **A square mod-list icon**, which Minecraft 26.2 asks for and shows beside
+  the mod's name. Without it LegendQuest was the only row in the list with no
+  icon. 26.2 also gained a separate wide banner in the info panel; earlier
+  versions are unaffected and still show the logo they always did.
+
 ## 2.2.0 — 2026-08-24
 
 The titles release. 2.1.0 added class ranks; this is the release where you

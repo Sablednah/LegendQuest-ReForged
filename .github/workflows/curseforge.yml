@@ -110,13 +110,24 @@ jobs:
           failed=0
           for file in "${ordered[@]}"; do
             echo "::group::$(basename "$file")"
+            # Each jar names the Minecraft version it was built for
+            # (legendquest-2.2.1+mc26.2.jar), because one release now carries a jar per version
+            # branch. Take the version from there rather than from gradle.properties: this
+            # workflow runs from whichever ref was tagged, so gradle.properties describes ONE of
+            # the three and would label the other two as that version. A 26.2 jar listed under
+            # 1.21.11 is worse than no upload -- it is a download that cannot possibly work.
+            # An untagged jar (the 1.21.11 line, and the example pack) falls back to
+            # gradle.properties, which is correct for it.
+            case "$(basename "$file")" in
+              *+mc*.jar) mc="$(basename "$file" | sed -n 's/.*+mc\([0-9.]*\)\.jar$/\1/p')" ;;
+              *)         mc="" ;;
+            esac
+            echo ">> Minecraft version for this file: ${mc:-<from gradle.properties>}"
             # Keep going if one fails, so a single bad upload does not strand the others, then fail
             # the job at the end so the failure is not silent.
             # Invoked via bash rather than as ./script: this repo lives on an NTFS drive with
             # core.fileMode=false, so exec bits are easily lost again on a future commit.
-            # No Minecraft version argument - the script reads minecraft_version from
-            # gradle.properties, which is what the jar was actually built against.
-            bash scripts/curseforge-upload.sh "$file" dist/changelog.md "" "$RELEASE_TYPE" || failed=1
+            bash scripts/curseforge-upload.sh "$file" dist/changelog.md "$mc" "$RELEASE_TYPE" || failed=1
             echo "::endgroup::"
           done
           [ "$failed" -eq 0 ] || { echo "::error::At least one upload failed."; exit 1; }
