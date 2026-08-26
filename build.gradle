@@ -9,7 +9,14 @@ tasks.named('wrapper', Wrapper).configure {
     distributionType = Wrapper.DistributionType.BIN
 }
 
-version = mod_version
+// The jar carries the Minecraft version it was built against, on EVERY branch.
+// All three lines share a mod version, so two files both called
+// legendquest-2.2.1.jar are indistinguishable in a mods folder or on a
+// releases page. Tagging only the 26.x jars would be enough to tell them
+// apart, but it leaves the 1.21.11 one as the odd unlabelled file you have to
+// know about -- and "the one with no suffix" reads as an oversight rather than
+// as a meaning. The mod's own version in neoforge.mods.toml stays plain.
+version = "${mod_version}+mc${minecraft_version}"
 group = mod_group_id
 
 sourceSets.main.resources {
