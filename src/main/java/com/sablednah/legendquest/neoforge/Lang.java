@@ -236,6 +236,11 @@ public final class Lang {
         def("msg.combat.dodged_you", "&aDodged!");
         def("msg.combat.they_dodged", "&7They dodged.");
         def("msg.combat.fumble", "&cYou fumble with the unfamiliar {item}...");
+        // Shown when a hostile skill is refused because fighting is not allowed
+        // where the target is standing. The other refusal -- "you two may not
+        // fight each other" -- is worded by whichever mod knows why, so it is
+        // not ours to phrase.
+        def("msg.combat.pvp_off_here", "&cThere is no fighting here.");
         def("msg.combat.bad_armour", "&c{item} was not made for your kind — it will slow and tire you.");
 
         def("msg.station.crafting", "&cYour hands were never taught the maker's craft.");

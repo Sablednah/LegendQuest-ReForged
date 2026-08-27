@@ -13,6 +13,19 @@ public final class Feedback {
         player.sendOverlayMessage(colored(text));
     }
 
+    /**
+     * An already-built component, for text somebody else worded — a refusal
+     * from another mod, say, which arrives translated and styled and has no
+     * business being flattened through our '&amp;' handling.
+     *
+     * <p>Here rather than at the call sites because this is one of the calls
+     * 26.x moved, and keeping it in this class is what lets the effects and
+     * everything else stay identical across the version branches.</p>
+     */
+    public static void actionBar(ServerPlayer player, Component message) {
+        player.sendOverlayMessage(message);
+    }
+
     public static void chat(ServerPlayer player, String text) {
         player.sendSystemMessage(colored(text));
     }
