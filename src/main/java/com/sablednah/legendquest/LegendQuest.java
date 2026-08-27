@@ -62,8 +62,35 @@ public class LegendQuest {
         // unguarded would be a NoClassDefFoundError on every server without
         // Standards installed.
         if (net.neoforged.fml.ModList.get().isLoaded("standards")) {
-            com.sablednah.legendquest.neoforge.ChatSupport.register();
-            com.sablednah.legendquest.neoforge.CombatSupport.register();
+            optionalIntegration("chat", com.sablednah.legendquest.neoforge.ChatSupport::register);
+            optionalIntegration("combat", com.sablednah.legendquest.neoforge.CombatSupport::register);
+        }
+    }
+
+    /**
+     * Wire up one optional Standards feature, surviving a Standards that is
+     * present but older than the API this was built against.
+     *
+     * <p><b>{@code isLoaded} is not enough, and finding that out cost a dead
+     * server.</b> It answers "is Standards here", not "is Standards new enough
+     * to have the classes I call". A 1.0.1 install has the chat API and no
+     * combat package at all, so touching {@code Combat} threw
+     * {@code NoClassDefFoundError} during mod construction and took the whole
+     * game down with it — from a mod that is supposed to work fine with no
+     * Standards whatsoever.</p>
+     *
+     * <p>{@code LinkageError} rather than {@code Exception}: a missing class is
+     * an {@code Error}, so catching exceptions would not have caught this. Each
+     * feature is wired separately so an older Standards still gets the parts it
+     * does have — chat kept working in exactly the case that killed combat.</p>
+     */
+    private static void optionalIntegration(String feature, Runnable register) {
+        try {
+            register.run();
+        } catch (LinkageError e) {
+            LOGGER.warn("Standards is installed but has no {} API this build can use"
+                    + " -- that feature is off. Update Standards to re-enable it. ({})",
+                    feature, e.toString());
         }
     }
 
