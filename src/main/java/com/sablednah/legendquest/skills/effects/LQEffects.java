@@ -5,6 +5,7 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.sablednah.legendquest.LegendQuest;
 import com.sablednah.legendquest.neoforge.CombatTagging;
+import com.sablednah.legendquest.neoforge.Feedback;
 import com.sablednah.legendquest.skills.SkillContext;
 import com.sablednah.legendquest.skills.SkillEffect;
 import com.sablednah.legendquest.skills.SkillEffectTypes;
@@ -183,15 +184,31 @@ public final class LQEffects {
         public void apply(SkillContext ctx) {
             int ticks = (int) Math.max(1, durationMs / 50);
             boolean hostile = hostile();
+            net.minecraft.network.chat.Component refusal = null;
             for (LivingEntity e : target.resolveEntities(ctx)) {
+                // Ask before harming, and only in the hostile case -- a party
+                // buff has nobody to ask about. Refusals are PER TARGET, so a
+                // blast that catches one protected player still lands on
+                // everyone else: aborting the lot would let one person standing
+                // in a safe zone shield a crowd outside it.
+                if (hostile) {
+                    var refused = CombatTagging.refuses(ctx.caster(), e);
+                    if (refused.isPresent()) {
+                        refusal = refused.get();
+                        continue;
+                    }
+                }
                 e.addEffect(new MobEffectInstance(effect, ticks, amplifier,
                         !particles, particles, showIcon));
                 // The victim's half. Effects that deal damage need no help --
                 // their damage event tags whoever it lands on -- but a pure
                 // debuff would otherwise leave the target free to teleport out
                 // of a fight they are unmistakably in.
-                if (hostile) CombatTagging.skillVictim(e, TYPE);
+                CombatTagging.skillVictim(e, TYPE);
             }
+            // Said once however many were spared: a crowd effect reporting each
+            // refusal separately is its own kind of spam.
+            if (refusal != null) Feedback.actionBar(ctx.caster(), refusal);
         }
     }
 
@@ -270,6 +287,17 @@ public final class LQEffects {
         @Override
         public void apply(SkillContext ctx) {
             target.resolvePos(ctx).ifPresent(pos -> {
+                // A bolt lands in a PLACE rather than on a person, so only the
+                // place question applies -- there is no pair to ask about. A
+                // real bolt dropped into a safe zone is an attack on whoever is
+                // standing in it; a visual-only one is a light show and nobody
+                // needs protecting from weather.
+                if (!visualOnly && !CombatTagging.pvpAllowedAt(ctx.level(), pos)) {
+                    Feedback.actionBar(ctx.caster(), net.minecraft.network.chat.Component.literal(
+                            com.sablednah.legendquest.neoforge.Lang
+                                    .get("msg.combat.pvp_off_here").replace('&', '§')));
+                    return;
+                }
                 LightningBolt bolt = EntityType.LIGHTNING_BOLT.create(ctx.level(), EntitySpawnReason.TRIGGERED);
                 if (bolt == null) return;
                 bolt.snapTo(pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D, 0.0F, 0.0F);
@@ -356,9 +384,20 @@ public final class LQEffects {
 
         @Override
         public void apply(SkillContext ctx) {
+            net.minecraft.network.chat.Component refusal = null;
             for (LivingEntity e : target.resolveEntities(ctx)) {
+                // Setting somebody alight is harm that fires no damage event at
+                // the moment it is done, so nothing else on the server gets a
+                // chance to refuse it. Per target, as with the debuffs.
+                var refused = CombatTagging.refuses(ctx.caster(), e);
+                if (refused.isPresent()) {
+                    refusal = refused.get();
+                    continue;
+                }
                 e.igniteForSeconds(durationMs / 1000.0F);
+                CombatTagging.skillVictim(e, TYPE);
             }
+            if (refusal != null) Feedback.actionBar(ctx.caster(), refusal);
         }
     }
 

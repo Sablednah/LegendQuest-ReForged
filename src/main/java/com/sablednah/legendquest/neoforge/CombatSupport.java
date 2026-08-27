@@ -3,6 +3,8 @@ package com.sablednah.legendquest.neoforge;
 import com.sablednah.legendquest.LegendQuest;
 import com.sablednah.standards.api.combat.Combat;
 import com.sablednah.standards.api.combat.CombatKind;
+import com.sablednah.standards.api.combat.Harm;
+import com.sablednah.standards.api.groups.Claims;
 
 /**
  * Reports LegendQuest's acts of combat to Standards.
@@ -37,7 +39,16 @@ public final class CombatSupport {
                 Combat.tag(player, mapped, source);
             }
         });
-        LegendQuest.LOGGER.info("Reporting combat to Standards");
+        // Two seams, deliberately separate, because they are two different
+        // facts: Harm is about the PAIR (a peaceful faction, an ally, a truce)
+        // and Claims is about the PLACE (a safe zone, a spawn area). Neither
+        // implies the other, and a mod that only deals damage needs neither --
+        // Standards gates player-on-player damage itself. LegendQuest needs
+        // both because a curse is not a damage event, so nothing else on the
+        // server gets the chance to refuse it.
+        CombatTagging.setGuard(Harm::forbidden);
+        CombatTagging.setPlaceGuard(Claims::pvpAllowed);
+        LegendQuest.LOGGER.info("Reporting combat to Standards, and asking it before doing harm");
     }
 
     private CombatSupport() {}
