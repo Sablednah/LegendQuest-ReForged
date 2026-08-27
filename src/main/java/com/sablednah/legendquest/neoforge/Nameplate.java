@@ -74,6 +74,25 @@ public final class Nameplate {
      */
     private static final Map<UUID, String> LAST = new ConcurrentHashMap<>();
 
+    /**
+     * True for a game mode that is not playing the game.
+     *
+     * <p><b>Spectator is the one that matters.</b> A spectator is invisible to
+     * everybody else — but a text display following them is an ordinary entity
+     * and is not, so the plate hovers in mid-air announcing exactly where the
+     * invisible person is. That turns the nameplate into a position leak, and
+     * the people most likely to be spectating are staff watching somebody they
+     * would rather not tip off.</p>
+     *
+     * <p>Creative is included on the same principle, less urgently: someone
+     * building is not adventuring, and a floating "Dwarf Fighter | Lvl 60" over
+     * a builder is noise. It is also the mode an admin flips into to fix
+     * something, where the plate is in the way rather than informative.</p>
+     */
+    private static boolean notPlaying(ServerPlayer player) {
+        return player.isSpectator() || player.isCreative();
+    }
+
     /** Rebuilds the plate if anything visible changed. Cheap when it has not. */
     public static void refresh(ServerPlayer player) {
         if (!(player.level() instanceof ServerLevel level)) return;
@@ -85,7 +104,7 @@ public final class Nameplate {
         // later, for as long as the death screen stayed up. Two paths decide
         // whether a plate exists, and both have to agree.
         if (!LQConfig.NAMEPLATE_ENABLED.get() || CharacterService.data(player).nameplateHidden()
-                || !player.isAlive()) {
+                || !player.isAlive() || notPlaying(player)) {
             clear(player);
             return;
         }
@@ -135,7 +154,10 @@ public final class Nameplate {
             // this branch is never reached again. The plate returns by itself
             // on respawn, when PlayerRespawnEvent refreshes the character and
             // CharacterSync rebuilds it.
-            if (!player.isAlive()) {
+            // Also here, not only in refresh(): refresh runs once a second, and
+            // a plate that lingers even that long over someone who just went
+            // spectator is a second of telling everybody where they are.
+            if (!player.isAlive() || notPlaying(player)) {
                 clear(player);
                 continue;
             }
