@@ -23,7 +23,7 @@ public final class Feedback {
      * everything else stay identical across the version branches.</p>
      */
     public static void actionBar(ServerPlayer player, Component message) {
-        player.displayClientMessage(message, true);
+        player.sendOverlayMessage(message);
     }
 
     public static void chat(ServerPlayer player, String text) {
