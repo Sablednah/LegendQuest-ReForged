@@ -53,15 +53,17 @@ public class LegendQuest {
         NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent event) ->
                 LQCommands.register(event.getDispatcher()));
 
-        // Standards is a SOFT dependency: it supplies the chat name-decorator
-        // and chat-router APIs, and without it LegendQuest decorates nothing
-        // and routes party chat through its own listener above. The
-        // isLoaded check has to sit here, outside ChatSupport, because naming
-        // that class is what triggers loading it -- and it is the one class
-        // that imports com.sablednah.standards. Calling it unguarded would be
-        // a NoClassDefFoundError on every server without Standards installed.
+        // Standards is a SOFT dependency: it supplies the chat name-decorator,
+        // chat-router and combat APIs. Without it LegendQuest decorates
+        // nothing, routes party chat through its own listener above, and
+        // reports no combat. The isLoaded check has to sit here, outside those
+        // classes, because naming one is what triggers loading it -- and they
+        // are the only two that import com.sablednah.standards. Calling them
+        // unguarded would be a NoClassDefFoundError on every server without
+        // Standards installed.
         if (net.neoforged.fml.ModList.get().isLoaded("standards")) {
             com.sablednah.legendquest.neoforge.ChatSupport.register();
+            com.sablednah.legendquest.neoforge.CombatSupport.register();
         }
     }
 

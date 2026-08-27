@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.sablednah.legendquest.LegendQuest;
+import com.sablednah.legendquest.neoforge.CombatTagging;
 import com.sablednah.legendquest.skills.SkillContext;
 import com.sablednah.legendquest.skills.SkillEffect;
 import com.sablednah.legendquest.skills.SkillEffectTypes;
@@ -18,6 +19,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
@@ -96,6 +98,9 @@ public final class LQEffects {
 
         @Override public Identifier type() { return TYPE; }
 
+        /** Dealing damage is the plainest act of aggression there is. */
+        @Override public boolean hostile() { return true; }
+
         @Override
         public String describe() {
             return fx("hb.fx.damage", "amount", num(amount), "at", target.describe());
@@ -162,12 +167,31 @@ public final class LQEffects {
                     "at", target.describe(), "time", secs(durationMs));
         }
 
+        /**
+         * Hostile when the effect is harmful AND aimed at somebody other than
+         * the caster or their own party. Haste on yourself is not a fight;
+         * blindness on the person you are robbing very much is — and it
+         * produces no damage event to give the game away.
+         */
+        @Override
+        public boolean hostile() {
+            return effect.value().getCategory() == MobEffectCategory.HARMFUL
+                    && target.kind() != TargetSpec.Kind.SELF
+                    && target.kind() != TargetSpec.Kind.PARTY;
+        }
+
         @Override
         public void apply(SkillContext ctx) {
             int ticks = (int) Math.max(1, durationMs / 50);
+            boolean hostile = hostile();
             for (LivingEntity e : target.resolveEntities(ctx)) {
                 e.addEffect(new MobEffectInstance(effect, ticks, amplifier,
                         !particles, particles, showIcon));
+                // The victim's half. Effects that deal damage need no help --
+                // their damage event tags whoever it lands on -- but a pure
+                // debuff would otherwise leave the target free to teleport out
+                // of a fight they are unmistakably in.
+                if (hostile) CombatTagging.skillVictim(e, TYPE);
             }
         }
     }
@@ -234,6 +258,9 @@ public final class LQEffects {
                 .apply(i, Lightning::new));
 
         @Override public Identifier type() { return TYPE; }
+
+        /** A real bolt is an attack; a visual-only one is theatre. */
+        @Override public boolean hostile() { return !visualOnly; }
 
         @Override
         public String describe() {
@@ -319,6 +346,9 @@ public final class LQEffects {
                 .apply(i, Ignite::new));
 
         @Override public Identifier type() { return TYPE; }
+
+        /** Setting somebody alight is an act of aggression. */
+        @Override public boolean hostile() { return true; }
 
         @Override
         public String describe() {
@@ -496,6 +526,9 @@ public final class LQEffects {
                 .apply(i, ProjectileEffect::new));
 
         @Override public Identifier type() { return TYPE; }
+
+        /** Firing a projectile at someone is an act of aggression. */
+        @Override public boolean hostile() { return true; }
 
         @Override
         public String describe() {
