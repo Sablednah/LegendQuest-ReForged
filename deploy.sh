@@ -70,7 +70,7 @@ NAME="$(basename "$INSTANCE")"
 # ---------------------------------------------------------------------------
 RUNNING="$(powershell.exe -NoProfile -Command \
   "Get-CimInstance Win32_Process | Where-Object { \$_.Name -like 'java*' } | ForEach-Object { \
-   \$m=[regex]::Match(\$_.CommandLine,'Instances\\\\([^\\\\\"]+)'); if (\$m.Success) { \$m.Groups[1].Value } }" \
+   \$m=[regex]::Match(\$_.CommandLine,'Instances\\\\([^\\\\\"\s]+)'); if (\$m.Success) { \$m.Groups[1].Value } }" \
   2>/dev/null | tr -d '\r' | sort -u || true)"
 
 if echo "$RUNNING" | grep -qxF "$NAME"; then
