@@ -25,6 +25,24 @@ public interface SkillEffect {
     void apply(SkillContext ctx);
 
     /**
+     * True when this is an act of aggression against somebody else.
+     *
+     * <p>Used to mark the caster as being in combat, so a server running
+     * Standards can stop them teleporting or logging straight out of a fight
+     * they started. It matters most for effects that deal no damage: blinding
+     * somebody and strolling to a {@code /home} is the exact trick a combat tag
+     * exists to prevent, and no damage event would ever reveal it.</p>
+     *
+     * <p><b>Defaults to false</b>, so a skill pack that has never heard of any
+     * of this stays quiet rather than tagging players for buffing each other. A
+     * pack whose effect really is hostile overrides it — one line, and the
+     * whole thing degrades to nothing on servers without Standards.</p>
+     */
+    default boolean hostile() {
+        return false;
+    }
+
+    /**
      * One plain sentence describing what this does, for the handbook's "what it
      * does" block — the numbers a player cannot otherwise see, written from the
      * data rather than from a skill author's prose, so it can never drift out of

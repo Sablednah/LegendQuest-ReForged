@@ -393,6 +393,12 @@ public final class LQServerEvents {
                         dodgeMod != null ? dodgeMod : 0);
                 if (outcome == Mechanics.AttackOutcome.MISS) {
                     event.setCanceled(true);
+                    // Cancelling means no damage event survives, so nothing
+                    // else on the server ever learns the swing happened --
+                    // including whatever decides you are too busy fighting to
+                    // teleport away. A miss is still a fight, and the instant
+                    // after one is exactly when somebody would like to leave.
+                    CombatTagging.melee(livingAttacker, victim, "legendquest:miss");
                     if (victim instanceof ServerPlayer p) Feedback.actionBar(p, Lang.get("msg.combat.dodged_you"));
                     if (attacker instanceof ServerPlayer p) {
                         Feedback.actionBar(p, Lang.get("msg.combat.they_dodged"));

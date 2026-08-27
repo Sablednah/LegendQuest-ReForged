@@ -190,6 +190,13 @@ public final class SkillEngine {
     }
 
     private static void runEffects(SkillDefinition def, SkillContext ctx, Identifier skillId) {
+        // One tag for the whole skill rather than one per effect: a spell that
+        // damages, ignites and blinds is a single act of aggression, and the
+        // server log should read that way too. Tagged before the effects run,
+        // so a skill that kills its target outright still tags the caster.
+        if (def.effects().stream().anyMatch(SkillEffect::hostile)) {
+            CombatTagging.skill(ctx.caster(), skillId);
+        }
         for (SkillEffect effect : def.effects()) {
             try {
                 effect.apply(ctx);
