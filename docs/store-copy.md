@@ -59,6 +59,12 @@ CurseForge project ID **1658748** (used by `CURSEFORGE_PROJECT_ID`, see
 
 ## Description
 
+**Paste from here down into the CurseForge description box. The banner line is
+part of the copy — CurseForge's editor does not keep an uploaded image across
+edits, so it lives here and gets pasted with everything else.**
+
+![Legendquest](https://media.forgecdn.net/attachments/description/1658748/description_e97262ef-6787-4591-b311-00304c4e3f3a.png)
+
 ### LegendQuest ReForged
 
 **Pick a race. Pick a class. Earn levels, learn skills, and live with the
@@ -67,7 +73,9 @@ rolled stats, classes that gate what you can wield, skills you buy with points
 you earn, and a karma score that quietly opens some doors and closes others.
 
 It began as a Bukkit plugin years ago. This is that design rebuilt from nothing
-for NeoForge 1.21.11.
+for NeoForge — and built for **Minecraft 1.21.11, 26.1.2 and 26.2**. Each
+download names the version it is for, and refuses to load on the wrong one
+rather than misbehaving quietly.
 
 ---
 
@@ -138,9 +146,11 @@ A skill-pack is a small jar that registers its own skill effect types and ships
 its own content, without touching LegendQuest. `SkillEffectTypes.register()` in
 your mod constructor is the entire API surface.
 
-A worked example is attached to the files page as `examplepack-1.0.0.jar` —
-install it beside LegendQuest to see custom effects in action, or read it as a
-template for your own.
+A worked example is attached to the files page as `examplepack-1.0.0+mc<version>.jar`
+— one per Minecraft version, same as the mod. Install it beside LegendQuest to
+see custom effects in action, or read it as a template for your own. Two of its
+three effects declare themselves hostile and one deliberately does not, which
+is the part worth copying.
 
 ---
 
@@ -161,11 +171,33 @@ template for your own.
 - **Karma** as a real mechanic, with good and evil paths that lock each other
   out.
 - **Parties** — invite, rename, teleport to members, and party-wide skills.
+- **Party chat** — `/pc` for a line, or `/pc` alone to send everything you type
+  to your party until you switch it off. Operators can listen in only if the
+  server grants it *and* they turn it on.
+- **Nameplates** — race, class and level above each player's head, worded from
+  your own vocabulary file. It is a display entity, so unmodded clients see it,
+  and it does not touch chat, the tab list, or the scoreboard team slot every
+  other prefix mod wants.
+- **Class ranks and karma epithets** — a Fighter climbs Squire, Man-at-Arms,
+  Knight, Champion, Lord; karma earns you "the good" or "the diabolic". Both
+  genre packs have their own ranks throughout.
 - **XP from kills, mining and smelting**, tag-based so modded ores count.
 - **An in-game Players Handbook** that explains every race, class, skill and
   feat, including what each skill actually does.
 - **Admin commands and permission nodes** for every race and class, for
   LuckPerms and friends.
+
+### Optional: better together with Standards
+
+Install [Standards](https://www.curseforge.com/minecraft/mc-mods/sablecraft-standards)
+alongside it and LegendQuest reports things nothing else can see. A **missed**
+attack counts as combat, so nobody teleports away the instant they dodge you.
+Hostile skills mark the caster, and a blind or a curse marks the victim — even
+though neither deals damage. And LegendQuest asks permission before landing a
+hostile skill, so a peaceful faction or a safe zone can refuse it.
+
+Entirely optional. Without Standards none of it runs and everything above works
+exactly as described.
 
 ---
 
@@ -180,7 +212,13 @@ template for your own.
    drop it into `<world>/datapacks/` and restart, then paste that pack's
    vocabulary snippet into `config/legendquest/messages.yml`.
 
-**Requires NeoForge 21.11.42+ on Minecraft 1.21.11.**
+**Pick the download matching your server:**
+
+| File | Minecraft | NeoForge |
+|---|---|---|
+| `legendquest-<version>+mc1.21.11.jar` | 1.21.11 | 21.11.42+ |
+| `legendquest-<version>+mc26.1.2.jar` | 26.1.2 | 26.1.2.95+ |
+| `legendquest-<version>+mc26.2.jar` | 26.2 | 26.2.0.59+ |
 
 Content is read when the world loads, matching how vanilla handles data-driven
 registries — edit your JSON or YAML and restart the server; `/reload` will not
