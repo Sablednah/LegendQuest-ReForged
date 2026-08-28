@@ -151,15 +151,19 @@ case "$BASE_NAME" in
     *)                          DISPLAY_NAME="$(basename "$BASE_NAME" .jar)" ;;
 esac
 
+# The changelog is rewritten to avoid the constructs CurseForge's HTML sanitiser chokes on -- see
+# scripts/curseforge-changelog.py for which, and why each one is a suspect. Anything it changes is
+# printed, because quietly editing release notes would be worse than the bug it prevents.
 METADATA="$(CHANGELOG="$CHANGELOG_FILE" DISPLAY="$DISPLAY_NAME" RTYPE="$RELEASE_TYPE" \
-    GV="$GAME_VERSIONS" python3 -c '
-import json,os,re
-# CurseForge sanitises the changelog as HTML, and a Markdown angle-bracket autolink - <https://x> -
-# reads to that sanitiser as a malformed tag. A changelog containing one made the upload spend 30
-# seconds and then return HTTP 500, "An unhandled exception occurred", while the same upload with a
-# one-line changelog succeeded instantly. Unwrap them; the bare URL still renders as a link.
-text = open(os.environ["CHANGELOG"], encoding="utf-8").read()
-text = re.sub(r"<((?:https?|ftp)://[^>\s]+)>", r"\1", text)
+    HERE="$HERE" GV="$GAME_VERSIONS" python3 -c '
+import json,os,sys,importlib.util
+# Loaded by path because the filename has a hyphen and is not importable by name.
+spec = importlib.util.spec_from_file_location(
+    "cfchangelog", os.path.join(os.environ["HERE"], "scripts", "curseforge-changelog.py"))
+mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
+text, notes = mod.sanitise(open(os.environ["CHANGELOG"], encoding="utf-8").read())
+for n in notes:
+    print(">> changelog: " + n, file=sys.stderr)
 print(json.dumps({
   "changelog": text,
   "changelogType": "markdown",
@@ -211,8 +215,12 @@ if [ "$STATUS" = "500" ]; then
     echo "!! A 500 is CurseForge failing, not a bad request - a rejected field gives a 400 naming" >&2
     echo "!! it. The known cause is the CHANGELOG, not the project: CurseForge sanitises it as HTML," >&2
     echo "!! and constructs it cannot parse throw server-side after a long pause. An angle-bracket" >&2
-    echo "!! autolink <https://x> did exactly this once; those are now unwrapped automatically, so" >&2
-    echo "!! the next suspect is the Markdown table. Re-run with -f minimal=true to confirm it is" >&2
-    echo "!! the changelog: minimal sends a one-line one and nothing else changes." >&2
+    echo "!! autolink <https://x> did exactly this once, and blockquotes plus an indented code" >&2
+    echo "!! block did it again. All three are now rewritten automatically by" >&2
+    echo "!! scripts/curseforge-changelog.py, and it prints whatever it changed -- so if that" >&2
+    echo "!! printed nothing, the changelog contains a construct we have not met yet. The next" >&2
+    echo "!! suspects are the Markdown table and fenced code blocks. Re-run with -f minimal=true" >&2
+    echo "!! to confirm it is the changelog at all: minimal sends a one-line one and changes" >&2
+    echo "!! nothing else." >&2
 fi
 exit 1
