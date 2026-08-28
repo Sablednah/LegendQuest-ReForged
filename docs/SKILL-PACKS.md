@@ -85,6 +85,50 @@ public record FlameRing(double radius, int flames) implements SkillEffect {
 }
 ```
 
+## Saying an effect is hostile
+
+If your effect is an act of aggression, say so:
+
+```java
+@Override public boolean hostile() { return true; }
+```
+
+**Defaults to false**, so a pack that ignores this behaves exactly as before.
+
+On a server running [Standards](https://github.com/Sablednah/SableCraft-Standards)
+it does two things. The caster is marked as being in combat, so they cannot
+teleport or log straight out of a fight they started — which matters most for
+effects that deal no damage, because blinding somebody and strolling to a
+`/home` produces no damage event for anything else to notice. And LegendQuest
+asks permission before the effect lands, so a peaceful faction or a safe zone
+can refuse it.
+
+Damage is a special case that needs nothing from you: Standards gates
+player-on-player damage on the damage event itself, so an effect that only
+deals damage is already covered.
+
+If your effect harms somebody *without* dealing damage — a curse, a snare, a
+blind — check before it lands:
+
+```java
+for (LivingEntity e : target.resolveEntities(ctx)) {
+    var refused = CombatTagging.refuses(ctx.caster(), e);
+    if (refused.isPresent()) { /* skip this target */ continue; }
+    // ... apply to e
+}
+```
+
+`refuses` asks both halves of the question — whether these two may fight
+(allies, a truce) and whether fighting is allowed *there* (a safe zone) —
+because remembering to ask one is easy and remembering to ask two is not.
+Refuse **per target** rather than aborting: otherwise one protected player
+standing in a crowd shields everybody around them.
+
+All of it is inert without Standards, so none of it is a dependency you take
+on. The built-in `lifesteal` and `shockwave` in the example pack show it;
+`sense` deliberately does not, because revealing what is nearby is not an
+attack.
+
 Rules of the road:
 
 - **Effects are immutable records.** Never store player state on the effect —
@@ -105,6 +149,6 @@ Use the same ModDevGradle scaffold as LegendQuest itself and add:
 ```groovy
 dependencies {
     // consume the published LegendQuest jar (or a maven repo / jarInJar later)
-    implementation files("libs/legendquest-2.2.0.jar")
+    implementation files("libs/legendquest-2.3.0.jar")
 }
 ```

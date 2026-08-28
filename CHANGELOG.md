@@ -3,6 +3,51 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 2.3.0 — 2026-08-28
+
+### Added
+
+- **Combat awareness, where [Standards](https://github.com/Sablednah/SableCraft-Standards)
+  is installed.** Standards knows about fights it can see — a damage event with
+  a player behind it. LegendQuest resolves several it cannot:
+
+  - **A missed attack now counts.** The dodge roll cancels the damage event, so
+    nothing else on the server ever learned the swing happened. The instant
+    after someone dodges you is exactly when they would like to teleport away.
+  - **Hostile skills mark the caster**, once per skill rather than once per
+    effect — a spell that damages, ignites and blinds is one act of aggression.
+  - **Harmful potion effects mark the victim.** This is the case the whole
+    thing exists for: blinding somebody and strolling to a `/home` produces no
+    damage event at all, so nothing else could ever have noticed.
+
+- **LegendQuest asks before doing harm that is not damage.** A curse or a snare
+  is not a damage event, so a peaceful faction would otherwise be peaceful
+  against swords and defenceless against spells. Both questions are asked —
+  whether these two may fight, and whether fighting is allowed *where the
+  effect lands*. Refusals are per target, so one protected player in a crowd
+  does not shield everybody around them.
+
+- **`hostile()` for skill packs.** One line to say an effect is an act of
+  aggression; defaults to false, so existing packs are unaffected. See
+  `docs/SKILL-PACKS.md`.
+
+All of this is inert without Standards, which remains entirely optional.
+
+### Fixed
+
+- **The nameplate no longer shows in spectator or creative.** Spectator was the
+  serious one: a spectator is invisible to everyone else, but the display
+  following them is an ordinary entity and is not — so the nameplate hovered in
+  mid-air marking exactly where the unseen player was.
+- **The nameplate no longer follows a corpse.** It disappears on death and
+  returns on respawn, rather than hovering over the body reading "here I am,
+  fine".
+- **A too-old Standards no longer stops the server starting.** Checking that
+  Standards is *installed* is not the same as checking it is new enough to have
+  the API being called, and an older one took the whole game down during
+  startup. Each integration now degrades on its own, so the parts that do work
+  keep working, with a log line naming what was switched off and why.
+
 ## 2.2.1 — 2026-08-26
 
 **Now built for three Minecraft versions.** Same mod, same features, three
