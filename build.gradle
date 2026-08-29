@@ -60,7 +60,10 @@ neoForge {
         // server — no second account needed (dev server is online-mode=false).
         clientBuddy {
             client()
-            programArguments.addAll '--username', 'TestBuddy', '--quickPlayMultiplayer', '127.0.0.1:25565'
+            // 25566, not the default 25565. Five of Sable's mods have a dev server and
+            // four of them were on 25565 and RCON 25575, so whichever started second
+            // silently lost. Each project now owns a pair -- see CLAUDE.md.
+            programArguments.addAll '--username', 'TestBuddy', '--quickPlayMultiplayer', '127.0.0.1:25566'
             // Own game dir: sharing run/ with a live dev server means
             // both fight over logs/latest.log on drvfs.
             gameDirectory = file('runBuddy')

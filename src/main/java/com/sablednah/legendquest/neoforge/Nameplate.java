@@ -123,8 +123,11 @@ public final class Nameplate {
             display.snapTo(player.getX(), player.getY() + Y_OFFSET, player.getZ(), 0.0F, 0.0F);
             display.addTag(TAG);
             apply(display, level, text);
-            level.addFreshEntity(display);
+            // Tracked BEFORE it joins the level, because joining fires the
+            // event that reaps untracked plates -- add it first and we would
+            // reap our own the instant we made it.
             PLATES.put(player.getUUID(), display);
+            level.addFreshEntity(display);
             LAST.put(player.getUUID(), text);
             return;
         }
@@ -163,6 +166,43 @@ public final class Nameplate {
             }
             display.snapTo(player.getX(), player.getY() + Y_OFFSET, player.getZ(), 0.0F, 0.0F);
         }
+    }
+
+    /**
+     * Removes any nameplate that is not one of ours, whenever one loads.
+     *
+     * <p><b>Why orphans happen at all.</b> {@link #PLATES} lives in memory, but
+     * the display is an ordinary entity and is saved to the region file like
+     * any other. So a plate that outlives its bookkeeping — a crash between
+     * spawning one and shutting down, a player logging out while their plate
+     * sat in a chunk nobody was near — is invisible to us the moment the server
+     * restarts. The map is empty; the entity is not. One was found still
+     * hovering after several restarts and two Minecraft version migrations.</p>
+     *
+     * <p>Hooking the moment an entity <em>joins a level</em> catches them
+     * wherever they are: chunk load, world load, migration. The test is simply
+     * "is this one of the plates I am currently tracking" — after a restart
+     * nothing is, so every survivor is swept as its chunk comes in.</p>
+     *
+     * <p>This makes the plate self-cleaning rather than merely tidied-up-after,
+     * which matters because the old sweep in {@link #clear} only looked within
+     * eight blocks of the player being cleared, and an orphan is by definition
+     * somewhere nobody is looking.</p>
+     */
+    public static void reapIfOrphan(Entity entity) {
+        if (!(entity instanceof Display.TextDisplay display)) return;
+        if (!display.entityTags().contains(TAG)) return;
+        if (PLATES.containsValue(display)) return;
+        display.discard();
+    }
+
+    /** Drops every plate we are holding. Called as the server stops. */
+    public static void clearAll() {
+        for (Display.TextDisplay display : PLATES.values()) {
+            display.discard();
+        }
+        PLATES.clear();
+        LAST.clear();
     }
 
     /** Removes the plate. Called on logout, and when it is switched off. */
