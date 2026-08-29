@@ -90,7 +90,12 @@ public final class Nameplate {
      * something, where the plate is in the way rather than informative.</p>
      */
     private static boolean notPlaying(ServerPlayer player) {
-        return player.isSpectator() || player.isCreative();
+        // Vanish belongs in this list for exactly the spectator reason: the
+        // player is hidden and the entity drawn on them is not, so the plate
+        // hangs in the air marking where the invisible person is. Standards
+        // owns the vanish state; PlayerVisibility answers "no" without it.
+        return player.isSpectator() || player.isCreative()
+                || PlayerVisibility.vanished(player);
     }
 
     /** Rebuilds the plate if anything visible changed. Cheap when it has not. */
