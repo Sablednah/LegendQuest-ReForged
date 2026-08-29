@@ -78,9 +78,37 @@ Replacing it with bespoke square art needs no other change.
 Worktrees are **detached** — advance with `git checkout --detach <sha>`, not
 `git checkout main` (main is held by the primary worktree).
 
-- **RCON is port 25576**, password `lqdev`. **25575 is Standards** — check
-  `ss -ltnp | grep 2557` before assuming a port is yours, and never kill a
-  process without checking whose it is.
+### Dev-server ports — one pair per project
+
+Sable has five mods with a dev server, and they were nearly all on the vanilla
+defaults: **four on game port 25565 and four on RCON 25575.** Whichever started
+second lost, and the symptom is not obvious — the game port collision fails
+loudly, but RCON just reports "Unable to initialise RCON" in the boot spam and
+then every RCON command answers "auth failed", which reads like a wrong
+password.
+
+| Project | game | RCON |
+|---|---|---|
+| Standards | 25565 | 25575 |
+| **LegendQuest** | **25566** | **25576** |
+| ZombieMod | 25567 | 25577 |
+| CityWorld | 25568 | 25578 |
+| MobHealth | 25569 | 25579 |
+
+RCON password is `lqdev`. The buddy client's connect address is in
+`build.gradle`, so **it and `run/server.properties` have to agree** — `run/` is
+gitignored, so a fresh checkout needs the port setting applied by hand.
+
+**Before assuming a port is yours**, check who holds it — and never kill the
+process that does without finding out whose it is:
+
+```bash
+ss -ltnp | grep -E '2556|2557'
+tr '\0' ' ' < /proc/<pid>/cmdline | grep -oE 'modFolders=[^ ]*'
+```
+
+That last line is the one that matters: `fml.modFolders` names the repo, so it
+tells you whether the server on your port is yours or another session's.
 - Drive the server with a small RCON client; `stop` shuts it down. Launch the
   buddy with `TestClient.cmd < nul` (the trailing `pause` blocks otherwise). It
   auto-joins; wait for "TestBuddy joined the game" in the server log.

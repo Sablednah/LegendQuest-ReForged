@@ -85,6 +85,28 @@ public final class LQServerEvents {
     }
 
     /**
+     * Sweep up nameplates that outlived their owner's session.
+     *
+     * <p>The plate is a saved entity but its bookkeeping is in memory, so
+     * anything that survives a shutdown is invisible to us afterwards. Checking
+     * as entities join a level catches them on chunk load, world load or a
+     * version migration alike — see {@link Nameplate#reapIfOrphan}.</p>
+     */
+    @SubscribeEvent
+    static void onEntityJoin(net.neoforged.neoforge.event.entity.EntityJoinLevelEvent event) {
+        if (!event.getLevel().isClientSide()) Nameplate.reapIfOrphan(event.getEntity());
+    }
+
+    /**
+     * Take the plates down on the way out, so a clean shutdown leaves none
+     * behind for {@link #onEntityJoin} to find next time.
+     */
+    @SubscribeEvent
+    static void onServerStopping(net.neoforged.neoforge.event.server.ServerStoppingEvent event) {
+        Nameplate.clearAll();
+    }
+
+    /**
      * Put a character's attribute bonuses back after they respawn.
      *
      * <p>Respawning builds a <em>new</em> {@code ServerPlayer}, and
