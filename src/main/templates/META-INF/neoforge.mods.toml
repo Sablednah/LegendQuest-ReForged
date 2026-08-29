@@ -41,10 +41,18 @@ iconBlur=true
 # The mod is server-authoritative: vanilla clients can join and play. The
 # optional client entrypoint adds the mana/skill HUD for modded clients.
 
+# The NeoForge SERIES this was built for, not the exact build. Pinning the
+# lower bound to the build on the developer's machine turns every patch release
+# NeoForge makes into a support question -- 21.11.41 would be refused by a jar
+# that works perfectly well on it. The upper bound matters just as much and was
+# missing: an open-ended range claimed this jar worked on NeoForge 26.x and
+# beyond, which is exactly the false promise the separate version branches
+# exist to avoid. A NeoForge series tracks one Minecraft version, so the series
+# is the honest unit.
 [[dependencies.${mod_id}]]
     modId="neoforge"
     type="required"
-    versionRange="[${neo_version},)"
+    versionRange="${neo_version_range}"
     ordering="NONE"
     side="BOTH"
 
