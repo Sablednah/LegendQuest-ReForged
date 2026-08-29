@@ -64,6 +64,7 @@ public class LegendQuest {
         if (net.neoforged.fml.ModList.get().isLoaded("standards")) {
             optionalIntegration("chat", com.sablednah.legendquest.neoforge.ChatSupport::register);
             optionalIntegration("combat", com.sablednah.legendquest.neoforge.CombatSupport::register);
+            optionalIntegration("vanish", com.sablednah.legendquest.neoforge.VanishSupport::register);
         }
     }
 
