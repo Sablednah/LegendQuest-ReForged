@@ -345,3 +345,21 @@ to a player, so a genre pack showing 61 skills is not adding to the 26.
 
 **⚠ Deployment is not visibility: Cloudflare must be purged** before changes reach real visitors. Do
 not conclude from a fetch that a deploy failed.
+
+## 2.3.0 (2026-08-28) — DONE, plus older drift found and fixed
+
+**2.3.0 itself needed almost no site change** - it's an optional, inert-without-Standards combat
+integration (missed attacks/hostile skills/harmful effects now correctly tag a fight) plus two
+nameplate bug fixes (spectator/creative visibility, following a corpse). No counts changed (races,
+classes, skills, feats, effect types, config settings all verified unchanged at HEAD). Added one small
+feature card to the hub's feature grid: "Combat-aware, if Standards is installed."
+
+**The real finding was older drift, unrelated to 2.3.0**: the hub's Requirements table still showed a
+single 1.21.11 row, but LegendQuest has shipped 3 Minecraft versions (1.21.11/26.1.2/26.2, via the
+`mc26.1`/`mc26.2` branches) since **2.2.0** - two releases ago. Nothing in this file flagged it. Fixed
+now to the same 3-row table pattern CityWorld and ZombieMod use, with the "same mod, same features,
+three jars" line. Site was serving version-support information that had been wrong for a while.
+
+**Lesson**: a multi-version branch cut doesn't automatically get a checklist item here unless someone
+adds one - worth adding "did the version matrix change?" as an explicit first question on every future
+update pass, not just when a changelog entry says so directly.
