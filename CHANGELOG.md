@@ -36,11 +36,11 @@ This project follows [Semantic Versioning](https://semver.org/).
   build the jar happened to be compiled against. Updating NeoForge no longer
   means waiting for a LegendQuest release that changes nothing else.
 
-  | Jar | Minecraft | NeoForge |
-  |---|---|---|
-  | `legendquest-2.3.1+mc1.21.11.jar` | 1.21.11 | any 21.11 |
-  | `legendquest-2.3.1+mc26.1.2.jar` | 26.1.2 | any 26.1 |
-  | `legendquest-2.3.1+mc26.2.jar` | 26.2 | any 26.2 |
+| Jar | Minecraft | NeoForge |
+|---|---|---|
+| `legendquest-2.3.1+mc1.21.11.jar` | 1.21.11 | any 21.11 build |
+| `legendquest-2.3.1+mc26.1.2.jar` | 26.1.2 | any 26.1 build |
+| `legendquest-2.3.1+mc26.2.jar` | 26.2 | any 26.2 build |
 
 ## 2.3.0 — 2026-08-28
 
