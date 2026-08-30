@@ -3,6 +3,45 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 2.3.1 — 2026-08-30
+
+### Added
+
+- **The nameplate hides when [Standards](https://github.com/Sablednah/SableCraft-Standards)
+  vanishes a player.** A vanished player is hidden from everybody's screen, but
+  the display entity carrying their name is a separate entity and was not — so
+  the name hung in the air over nobody, marking the spot they had just walked
+  away from. The same shape of bug as the spectator leak fixed in 2.3.0, and it
+  needed the same fix from the other direction: Standards owns the vanish state,
+  LegendQuest owns the nameplate, so Standards is asked and LegendQuest acts.
+
+  The plate goes at the instant the player does, not a tick later — a single
+  frame of a floating name is the giveaway the whole thing exists to prevent.
+  A player who logs in *already* vanished never gets one at all.
+
+  Inert without Standards, which remains entirely optional.
+
+### Fixed
+
+- **Orphaned nameplates now clean themselves up.** If a plate was ever left
+  behind — a crash mid-spawn, a world unloaded at the wrong moment — it stayed
+  in the world with nothing to follow, and the only way to be rid of it was to
+  hunt it down by hand. Any LegendQuest plate that no longer belongs to a
+  player is now discarded when its chunk next loads. Only plates carrying
+  LegendQuest's own tag are touched; other mods' text displays are left alone.
+
+### Changed
+
+- **Any NeoForge build in the series is now accepted**, rather than the exact
+  build the jar happened to be compiled against. Updating NeoForge no longer
+  means waiting for a LegendQuest release that changes nothing else.
+
+  | Jar | Minecraft | NeoForge |
+  |---|---|---|
+  | `legendquest-2.3.1+mc1.21.11.jar` | 1.21.11 | any 21.11 |
+  | `legendquest-2.3.1+mc26.1.2.jar` | 26.1.2 | any 26.1 |
+  | `legendquest-2.3.1+mc26.2.jar` | 26.2 | any 26.2 |
+
 ## 2.3.0 — 2026-08-28
 
 ### Added

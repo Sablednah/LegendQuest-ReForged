@@ -112,7 +112,9 @@ is the part worth copying.
 - **Nameplates** — race, class and level above each player's head, worded from
   your own vocabulary file. It is a display entity, so unmodded clients see it,
   and it does not touch chat, the tab list, or the scoreboard team slot every
-  other prefix mod wants.
+  other prefix mod wants. It knows when to get out of the way: no plate in
+  spectator or creative, none on a corpse, and none floating where a hidden
+  player used to be.
 - **Class ranks and karma epithets** — a Fighter climbs Squire, Man-at-Arms,
   Knight, Champion, Lord; karma earns you "the good" or "the diabolic". Both
   genre packs have their own ranks throughout.
@@ -130,6 +132,9 @@ attack counts as combat, so nobody teleports away the instant they dodge you.
 Hostile skills mark the caster, and a blind or a curse marks the victim — even
 though neither deals damage. And LegendQuest asks permission before landing a
 hostile skill, so a peaceful faction or a safe zone can refuse it.
+
+Standards' vanish is honoured too: hide a player and their nameplate goes with
+them, instead of hovering over empty air announcing exactly where they are.
 
 Entirely optional. Without Standards none of it runs and everything above works
 exactly as described.
@@ -151,9 +156,12 @@ exactly as described.
 
 | File | Minecraft | NeoForge |
 |---|---|---|
-| `legendquest-<version>+mc1.21.11.jar` | 1.21.11 | 21.11.42+ |
-| `legendquest-<version>+mc26.1.2.jar` | 26.1.2 | 26.1.2.95+ |
-| `legendquest-<version>+mc26.2.jar` | 26.2 | 26.2.0.59+ |
+| `legendquest-<version>+mc1.21.11.jar` | 1.21.11 | any 21.11 build |
+| `legendquest-<version>+mc26.1.2.jar` | 26.1.2 | any 26.1 build |
+| `legendquest-<version>+mc26.2.jar` | 26.2 | any 26.2 build |
+
+Any build within the series will do — updating NeoForge does not mean waiting
+for a LegendQuest release that changes nothing else.
 
 Content is read when the world loads, matching how vanilla handles data-driven
 registries — edit your JSON or YAML and restart the server; `/reload` will not

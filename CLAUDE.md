@@ -206,10 +206,17 @@ naming the class is what loads it, so an unguarded call is a
 
 ## Releasing
 
-`CHANGELOG.md`, tag, then a GitHub release — publishing it fires the CurseForge
-and Modrinth workflows. Modrinth skips cleanly until a project ID and token
-exist (still not created).
+`CHANGELOG.md`, **`CURSEFORGE.md`**, `mod_version` on all three branches, tag,
+then a GitHub release — publishing it fires the CurseForge and Modrinth
+workflows. Modrinth skips cleanly until a project ID and token exist (still not
+created).
 
+- **The store copy is part of the release, not a chore for later.** The
+  `store-copy` job fails the release when `CURSEFORGE.md` has not changed since
+  the previous tag. It had drifted three releases behind before anyone noticed,
+  which is why it is enforced rather than remembered. A release that genuinely
+  changes nothing a reader would care about can say `[no-store-update]` in the
+  tag message.
 - **CurseForge rejects non-jar files** *after* returning HTTP 200. Packs ship
   from GitHub only.
 - **A 200 is acceptance, not publication.** Check the file is approved.
