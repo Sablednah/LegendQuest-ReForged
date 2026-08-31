@@ -179,10 +179,24 @@ they know, they know from what the game told them at that moment.
 Races, classes, skills and feats are **datapack registries** fed from YAML.
 Genre packs (`packs/apocalypse`, `packs/scifi`) declare `min_format: 82` /
 `max_format: 999` and ride version bumps untouched. This is the single biggest
-reason version drops are cheaper here than for a mod that names blocks.
+reason version drops are cheaper here than for a mod that names blocks. **Proven,
+not assumed** — the unmodified apocalypse pack booted on both 26.1.2 and 26.2
+(2026-08-31, data formats 101 and 107); see `docs/VERSIONS.md` step 3. A version
+drop is a code problem, not a content problem.
+
+- **`min_format: 82` is load-bearing.** `lastPreMinorVersion(SERVER_DATA)` is 81
+  on 26.1/26.2, and sitting one above it is what exempts a pack from the legacy
+  `pack_format` / `supported_formats` fields. Never lower it to widen support —
+  that narrows it.
 
 - **Titles live in pack data**, so "update the jar" does not update ranks —
   say so in release notes whenever packs change.
+- **Never rename a shipped pack zip; overwrite it in place.** A world records
+  its enabled packs by filename in `level.dat` (`file/legendquest-wasteland.zip`),
+  so a rename silently *disables* the pack and dangles every saved race/class id
+  in that world. The `legendquest-wasteland.zip` → `legendquest-apocalypse.zip`
+  rename already stranded one world this way; it still carries the old filename
+  because that is the only thing keeping its characters alive.
 - All player-facing wording is in `Lang.java`, generated into
   `config/legendquest/messages.yml`. `messages.yml` only pins keys it actually
   contains, so new defaults reach existing servers.

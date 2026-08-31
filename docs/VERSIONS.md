@@ -240,6 +240,25 @@ the substitution runs.
 3. **Check the content layer separately.** Boot each version with a genre pack
    and confirm the registries load. `max_format: 999` should hold, but "should"
    is doing work there and a boot proves it.
+   **DONE for BOTH versions, apocalypse pack (2026-08-31)** — the unmodified
+   pack was dropped into the `26.2` and `26.1.2` instances and its races and
+   classes showed in game on each. The prediction held with **no pack edit of
+   any kind**, across two different data formats (101 and 107). Verified
+   statically alongside it: `min_format` / `max_format` are still the field
+   names in 26.2's `PackFormat`, the data format runs 94 (1.21.11) → 101
+   (26.1.2) → 107 (26.2), and every vanilla id the two packs name (88 items, 17
+   effects, 12 entities, 8 attributes, 7 particles, 10 sounds) resolves on both.
+   **Still unbooted: the sci-fi pack on either version** — same mcmeta, same
+   schema, ids checked, so this is bookkeeping rather than risk.
+
+   So the content layer costs nothing per drop, and that is now measured rather
+   than hoped. The version treadmill is a **code** problem only.
+
+   The `82` in `min_format` is load-bearing, not a round number.
+   `PackFormat.lastPreMinorVersion(SERVER_DATA)` is **81** on both 26.1 and
+   26.2, and declaring one above it is exactly what exempts a pack from the
+   legacy `pack_format` / `supported_formats` fields. Lower `min_format` below
+   82 and the pack is rejected until those old fields are added back.
 4. **CI matrix**, modelled on CityWorld's `selftest.yml`, so a version cannot
    silently rot between drops.
 5. **Release plumbing** — jar naming, and CurseForge/Modrinth uploads that
