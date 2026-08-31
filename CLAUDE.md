@@ -132,6 +132,21 @@ powershell.exe -NoProfile -Command "Get-CimInstance Win32_Process | \
   [regex]::Match(\$_.CommandLine,'Instances\\\\([^\\\\\"]+)').Groups[1].Value }"
 ```
 
+### Deploying to one instance, or to all of them
+
+`./deploy.sh` builds the current branch and copies it to one instance, routed by
+the jar's `+mc` tag. That is the mid-loop tool.
+
+`./deploy-all.sh <dir-of-jars>` is the after-a-release tool: it updates **every**
+instance that already has a LegendQuest jar, from a directory holding all three
+tagged jars. It never installs the mod somewhere new.
+
+**Route on the instance's own `gameVersion`, never its folder name.** Seven
+instances carry LegendQuest and two of them (`MobHealth - Forge`, `Standards`)
+are named after a mod rather than a version, so name-guessing gets both wrong.
+It is in `minecraftinstance.json` — written **UTF-8 with BOM**, so read it as
+`utf-8-sig` or it fails on the first character looking like a corrupt file.
+
 ## Design principles
 
 Two standing requirements, not preferences to trade off:
