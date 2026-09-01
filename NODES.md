@@ -56,7 +56,7 @@ legendquest.class.<namespace>.<class>
 ```
 
 The lists below are one node per line inside a fenced block rather than a table,
-because there are 73 of them and a 73-row table helps nobody.
+because there are 71 of them and a 71-row table helps nobody.
 
 **These default to allow.** A race or class is selectable by everyone unless its
 data file declares a `perm` field, which flips it to deny-until-granted. Nothing
