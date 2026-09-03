@@ -201,6 +201,28 @@ drop is a code problem, not a content problem.
   `config/legendquest/messages.yml`. `messages.yml` only pins keys it actually
   contains, so new defaults reach existing servers.
 
+## Permissions
+
+**`NODES.md` is the full reference** — every node, its default, and how to grant
+it. Regenerate the race/class lists from the registries rather than editing them
+by hand; the generated lists stay right while hand-typed totals beside them
+drift (shipped "75 nodes" once when it is 73).
+
+Nodes go through NeoForge's `PermissionAPI`. Two fixed — `legendquest.admin`
+(op level 2 also passes) and `legendquest.party.spy` (deny even for ops, and
+rechecked per message) — plus one per race and class, built at runtime.
+
+Three things the code knows and nothing else says:
+
+- **The `perm` field in race/class data is a presence flag; its value is
+  ignored.** It marks an entry restricted, and the node checked is always the
+  generated `legendquest.race.<id>`. The Bukkit plugin used it to *name* a node,
+  so this is the assumption people arrive with.
+- **Nodes are gathered once per server start**, and an entry with no node counts
+  as open — content added by `/reload` is unrestricted until a restart.
+- **They gate player self-selection only.** `/lq admin setrace` never consults
+  them, and its `force` flag is about race/class *legality*, not permissions.
+
 ## Standards integration (optional)
 
 `ChatSupport` is the **only** class importing `com.sablednah.standards`, and the
@@ -215,6 +237,12 @@ naming the class is what loads it, so an unguarded call is a
   higher-means-nearer-the-name (additive). Easy to "fix" wrongly.
 - Without Standards, `PartyChat.onChat` handles capture itself. Exactly one path
   is ever live.
+- **Standards is also a permissions handler** (`permissionHandler =
+  "standards:permissions"` in `neoforge-server.toml`), so it can grant our nodes
+  on a server with no LuckPerms. It resolves **tier-first** — nearest tier with
+  any opinion wins outright, and specificity only decides *within* a tier, which
+  is the opposite of what "exact beats wildcard" suggests. `NODES.md` has the
+  worked `/perm` examples.
 
 ## Known traps
 
