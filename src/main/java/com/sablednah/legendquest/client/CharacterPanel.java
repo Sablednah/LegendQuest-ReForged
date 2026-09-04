@@ -364,6 +364,13 @@ public final class CharacterPanel {
                 if (skill.owned() && "ACTIVE".equals(skill.type())
                         && !s.loadout().contains(skill.id())) {
                     drag = new Drag(skill.id(), -1, mx, my);
+                } else if (skill.owned() && skill.toggleable()) {
+                    // The whole row, not just the 16px icon: nothing else on a
+                    // passive row does anything, so a smaller target would only
+                    // be a hitbox to hunt for.
+                    send(new com.sablednah.legendquest.network.SkillActionPayload(
+                            com.sablednah.legendquest.network.SkillActionPayload.TOGGLE_SKILL,
+                            0, skill.id()));
                 }
             }
             return;
@@ -901,7 +908,7 @@ public final class CharacterPanel {
             if (hover) g.fill(x + 4, ry, x + PANEL_WIDTH - 4, ry + ROW_HEIGHT, 0x28FFFFFF);
 
             g.renderItem(icon(skill.icon()), tx, ry + 1);
-            if (!skill.owned()) {
+            if (!skill.owned() || !skill.enabled()) {
                 g.fill(tx, ry + 1, tx + 16, ry + 17, 0xA0101018); // greyed-out icon
             }
             String line;
@@ -915,6 +922,10 @@ public final class CharacterPanel {
                         + (skill.cost() > 0 ? ", " + skill.cost() + ClientVocab.get("ui.sp_short", "sp") : "") + "]";
             } else if (skill.readyInSec() > 0) {
                 line = "§c" + skill.name() + " §7" + skill.readyInSec() + "s";
+            } else if (!skill.enabled()) {
+                // Switched off by its owner — a different thing entirely from
+                // locked, and it must not read like one.
+                line = "§7" + skill.name() + " §c" + ClientVocab.get("ui.off_label", "[off]");
             } else {
                 line = (inLoadout ? "§6" : "§a") + skill.name()
                         + (inLoadout ? " §8◆" : "")
@@ -964,7 +975,15 @@ public final class CharacterPanel {
             return skill.cost() > 0 ? "\n§8" + ClientVocab.get("ui.buy_cmd_tip", "Buy with /skill buy when you have the points") : "";
         }
         if (!"ACTIVE".equals(skill.type())) {
-            return "\n§8" + (skill.type().equals("PASSIVE") ? ClientVocab.get("ui.passive_tip", "Always on.") : ClientVocab.get("ui.triggered_tip", "Fires on its trigger."));
+            String what = skill.type().equals("PASSIVE")
+                    ? ClientVocab.get("ui.passive_tip", "Always on.")
+                    : ClientVocab.get("ui.triggered_tip", "Fires on its trigger.");
+            if (!skill.toggleable()) {
+                return "\n§8" + what + "\n§8" + ClientVocab.get("ui.always_on_tip", "Cannot be switched off.");
+            }
+            return "\n§8" + what + "\n§e" + (skill.enabled()
+                    ? ClientVocab.get("ui.toggle_off_tip", "Click to switch off")
+                    : ClientVocab.get("ui.toggle_on_tip", "Switched off — click to turn back on"));
         }
         return inLoadout ? "\n§8" + ClientVocab.get("ui.already_in_loadout", "Already in the loadout") : "\n§e" + ClientVocab.get("ui.drag_to_loadout", "Click or drag to the loadout");
     }
