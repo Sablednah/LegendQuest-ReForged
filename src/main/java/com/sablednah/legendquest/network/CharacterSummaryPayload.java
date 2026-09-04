@@ -56,7 +56,9 @@ public record CharacterSummaryPayload(
             boolean owned, int readyInSec,
             int durationSec,     // timing duration (0 = instant skill)
             int activeForSec,    // seconds of ACTIVE remaining right now
-            String karmaNote) {} // "" or "needs karma ≥ 50" — the REAL lock reason
+            String karmaNote,    // "" or "needs karma ≥ 50" — the REAL lock reason
+            boolean enabled,     // false = the player switched it off themselves
+            boolean toggleable) {} // false = nothing to switch (active, or a fixed drawback)
 
     /** One clickable option in the race/class picker. */
     public record PickEntry(String id, String name, String description, boolean available) {}
@@ -97,6 +99,8 @@ public record CharacterSummaryPayload(
             buf.writeVarInt(s.durationSec());
             buf.writeVarInt(s.activeForSec());
             buf.writeUtf(s.karmaNote());
+            buf.writeBoolean(s.enabled());
+            buf.writeBoolean(s.toggleable());
         }
         buf.writeVarInt(p.loadout.size());
         for (String id : p.loadout) buf.writeUtf(id);
@@ -140,7 +144,8 @@ public record CharacterSummaryPayload(
             skills.add(new SkillEntry(buf.readUtf(), buf.readUtf(), buf.readUtf(), buf.readUtf(),
                     buf.readUtf(), buf.readVarInt(), buf.readVarInt(), buf.readVarInt(),
                     buf.readVarInt(), buf.readBoolean(), buf.readVarInt(),
-                    buf.readVarInt(), buf.readVarInt(), buf.readUtf()));
+                    buf.readVarInt(), buf.readVarInt(), buf.readUtf(),
+                    buf.readBoolean(), buf.readBoolean()));
         }
         int loadoutCount = buf.readVarInt();
         List<String> loadout = new ArrayList<>(loadoutCount);

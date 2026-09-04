@@ -282,6 +282,12 @@ public final class HandbookSync {
         description(lines, def.description(), Optional.empty());
         lines.add(Line.text(""));
         lines.add(Line.text("§7" + hb("hb.type") + ": §f" + def.type().name().toLowerCase(Locale.ROOT)));
+        // Where a player goes looking when a passive is unwelcome — night
+        // vision under a shader pack is the reported case. Named here because
+        // the handbook is the one place they will read about the skill at all.
+        if (SkillEngine.toggleable(def)) {
+            lines.add(Line.text("§8" + hbf("hb.toggleable", "id", id.getPath())));
+        }
 
         var costs = def.costs();
         StringBuilder cost = new StringBuilder("§7");

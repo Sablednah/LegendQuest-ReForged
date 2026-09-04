@@ -25,6 +25,24 @@ public interface SkillEffect {
     void apply(SkillContext ctx);
 
     /**
+     * Undo what {@link #apply} left behind, for a passive the player has just
+     * switched off.
+     *
+     * <p>A passive re-applies itself every few seconds, so merely stopping the
+     * tick is not the same as stopping the skill: the last application runs its
+     * full duration first, and the player watches the thing they just turned
+     * off fade out on its own schedule. A visible correction is itself a
+     * defect, so the switch takes effect at the moment it is thrown.</p>
+     *
+     * <p><b>Defaults to a no-op</b>, which is right for everything momentary —
+     * a heal that has already landed is not owed back. Only effects that leave
+     * lasting state on the caster need override it.</p>
+     */
+    default void revoke(SkillContext ctx) {
+        // nothing lingering to take back
+    }
+
+    /**
      * True when this is an act of aggression against somebody else.
      *
      * <p>Used to mark the caster as being in combat, so a server running

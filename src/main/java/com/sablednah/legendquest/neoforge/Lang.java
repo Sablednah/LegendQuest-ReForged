@@ -117,6 +117,10 @@ public final class Lang {
         def("ui.soul_bound", "Soul-bound:");
         def("ui.requires_level", "Requires {term.level}");
         def("ui.lvl_short", "lvl");
+        def("ui.off_label", "[off]");
+        def("ui.toggle_off_tip", "Click to switch off");
+        def("ui.toggle_on_tip", "Switched off — click to turn back on");
+        def("ui.always_on_tip", "Cannot be switched off.");
         def("ui.sp_short", "sp");
     }
 
@@ -125,6 +129,8 @@ public final class Lang {
         def("msg.login", "&6[LegendQuest]&r {race} {class} &7({term.level} {level}, {karma})");
         def("msg.login.content_gone", "&6This server no longer offers: &c{list}&6. Those choices were "
                 + "reset (your XP is safe) — pick a new {term.race} or {term.class} from the character panel.");
+        def("msg.login.skills_off", "&7You have switched off: {list}&7. "
+                + "&f/skill toggle <id>&7 turns one back on.");
         def("msg.levelup", "&6[LegendQuest]&a {term.level} up! You are now {term.level} {level}.");
         def("msg.levelup.title", "&6&l{term.level} {level}");
         def("msg.levelup.subtitle", "&e{class}");
@@ -132,7 +138,8 @@ public final class Lang {
 
         def("msg.skill.not_known", "&cYou don't know that {term.skill}.");
         def("msg.skill.not_loaded", "&c{term.skill} '{id}' is not loaded — tell an admin.");
-        def("msg.skill.not_active_type", "&e{skill} is {type} — it works on its own.");
+        def("msg.skill.not_active_type", "&e{skill} is {type} — it works on its own. &7/skill toggle {id} &eswitches it off.");
+        def("msg.skill.not_active_fixed", "&e{skill} is {type} — it works on its own.");
         def("msg.skill.level_locked", "&c{skill} unlocks at {term.level} {level}.");
         def("msg.skill.not_purchased", "&c{skill} must be bought first: /skill buy {id} ({cost} points)");
         def("msg.skill.soul_dark", "&5{skill} has left you — your {term.soul} is too dark.");
@@ -144,6 +151,11 @@ public final class Lang {
         def("msg.skill.not_virtuous", "&cYou are not virtuous enough for {skill}.");
         def("msg.skill.not_wicked", "&cYou are not wicked enough for {skill}.");
         def("msg.skill.fades_soon", "&e⌛ {skill} fades in 5 seconds!");
+        def("msg.skill.toggled_off", "&7{skill} is now &coff&7. &f/skill toggle {id}&7 turns it back on.");
+        def("msg.skill.toggled_on", "&a{skill} is now on.");
+        def("msg.skill.toggle_active", "&e{skill} is an {term.skill} you use — it never fires on its own, so there is nothing to switch off.");
+        def("msg.skill.toggle_fixed", "&e{skill} cannot be switched off — it is part of what you are.");
+        def("msg.skill.off_marker", "&c[off]");
 
         def("msg.buy.skill_not_offered", "&cYour {term.race}/{term.class} does not offer that {term.skill}.");
         def("msg.buy.no_purchase_needed", "&7No purchase needed — it unlocks at {term.level} {level}.");
@@ -365,6 +377,7 @@ public final class Lang {
         def("hb.taught_by", "Taught by:");
         def("hb.from_start", "from the start");
         def("hb.type", "Type");
+        def("hb.toggleable", "Don't want it? /skill toggle {id}");
         def("hb.cost_line", "Cost: &f{cost} {term.skill_points}");
         def("hb.needs_level", "needs {term.level} &f{level}");
         def("hb.soul_line", "{term.soul}: &f{band} &8(drifting out of band suspends the {term.feat})");

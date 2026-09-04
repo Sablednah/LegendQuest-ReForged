@@ -210,6 +210,28 @@ public final class LQEffects {
             // refusal separately is its own kind of spam.
             if (refusal != null) Feedback.actionBar(ctx.caster(), refusal);
         }
+
+        /**
+         * Take the effect back off when the passive that supplies it is
+         * switched off.
+         *
+         * <p>Only instances that look like ours: same amplifier, and no more
+         * time left than one application grants. A player who <em>drank</em> a
+         * night-vision potion has 3 or 8 minutes on the clock, so switching the
+         * racial passive off leaves their potion alone — the alternative is a
+         * toggle that quietly drinks your inventory.</p>
+         */
+        @Override
+        public void revoke(SkillContext ctx) {
+            int ticks = (int) Math.max(1, durationMs / 50);
+            for (LivingEntity e : target.resolveEntities(ctx)) {
+                MobEffectInstance active = e.getEffect(effect);
+                if (active != null && active.getAmplifier() == amplifier
+                        && active.getDuration() <= ticks) {
+                    e.removeEffect(effect);
+                }
+            }
+        }
     }
 
     /** Launch the caster along their look direction. The old Leap. */

@@ -122,7 +122,14 @@ public final class LQCommands {
                 .then(Commands.literal("buy")
                         .then(Commands.argument("skill", ResourceKeyArgument.key(LQRegistries.SKILL))
                                 .suggests(LQCommands::suggestOwnedSkills)
-                                .executes(LQCommands::skillBuy)));
+                                .executes(LQCommands::skillBuy)))
+                // Switch a passive or triggered skill off and on. No permission
+                // node: it is your own character, and the switch changes nothing
+                // anybody else can see.
+                .then(Commands.literal("toggle")
+                        .then(Commands.argument("skill", ResourceKeyArgument.key(LQRegistries.SKILL))
+                                .suggests(LQCommands::suggestTogglableSkills)
+                                .executes(LQCommands::skillToggle)));
 
         // The old /link|/bind: bind the held item type to a skill; right-click fires it.
         LiteralArgumentBuilder<CommandSourceStack> bind = Commands.literal("bind")
@@ -592,6 +599,9 @@ public final class LQCommands {
             sb.append("\n §7-§r ").append(owned ? "§a" : "§8").append(def.get().name())
                     .append(" §8(").append(id).append(") §7")
                     .append(def.get().type().name().toLowerCase());
+            // A vanilla client has no greyed-out icon to look at — this list is
+            // the only place a forgotten toggle can confess.
+            if (!pc.skillEnabled(id)) sb.append(" ").append(lc("msg.skill.off_marker"));
             if (!owned) {
                 sb.append(" §8[").append(lc("hb.grant_level", "level", grant.level()));
                 if (grant.cost() > 0) sb.append(", ").append(lc("hb.grant_sp", "cost", grant.cost()));
@@ -602,6 +612,25 @@ public final class LQCommands {
         });
         ctx.getSource().sendSuccess(() -> Feedback.colored(sb.toString()), false);
         return 1;
+    }
+
+    private static int skillToggle(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        Identifier skillId = resolve(ctx.getSource(), LQRegistries.SKILL,
+                ResourceKeyArgument.getRegistryKey(ctx, "skill", LQRegistries.SKILL, ERROR_UNKNOWN_SKILL),
+                ERROR_UNKNOWN_SKILL);
+        return CharacterActions.toggleSkill(player, skillId) ? 1 : 0;
+    }
+
+    private static java.util.concurrent.CompletableFuture<com.mojang.brigadier.suggestion.Suggestions> suggestTogglableSkills(
+            CommandContext<CommandSourceStack> ctx, com.mojang.brigadier.suggestion.SuggestionsBuilder builder) {
+        if (ctx.getSource().getEntity() instanceof ServerPlayer player) {
+            return SharedSuggestionProvider.suggest(friendlyIds(
+                    SkillEngine.grants(player).keySet().stream().filter(id ->
+                            SkillEngine.definition(player, id).map(SkillEngine::toggleable).orElse(false))),
+                    builder);
+        }
+        return builder.buildFuture();
     }
 
     private static int skillUse(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
