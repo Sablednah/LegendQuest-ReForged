@@ -7,12 +7,12 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- **Passive skills can be switched off.** Reported on CurseForge: an elf's Night
-  Vision looks wrong under a shader pack, and a racial passive gave its owner no
-  way to decline it. `/skill toggle <skill>` now switches any passive or
-  triggered skill off, and on again. On a modded client, click the skill's row
-  in the character panel — a switched-off skill greys its icon and reads
-  `[off]`.
+- **Passive skills can be switched off.** Suggested by **Dev_ShadoW** on
+  CurseForge: an elf's Night Vision looks wrong under a shader pack, and a
+  racial passive gave its owner no way to decline it. `/skill toggle <skill>`
+  now switches any passive or triggered skill off, and on again. On a modded
+  client, click the skill's row in the character panel — a switched-off skill
+  greys its icon and reads `[off]`.
 
   Switching one off takes effect at that instant. A passive re-applies itself
   every few seconds, so merely stopping it would leave the last application to
