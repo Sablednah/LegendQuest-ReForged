@@ -85,6 +85,34 @@ public record FlameRing(double radius, int flames) implements SkillEffect {
 }
 ```
 
+## Taking an effect back
+
+A player can switch a passive off (`/skill toggle`, or a click in the character
+panel). If your effect leaves lasting state on whoever it touched, say how to
+undo it:
+
+```java
+@Override
+public void revoke(SkillContext ctx) {
+    // Runs the instant the player switches the skill off.
+}
+```
+
+**Defaults to a no-op**, which is right for everything momentary — a heal that
+has already landed is not owed back, and a pack that ignores this behaves
+exactly as before.
+
+It matters because a passive re-applies itself every few seconds, so merely
+ceasing to tick is not the same as stopping: the last application runs its full
+duration and fades on its own schedule, while the player watches the thing they
+just switched off refuse to go. The built-in potion effect removes only what
+looks like its own — same amplifier, no more time left than one application
+grants — so a potion the player actually drank survives the toggle. Worth
+copying if your effect can collide with something a player owns.
+
+A skill that should never be switchable declares `toggleable: false` in its
+data instead; that is the author's decision, not the effect's.
+
 ## Saying an effect is hostile
 
 If your effect is an act of aggression, say so:

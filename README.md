@@ -65,6 +65,13 @@ effect types come from **skill-pack mods** — see
 item binding (`/bind`), or through the loadout: an ordered skill list cycled
 on one "spellbook" item, with five direct-use hotkeys.
 
+Passive and triggered skills can be switched off per player — `/skill toggle
+<skill>`, or click the skill's row in the character panel. Night vision is a
+gift until you install a shader pack. The setting persists, and the game names
+what you have switched off when you log in, so it can never be mistaken for a
+bug. A skill whose data says `toggleable: false` cannot be silenced, which is
+how a drawback (sunlight weakness) stays part of the bargain.
+
 ### Modded clients get the works
 *(all optional — vanilla clients join and play with chat/action-bar feedback)*
 - **Character panel** on the inventory screen: recipe-book-style slide-out
@@ -360,6 +367,7 @@ effects:
 | `xp` | `0` | Class XP awarded on a successful use. |
 | `trigger` | *(none)* | For `triggered` skills — see below. |
 | `passive_interval` | `3000` | ms between re-applications of a passive's effects. |
+| `toggleable` | `true` | May a player switch this off with `/skill toggle`? Set `false` for a drawback that is meant to be unconditional. Ignored for `active` skills, which nothing fires but the player. |
 | `effects` | `[]` | The list that IS the skill — see [Effects](#effects). |
 
 Triggers: `trigger: { on: melee_hit, chance: 25.0 }`. `on` is one of
@@ -535,6 +543,8 @@ so the panel and handbook follow the server's genre too.
 ## Commands
 `/lq` is the root; classic shorthands (`/race`, `/class`, `/skill`, `/stats`,
 `/karma`, `/roll`, `/bind`, `/loadout`, `/party`) are registered as aliases.
+`/skill toggle <skill>` switches a passive or triggered skill off, and on
+again; `/skill list` marks the switched-off ones.
 Admin: `/lq admin setrace|setclass|addxp|setkarma|level` (append `force` to
 setrace/setclass to allow illegal combos). Bare names work
 everywhere — `dwarf`, not `legendquest:dwarf`.

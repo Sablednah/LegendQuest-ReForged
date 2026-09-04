@@ -3,7 +3,7 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
-## 2.4.0 — unreleased
+## 2.4.0 — 2026-09-04
 
 ### Added
 
@@ -35,6 +35,26 @@ This project follows [Semantic Versioning](https://semver.org/).
   Skill-pack authors: `SkillEffect` gained `revoke()`, a no-op by default. An
   effect that leaves lasting state on the caster should override it, so the
   switch is honoured the moment it is thrown.
+
+### Fixed
+
+- **The YAML folder's README stopped recommending `/reload`.** It said "Run
+  /reload after editing", and that has never worked: races, classes, skills and
+  feats are datapack registries, frozen when the world loads, so a content edit
+  applies on **restart**. Every other place this is documented said so already —
+  and the game itself tells an op exactly this when they reload — but the file
+  sitting in the folder being edited, the copy most likely to be read, gave the
+  opposite instruction.
+
+  Servers that already have the file get the one wrong sentence corrected in
+  place on next start, since the file is only written when it is missing. Any
+  notes you added of your own are left alone.
+
+| Jar | Minecraft | NeoForge |
+|---|---|---|
+| `legendquest-2.4.0+mc1.21.11.jar` | 1.21.11 | any 21.11 build |
+| `legendquest-2.4.0+mc26.1.2.jar` | 26.1.2 | any 26.1 build |
+| `legendquest-2.4.0+mc26.2.jar` | 26.2 | any 26.2 build |
 
 ## 2.3.1 — 2026-08-30
 
