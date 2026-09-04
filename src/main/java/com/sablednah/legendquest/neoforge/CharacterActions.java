@@ -125,6 +125,40 @@ public final class CharacterActions {
      * must not leave five ghost books in the loadout strip. Karma-suspended
      * skills keep their slots (they still have a grant; they're sleeping).
      */
+    /**
+     * Switch a passive or triggered skill off, or back on.
+     *
+     * <p>Shared by {@code /skill toggle} and the click on its row in the skills
+     * panel, so the two can never grow different rules or different wording.
+     * The reply always names the way back — a player who switched night vision
+     * off through a shader pack must never have to go looking for how to undo
+     * it.</p>
+     *
+     * @return true if the skill actually changed state.
+     */
+    public static boolean toggleSkill(ServerPlayer player, Identifier skillId) {
+        String name = SkillEngine.definition(player, skillId)
+                .map(com.sablednah.legendquest.data.SkillDefinition::name).orElse(skillId.getPath());
+        switch (SkillEngine.toggle(player, skillId)) {
+            case SWITCHED_OFF -> {
+                Feedback.notify(player, Lang.fmt("msg.skill.toggled_off",
+                        "skill", name, "id", SkillEngine.friendlyId(player, skillId)));
+                CharacterSync.send(player);
+                return true;
+            }
+            case SWITCHED_ON -> {
+                Feedback.notify(player, Lang.fmt("msg.skill.toggled_on", "skill", name));
+                CharacterSync.send(player);
+                return true;
+            }
+            case ACTIVE_TYPE -> Feedback.notify(player, Lang.fmt("msg.skill.toggle_active", "skill", name));
+            case FIXED -> Feedback.notify(player, Lang.fmt("msg.skill.toggle_fixed", "skill", name));
+            case NOT_LOADED -> Feedback.notify(player, Lang.fmt("msg.skill.not_loaded", "id", skillId));
+            default -> Feedback.notify(player, Lang.get("msg.skill.not_known"));
+        }
+        return false;
+    }
+
     public static void pruneUnknownSkills(ServerPlayer player) {
         var known = SkillEngine.grants(player).keySet();
         PlayerCharacter pc = CharacterService.data(player);

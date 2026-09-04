@@ -34,6 +34,7 @@ public record SkillDefinition(
         SkillCosts costs,
         Optional<TriggerSpec> trigger,
         long passiveIntervalMs,
+        boolean toggleable,
         List<SkillEffect> effects) {
 
     /** GUI icon shown in the skills panel/HUD when nothing is configured. */
@@ -50,6 +51,11 @@ public record SkillDefinition(
             SkillCosts.MAP_CODEC.forGetter(SkillDefinition::costs),
             TriggerSpec.CODEC.optionalFieldOf("trigger").forGetter(SkillDefinition::trigger),
             Codec.LONG.optionalFieldOf("passive_interval", 3000L).forGetter(SkillDefinition::passiveIntervalMs),
+            // Opt OUT, not in: a passive is switchable unless its author says
+            // otherwise, because the common case is a comfort a player may not
+            // want (night vision through a shader pack). Set false for a
+            // drawback — sunlight weakness is not a setting.
+            Codec.BOOL.optionalFieldOf("toggleable", true).forGetter(SkillDefinition::toggleable),
             SkillEffect.CODEC.listOf().optionalFieldOf("effects", List.of())
                     .forGetter(SkillDefinition::effects))
             .apply(i, SkillDefinition::new));

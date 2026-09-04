@@ -71,6 +71,21 @@ public final class LQServerEvents {
             Feedback.chat(player, Lang.fmt("msg.login.content_gone",
                     "list", String.join(", ", dropped)));
         }
+        // Relogging is the first thing anyone tries when something "isn't
+        // working", so it is exactly where a skill they switched off months ago
+        // has to own up — before they go hunting for a bug that is a setting.
+        // Said only when there IS one, and it names the way back.
+        var off = SkillEngine.disabled(player);
+        if (!off.isEmpty()) {
+            // Name AND id: the name is what they recognise, the id is what the
+            // command takes, and a player who has to guess which is which has
+            // been made to think.
+            Feedback.chat(player, Lang.fmt("msg.login.skills_off", "list",
+                    off.stream()
+                            .map(e -> "&c" + e.getValue().name() + " &8("
+                                    + SkillEngine.friendlyId(player, e.getKey()) + ")")
+                            .collect(java.util.stream.Collectors.joining("&7, "))));
+        }
     }
 
     /**

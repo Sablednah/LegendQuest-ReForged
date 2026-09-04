@@ -47,6 +47,11 @@ public final class SkillEngine {
         }
     }
 
+    /** What {@link #toggle} did, or why it did nothing. */
+    public enum ToggleResult {
+        SWITCHED_ON, SWITCHED_OFF, NOT_KNOWN, NOT_LOADED, ACTIVE_TYPE, FIXED
+    }
+
     /** A cast that has been paid for and is waiting out buildup + delay. */
     private record Pending(UUID player, Identifier skillId, long fireAtMs) {}
 
@@ -84,6 +89,89 @@ public final class SkillEngine {
         return true;
     }
 
+    // --- switching a skill off ---
+
+    /**
+     * Can a player switch this skill off at all?
+     *
+     * <p>Two ways to be un-switchable, and they are different questions. An
+     * ACTIVE skill has nothing to silence — it only ever happens because
+     * somebody pressed something. A skill whose data says
+     * {@code toggleable: false} is one the author meant to be unconditional:
+     * a racial drawback is part of the bargain, not a setting.</p>
+     */
+    public static boolean toggleable(SkillDefinition def) {
+        return def.toggleable() && def.type() != SkillType.ACTIVE;
+    }
+
+    /**
+     * The shortest form of a skill id that a command will still resolve — the
+     * bare path unless another skill in the registry shares it. A message that
+     * tells a player what to type must not hand them something ambiguous.
+     */
+    public static String friendlyId(ServerPlayer player, Identifier skillId) {
+        long sharing = player.level().registryAccess().lookupOrThrow(LQRegistries.SKILL)
+                .listElements()
+                .filter(h -> h.key().identifier().getPath().equals(skillId.getPath()))
+                .count();
+        return sharing == 1 ? skillId.getPath() : skillId.toString();
+    }
+
+    /** Flip a skill on or off, taking back what it left behind on the way out. */
+    public static ToggleResult toggle(ServerPlayer player, Identifier skillId) {
+        SkillGrant grant = grants(player).get(skillId);
+        if (grant == null) return ToggleResult.NOT_KNOWN;
+        Optional<SkillDefinition> defOpt = definition(player, skillId);
+        if (defOpt.isEmpty()) return ToggleResult.NOT_LOADED;
+        SkillDefinition def = defOpt.get();
+        if (def.type() == SkillType.ACTIVE) return ToggleResult.ACTIVE_TYPE;
+        if (!def.toggleable()) return ToggleResult.FIXED;
+
+        PlayerCharacter pc = CharacterService.data(player);
+        boolean turningOn = !pc.skillEnabled(skillId);
+        pc.setSkillEnabled(skillId, turningOn);
+        // Both directions land NOW rather than at the next passive tick: up to
+        // three seconds of "did that do anything?" is exactly the doubt the
+        // toggle exists to remove.
+        if (def.type() == SkillType.PASSIVE) {
+            SkillContext ctx = SkillContext.of(player, CharacterService.level(player));
+            if (turningOn) {
+                // Only if they'd have had it anyway. Firing the effects on the
+                // way in is a courtesy against the tick delay, and a courtesy
+                // that hands a level-1 character one free application of a
+                // level-20 passive is a duplication bug wearing a nice coat.
+                if (owns(player, skillId, grant)) runEffects(def, ctx, skillId);
+            } else {
+                for (SkillEffect effect : def.effects()) {
+                    try {
+                        effect.revoke(ctx);
+                    } catch (Exception e) {
+                        LegendQuest.LOGGER.error("Skill {} effect {} failed to revoke", skillId, effect.type(), e);
+                    }
+                }
+            }
+        }
+        return turningOn ? ToggleResult.SWITCHED_ON : ToggleResult.SWITCHED_OFF;
+    }
+
+    /**
+     * Every switched-off skill the player currently has, in id order — the
+     * login reminder's material. Only skills they actually hold: a preference
+     * kept from a class they no longer play is nobody's business today.
+     */
+    public static java.util.List<java.util.Map.Entry<Identifier, SkillDefinition>> disabled(ServerPlayer player) {
+        java.util.List<java.util.Map.Entry<Identifier, SkillDefinition>> out = new java.util.ArrayList<>();
+        PlayerCharacter pc = CharacterService.data(player);
+        grants(player).entrySet().stream()
+                .sorted(java.util.Map.Entry.comparingByKey())
+                .forEach(entry -> {
+                    if (pc.skillEnabled(entry.getKey())) return;
+                    definition(player, entry.getKey()).ifPresent(def ->
+                            out.add(java.util.Map.entry(entry.getKey(), def)));
+                });
+        return out;
+    }
+
     // --- active use ---
 
     public static UseResult use(ServerPlayer player, Identifier skillId) {
@@ -101,7 +189,14 @@ public final class SkillEngine {
         }
         SkillDefinition def = defOpt.get();
         if (def.type() != SkillType.ACTIVE) {
-            Feedback.actionBar(player, Lang.fmt("msg.skill.not_active_type", "skill", def.name(), "type", def.type()));
+            // Naming the toggle here is the discovery path for a passive
+            // somebody wants rid of — but only where there IS one: telling a
+            // player to switch off a drawback that cannot be switched off is
+            // worse than saying nothing.
+            Feedback.actionBar(player, toggleable(def)
+                    ? Lang.fmt("msg.skill.not_active_type", "skill", def.name(), "type", def.type(),
+                            "id", friendlyId(player, skillId))
+                    : Lang.fmt("msg.skill.not_active_fixed", "skill", def.name(), "type", def.type()));
             return UseResult.NOT_ACTIVE;
         }
         if (CharacterService.level(player) < grant.level()) {
@@ -278,8 +373,10 @@ public final class SkillEngine {
     }
 
     private static void passiveTick(ServerPlayer player) {
+        PlayerCharacter pc = CharacterService.data(player);
         for (var entry : grants(player).entrySet()) {
             if (!owns(player, entry.getKey(), entry.getValue())) continue;
+            if (!pc.skillEnabled(entry.getKey())) continue; // switched off by its owner
             definition(player, entry.getKey()).ifPresent(def -> {
                 if (def.type() == SkillType.PASSIVE) {
                     runEffects(def, SkillContext.of(player, CharacterService.level(player)), entry.getKey());
@@ -301,6 +398,7 @@ public final class SkillEngine {
         for (var entry : grants(player).entrySet()) {
             Identifier skillId = entry.getKey();
             if (!owns(player, skillId, entry.getValue())) continue;
+            if (!pc.skillEnabled(skillId)) continue; // switched off by its owner
             Optional<SkillDefinition> defOpt = definition(player, skillId);
             if (defOpt.isEmpty()) continue;
             SkillDefinition def = defOpt.get();

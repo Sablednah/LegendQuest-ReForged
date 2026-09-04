@@ -77,7 +77,9 @@ public final class CharacterSync {
                             waitMs <= 0 ? 0 : (int) (waitMs / 1000 + 1),
                             (int) (timing.durationMs() / 1000),
                             activeFor,
-                            karmaNote));
+                            karmaNote,
+                            pc.skillEnabled(id),
+                            SkillEngine.toggleable(def.get())));
                 });
 
         return new CharacterSummaryPayload(

@@ -61,6 +61,14 @@ public final class PlayerCharacter {
      *  same reason as the others, but with a sharper edge: a player who thought
      *  this was still on has just said something private to everybody. */
     private boolean partyChatCapture = false;
+    /** Skills the player has switched off themselves. Stored as the DISABLED
+     *  set, never the enabled one: absent means on, so a passive that arrives
+     *  later — a new datapack skill, a race they just picked — is working from
+     *  the moment they have it, and the set stays empty for everyone who never
+     *  touches a toggle. Deliberately NOT pruned when a skill stops being
+     *  granted: switch class away and back, and your preference is as you left
+     *  it. */
+    private final Set<String> disabledSkills = new HashSet<>();
 
     public PlayerCharacter() {}
 
@@ -90,14 +98,17 @@ public final class PlayerCharacter {
      * MapCodec reads sibling keys, so the saved NBT layout is unchanged and
      * existing characters load with their switches intact.
      */
-    private record Toggles(boolean nameplateHidden, boolean partySpy, boolean partyChatCapture) {
+    private record Toggles(boolean nameplateHidden, boolean partySpy, boolean partyChatCapture,
+            List<String> disabledSkills) {
 
         static final MapCodec<Toggles> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 Codec.BOOL.optionalFieldOf("nameplate_hidden", false)
                         .forGetter(Toggles::nameplateHidden),
                 Codec.BOOL.optionalFieldOf("party_spy", false).forGetter(Toggles::partySpy),
                 Codec.BOOL.optionalFieldOf("party_chat_capture", false)
-                        .forGetter(Toggles::partyChatCapture))
+                        .forGetter(Toggles::partyChatCapture),
+                Codec.STRING.listOf().optionalFieldOf("disabled_skills", List.of())
+                        .forGetter(Toggles::disabledSkills))
                 .apply(i, Toggles::new));
     }
 
@@ -127,6 +138,7 @@ public final class PlayerCharacter {
         this.nameplateHidden = toggles.nameplateHidden();
         this.partySpy = toggles.partySpy();
         this.partyChatCapture = toggles.partyChatCapture();
+        this.disabledSkills.addAll(toggles.disabledSkills());
     }
 
     public static final MapCodec<PlayerCharacter> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -150,8 +162,8 @@ public final class PlayerCharacter {
                     .forGetter(c -> List.copyOf(c.loadout)),
             Codec.INT.optionalFieldOf("loadout_index", 0).forGetter(c -> c.loadoutIndex),
             Identifier.CODEC.optionalFieldOf("loadout_item").forGetter(c -> c.loadoutItem),
-            Toggles.MAP_CODEC.forGetter(c ->
-                    new Toggles(c.nameplateHidden, c.partySpy, c.partyChatCapture)))
+            Toggles.MAP_CODEC.forGetter(c -> new Toggles(c.nameplateHidden, c.partySpy,
+                    c.partyChatCapture, List.copyOf(c.disabledSkills))))
             .apply(i, PlayerCharacter::new));
 
     /** True when this player has switched their own floating nameplate off. */
@@ -258,6 +270,25 @@ public final class PlayerCharacter {
     public void buyFeat(Identifier featId, int cost) {
         purchasedFeats.add(featId.toString());
         skillPointsSpent += cost;
+    }
+
+    // --- per-skill on/off (passives and triggers the player has silenced) ---
+
+    /** True unless the player has switched this skill off themselves. Nothing
+     *  to do with karma suspension or level locks — those are the game's
+     *  opinion, this one is the player's. */
+    public boolean skillEnabled(Identifier skillId) {
+        return !disabledSkills.contains(skillId.toString());
+    }
+
+    /** @return true if this actually changed anything. */
+    public boolean setSkillEnabled(Identifier skillId, boolean enabled) {
+        return enabled ? disabledSkills.remove(skillId.toString())
+                : disabledSkills.add(skillId.toString());
+    }
+
+    public Set<String> disabledSkills() {
+        return Set.copyOf(disabledSkills);
     }
 
     public long lastUse(Identifier skillId) {
