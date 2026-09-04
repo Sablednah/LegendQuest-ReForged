@@ -33,8 +33,16 @@ import net.neoforged.fml.loading.FMLPaths;
 
 /**
  * The YAML front door: serves {@code config/legendquest/**\/*.yml} as a
- * datapack. Admins edit YAML; the registry loader sees JSON; {@code /reload}
- * re-opens the pack and picks up edits.
+ * datapack. Admins edit YAML; the registry loader sees JSON.
+ *
+ * <p><b>{@code /reload} re-opens this pack but does not apply the edit.</b>
+ * The conversion below runs again and logs the new file count, which reads
+ * exactly like success — but race/class/skill/feat are datapack registries,
+ * frozen at world load, and {@code MinecraftServer.reloadResources} rebuilds
+ * recipes, advancements, functions and tags without ever re-running the
+ * registry loader. Content changes land on RESTART. See
+ * {@code LQServerEvents.onDatapackSync}, which tells the op so at the moment
+ * they reload.</p>
  *
  * <p>Conversion happens eagerly when the pack opens. A file that is not valid
  * YAML is skipped with a loud log line — it never reaches the registry
@@ -96,6 +104,40 @@ public final class YamlConfigPack implements PackResources {
         }
     }
 
+    /**
+     * The one thing this folder most needs to say, and the one thing it used to
+     * say wrongly. Named as a remedy rather than a problem: an admin whose edit
+     * "did nothing" wants the next action, not a diagnosis.
+     */
+    private static final String RESTART_ADVICE = """
+
+            RESTART THE SERVER after editing. Races, classes, skills
+            and feats are frozen registries -- like vanilla's own
+            enchantments, they load once when the world starts, so
+            /reload will NOT pick up a change made here.
+            (messages.yml is different: text is not a registry, and
+            /reload does apply it.)
+            """;
+
+    /** The sentence shipped before this was known to be false. */
+    private static final String STALE_ADVICE = "overrides it. Run /reload after editing.\n";
+
+    /**
+     * Repair the advice in a README written before we knew better.
+     *
+     * <p>Every server that has ever run LegendQuest already has this file, and
+     * it is only written when missing — so leaving it alone would mean the
+     * correction reached new installs and nobody else, which is the wrong half
+     * of the audience. One sentence is replaced rather than the whole file
+     * rewritten: an admin who has added notes of their own keeps them.</p>
+     */
+    private static void correctStaleReloadAdvice(Path readme) throws IOException {
+        String existing = Files.readString(readme);
+        if (!existing.contains(STALE_ADVICE)) return;
+        Files.writeString(readme, existing.replace(STALE_ADVICE, "overrides it.\n" + RESTART_ADVICE));
+        LegendQuest.LOGGER.info("Corrected the out-of-date /reload advice in {}", readme);
+    }
+
     private static void ensureScaffold(Path root) {
         try {
             for (String folder : FOLDERS.keySet()) {
@@ -114,8 +156,10 @@ public final class YamlConfigPack implements PackResources {
                         The same schema also works as JSON in any datapack at
                         data/<pack>/legendquest/{race,class,skill}/<name>.json.
                         A YAML file here with the same name as a built-in entry
-                        overrides it. Run /reload after editing.
-                        """);
+                        overrides it.
+                        """ + RESTART_ADVICE);
+            } else {
+                correctStaleReloadAdvice(readme);
             }
         } catch (IOException e) {
             LegendQuest.LOGGER.error("Could not create config scaffold under {}", root, e);
