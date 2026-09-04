@@ -101,6 +101,11 @@ is the part worth copying.
   stat boosts, respec when you change your mind.
 - **A five-slot loadout bar** with drag-and-drop, cooldown readouts and cast
   feedback, plus binding a skill to a held item so right-click casts it.
+- **Passives you can switch off** — night vision is a gift until you install a
+  shader pack. `/skill toggle` silences any always-on skill and brings it back,
+  and the game reminds you on login which ones you have switched off, so a
+  setting never gets mistaken for a bug. Content authors can mark a skill
+  unswitchable where it is meant to be a drawback.
 - **Item proficiency per class** — wield what your class cannot use and you
   fumble.
 - **Karma** as a real mechanic, with good and evil paths that lock each other

@@ -3,6 +3,39 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 2.4.0 — unreleased
+
+### Added
+
+- **Passive skills can be switched off.** Reported on CurseForge: an elf's Night
+  Vision looks wrong under a shader pack, and a racial passive gave its owner no
+  way to decline it. `/skill toggle <skill>` now switches any passive or
+  triggered skill off, and on again. On a modded client, click the skill's row
+  in the character panel — a switched-off skill greys its icon and reads
+  `[off]`.
+
+  Switching one off takes effect at that instant. A passive re-applies itself
+  every few seconds, so merely stopping it would leave the last application to
+  run its full duration and fade out on its own schedule — a quarter of a minute
+  of the game disagreeing with the switch you just threw. A night-vision potion
+  you actually *drank* is left alone.
+
+  **The setting confesses on login**: "You have switched off: Night Vision
+  (night_vision)", with the command that undoes it. Relogging is the first thing
+  anybody tries when something "isn't working", so that is where a toggle you
+  set months ago has to own up. `/skill list` marks them too, and the handbook
+  page for a switchable skill names the command — no client mod needed for any
+  of it.
+
+- **Skill data can refuse to be switched off**: `"toggleable": false` on a skill
+  marks it unconditional, for the drawback case — a sunlight weakness is part of
+  the bargain of being what you are, not a setting. Defaults to true, so every
+  skill already written stays switchable.
+
+  Skill-pack authors: `SkillEffect` gained `revoke()`, a no-op by default. An
+  effect that leaves lasting state on the caster should override it, so the
+  switch is honoured the moment it is thrown.
+
 ## 2.3.1 — 2026-08-30
 
 ### Added
