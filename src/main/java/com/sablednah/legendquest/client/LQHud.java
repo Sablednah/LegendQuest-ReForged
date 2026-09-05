@@ -38,7 +38,16 @@ public final class LQHud {
         Minecraft mc = Minecraft.getInstance();
         CharacterSummaryPayload s = ClientCharacterState.summary();
         if (s == null || mc.player == null || mc.gui.hud.isHidden() || mc.gui.screen() != null) return;
-        if (mc.getDebugOverlay().showDebugScreen()) return;
+        // Hide for the debug CHARTS, not for the debug text. The text sits in
+        // the top corners; only the FPS/network/profiler graphs reach the
+        // bottom, where the mana bar and loadout strip live.
+        //
+        // showDebugScreen() is NOT "is the F3 overlay up". It is also true
+        // whenever any debug line has been pinned to stay on screen from the
+        // F3+F6 options -- so a player who pins one loses the whole HUD for
+        // the session, with two lines of text in a corner they never touch.
+        var debug = mc.getDebugOverlay();
+        if (debug.showFpsCharts() || debug.showNetworkCharts() || debug.showProfilerChart()) return;
 
         GuiGraphicsExtractor g = event.getGuiGraphics();
         Font font = mc.font;
