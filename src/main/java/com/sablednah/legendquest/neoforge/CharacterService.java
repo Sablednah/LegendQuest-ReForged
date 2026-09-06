@@ -255,7 +255,59 @@ public final class CharacterService {
                 .orElse(0.0D);
         int spBonus = mainClass(player).map(c -> c.levels().totalInt(lvl, LevelBonusGetters.SP)).orElse(0)
                 + race(player).map(r -> r.levels().totalInt(lvl, LevelBonusGetters.SP)).orElse(0);
-        return (int) Math.floor(race + cls) + spBonus;
+        // Granted points last: everything above is recomputed from race, class
+        // and level every call, so a hand-out folded into that would disappear
+        // the next time the character levelled.
+        return (int) Math.floor(race + cls) + spBonus + data(player).skillPointsGranted();
+    }
+
+    // --- levels, as an operation rather than a command ---
+
+    /**
+     * Put a character at an exact level, snapping XP to that level's threshold.
+     *
+     * <p>Extracted from {@code /lq admin level} so it is callable — a partner
+     * mod handing out a level should not have to either re-derive LegendQuest's
+     * XP arithmetic or shell out to a command string. The command now calls
+     * this, so there is one implementation and the two cannot drift.</p>
+     *
+     * @return false when the character has no main class, which is the one
+     *         case with nowhere to put the XP. Callers should say so rather
+     *         than report a silent success.
+     */
+    public static boolean setLevel(ServerPlayer player, int level) {
+        PlayerCharacter pc = data(player);
+        var classId = pc.mainClassId();
+        if (classId.isEmpty()) return false;
+        int before = level(player);
+        int after = Math.clamp(level, 0, LQConfig.MAX_LEVEL.get());
+        pc.setXp(classId.get(), Leveling.totalXpForLevel(after, LQConfig.XP_LEVEL_BASE.get()));
+        afterXpChange(player, before);
+        return true;
+    }
+
+    /**
+     * Move a character up or down by whole levels, <b>keeping part-levelled
+     * progress</b>: adding one level to someone 90% of the way to the next one
+     * leaves them 90% of the way to the one after, rather than throwing that
+     * progress away. That distinction is why this is not just
+     * {@code setLevel(level(player) + delta)}.
+     *
+     * @return false when the character has no main class.
+     */
+    public static boolean addLevels(ServerPlayer player, int delta) {
+        PlayerCharacter pc = data(player);
+        var classId = pc.mainClassId();
+        if (classId.isEmpty()) return false;
+        long base = LQConfig.XP_LEVEL_BASE.get();
+        int before = level(player);
+        int after = Math.clamp(before + delta, 0, LQConfig.MAX_LEVEL.get());
+        long xp = Math.max(0, pc.xpFor(classId.get())
+                + Leveling.totalXpForLevel(after, base)
+                - Leveling.totalXpForLevel(before, base));
+        pc.setXp(classId.get(), xp);
+        afterXpChange(player, before);
+        return true;
     }
 
     /** Best-of-main-and-sub for a class growth number (the old max rule). */

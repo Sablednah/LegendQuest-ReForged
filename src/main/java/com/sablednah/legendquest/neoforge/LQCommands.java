@@ -9,10 +9,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
-import com.sablednah.legendquest.LQConfig;
 import com.sablednah.legendquest.LQRegistries;
 import com.sablednah.legendquest.character.PlayerCharacter;
-import com.sablednah.legendquest.core.Leveling;
 import com.sablednah.legendquest.core.Mechanics;
 import com.sablednah.legendquest.core.SkillPhase;
 import com.sablednah.legendquest.core.Stat;
@@ -812,8 +810,6 @@ public final class LQCommands {
             throws CommandSyntaxException {
         var targets = EntityArgument.getPlayers(ctx, "players");
         int amount = IntegerArgumentType.getInteger(ctx, "level");
-        long base = LQConfig.XP_LEVEL_BASE.get();
-        int cap = LQConfig.MAX_LEVEL.get();
         int changed = 0;
         String lastName = "";
         int lastLevel = 0;
@@ -827,24 +823,19 @@ public final class LQCommands {
                         "msg.admin.level_none", "player", target.getName().getString())));
                 continue;
             }
-            int before = CharacterService.level(target);
-            int after = Math.clamp(switch (op) {
-                case SET -> amount;
-                case ADD -> before + amount;
-                case REMOVE -> before - amount;
-            }, 0, cap);
-            long xp = op == LevelOp.SET
-                    ? Leveling.totalXpForLevel(after, base)
-                    : Math.max(0, pc.xpFor(classId.get())
-                            + Leveling.totalXpForLevel(after, base)
-                            - Leveling.totalXpForLevel(before, base));
-
-            pc.setXp(classId.get(), xp);
-            CharacterService.afterXpChange(target, before);
+            // The arithmetic lives in CharacterService so a partner mod can
+            // grant a level without re-deriving it. SET snaps to the
+            // threshold; ADD/REMOVE keep part-levelled progress.
+            boolean ok = switch (op) {
+                case SET -> CharacterService.setLevel(target, amount);
+                case ADD -> CharacterService.addLevels(target, amount);
+                case REMOVE -> CharacterService.addLevels(target, -amount);
+            };
+            if (!ok) continue; // no main class; reported above
             changed++;
             lastName = target.getName().getString();
             lastLevel = CharacterService.level(target);
-            lastXp = xp;
+            lastXp = pc.xpFor(classId.get());
         }
 
         if (changed == 1) {
