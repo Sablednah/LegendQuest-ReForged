@@ -41,6 +41,12 @@ public final class PlayerCharacter {
     /** Feat ids bought with skill points. */
     private final Set<String> purchasedFeats = new HashSet<>();
     private int skillPointsSpent = 0;
+    /** Skill points handed out rather than earned — a Storyteller's reward for
+     *  good play, or an admin putting something right. Kept separate from the
+     *  level-derived pool because that pool is recomputed from race, class and
+     *  level every time it is asked for: a grant folded into it would vanish
+     *  the moment the character levelled. */
+    private int skillPointsGranted = 0;
     /** Skill id → last activation (epoch ms); drives the phase machine. */
     private final Map<String, Long> lastUse = new HashMap<>();
     /** Stat name → points bought with skill points ("expensive stat boosts"). */
@@ -73,12 +79,14 @@ public final class PlayerCharacter {
     public PlayerCharacter() {}
 
     /**
-     * Everything skill points were spent on, grouped so the main codec stays
-     * under RecordCodecBuilder's 16-field ceiling. A MapCodec reads sibling
-     * keys, so the saved NBT keeps the exact same flat layout as before.
+     * The skill-point ledger: what was spent, on what, and what was granted
+     * outright. Grouped so the main codec stays under RecordCodecBuilder's
+     * 16-field ceiling. A MapCodec reads sibling keys, so the saved NBT keeps
+     * the exact same flat layout as before, and an older save simply has no
+     * {@code skill_points_granted} key — which reads as zero, correctly.
      */
     private record Purchases(List<String> skills, List<String> feats,
-            int spent, Map<String, Integer> statBoosts) {
+            int spent, Map<String, Integer> statBoosts, int granted) {
 
         static final MapCodec<Purchases> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
                 Codec.STRING.listOf().optionalFieldOf("purchased_skills", List.of())
@@ -87,7 +95,8 @@ public final class PlayerCharacter {
                         .forGetter(Purchases::feats),
                 Codec.INT.optionalFieldOf("skill_points_spent", 0).forGetter(Purchases::spent),
                 Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("stat_boosts", Map.of())
-                        .forGetter(Purchases::statBoosts))
+                        .forGetter(Purchases::statBoosts),
+                Codec.INT.optionalFieldOf("skill_points_granted", 0).forGetter(Purchases::granted))
                 .apply(i, Purchases::new));
     }
 
@@ -129,6 +138,7 @@ public final class PlayerCharacter {
         this.purchasedSkills.addAll(purchases.skills());
         this.purchasedFeats.addAll(purchases.feats());
         this.skillPointsSpent = purchases.spent();
+        this.skillPointsGranted = purchases.granted();
         this.statBoosts.putAll(purchases.statBoosts());
         this.lastUse.putAll(lastUse);
         this.bindings.putAll(bindings);
@@ -153,7 +163,7 @@ public final class PlayerCharacter {
                     .forGetter(c -> Map.copyOf(c.classXp)),
             Purchases.MAP_CODEC.forGetter(c -> new Purchases(
                     List.copyOf(c.purchasedSkills), List.copyOf(c.purchasedFeats),
-                    c.skillPointsSpent, Map.copyOf(c.statBoosts))),
+                    c.skillPointsSpent, Map.copyOf(c.statBoosts), c.skillPointsGranted)),
             Codec.unboundedMap(Codec.STRING, Codec.LONG).optionalFieldOf("last_use", Map.of())
                     .forGetter(c -> Map.copyOf(c.lastUse)),
             Codec.unboundedMap(Codec.STRING, Codec.STRING).optionalFieldOf("bindings", Map.of())
@@ -233,6 +243,17 @@ public final class PlayerCharacter {
     }
 
     public int skillPointsSpent() { return skillPointsSpent; }
+
+    /** Skill points handed out rather than earned. Added to the level-derived
+     *  pool by {@code CharacterService.skillPointsTotal}. */
+    public int skillPointsGranted() { return skillPointsGranted; }
+
+    /** Hand out (or, with a negative delta, take back) skill points. Never
+     *  drops below zero: a grant that goes negative would quietly eat points
+     *  the character earned honestly. */
+    public void grantSkillPoints(int delta) {
+        this.skillPointsGranted = Math.max(0, this.skillPointsGranted + delta);
+    }
 
     // --- stat boosts (skill points made permanent) ---
 
