@@ -101,6 +101,9 @@ public final class Nameplate {
     /** Rebuilds the plate if anything visible changed. Cheap when it has not. */
     public static void refresh(ServerPlayer player) {
         if (!(player.level() instanceof ServerLevel level)) return;
+        // LQCommands and VanishSupport call this directly, so the guards in
+        // CharacterService and CharacterSync do not cover every route in.
+        if (!CharacterService.isRealPlayer(player)) return;
 
         // Dead counts as "no plate" for the same reason switched-off does. This
         // check belongs HERE and not only in follow(): the per-second character

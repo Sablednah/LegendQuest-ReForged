@@ -18,6 +18,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -40,6 +41,44 @@ public final class CharacterService {
 
     public static PlayerCharacter data(ServerPlayer player) {
         return player.getData(LQAttachments.CHARACTER);
+    }
+
+    /**
+     * Is this a real player, and therefore something that can have a character?
+     *
+     * <p><b>Being in the player list is the test</b>, because it is a test of
+     * <em>intent</em>. Mods stand fake players in for machines, automation and
+     * — since Cast — for NPC bodies, and essentially all of them hide from the
+     * player list precisely so they are not counted as people. Anything that
+     * has deliberately hidden itself from the roster has told us what it is;
+     * {@code instanceof FakePlayer} is kept alongside it as the cheap case,
+     * but on its own it would miss every NPC mod that does not happen to
+     * extend that class.</p>
+     *
+     * <p>Left unguarded this is visible to players, not merely untidy: a Cast
+     * NPC was seen wearing a LegendQuest nameplate reading
+     * "Undecided Citizen level 0", because the plate is a real
+     * {@code text_display} entity spawned into the world beside a body that
+     * has no character at all. Several of the events this mod listens to fire
+     * for fake players (equipment changes, interactions, block breaking), and
+     * every one of those handlers reaches a character.</p>
+     *
+     * <p><b>Do not move this test onto the clone path.</b> During
+     * {@code PlayerEvent.Clone} the new player is genuinely not in the list
+     * yet — {@code PlayerList.respawn} calls {@code restoreFrom} at line 408
+     * and {@code players.add} only at 440 — so gating there would silently
+     * stop the respawn modifier repair, which is a bug this mod has already
+     * fixed once. {@code onClone} calls {@code applyModifiers} directly for
+     * exactly that reason, and {@code PlayerRespawnEvent} fires after the add.</p>
+     *
+     * <p>The intended extension, when an NPC is meant to have a real race and
+     * class, is for the NPC mod to <em>tag</em> that body and for this test to
+     * honour the tag — an opt-in, so the default stays "not a person".</p>
+     */
+    public static boolean isRealPlayer(ServerPlayer player) {
+        if (player instanceof net.neoforged.neoforge.common.util.FakePlayer) return false;
+        MinecraftServer server = player.level().getServer();
+        return server != null && server.getPlayerList().getPlayer(player.getUUID()) == player;
     }
 
     // --- registry access ---
@@ -326,6 +365,9 @@ public final class CharacterService {
      * so a class change takes effect within a second.)
      */
     public static void refresh(ServerPlayer player) {
+        // Nothing to refresh on something that is not a person: no attribute
+        // modifiers to apply, no client to tell, no plate to hang.
+        if (!isRealPlayer(player)) return;
         applyModifiers(player);
         CharacterSync.send(player);
     }
