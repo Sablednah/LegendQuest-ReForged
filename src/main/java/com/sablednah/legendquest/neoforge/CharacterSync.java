@@ -26,6 +26,10 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class CharacterSync {
 
     public static void send(ServerPlayer player) {
+        // Guarded here as well as in CharacterService.refresh, because a dozen
+        // callers reach this directly. A fake player has no client to receive
+        // the summary and no business wearing a nameplate.
+        if (!CharacterService.isRealPlayer(player)) return;
         Net.sendIfAble(player, summarize(player));
         // Every meaningful character change already funnels through here, so
         // this is where the plate stays honest. refresh() no-ops unless the
