@@ -68,9 +68,17 @@ NAME="$(basename "$INSTANCE")"
 # before, by an earlier version of this script whose comment claimed Windows
 # would refuse the write for us.
 # ---------------------------------------------------------------------------
+# The character class must NOT exclude whitespace. Seven instances carry this
+# mod and two are named with spaces ("MobHealth - Forge", "Standards"), so a
+# \s in there truncates the name at the first space, compares "MobHealth"
+# against the folder "MobHealth - Forge", never matches, and the guard silently
+# passes while the game is running. That was the state of this script until
+# 2026-09-07; what stood in for the guard was `set -e` aborting on the rm below
+# failing with "Permission denied" -- luck, not a check. Let the name run to
+# the next backslash or quote.
 RUNNING="$(powershell.exe -NoProfile -Command \
   "Get-CimInstance Win32_Process | Where-Object { \$_.Name -like 'java*' } | ForEach-Object { \
-   \$m=[regex]::Match(\$_.CommandLine,'Instances\\\\([^\\\\\"\s]+)'); if (\$m.Success) { \$m.Groups[1].Value } }" \
+   \$m=[regex]::Match(\$_.CommandLine,'Instances\\\\([^\\\\\"]+)'); if (\$m.Success) { \$m.Groups[1].Value } }" \
   2>/dev/null | tr -d '\r' | sort -u || true)"
 
 if echo "$RUNNING" | grep -qxF "$NAME"; then
