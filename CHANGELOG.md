@@ -3,6 +3,52 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 2.4.1 — 2026-09-07
+
+### Fixed
+
+- **The HUD stopped vanishing for the rest of the session when a debug line is
+  pinned.** Minecraft 1.21.9 replaced F3+E with an F3+F6 "Debug Options" screen
+  that can pin individual debug lines to stay on screen permanently. Doing that
+  made LegendQuest's loadout bar, mana and level readouts disappear — not while
+  F3 was held, but from then on.
+
+  The HUD was hiding itself on `showDebugScreen()`, which is not "is the F3
+  overlay up": it is also true whenever *any* line has been pinned. So two
+  pinned lines in a corner cost a player their whole HUD until they unpinned
+  them, with nothing on screen to connect the two. It now keys on the debug
+  *charts* being genuinely visible, which are the only parts that reach the
+  bottom of the screen where these bars live.
+
+  Reported as a 26.x problem, because that is what it looked like. It affected
+  every version equally.
+
+- **NPCs no longer wear somebody else's nameplate.** Mods that stand a fake
+  player in for an NPC — Cast, and anything like it — got a LegendQuest plate
+  reading "Undecided Citizen level 0" floating over them, because a nameplate is
+  a real display entity spawned into the world beside a body that has no
+  character at all.
+
+  A dozen of the events LegendQuest listens to fire for fake players, and every
+  one of those handlers reached a character. Being in the server's player list
+  is now the test of whether something is a person: essentially every NPC and
+  automation mod hides from that list precisely so it is not counted as one.
+
+### Added
+
+- **Levels and granted skill points are API**, not only commands.
+  `CharacterService.setLevel` and `addLevels` change a character's level from
+  another mod — `addLevels` keeps part-earned progress towards the next one
+  rather than snapping it away — and skill points can be granted on top of the
+  per-level economy. Written for LegendQuest StoryTeller, which hands them out
+  as quest rewards, and available to anything else that depends on LegendQuest.
+
+| Jar | Minecraft | NeoForge |
+|---|---|---|
+| `legendquest-2.4.1+mc1.21.11.jar` | 1.21.11 | any 21.11 build |
+| `legendquest-2.4.1+mc26.1.2.jar` | 26.1.2 | any 26.1 build |
+| `legendquest-2.4.1+mc26.2.jar` | 26.2 | any 26.2 build |
+
 ## 2.4.0 — 2026-09-04
 
 ### Added

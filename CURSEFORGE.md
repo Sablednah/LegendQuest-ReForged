@@ -118,8 +118,9 @@ is the part worth copying.
   your own vocabulary file. It is a display entity, so unmodded clients see it,
   and it does not touch chat, the tab list, or the scoreboard team slot every
   other prefix mod wants. It knows when to get out of the way: no plate in
-  spectator or creative, none on a corpse, and none floating where a hidden
-  player used to be.
+  spectator or creative, none on a corpse, none floating where a hidden player
+  used to be, and none over an NPC that another mod is standing a fake player
+  in for.
 - **Class ranks and karma epithets** — a Fighter climbs Squire, Man-at-Arms,
   Knight, Champion, Lord; karma earns you "the good" or "the diabolic". Both
   genre packs have their own ranks throughout.
