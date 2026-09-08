@@ -39,6 +39,14 @@ public final class CharacterService {
     private static final double VANILLA_BASE_HEALTH = 20.0D;
     private static final double NORMAL_SPEED = 0.2D; // the old configs' "normal walking speed"
 
+    /**
+     * A player's character sheet.
+     *
+     * <p><b>Read by other mods</b> — Chronicler's
+     * {@code compat/LegendQuestCharacter} and StoryTeller both start here — so
+     * this is public API rather than an internal that happens to be public.
+     * Tell those repos before changing it.</p>
+     */
     public static PlayerCharacter data(ServerPlayer player) {
         return player.getData(LQAttachments.CHARACTER);
     }

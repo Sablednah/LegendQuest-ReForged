@@ -192,6 +192,16 @@ public final class PlayerCharacter {
     public void setPartyChatCapture(boolean capturing) { this.partyChatCapture = capturing; }
 
     // --- race / classes ---
+    //
+    // READ BY OTHER MODS. Chronicler's compat/LegendQuestCharacter reads all
+    // three to decide quest availability, and StoryTeller reads them too, so
+    // these three and CharacterService.data are effectively public API rather
+    // than internals that happen to be public. Tell those repos before moving
+    // them.
+    //
+    // They are safe ground to have offered: all three are codec-backed fields
+    // that a saved character's data depends on, so they cannot change shape
+    // without a save migration anyway.
     public Optional<Identifier> raceId() { return raceId; }
     public Optional<Identifier> mainClassId() { return mainClassId; }
     public Optional<Identifier> subClassId() { return subClassId; }
