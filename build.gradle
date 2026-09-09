@@ -128,7 +128,26 @@ dependencies {
     // A local file rather than a maven coordinate because Standards is not
     // published anywhere yet. fileTree so an absent jar just leaves the API off
     // the classpath instead of failing project configuration outright.
-    compileOnly fileTree(dir: '../SableCraft-Standards/build/libs', include: ['standards-*.jar'])
+    // VERSION-MATCHED, not a plain wildcard. That directory holds a standards
+    // jar for every Minecraft version this mod supports, and `standards-*.jar`
+    // hands javac all fifteen of them -- the same trap CLAUDE.md records for
+    // LegendQuest's own jars, and it matters more here now that we compile
+    // against Standards' client classes: the panel seam's PanelTheme exists on
+    // the 1.21.11 line and not yet on 26.x, so the wrong jar winning would
+    // either fail confusingly or compile against another version's API.
+    compileOnly files(provider {
+        def pattern = ~/standards-.*\+mc${minecraft_version}\.jar/
+        def found = (file('../SableCraft-Standards/build/libs').listFiles() ?: [])
+                .findAll { it.name ==~ pattern }
+                .sort { -it.lastModified() }
+        if (found.isEmpty()) {
+            logger.lifecycle("Standards: no jar for Minecraft ${minecraft_version}; " +
+                "cannot compile against it.")
+            return []
+        }
+        logger.lifecycle("Standards dependency: ${found.first().name}")
+        [found.first()]
+    })
 }
 
 // Expand mod metadata properties into the generated neoforge.mods.toml.
