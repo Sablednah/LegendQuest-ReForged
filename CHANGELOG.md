@@ -3,6 +3,36 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 2.5.0 — unreleased
+
+### Changed
+
+- **Standards is now a required dependency.** It was optional up to 2.4.1. The
+  character sheet and skills panel are built on Standards' inventory-panel
+  system, which is what lets several mods put a panel beside your inventory
+  without two of them fighting over the same space — LegendQuest's and Factions'
+  could previously overlap, because two mods shifting the inventory by vanilla's
+  own formula are indistinguishable from each other.
+
+  It also removes a way LegendQuest could break your game. The panel used to
+  read two of vanilla's private inventory-screen fields by reflection, from a
+  static initialiser that threw if either was ever renamed — which happens the
+  first time a player opens their inventory, so a Minecraft rename did not
+  degrade the panel, it took the inventory screen away from everyone on the
+  server. Standards carries a single access transformer instead, so the same
+  rename breaks a build rather than a game.
+
+  Nothing about the panel looks or behaves differently: the gold-on-black frame,
+  the tabs, the loadout dragging and the tooltips are all unchanged.
+
+### Fixed
+
+- **The build resolved the Standards jar with a bare wildcard**, handing the
+  compiler every version of it for every Minecraft line at once. Harmless while
+  the API it used happened to be identical across all of them, and not harmless
+  any more. Now matched to the Minecraft version being built, and it logs which
+  jar it chose.
+
 ## 2.4.1 — 2026-09-07
 
 ### Fixed

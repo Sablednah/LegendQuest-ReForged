@@ -250,20 +250,60 @@ Three things the code knows and nothing else says:
 - **They gate player self-selection only.** `/lq admin setrace` never consults
   them, and its `force` flag is about race/class *legality*, not permissions.
 
-## Standards integration (optional)
+## Standards integration (REQUIRED since 2.5.0)
 
-`ChatSupport` is the **only** class importing `com.sablednah.standards`, and the
-`ModList.isLoaded("standards")` guard sits outside it in `LegendQuest.java` —
-naming the class is what loads it, so an unguarded call is a
-`NoClassDefFoundError` everywhere Standards is absent.
+**Standards is a required dependency**, declared in the mods.toml template with
+`standards_version_range` from `gradle.properties`. It was optional up to 2.4.1;
+adopting its inventory-panel seam for the character sheet is what changed that,
+and the owner's reason was that several of his mods have panes planned and one
+of them doing it differently is the worse outcome.
+
+**Four** classes import `com.sablednah.standards`, one per seam, and no more
+should:
+
+| Class | Seam |
+|---|---|
+| `ChatSupport` | `api.chat` — decorators, router |
+| `CombatSupport` | `api.combat`, `api.groups` — combat tagging, claim checks |
+| `VanishSupport` | `api.vanish` — hide the nameplate with the player |
+| `CharacterPane` | `client.panels` — the inventory-panel seam |
+
+`CharacterPane` is also the only class that knows the *host* exists, and that is
+deliberate beyond tidiness: 26.x reworked GUI rendering wholesale, so everything
+host-coupled belongs in one small file that ports in one edit rather than being
+hunted through five. Standards reached the same rule porting its own client half.
+
+**This list was wrong before it was right.** Until 2.5.0 this section claimed
+`ChatSupport` was the *only* importer, and `CombatSupport` and `VanishSupport`
+had both been added since without anyone updating it — the trap recorded under
+"grep for the name of the thing you removed", found here by grepping rather than
+by trusting the sentence above it.
+
+The `ModList.isLoaded("standards")` guards around `ChatSupport` are now
+vestigial: FML will not load LegendQuest at all without Standards, so they can
+never be false. They are left in place because deleting a working guard buys
+nothing, but do not read them as evidence that the optional path still exists.
+
+**The panel seam is why the dependency is worth it.** `CharacterPanel` used to
+reflect into `AbstractContainerScreen.leftPos` and
+`AbstractRecipeBookScreen.recipeBookComponent`, from a *static initialiser* that
+threw `IllegalStateException("inventory screen internals moved")`. That fires
+the first time anything touches the class — the first time a player opens their
+inventory — so a vanilla field rename did not degrade LegendQuest, it took the
+inventory screen away from everyone on the server. Standards carries one access
+transformer instead, so the same rename breaks a build. It also arbitrates: two
+mods shifting the inventory by vanilla's own formula are indistinguishable from
+each other, so LegendQuest and Factions could previously overlap.
 
 - Class titles and karma epithets decorate chat via `NameDecorator`.
 - Party chat routes through their `ChatRouter`, so a muted player cannot talk to
   their party. **Priority runs opposite to `NameDecorator`**: routers are
   higher-wins (first claim ends it, one destination); decorators are
   higher-means-nearer-the-name (additive). Easy to "fix" wrongly.
-- Without Standards, `PartyChat.onChat` handles capture itself. Exactly one path
-  is ever live.
+- `PartyChat.onChat` is the no-Standards capture path. It can no longer be
+  reached now the dependency is required, but it is kept: exactly one path is
+  ever live, and it is the one that proves the router is not load-bearing for
+  correctness.
 - **Standards is also a permissions handler** (`permissionHandler =
   "standards:permissions"` in `neoforge-server.toml`), so it can grant our nodes
   on a server with no LuckPerms. It resolves **tier-first** — nearest tier with

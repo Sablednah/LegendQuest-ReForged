@@ -19,9 +19,15 @@ nobody claimed it. By the time `route` is called the sender is known not to be
 muted and their AFK is already cleared, so party chat inherits both for free.
 Registering also sets `PartyChat.routed`, which stands the listener below down.
 
-**Without Standards** — `PartyChat.onChat` on `ServerChatEvent` at `HIGH`.
-Standards is a soft dependency and capture is not allowed to need it. On a
+**Without Standards** — `PartyChat.onChat` on `ServerChatEvent` at `HIGH`. On a
 plain NeoForge server there is no mute to respect and nothing to collide with.
+
+⚠ **This path is now unreachable.** Standards became a required dependency in
+2.5.0 (the character panel is built on its inventory-panel seam), so FML will
+not load LegendQuest without it. The path is kept rather than deleted because it
+is what keeps capture honest — party chat does not *need* the router to be
+correct, and a second implementation that still compiles is the cheapest proof
+of that. Do not rely on it running.
 
 Both call `PartyChat.claim`, and nothing else decides, so the two paths cannot
 disagree about what capture means. Both are registered in the mod constructor,

@@ -130,7 +130,7 @@ is the part worth copying.
 - **Admin commands and permission nodes** for every race and class, for
   LuckPerms and friends.
 
-## Optional: better together with Standards
+## Required: Standards
 
 Install [Standards](https://www.curseforge.com/minecraft/mc-mods/sablecraft-standards)
 alongside it and LegendQuest reports things nothing else can see. A **missed**
@@ -142,8 +142,11 @@ hostile skill, so a peaceful faction or a safe zone can refuse it.
 Standards' vanish is honoured too: hide a player and their nameplate goes with
 them, instead of hovering over empty air announcing exactly where they are.
 
-Entirely optional. Without Standards none of it runs and everything above works
-exactly as described.
+**Standards is required, and has been since 2.5.0** — the character sheet and
+skills panel are built on its inventory-panel system, which is what lets several
+mods put a panel beside your inventory without two of them fighting over the
+same space. Install it alongside LegendQuest; both are on CurseForge and both
+are free.
 
 ---
 

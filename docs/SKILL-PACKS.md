@@ -152,7 +152,9 @@ because remembering to ask one is easy and remembering to ask two is not.
 Refuse **per target** rather than aborting: otherwise one protected player
 standing in a crowd shields everybody around them.
 
-All of it is inert without Standards, so none of it is a dependency you take
+Standards is a required dependency of LegendQuest itself as of 2.5.0, so this
+is present on any server running LegendQuest — but a skill pack still need not
+know or care about it, so none of it is a dependency you take
 on. The built-in `lifesteal` and `shockwave` in the example pack show it;
 `sense` deliberately does not, because revealing what is nearby is not an
 attack.
