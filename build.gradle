@@ -125,7 +125,21 @@ dependencies {
     // A local file rather than a maven coordinate because Standards is not
     // published anywhere yet. fileTree so an absent jar just leaves the API off
     // the classpath instead of failing project configuration outright.
-    compileOnly fileTree(dir: '../SableCraft-Standards/build/libs', include: ['standards-*.jar'])
+    // VERSION-MATCHED, not a bare wildcard: that directory holds a jar for
+    // every Minecraft line, and the panel seam's PanelTheme is not on all of
+    // them, so the wrong jar winning fails confusingly.
+    compileOnly files(provider {
+        def pattern = ~/standards-.*\+mc${minecraft_version}\.jar/
+        def found = (file('../SableCraft-Standards/build/libs').listFiles() ?: [])
+                .findAll { it.name ==~ pattern }
+                .sort { -it.lastModified() }
+        if (found.isEmpty()) {
+            logger.lifecycle("Standards: no jar for Minecraft ${minecraft_version}; cannot compile against it.")
+            return []
+        }
+        logger.lifecycle("Standards dependency: ${found.first().name}")
+        [found.first()]
+    })
 }
 
 // Expand mod metadata properties into the generated neoforge.mods.toml.
@@ -140,6 +154,7 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             mod_name               : mod_name,
             mod_license            : mod_license,
             mod_version            : mod_version,
+            standards_version_range: standards_version_range,
             mod_authors            : mod_authors,
             mod_description        : mod_description,
     ]

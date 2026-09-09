@@ -1,6 +1,5 @@
 package com.sablednah.legendquest.client;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,10 +15,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.gui.screens.inventory.AbstractRecipeBookScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.gui.screens.recipebook.RecipeBookComponent;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -41,8 +37,13 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
  * to remove it, click a slot to select. Hovering anything explains itself.
  * The stats tab grows race/class pickers while those choices are open.</p>
  *
- * <p>The screen's {@code leftPos} is vanilla's own re-centring knob (the
- * recipe book writes it too); we set it reflectively since there's no setter.
+ * <p><b>Standards owns where this sits.</b> It is registered as an inventory
+ * panel (see {@link CharacterPane}), so the host re-centres the screen, decides
+ * the rectangle, paints the frame from our colours, and arbitrates with other
+ * mods' panes. This class kept every pixel inside that rectangle and every
+ * click rule; it no longer reflects into vanilla's {@code leftPos} or the
+ * recipe book, which it used to do from a static initialiser that took the
+ * inventory screen away from every player if either field was ever renamed.
  * All edits go to the server as requests — the panel never mutates locally.</p>
  */
 public final class CharacterPanel {
@@ -58,12 +59,17 @@ public final class CharacterPanel {
     private static final int BOOK_SLOT_GAP = 5;
     private static final int ROW_HEIGHT = 18;
 
-    private enum Tab { NONE, STATS, SKILLS, PARTY }
+    /**
+     * Which content the pane shows. There is deliberately no NONE any more:
+     * whether the pane is showing is the host's answer, and keeping a second
+     * copy of it here is how the two drift apart.
+     */
+    enum Tab { STATS, SKILLS, PARTY }
 
     /** Height of the internal Stats|Skills|Party chip row. */
     private static final int TAB_BAR = 16;
 
-    private static Tab tab = Tab.NONE;
+    private static Tab tab = Tab.STATS;
     private static boolean openOnInit = false;
     private static Button statsButton;
     private static Button skillsButton;
@@ -97,36 +103,17 @@ public final class CharacterPanel {
         pendingTab = Tab.PARTY;
     }
 
-    // --- vanilla has no setters for these; see class javadoc ---
-
-    private static final Field LEFT_POS;
-    private static final Field RECIPE_COMPONENT;
-    static {
-        try {
-            LEFT_POS = AbstractContainerScreen.class.getDeclaredField("leftPos");
-            LEFT_POS.setAccessible(true);
-            RECIPE_COMPONENT = AbstractRecipeBookScreen.class.getDeclaredField("recipeBookComponent");
-            RECIPE_COMPONENT.setAccessible(true);
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException("LegendQuest: inventory screen internals moved", e);
-        }
-    }
-
-    private static RecipeBookComponent<?> recipeBook(InventoryScreen screen) {
-        try {
-            return (RecipeBookComponent<?>) RECIPE_COMPONENT.get(screen);
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    private static void setLeftPos(InventoryScreen screen, int value) {
-        try {
-            LEFT_POS.setInt(screen, value);
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException(e);
-        }
-    }
+    /**
+     * The rectangle the host last drew us into.
+     *
+     * <p>Every geometry helper below reads these rather than computing a
+     * position, so clicks land where the last frame actually painted — which is
+     * what an immediate-mode panel wants anyway, since {@code HOTSPOTS} is
+     * rebuilt each frame from the same numbers.</p>
+     */
+    private static int paneX;
+    private static int paneY;
+    private static int paneH;
 
     // --- lifecycle ---
 
@@ -158,43 +145,48 @@ public final class CharacterPanel {
         event.addListener(statsButton);
         event.addListener(skillsButton);
 
+        // The recipe book is no longer ours to fight: the host stands one
+        // pane down when the other opens, and tells us through onClose().
         if (openOnInit) {
             openOnInit = false;
-            tab = pendingTab;
-            RecipeBookComponent<?> book = recipeBook(screen);
-            if (book.isVisible()) book.toggleVisibility();
-        } else if (tab != Tab.NONE && recipeBook(screen).isVisible()) {
-            tab = Tab.NONE; // book state persists across screens; it was here first
+            CharacterPane.open(pendingTab);
         }
-        applyShift(screen);
         positionButtons(screen);
     }
 
     private static void toggleTab(InventoryScreen screen, Tab which) {
-        tab = tab == which ? Tab.NONE : which;
-        drag = null;
-        if (tab != Tab.NONE) {
-            RecipeBookComponent<?> book = recipeBook(screen);
-            if (book.isVisible()) book.toggleVisibility(); // tab switch: recipes → us
-        }
-        applyShift(screen);
+        CharacterPane.toggle(which);
         positionButtons(screen);
     }
 
-    /**
-     * Re-centre the GUI. With a tab open we use the recipe book's own shift
-     * formula; otherwise the book decides (it knows whether IT is open).
-     * Narrow windows (<379px, vanilla's cutoff) don't shift — the panel
-     * overlays to the left instead, clamped on-screen.
-     */
-    private static void applyShift(InventoryScreen screen) {
-        int leftPos;
-        if (tab != Tab.NONE && screen.width >= 379) {
-            leftPos = 177 + (screen.width - screen.getXSize() - 200) / 2;
-        } else {
-            leftPos = recipeBook(screen).updateScreenPosition(screen.width, screen.getXSize());
-        }
-        setLeftPos(screen, leftPos);
+    /** Which tab is showing — the host asks before toggling. */
+    static Tab tabShowing() {
+        return tab;
+    }
+
+    /** Switch content without touching whether the pane is showing. */
+    static void showTab(Tab which) {
+        tab = which;
+        drag = null;
+    }
+
+    static int panelWidth() {
+        return PANEL_WIDTH;
+    }
+
+    /** The height this pane would like, recomputed every frame because it
+     *  changes while open: the skills list grows with the skill count, and the
+     *  stats tab grows again with each picker the player opens. */
+    static int contentHeight() {
+        return panelHeight();
+    }
+
+    static boolean dragging() {
+        return drag != null;
+    }
+
+    static void clearDrag() {
+        drag = null;
     }
 
     /**
@@ -209,20 +201,23 @@ public final class CharacterPanel {
         if (skillsButton != null) skillsButton.setPosition(screen.getGuiLeft() + 148, y);
     }
 
+    /**
+     * The buttons chase the shift every frame.
+     *
+     * <p>Still needed with the host owning placement, because it writes
+     * vanilla's own {@code leftPos} rather than drawing at an offset — so
+     * {@code getGuiLeft()} keeps telling the truth and these three keep having
+     * to follow it, for the same reason the comment below has always given.</p>
+     */
     @SubscribeEvent
     static void onScreenRenderPre(ScreenEvent.Render.Pre event) {
-        if (!(event.getScreen() instanceof InventoryScreen screen)) return;
-        if (tab != Tab.NONE && recipeBook(screen).isVisible()) {
-            tab = Tab.NONE; // recipe button was clicked: tab switch us → recipes
-            drag = null;
-        }
-        positionButtons(screen);
+        if (event.getScreen() instanceof InventoryScreen screen) positionButtons(screen);
     }
 
     // --- geometry (pure functions of the summary; used by render AND clicks) ---
 
     private static int panelX(InventoryScreen screen) {
-        return Math.max(0, screen.getGuiLeft() - PANEL_WIDTH - GAP);
+        return paneX;
     }
 
     /** Where tab content starts: below the internal chip row. */
@@ -238,7 +233,7 @@ public final class CharacterPanel {
     /** Top of the panel: the GUI's top, but slid up if the content would
      *  run off the bottom of the screen (both pickers open, long skill list). */
     private static int panelY(InventoryScreen screen) {
-        return Math.max(2, Math.min(screen.getGuiTop(), screen.height - panelHeight() - 2));
+        return paneY;
     }
 
     private static CharacterSummaryPayload summary() {
@@ -246,9 +241,9 @@ public final class CharacterPanel {
     }
 
     private static boolean inPanel(InventoryScreen screen, double mx, double my) {
-        int x = panelX(screen);
-        int y = panelY(screen);
-        return mx >= x && mx < x + PANEL_WIDTH && my >= y && my < y + panelHeight();
+        int x = paneX;
+        int y = paneY;
+        return mx >= x && mx < x + PANEL_WIDTH && my >= y && my < y + paneH;
     }
 
     private static int panelHeight() {
@@ -313,32 +308,62 @@ public final class CharacterPanel {
 
     // --- mouse: clicks, drags, drops ---
 
+    /**
+     * The carried-item shield, which is all that is left for us to do here.
+     *
+     * <p>Clicks inside the pane arrive through {@link #clicked} — the host
+     * routes those. But the shield also covers the gap <em>outside</em> the
+     * pane: while an item is on the cursor, the whole region left of the GUI
+     * has to swallow clicks, because carrying a would-be spellbook towards the
+     * slot must never count as "clicked outside, throw it on the floor". The
+     * host cannot do that for us; it only knows about its own rectangle.</p>
+     *
+     * <p><b>The disjointness below is load-bearing, and nothing enforces it.</b>
+     * This listener and Standards' click routing are on the same event
+     * ({@code ScreenEvent.MouseButtonPressed.Pre}) at the same priority, and
+     * {@code @SubscribeEvent}'s {@code receiveCanceled} defaults to false — so
+     * whichever runs first, if it cancels, the other never sees the click at
+     * all. It is safe only because this claims space <em>outside</em> the pane
+     * and the host claims clicks <em>inside</em> it, so no click belongs to
+     * both.</p>
+     *
+     * <p>Widen this region, change the bounds test, or gain an off-by-one at
+     * some GUI scale, and the host's routing silently stops for that click. The
+     * symptom is <em>"the pane's buttons stop responding while an item is on
+     * the cursor"</em>, which reads as a Standards bug and is not one. If this
+     * ever needs to overlap the pane, say so upstream rather than raising the
+     * priority — ordering between two mods is a race that looks solved until a
+     * third handler registers.</p>
+     */
     @SubscribeEvent
     static void onMouseClick(ScreenEvent.MouseButtonPressed.Pre event) {
-        if (tab == Tab.NONE || !(event.getScreen() instanceof InventoryScreen screen)) return;
+        if (!CharacterPane.isOpen() || !(event.getScreen() instanceof InventoryScreen screen)) return;
+        if (screen.getMenu().getCarried().isEmpty()) return;
         double mx = event.getMouseX();
         double my = event.getMouseY();
-        // The shield: clicks on the panel never reach the screen, and with an
-        // item on the cursor the ENTIRE region left of the GUI is safe ground
-        // — carrying your would-be spellbook to the slot must never count as
-        // "clicked outside, throw it on the floor".
-        boolean carrying = !screen.getMenu().getCarried().isEmpty();
-        boolean shielded = inPanel(screen, mx, my) || (carrying && mx < screen.getGuiLeft());
-        if (!shielded) return;
-        event.setCanceled(true);
-        if (!inPanel(screen, mx, my)) return; // shielded gap: swallow, do nothing
+        // Not the pane itself: that is the host's click to route, and cancelling
+        // it here would take it away from the thing that handles it.
+        if (!inPanel(screen, mx, my) && mx < screen.getGuiLeft()) event.setCanceled(true);
+    }
+
+    /**
+     * A click the host has routed to us, inside the pane.
+     *
+     * @return true when it was ours, so the host knows to keep it from vanilla.
+     */
+    static boolean clicked(InventoryScreen screen, double mx, double my, int button) {
         CharacterSummaryPayload s = summary();
-        if (s == null) return;
+        if (s == null) return false;
 
         // Hotspots first — buy chips, handbook links, right-click lookups.
         for (Hot hot : HOTSPOTS) {
             if (mx >= hot.x0() && mx < hot.x1() && my >= hot.y0() && my < hot.y1()
-                    && (hot.button() == -1 || hot.button() == event.getButton())) {
+                    && (hot.button() == -1 || hot.button() == button)) {
                 hot.action().run();
-                return;
+                return true;
             }
         }
-        if (event.getButton() != 0) return; // everything below is left-click
+        if (button != 0) return true; // everything below is left-click; still ours
 
         if (tab == Tab.SKILLS) {
             // Spellbook slot: click with an item on the cursor to set it,
@@ -351,12 +376,12 @@ public final class CharacterPanel {
                 } else if (!s.loadoutItem().isEmpty()) {
                     send(new LoadoutEditPayload(LoadoutEditPayload.SET_ITEM, "", -1, -1));
                 }
-                return;
+                return true;
             }
             int slot = slotAt(screen, mx, my);
             if (slot >= 0 && slot < s.loadout().size()) {
                 drag = new Drag(s.loadout().get(slot), slot, mx, my);
-                return;
+                return true;
             }
             int row = listRowAt(screen, mx, my);
             if (row >= 0) {
@@ -373,10 +398,10 @@ public final class CharacterPanel {
                             0, skill.id()));
                 }
             }
-            return;
+            return true;
         }
 
-        if (tab != Tab.STATS) return; // party tab is hotspot-only
+        if (tab != Tab.STATS) return true; // party tab is hotspot-only
 
         // Stats tab: picker rows.
         PickerHit hit = pickerRowAt(screen, mx, my);
@@ -384,30 +409,35 @@ public final class CharacterPanel {
             send(new ChoosePayload(hit.race() ? ChoosePayload.RACE : ChoosePayload.MAIN_CLASS,
                     hit.entry().id()));
         }
+        return true;
     }
 
+    /**
+     * The release half of the shield.
+     *
+     * <p>Quickcraft's release-outside path is another way to fling a carried
+     * item, so a release over the shielded gap is swallowed for the same reason
+     * a press is. A release inside the pane is the host's, and reaches
+     * {@link #released}.</p>
+     */
     @SubscribeEvent
     static void onMouseRelease(ScreenEvent.MouseButtonReleased.Pre event) {
-        if (!(event.getScreen() instanceof InventoryScreen screen)) return;
-        // Releases over the shield are swallowed too — quickcraft's
-        // release-outside path is another way to fling a carried item.
-        if (drag == null) {
-            if (tab != Tab.NONE
-                    && (inPanel(screen, event.getMouseX(), event.getMouseY())
-                            || (!screen.getMenu().getCarried().isEmpty()
-                                    && event.getMouseX() < screen.getGuiLeft()))) {
-                event.setCanceled(true);
-            }
-            return;
+        if (!CharacterPane.isOpen() || !(event.getScreen() instanceof InventoryScreen screen)) return;
+        if (screen.getMenu().getCarried().isEmpty()) return;
+        double mx = event.getMouseX();
+        if (!inPanel(screen, mx, event.getMouseY()) && mx < screen.getGuiLeft()) {
+            event.setCanceled(true);
         }
+    }
+
+    /** A release the host routed to us: the end of a loadout drag. */
+    static void released(InventoryScreen screen, double mx, double my) {
         Drag d = drag;
         drag = null;
+        if (d == null) return;
         CharacterSummaryPayload s = summary();
         if (s == null) return;
-        double mx = event.getMouseX();
-        double my = event.getMouseY();
         boolean moved = Math.abs(mx - d.pressX()) > 4 || Math.abs(my - d.pressY()) > 4;
-        if (inPanel(screen, mx, my)) event.setCanceled(true);
 
         int slot = slotAt(screen, mx, my);
         if (d.fromSlot() < 0) {
@@ -438,25 +468,22 @@ public final class CharacterPanel {
 
     // --- drawing ---
 
-    @SubscribeEvent
-    static void onScreenRender(ScreenEvent.Render.Post event) {
-        if (tab == Tab.NONE || !(event.getScreen() instanceof InventoryScreen screen)) return;
-        GuiGraphicsExtractor g = event.getGuiGraphics();
-        Font font = screen.getMinecraft().font;
-        mouseX = event.getMouseX();
-        mouseY = event.getMouseY();
+    /**
+     * Draw into the rectangle the host chose.
+     *
+     * <p>The plate and its gold border are the host's now, painted from the
+     * {@code PanelTheme} handed over in {@link CharacterPane} — so several
+     * mods' panes share one shape without Standards holding anyone's palette.
+     * Everything inside is still ours.</p>
+     */
+    static void renderInto(InventoryScreen screen, GuiGraphicsExtractor g, Font font,
+            int x, int y, int h, int mx, int my) {
+        mouseX = mx;
+        mouseY = my;
+        paneX = x;
+        paneY = y;
+        paneH = h;
         HOTSPOTS.clear();
-
-        int x = panelX(screen);
-        int y = panelY(screen);
-        int h = panelHeight();
-
-        // Dark plate with a gold frame.
-        g.fill(x, y, x + PANEL_WIDTH, y + h, 0xE8101018);
-        g.fill(x, y, x + PANEL_WIDTH, y + 1, 0xFFDAA520);
-        g.fill(x, y + h - 1, x + PANEL_WIDTH, y + h, 0xFFDAA520);
-        g.fill(x, y, x + 1, y + h, 0xFFDAA520);
-        g.fill(x + PANEL_WIDTH - 1, y, x + PANEL_WIDTH, y + h, 0xFFDAA520);
 
         CharacterSummaryPayload s = summary();
         if (s == null) {
@@ -509,8 +536,20 @@ public final class CharacterPanel {
             g.itemDecorations(font, carried, (int) mouseX - 8, (int) mouseY - 8);
         }
 
-        drawPendingTooltip(g, font); // last, so nothing paints over it
-        ClientNotices.draw(g, font); // server notices beat even the tooltip
+    }
+
+    /**
+     * Tooltips and server notices, in the host's overlay pass.
+     *
+     * <p>These used to be the last two calls of our own render for the reason
+     * the old comment gave — nothing must paint over them. The host now draws
+     * every pane and every frame before calling this, which is a stronger
+     * guarantee than being last in one method, and it never scissors, so a
+     * tooltip may still hang out over the inventory.</p>
+     */
+    static void renderTooltip(GuiGraphicsExtractor g, Font font) {
+        drawPendingTooltip(g, font);
+        ClientNotices.draw(g, font); // notices beat even the tooltip
     }
 
     /** One internal tab chip; returns the next chip's x. */
