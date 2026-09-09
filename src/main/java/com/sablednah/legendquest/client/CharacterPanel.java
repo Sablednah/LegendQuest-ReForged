@@ -317,6 +317,23 @@ public final class CharacterPanel {
      * has to swallow clicks, because carrying a would-be spellbook towards the
      * slot must never count as "clicked outside, throw it on the floor". The
      * host cannot do that for us; it only knows about its own rectangle.</p>
+     *
+     * <p><b>The disjointness below is load-bearing, and nothing enforces it.</b>
+     * This listener and Standards' click routing are on the same event
+     * ({@code ScreenEvent.MouseButtonPressed.Pre}) at the same priority, and
+     * {@code @SubscribeEvent}'s {@code receiveCanceled} defaults to false — so
+     * whichever runs first, if it cancels, the other never sees the click at
+     * all. It is safe only because this claims space <em>outside</em> the pane
+     * and the host claims clicks <em>inside</em> it, so no click belongs to
+     * both.</p>
+     *
+     * <p>Widen this region, change the bounds test, or gain an off-by-one at
+     * some GUI scale, and the host's routing silently stops for that click. The
+     * symptom is <em>"the pane's buttons stop responding while an item is on
+     * the cursor"</em>, which reads as a Standards bug and is not one. If this
+     * ever needs to overlap the pane, say so upstream rather than raising the
+     * priority — ordering between two mods is a race that looks solved until a
+     * third handler registers.</p>
      */
     @SubscribeEvent
     static void onMouseClick(ScreenEvent.MouseButtonPressed.Pre event) {
