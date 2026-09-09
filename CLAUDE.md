@@ -338,6 +338,24 @@ each other, so LegendQuest and Factions could previously overlap.
   `debug=false` in every run: the answer was in the evidence for hours, unread,
   because the search was for a version bug. A flag you log is only useful if you
   ask what the other value would mean.
+- **A dependency range is written against a version number, and that number
+  lies while the other mod is still moving.** Three times in one day: StoryTeller
+  declared `legendquest [2.4.0,)` while calling API that only shipped in 2.4.1;
+  Standards grew `Action`'s constructor without bumping, so an already-shipped
+  StoryTeller hit `NoSuchMethodError` against a jar its range called fine; and
+  LegendQuest then declared `standards [1.6.0,)` for a panel seam that does not
+  exist in the published 1.6.0. **The third was written by the session that had
+  fixed the first nine hours earlier**, which is the part worth remembering — it
+  is not a trap you stop falling into by having seen it.
+
+  A range admitting a version the code cannot run against is worse than no range:
+  it converts "missing dependency, install it" into a `NoSuchMethodError`
+  somewhere unrelated, long after start-up, in a mod that looks innocent. Ask the
+  other mod to bump *before* you depend on the new thing, and put the reason
+  beside the number in `gradle.properties` — a range one minor ahead of the
+  published release looks like a mistake and the next person will helpfully
+  correct it.
+
 - **A count and the thing counted are different questions.** "36 errors"
   overstated distinct problems fourfold; `head -30` on a 36-line list under-
   reported a figure that was then quoted.
