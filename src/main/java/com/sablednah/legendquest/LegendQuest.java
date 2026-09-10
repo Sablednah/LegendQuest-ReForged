@@ -30,7 +30,10 @@ public class LegendQuest {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public LegendQuest(IEventBus modEventBus, ModContainer modContainer) {
-        LOGGER.info("LegendQuest ReForged initialising");
+        // The build, not just the version: says what RAN when somebody reports
+        // a bug, which a version number cannot answer for a jar rebuilt under
+        // an unchanged number.
+        LOGGER.info("LegendQuest ReForged {} initialising", BuildInfo.describe());
 
         modContainer.registerConfig(ModConfig.Type.COMMON, LQConfig.SPEC);
 
