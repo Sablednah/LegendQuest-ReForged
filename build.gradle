@@ -177,7 +177,19 @@ var buildCommit = gitOut(projectDir, "git", "rev-parse", "--short=8", "HEAD") ?:
 var buildBranch = gitOut(projectDir, "git", "rev-parse", "--abbrev-ref", "HEAD") ?: "unknown"
 var buildDirty  = gitOut(projectDir, "git", "status", "--porcelain")
 if (buildDirty) buildCommit += "-dirty"   // built from uncommitted changes; say so
-var buildTime = new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+// The COMMIT's timestamp, not the wall clock. A wall-clock stamp changes on
+// every Gradle invocation, so the generated resource changes, so processResources
+// and jar are never up to date -- measured here as a no-op build going from ~3s
+// to ~25s, permanently. Using the commit makes the stamp a pure function of the
+// commit: tasks cache properly and the build becomes reproducible.
+//
+// On a -dirty build this is the commit's time rather than the build's, and
+// nothing is lost by that: -dirty already says the bytes are not the commit's,
+// and the jar's own mtime answers "when was this written".
+var commitEpoch = gitOut(projectDir, "git", "show", "-s", "--format=%ct", "HEAD")
+var buildTime = commitEpoch
+        ? new Date(commitEpoch.toLong() * 1000L).format("yyyy-MM-dd'T'HH:mm:ss'Z'", TimeZone.getTimeZone("UTC"))
+        : "unknown"
 logger.lifecycle("Build stamp: ${buildCommit} on ${buildBranch} at ${buildTime}")
 
 var generateModMetadata = tasks.register("generateModMetadata", ProcessResources) {
