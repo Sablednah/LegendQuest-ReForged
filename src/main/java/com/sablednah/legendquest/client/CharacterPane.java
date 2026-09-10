@@ -136,10 +136,24 @@ public final class CharacterPane implements InventoryPanel {
         return CharacterPanel.dragging();
     }
 
+    /**
+     * Deliberately a no-op: releases are handled by LegendQuest's own listener.
+     *
+     * <p>This method returns {@code void}, so a panel cannot tell the host it
+     * consumed a release and the host cannot cancel one for it — unlike
+     * {@code mouseClicked}, whose boolean it uses for exactly that. An
+     * unconsumed release reaches vanilla, which reads a release outside its own
+     * bounds with an item on the cursor as "throw it on the floor". Carrying a
+     * spellbook to the slot dropped it on the ground.</p>
+     *
+     * <p>{@link CharacterPanel} cancels the event itself and resolves the drag
+     * in the same handler, so nothing is left depending on listener order.
+     * Reported upstream; if the seam ever returns a boolean here this can go
+     * back to delegating.</p>
+     */
     @Override
     public void mouseReleased(double mouseX, double mouseY, int button) {
-        InventoryScreen screen = screen();
-        if (screen != null) CharacterPanel.released(screen, mouseX, mouseY);
+        // intentionally empty -- see javadoc
     }
 
     /** Every call means start again, so an interrupted drag never survives. */

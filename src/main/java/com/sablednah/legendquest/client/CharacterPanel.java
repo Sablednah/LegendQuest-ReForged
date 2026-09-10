@@ -413,21 +413,39 @@ public final class CharacterPanel {
     }
 
     /**
-     * The release half of the shield.
+     * Releases are handled here rather than through the seam, and they have to
+     * be.
      *
-     * <p>Quickcraft's release-outside path is another way to fling a carried
-     * item, so a release over the shielded gap is swallowed for the same reason
-     * a press is. A release inside the pane is the host's, and reaches
-     * {@link #released}.</p>
+     * <p><b>{@code InventoryPanel.mouseReleased} returns void.</b> There is no
+     * way for a panel to tell the host it consumed a release, so the host
+     * cannot cancel one on our behalf — unlike {@code mouseClicked}, whose
+     * boolean it uses for exactly that. A release inside the pane therefore
+     * reaches vanilla, and vanilla reads a release outside its own bounds with
+     * an item on the cursor as "throw it on the floor". Which is what happened:
+     * carrying a spellbook to the slot dropped it on the ground.</p>
+     *
+     * <p>So this cancels the release itself, over the pane <em>and</em> over the
+     * shielded gap left of the GUI, and resolves the loadout drag directly
+     * rather than waiting to be called back. The drag resolution must live on
+     * this side of the cancel: cancelling first and hoping the host still calls
+     * us would depend on listener ordering that nothing guarantees.</p>
      */
     @SubscribeEvent
     static void onMouseRelease(ScreenEvent.MouseButtonReleased.Pre event) {
         if (!CharacterPane.isOpen() || !(event.getScreen() instanceof InventoryScreen screen)) return;
-        if (screen.getMenu().getCarried().isEmpty()) return;
         double mx = event.getMouseX();
-        if (!inPanel(screen, mx, event.getMouseY()) && mx < screen.getGuiLeft()) {
-            event.setCanceled(true);
+        double my = event.getMouseY();
+        boolean overPane = inPanel(screen, mx, my);
+        boolean overShield = !screen.getMenu().getCarried().isEmpty() && mx < screen.getGuiLeft();
+
+        if (drag == null) {
+            // Quickcraft's release-outside path is another way to fling a
+            // carried item, so a release over either region is swallowed.
+            if (overPane || overShield) event.setCanceled(true);
+            return;
         }
+        if (overPane || overShield) event.setCanceled(true);
+        released(screen, mx, my);
     }
 
     /** A release the host routed to us: the end of a loadout drag. */
