@@ -413,48 +413,52 @@ public final class CharacterPanel {
     }
 
     /**
-     * Releases are handled here rather than through the seam, and they have to
-     * be.
+     * The release half of the carried-item shield, for the gap the host cannot
+     * see.
      *
-     * <p><b>{@code InventoryPanel.mouseReleased} returns void.</b> There is no
-     * way for a panel to tell the host it consumed a release, so the host
-     * cannot cancel one on our behalf — unlike {@code mouseClicked}, whose
-     * boolean it uses for exactly that. A release inside the pane therefore
-     * reaches vanilla, and vanilla reads a release outside its own bounds with
-     * an item on the cursor as "throw it on the floor". Which is what happened:
-     * carrying a spellbook to the slot dropped it on the ground.</p>
+     * <p>Releases over the pane are the host's now — {@code mouseReleased}
+     * returns boolean since Standards 1.8.0, so {@link CharacterPane} consumes
+     * them properly. What remains is the region <em>outside</em> the pane:
+     * while an item is on the cursor the whole strip left of the GUI has to
+     * swallow releases too, because quickcraft's release-outside path is
+     * another way to fling one. The host owns its rectangle and cannot own
+     * that.</p>
      *
-     * <p>So this cancels the release itself, over the pane <em>and</em> over the
-     * shielded gap left of the GUI, and resolves the loadout drag directly
-     * rather than waiting to be called back. The drag resolution must live on
-     * this side of the cancel: cancelling first and hoping the host still calls
-     * us would depend on listener ordering that nothing guarantees.</p>
+     * <p>Disjoint from the host's routing by construction, which is what makes
+     * the undefined listener ordering safe — see {@link #onMouseClick}.</p>
      */
     @SubscribeEvent
     static void onMouseRelease(ScreenEvent.MouseButtonReleased.Pre event) {
         if (!CharacterPane.isOpen() || !(event.getScreen() instanceof InventoryScreen screen)) return;
         double mx = event.getMouseX();
         double my = event.getMouseY();
-        boolean overPane = inPanel(screen, mx, my);
-        boolean overShield = !screen.getMenu().getCarried().isEmpty() && mx < screen.getGuiLeft();
 
-        if (drag == null) {
-            // Quickcraft's release-outside path is another way to fling a
-            // carried item, so a release over either region is swallowed.
-            if (overPane || overShield) event.setCanceled(true);
-            return;
+        // Resolve a loadout drag here as well as through the seam, and do it
+        // whatever the position. "Drop it anywhere but the strip" is how a skill
+        // is REMOVED, so that release lands outside the pane -- and if the host
+        // bounds-checks the releases it routes, it would never reach us and the
+        // drag would still be running on the next click. Calling it from both
+        // sides is safe because released() clears the drag before doing
+        // anything, so the second call finds nothing to do.
+        if (drag != null) released(screen, mx, my);
+
+        if (screen.getMenu().getCarried().isEmpty()) return;
+        if (!inPanel(screen, mx, my) && mx < screen.getGuiLeft()) {
+            event.setCanceled(true);
         }
-        if (overPane || overShield) event.setCanceled(true);
-        released(screen, mx, my);
     }
 
     /** A release the host routed to us: the end of a loadout drag. */
-    static void released(InventoryScreen screen, double mx, double my) {
+    static boolean released(InventoryScreen screen, double mx, double my) {
+        // Over the pane at all? Then the release is ours whether or not a drag
+        // was running -- otherwise it reaches vanilla, which reads a release
+        // outside its own bounds with a carried item as "throw it on the floor".
+        boolean ours = inPanel(screen, mx, my);
         Drag d = drag;
         drag = null;
-        if (d == null) return;
+        if (d == null) return ours;
         CharacterSummaryPayload s = summary();
-        if (s == null) return;
+        if (s == null) return ours;
         boolean moved = Math.abs(mx - d.pressX()) > 4 || Math.abs(my - d.pressY()) > 4;
 
         int slot = slotAt(screen, mx, my);
@@ -466,7 +470,7 @@ public final class CharacterPanel {
             } else if (!moved) {
                 send(new LoadoutEditPayload(LoadoutEditPayload.ADD, d.skillId(), -1, -1));
             }
-            return;
+            return ours;
         }
         // From a slot: click selects, drop on the strip reorders, drop anywhere else removes.
         if (!moved) {
@@ -477,6 +481,7 @@ public final class CharacterPanel {
         } else {
             send(new LoadoutEditPayload(LoadoutEditPayload.REMOVE, d.skillId(), -1, -1));
         }
+        return ours;
     }
 
     private static void send(net.minecraft.network.protocol.common.custom.CustomPacketPayload payload) {
