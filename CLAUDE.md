@@ -356,6 +356,20 @@ each other, so LegendQuest and Factions could previously overlap.
   published release looks like a mistake and the next person will helpfully
   correct it.
 
+- **A test you have only run against working code has unmeasured discriminating
+  power.** Five sessions argued for three rounds about which corrupt-input
+  fixture proved a parser degrades all-or-nothing, and reasoned their way to
+  different answers. Both candidate fixtures pass against a *correct*
+  implementation, so nothing about correct code could settle it. The answer came
+  from writing the bug deliberately — a parser that swallows the throw and reads
+  what landed — and watching which fixture noticed: a valid line followed by a
+  bad escape catches it, the reverse ordering cannot. One measurement ended what
+  three rounds of reasoning had not.
+
+  The same session then found its own *justification comment* was an untested
+  claim of the same kind, one level down. If a test's value is being argued
+  from, write the failure it is supposed to catch and check that it catches it.
+
 - **A count and the thing counted are different questions.** "36 errors"
   overstated distinct problems fourfold; `head -30` on a 36-line list under-
   reported a figure that was then quoted.
