@@ -56,6 +56,20 @@ iconBlur=true
     ordering="NONE"
     side="BOTH"
 
+# Standards is REQUIRED, and that is a change from 2.4.1 and earlier where it
+# was optional. LegendQuest's character and skills panes are built on its
+# inventory-panel seam: the host places them, frames them in our colours, and
+# arbitrates with other mods' panes so two of them cannot overlap. It also
+# carries the access transformer that replaced our reflective reads of vanilla's
+# inventory-screen internals -- a rename there used to take the inventory screen
+# away from every player, and now breaks a build instead.
+[[dependencies.${mod_id}]]
+    modId="standards"
+    type="required"
+    versionRange="${standards_version_range}"
+    ordering="AFTER"
+    side="BOTH"
+
 [[dependencies.${mod_id}]]
     modId="minecraft"
     type="required"

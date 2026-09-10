@@ -25,6 +25,10 @@ public class LegendQuestClient {
                 net.neoforged.neoforge.client.gui.ConfigurationScreen::new);
         modEventBus.addListener(LQKeyMappings::register);
         NeoForge.EVENT_BUS.register(CharacterPanel.class);
+        // The character sheet is a Standards inventory panel: the host places
+        // it, frames it in our colours, and stands it down when another mod's
+        // pane opens. Unguarded because Standards is a required dependency now.
+        CharacterPane.register();
         NeoForge.EVENT_BUS.register(ClientCharacterState.class);
         NeoForge.EVENT_BUS.register(LQHud.class);
         NeoForge.EVENT_BUS.register(CombatIndicators.class);
