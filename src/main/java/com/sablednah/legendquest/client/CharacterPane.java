@@ -137,23 +137,25 @@ public final class CharacterPane implements InventoryPanel {
     }
 
     /**
-     * Deliberately a no-op: releases are handled by LegendQuest's own listener.
+     * A release the host routed to us, and the end of a loadout drag.
      *
-     * <p>This method returns {@code void}, so a panel cannot tell the host it
-     * consumed a release and the host cannot cancel one for it — unlike
-     * {@code mouseClicked}, whose boolean it uses for exactly that. An
-     * unconsumed release reaches vanilla, which reads a release outside its own
-     * bounds with an item on the cursor as "throw it on the floor". Carrying a
-     * spellbook to the slot dropped it on the ground.</p>
+     * <p>Returning true is what stops it reaching vanilla, which reads a release
+     * outside its own bounds with an item on the cursor as "throw it on the
+     * floor" — and a pane is outside those bounds by construction. That is not
+     * hypothetical: this method returned {@code void} in Standards 1.7.0, so a
+     * panel could not consume a release at all, and carrying a spellbook to the
+     * slot dropped it on the ground. Fixed in 1.8.0, which is why the dependency
+     * range demands it.</p>
      *
-     * <p>{@link CharacterPanel} cancels the event itself and resolves the drag
-     * in the same handler, so nothing is left depending on listener order.
-     * Reported upstream; if the seam ever returns a boolean here this can go
-     * back to delegating.</p>
+     * <p>Only true when the release was actually over the pane. A pane that
+     * swallows releases it did not use leaves a button somewhere else stuck
+     * down.</p>
      */
     @Override
-    public void mouseReleased(double mouseX, double mouseY, int button) {
-        // intentionally empty -- see javadoc
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        InventoryScreen screen = screen();
+        if (screen == null) return false;
+        return CharacterPanel.released(screen, mouseX, mouseY);
     }
 
     /** Every call means start again, so an interrupted drag never survives. */
