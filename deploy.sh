@@ -87,6 +87,25 @@ if echo "$RUNNING" | grep -qxF "$NAME"; then
     exit 1
 fi
 
+# Say which build is being replaced, and by which. Two jars can carry the same
+# filename AND the same version and still differ -- that has happened here, and
+# the version string is no help at all when it does. The script itself cannot
+# get this wrong (it removes and copies unconditionally, with no comparison to
+# fumble); what it guards against is a PERSON, or an agent, deciding to skip a
+# deploy because "it already says 2.5.0". The stamp makes that judgement
+# checkable afterwards -- printing it here makes it visible before.
+stampof() {
+    unzip -p "$1" legendquest/build.properties 2>/dev/null \
+        | sed -n 's/^commit=//p' | head -1
+}
+OLDJAR=$(ls "$MODS"/legendquest-*.jar 2>/dev/null | head -1)
+if [ -n "$OLDJAR" ]; then
+    OLDSTAMP=$(stampof "$OLDJAR")
+    echo ">> Replacing $(basename "$OLDJAR") [build ${OLDSTAMP:-none, predates stamps}]"
+else
+    echo ">> No existing LegendQuest jar in '$NAME'"
+fi
+
 echo ">> Removing previous LegendQuest jars from '$NAME'..."
 rm -f "$MODS"/legendquest-*.jar
 
@@ -96,5 +115,5 @@ cp "$JAR" "$MODS/"
 cmp -s "$JAR" "$MODS/$JARNAME" || { echo "!! Deployed jar does not match the build." >&2; exit 1; }
 unzip -t "$MODS/$JARNAME" >/dev/null 2>&1 || { echo "!! Deployed jar is not a valid zip." >&2; exit 1; }
 
-echo ">> Deployed $JARNAME ($(stat -c%s "$JAR") bytes) to '$NAME'"
+echo ">> Deployed $JARNAME ($(stat -c%s "$JAR") bytes) [build $(stampof "$JAR")] to '$NAME'"
 echo ">> Launch that instance in CurseForge to test."

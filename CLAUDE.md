@@ -370,6 +370,18 @@ each other, so LegendQuest and Factions could previously overlap.
   claim of the same kind, one level down. If a test's value is being argued
   from, write the failure it is supposed to catch and check that it catches it.
 
+- **Version equality is not build equality.** Two jars can share a filename and
+  a version string and still differ — `legendquest-2.5.0+mc1.21.11.jar` sat in a
+  played instance for hours as a build that predated a fix, while the build tree
+  held another with the same name. Nothing in a directory listing can tell them
+  apart; the build stamp inside is the only discriminator, and a jar old enough
+  to have no stamp is itself the answer. The deploy scripts cannot get this
+  wrong — they remove and copy unconditionally, with no comparison to fumble —
+  so the failure mode is a person or an agent *choosing to skip* a deploy
+  because the version already reads right. `deploy.sh` now prints the stamp of
+  the jar it replaces and the one it installs, which turns a fact checkable
+  afterwards into one visible at the time.
+
 - **A count and the thing counted are different questions.** "36 errors"
   overstated distinct problems fourfold; `head -30` on a 36-line list under-
   reported a figure that was then quoted.
