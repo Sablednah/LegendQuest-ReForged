@@ -311,6 +311,13 @@ each other, so LegendQuest and Factions could previously overlap.
   is the opposite of what "exact beats wildcard" suggests. `NODES.md` has the
   worked `/perm` examples.
 
+## Parked ideas
+
+`docs/IDEAS.md` holds things wanted but not built, written down when they were
+thought of rather than left in a chat log. Each entry says what the idea is and,
+where known, what would make it hard — so the next person starts from the real
+problem. Currently: the dice tray.
+
 ## Known traps
 
 - **`/party` collides with FTB Teams**, which registers the same literal and
@@ -381,6 +388,16 @@ each other, so LegendQuest and Factions could previously overlap.
   because the version already reads right. `deploy.sh` now prints the stamp of
   the jar it replaces and the one it installs, which turns a fact checkable
   afterwards into one visible at the time.
+
+- **Changing an existing message's SHAPE is a no-op on every existing server.**
+  `messages.yml` pins every key it already contains, so a server that has run
+  any earlier version keeps its old string for ever. Adding a placeholder to a
+  live key means the new placeholder never appears and the feature renders
+  exactly as it did before — broken-looking rather than unconfigured, and
+  silent. Changing the *wording* of a key in place is fine; changing its shape
+  needs a NEW key. `/roll` grew `{notation}`, `{detail}` and `{edge}` into
+  `msg.roll.broadcast` and rendered identically to before until it moved to
+  `msg.roll.result`.
 
 - **A count and the thing counted are different questions.** "36 errors"
   overstated distinct problems fourfold; `head -30` on a 36-line list under-
