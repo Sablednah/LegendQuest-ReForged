@@ -326,6 +326,16 @@ problem. Currently: the dice tray.
 - **Transient attribute modifiers do not survive respawn.** Repair on
   `PlayerEvent.Clone` (before the respawn packet), never `PlayerRespawnEvent`
   (after it, so the client draws the wrong value first).
+- **…and they do not survive a LOGOUT either, which costs health rather than
+  attributes.** The modifier is rebuilt fine on login — but vanilla has already
+  read `Health` from the save and clamped it against a max of 20, because at
+  that instant our bonus is not applied. A 33-health character logs out full and
+  comes back on 20, and the login handler then restores the max, so the bar
+  reads 20/33 and nothing says anything went missing. The real figure is kept in
+  `LQAttachments.LAST_HEALTH`, written on `PlayerLoggedOutEvent` and put back
+  *after* `CharacterService.refresh` — before that call the max is still 20 and
+  restoring would simply clamp again. Dimension travel is unaffected: the entity
+  is not rebuilt from NBT.
 - **`doImmediateRespawn` is the wrong death to test with** — it takes a
   different path from clicking the button, and reported a real bug as absent.
 - **After a rewrite, grep for the name of the thing you removed**, not the thing
