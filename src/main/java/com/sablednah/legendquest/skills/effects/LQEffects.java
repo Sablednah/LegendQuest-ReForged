@@ -82,6 +82,7 @@ public final class LQEffects {
         SkillEffectTypes.register(Message.TYPE, Message.CODEC);
         SkillEffectTypes.register(Ignite.TYPE, Ignite.CODEC);
         SkillEffectTypes.register(GiveItem.TYPE, GiveItem.CODEC);
+        SkillEffectTypes.register(Track.TYPE, Track.CODEC);
         SkillEffectTypes.register(Sound.TYPE, Sound.CODEC);
         SkillEffectTypes.register(ParticleLine.TYPE, ParticleLine.CODEC);
         SkillEffectTypes.register(ProjectileEffect.TYPE, ProjectileEffect.CODEC);
@@ -419,6 +420,82 @@ public final class LQEffects {
                 CombatTagging.skillVictim(e, TYPE);
             }
             if (refusal != null) Feedback.actionBar(ctx.caster(), refusal);
+        }
+    }
+
+    /**
+     * Mark a creature as quarry: it will not despawn, and it glows so you can
+     * see that it worked.
+     *
+     * <p>Built for the scout and the rogue. Its whole reason for existing is
+     * that a creature worth hunting can vanish mid-hunt — ZombieMod's rare
+     * genera despawn like any vanilla mob now — and "it got away because the
+     * game deleted it" is not a story anybody wants to be in.</p>
+     *
+     * <p><b>The glow is not decoration.</b> A skill whose entire effect is that
+     * something <i>fails to happen later</i> gives the player nothing to react
+     * to and no way to know it landed; that is the invisible-state failure this
+     * project keeps out of everything else. Vanilla's own Glowing does the job,
+     * which means an unmodded client sees the mark through a wall exactly as a
+     * spectral arrow's, and it expires by itself. Turning it off is allowed and
+     * is a deliberate choice to hunt blind, not the default.</p>
+     *
+     * <p><b>Hostile, and deliberately.</b> No damage is dealt, but this can be
+     * pointed at a player — and lighting somebody up for everyone to see, so
+     * they cannot leave, is an aggressive act whatever the numbers say. Being
+     * hostile means a safe zone or a peaceful faction gets to refuse it, which
+     * is the answer that should exist.</p>
+     *
+     * <p>{@link Tracking} holds the mechanism and the reason it is not
+     * {@code setPersistenceRequired()}.</p>
+     */
+    public record Track(long durationMs, boolean glow, TargetSpec target) implements SkillEffect {
+        public static final Identifier TYPE = id("track");
+        public static final MapCodec<Track> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+                Codec.LONG.optionalFieldOf("duration", 300000L).forGetter(Track::durationMs),
+                Codec.BOOL.optionalFieldOf("glow", true).forGetter(Track::glow),
+                TargetSpec.CODEC.optionalFieldOf("target", TargetSpec.LOOKING_AT).forGetter(Track::target))
+                .apply(i, Track::new));
+
+        @Override public Identifier type() { return TYPE; }
+
+        @Override public boolean hostile() { return true; }
+
+        @Override
+        public String describe() {
+            return fx("hb.fx.track", "at", target.describe(), "time", secs(durationMs));
+        }
+
+        @Override
+        public void apply(SkillContext ctx) {
+            // 20 ticks a second, and the mark is an absolute game time so it
+            // needs nothing ticking to keep it.
+            long until = ctx.level().getGameTime() + (durationMs / 50L);
+            int glowTicks = (int) Math.min(Integer.MAX_VALUE, durationMs / 50L);
+            net.minecraft.network.chat.Component refusal = null;
+            for (LivingEntity e : target.resolveEntities(ctx)) {
+                var refused = CombatTagging.refuses(ctx.caster(), e);
+                if (refused.isPresent()) {
+                    refusal = refused.get();
+                    continue;
+                }
+                Tracking.mark(e, until);
+                if (glow) {
+                    e.addEffect(new net.minecraft.world.effect.MobEffectInstance(
+                            net.minecraft.world.effect.MobEffects.GLOWING, glowTicks, 0, false, false));
+                }
+                CombatTagging.skillVictim(e, TYPE);
+            }
+            if (refusal != null) Feedback.actionBar(ctx.caster(), refusal);
+        }
+
+        /** Let the quarry go, and take the glow with it. */
+        @Override
+        public void revoke(SkillContext ctx) {
+            for (LivingEntity e : target.resolveEntities(ctx)) {
+                Tracking.clear(e);
+                e.removeEffect(net.minecraft.world.effect.MobEffects.GLOWING);
+            }
         }
     }
 

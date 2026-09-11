@@ -418,6 +418,7 @@ public final class Lang {
         def("hb.fx.lightning_visual", "Calls down lightning that only looks the part.");
         def("hb.fx.summon", "Summons {count}x {entity}.");
         def("hb.fx.ignite", "Sets {at} on fire for {time}s.");
+        def("hb.fx.track", "Marks {at} as quarry for {time}s: it glows, and it will not vanish.");
         def("hb.fx.give_item", "Puts {count}x {item} in your pack.");
         def("hb.fx.projectile", "Launches {entity}.");
         def("hb.fx.run_command", "Runs a command on the server.");

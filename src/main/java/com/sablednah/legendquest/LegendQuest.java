@@ -45,6 +45,10 @@ public class LegendQuest {
 
         // Game bus: character lifecycle, combat, skills, commands, permissions.
         NeoForge.EVENT_BUS.register(LQServerEvents.class);
+        // Its own listener rather than a method on LQServerEvents: this one
+        // answers MobDespawnEvent for every mob on every despawn check, and
+        // the reasoning for why it is cheap enough to do that lives beside it.
+        NeoForge.EVENT_BUS.register(com.sablednah.legendquest.skills.effects.Tracking.class);
         NeoForge.EVENT_BUS.register(com.sablednah.legendquest.neoforge.LQPermissions.class);
         // Party-chat capture for servers with no Standards installed. Kept out
         // of LQServerEvents because it is the one listener that stands itself
