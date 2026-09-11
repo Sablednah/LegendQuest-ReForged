@@ -1,0 +1,26 @@
+{
+  "name": "Mark Quarry",
+  "description": "Name a beast as yours and it cannot slip the hunt: it burns with a light you can follow through trees and dark, and the wild will not take it back while the mark holds.",
+  "icon": "minecraft:arrow",
+  "type": "active",
+  "cooldown": 20000,
+  "mana_cost": 8,
+  "effects": [
+    {
+      "type": "legendquest:track",
+      "duration": 300000,
+      "glow": true,
+      "target": { "kind": "looking_at", "range": 24 }
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:entity.arrow.hit",
+      "volume": 0.7,
+      "pitch": 1.4
+    },
+    {
+      "type": "legendquest:message",
+      "text": "&aYou name it, and it is yours for five minutes."
+    }
+  ]
+}
