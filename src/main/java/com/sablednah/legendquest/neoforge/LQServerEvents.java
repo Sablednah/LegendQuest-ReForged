@@ -1,5 +1,6 @@
 package com.sablednah.legendquest.neoforge;
 
+import com.sablednah.legendquest.character.LQAttachments;
 import com.sablednah.legendquest.LQConfig;
 import com.sablednah.legendquest.character.PlayerCharacter;
 import com.sablednah.legendquest.core.Mechanics;
@@ -43,6 +44,31 @@ public final class LQServerEvents {
         Lang.load(); // messages.yml: generated on first run, merged thereafter
     }
 
+    /**
+     * Give back the health vanilla clamped away while our modifier was absent.
+     *
+     * <p>Must run AFTER {@link CharacterService#refresh}, because it is that
+     * call which puts the max-health modifier back — restoring 33 health to a
+     * player whose max is still 20 would simply clamp again and achieve
+     * nothing.</p>
+     *
+     * <p>Clamped to the CURRENT max rather than trusted outright: a pack change
+     * or a class edit while they were away can legitimately lower it, and a
+     * player should never come back with more health than their character can
+     * hold. Absent or zero means we have never seen them leave — a first login,
+     * or a world that predates this — and then vanilla's own figure stands.</p>
+     */
+    private static void restoreHealth(ServerPlayer player) {
+        if (!player.hasData(LQAttachments.LAST_HEALTH)) return;
+        float remembered = player.getData(LQAttachments.LAST_HEALTH);
+        if (remembered <= 0.0F) return;
+        float ceiling = player.getMaxHealth();
+        float restored = Math.min(remembered, ceiling);
+        // Only ever upward. If they are on 6 health because something hurt them
+        // between load and here, that is real and not ours to undo.
+        if (restored > player.getHealth()) player.setHealth(restored);
+    }
+
     private static void sendVocab(ServerPlayer player) {
         Net.sendIfAble(player, new com.sablednah.legendquest.network.VocabPayload(Lang.clientVocab()));
     }
@@ -60,6 +86,7 @@ public final class LQServerEvents {
         }
         sendVocab(player);
         CharacterService.refresh(player);
+        restoreHealth(player);
         HandbookSync.send(player);
         var pc = CharacterService.data(player);
         String race = CharacterService.race(player).map(r -> r.name()).orElse("Undecided");
@@ -96,7 +123,14 @@ public final class LQServerEvents {
      */
     @SubscribeEvent
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) Nameplate.clear(player);
+        if (!(event.getEntity() instanceof ServerPlayer player)) return;
+        Nameplate.clear(player);
+        // Remember the real figure before it is lost. See LQAttachments.LAST_HEALTH:
+        // the saved Health is clamped on the way back IN, not on the way out, so
+        // this is the last moment the true value exists.
+        if (CharacterService.isRealPlayer(player)) {
+            player.setData(LQAttachments.LAST_HEALTH, player.getHealth());
+        }
     }
 
     /**
