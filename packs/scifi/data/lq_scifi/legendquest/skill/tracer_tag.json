@@ -1,0 +1,26 @@
+{
+  "name": "Tracer Tag",
+  "description": "A micro-beacon, fired and forgotten. The target reads hot on every visor aboard, and the ship's registry will not let it drop off the plot until the tag burns out.",
+  "icon": "minecraft:recovery_compass",
+  "type": "active",
+  "cooldown": 20000,
+  "mana_cost": 8,
+  "effects": [
+    {
+      "type": "legendquest:track",
+      "duration": 300000,
+      "glow": true,
+      "target": { "kind": "looking_at", "range": 24 }
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:block.beacon.activate",
+      "volume": 0.5,
+      "pitch": 1.6
+    },
+    {
+      "type": "legendquest:message",
+      "text": "&aTag away. It stays on the plot for five minutes."
+    }
+  ]
+}
