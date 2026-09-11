@@ -409,6 +409,17 @@ problem. Currently: the dice tray.
   `msg.roll.broadcast` and rendered identically to before until it moved to
   `msg.roll.result`.
 
+- **Every instance path has spaces in it, and the shell will quietly eat
+  them.** `MobHealth - Forge`, `Neoforge 1.21.11 - sci fi`, and every world
+  called `New World (12)`. This has now bitten twice in different shapes: the
+  running-instance guard once failed to fire for a name with a space, and a
+  pack-refresh loop written as `for f in $(find ...)` split all 34 paths on
+  whitespace and copied nothing at all. Use `find -print0` with
+  `while IFS= read -r -d ''`, quote every expansion, and **report a count** —
+  that loop said `refreshed: 0` and that number is what made it obvious. A
+  variant that half-succeeded would have been far worse than one that failed
+  outright.
+
 - **A count and the thing counted are different questions.** "36 errors"
   overstated distinct problems fourfold; `head -30` on a 36-line list under-
   reported a figure that was then quoted.
