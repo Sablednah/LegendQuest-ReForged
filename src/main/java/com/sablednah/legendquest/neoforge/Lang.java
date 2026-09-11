@@ -315,7 +315,33 @@ public final class Lang {
         def("msg.karma.needs_min", "needs {term.karma} ≥ {value}");
         def("msg.karma.needs_max", "needs {term.karma} ≤ {value}");
         def("msg.karma.show", "&6{term.karma}: &f{name} &8({value})");
-        def("msg.roll.broadcast", "&7{player} rolls a d20: &f{roll}{flair}");
+        // The six stat names, so /roll str can say what it rolled against. The
+        // character panel still draws its own hardcoded abbreviations; these
+        // exist because a stat name is player-facing text and this file is
+        // where that lives -- and because a genre pack that renames Mana to
+        // Stamina will eventually want to rename CHR to something too.
+        def("stat.str", "STR");
+        def("stat.dex", "DEX");
+        def("stat.con", "CON");
+        def("stat.int", "INT");
+        def("stat.wis", "WIS");
+        def("stat.chr", "CHR");
+        // NOT msg.roll.broadcast, and that is the whole point. messages.yml pins
+        // every key it already contains, so a server that has run any earlier
+        // version keeps its old "{player} rolls a d20: {roll}{flair}" for ever
+        // -- and since that string has no {notation}, {detail} or {edge} in it,
+        // an expanded /roll renders exactly as it always did and looks broken
+        // rather than unconfigured. Only NEW keys reach an existing server.
+        //
+        // So changing the SHAPE of a live message means a new key. Changing its
+        // wording in place is fine; adding a placeholder to it is not.
+        def("msg.roll.result", "&7{player} rolls {notation}{stat}: &f{roll}&7{detail}{edge}{flair}");
+        def("msg.roll.detail", " &8({dice}{bonus})");
+        def("msg.roll.advantage", " &a[adv, dropped {dropped}]");
+        def("msg.roll.disadvantage", " &c[dis, dropped {dropped}]");
+        def("msg.roll.stat", " &7({stat} {mod})");
+        def("msg.roll.unreadable", "&cNo idea how to roll &f{input}&c. "
+                + "&7Try &fd20&7, &f6&7, &f2d6+3&7, &fstr&7, or &fdex adv&7.");
         def("msg.roll.nat20", " &6— natural 20!");
         def("msg.roll.nat1", " &c— oof.");
 
