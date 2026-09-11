@@ -272,6 +272,18 @@ public final class LQServerEvents {
                 if (pc.mana() < max) {
                     pc.setMana(Math.min(max, pc.mana() + CharacterService.manaPerSecond(player)));
                 }
+                // Keep the remembered health current, not just written on the
+                // way out. PlayerLoggedOutEvent covers a quit, a kick, a
+                // timeout and a dropped connection -- everything that goes
+                // through PlayerList.remove -- but a server CRASH runs no
+                // shutdown code at all, and the player data on disk is then
+                // whatever the last autosave wrote. Updating here means that
+                // autosave carries a figure no more than a second stale, so a
+                // crash costs at most a second of healing rather than every
+                // point above 20. One map write per player per second.
+                if (CharacterService.isRealPlayer(player)) {
+                    player.setData(LQAttachments.LAST_HEALTH, player.getHealth());
+                }
                 penaliseDisallowedArmour(player);
                 SkillEngine.warnFadingDurations(player);
                 CharacterSync.send(player); // mana + cooldowns tick visibly on modded clients
