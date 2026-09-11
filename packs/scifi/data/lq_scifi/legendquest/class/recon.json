@@ -12,6 +12,7 @@
   "allowed_weapons": "#legendquest:marksman_weapons",
   "skills": {
     "lq_scifi:burst_servos": { "level": 3 },
+    "lq_scifi:tracer_tag": { "level": 5 },
     "lq_scifi:low_light_optics": { "level": 8 },
     "lq_scifi:sensor_pulse": { "level": 15, "cost": 5 },
     "lq_scifi:optic_camo": { "level": 20, "cost": 5 }

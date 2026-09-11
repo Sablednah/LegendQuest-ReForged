@@ -1,0 +1,26 @@
+{
+  "name": "Tag It",
+  "description": "A smear of paint, a bent aerial, whatever you carry. It lights up and it stays lit — and whatever it is, it is still there when you come back around.",
+  "icon": "minecraft:spyglass",
+  "type": "active",
+  "cooldown": 20000,
+  "mana_cost": 8,
+  "effects": [
+    {
+      "type": "legendquest:track",
+      "duration": 300000,
+      "glow": true,
+      "target": { "kind": "looking_at", "range": 24 }
+    },
+    {
+      "type": "legendquest:sound",
+      "sound": "minecraft:entity.arrow.hit",
+      "volume": 0.7,
+      "pitch": 1.4
+    },
+    {
+      "type": "legendquest:message",
+      "text": "&aTagged. It is not losing you now."
+    }
+  ]
+}
