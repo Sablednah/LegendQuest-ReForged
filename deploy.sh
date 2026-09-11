@@ -94,16 +94,33 @@ fi
 # fumble); what it guards against is a PERSON, or an agent, deciding to skip a
 # deploy because "it already says 2.5.0". The stamp makes that judgement
 # checkable afterwards -- printing it here makes it visible before.
+#
+# Both helpers below are written around `set -euo pipefail`, which is hostile to
+# the two cases that matter most here. A pipeline whose FIRST element fails
+# fails the whole pipeline under pipefail, and a failed command substitution in
+# an assignment then exits the script under -e, with nothing printed. So:
+#   ls glob | head   dies when there is no jar yet -- a FIRST deploy into an
+#                    instance, the one run where this code has something to say.
+#   unzip -p | sed   dies when the jar has no build.properties -- a pre-stamp
+#                    jar, which is most of the instances right now.
+# Both are silent, and both pass every test that uses a populated instance and a
+# current jar. Caught by MobHealth's session hitting the first one; the second
+# was sitting beside it. A glob loop has no pipeline to fail, and `|| true`
+# keeps a missing entry from being fatal.
 stampof() {
-    unzip -p "$1" legendquest/build.properties 2>/dev/null \
-        | sed -n 's/^commit=//p' | head -1
+    local out
+    out=$(unzip -p "$1" legendquest/build.properties 2>/dev/null || true)
+    printf '%s' "$out" | sed -n 's/^commit=//p' | head -1 || true
 }
-OLDJAR=$(ls "$MODS"/legendquest-*.jar 2>/dev/null | head -1)
+OLDJAR=""
+for f in "$MODS"/legendquest-*.jar; do
+    if [ -f "$f" ]; then OLDJAR="$f"; break; fi
+done
 if [ -n "$OLDJAR" ]; then
     OLDSTAMP=$(stampof "$OLDJAR")
     echo ">> Replacing $(basename "$OLDJAR") [build ${OLDSTAMP:-none, predates stamps}]"
 else
-    echo ">> No existing LegendQuest jar in '$NAME'"
+    echo ">> No existing LegendQuest jar in '$NAME' (first deploy here)"
 fi
 
 echo ">> Removing previous LegendQuest jars from '$NAME'..."
