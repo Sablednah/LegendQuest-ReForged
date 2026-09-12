@@ -571,9 +571,19 @@ public final class LQServerEvents {
                 Feedback.actionBar(player, loadoutBar(player, pc, "&e"));
             } else if (bound.isPresent()) {
                 var result = SkillEngine.use(player, bound.get());
-                if (isLoadoutItem) {
-                    // The bar is the feedback: selected skill coloured by
-                    // outcome (sent after use()'s message, so it wins).
+                if (isLoadoutItem && result.fired()) {
+                    // ONLY on success. This used to send unconditionally, with
+                    // a comment saying it was "sent after use()'s message, so
+                    // it wins" -- and win it did: a refusal reached the action
+                    // bar and was overwritten microseconds later by a coloured
+                    // loadout strip. From the loadout you got a cyan bar and no
+                    // words; the same skill typed as /skill use explained
+                    // itself perfectly, which is how Sable found it.
+                    //
+                    // A colour standing in for a sentence is output that needs
+                    // decoding, which this project does not ship. On a refusal
+                    // the words are worth more than the strip, so the strip
+                    // stands down and returns on the next action.
                     Feedback.actionBar(player, loadoutBar(player, pc, resultColour(result)));
                 }
             } else {

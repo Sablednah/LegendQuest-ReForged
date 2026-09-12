@@ -127,8 +127,14 @@ public final class SkillActions {
             return;
         }
         var result = SkillEngine.use(player, selected.get());
-        Feedback.actionBar(player, LQServerEvents.loadoutBar(player, pc,
-                LQServerEvents.resultColour(result)));
+        // Only on success -- see the same guard in LQServerEvents. A refusal
+        // has already put words on the action bar, and overwriting them with a
+        // coloured strip leaves the player with a hue to interpret and nothing
+        // to read. This is the keybind path; the item-click path is the other.
+        if (result.fired()) {
+            Feedback.actionBar(player, LQServerEvents.loadoutBar(player, pc,
+                    LQServerEvents.resultColour(result)));
+        }
     }
 
     private SkillActions() {}
