@@ -420,6 +420,17 @@ problem. Currently: the dice tray.
   variant that half-succeeded would have been far worse than one that failed
   outright.
 
+- **Never switch branches while a build is running.** The worktree is shared,
+  so a background `./gradlew build` started on one branch will happily compile
+  whatever the tree holds after you check out another. It produced a convincing
+  false failure: `mc26.2` was reported broken on `cannot find symbol:
+  GuiGraphics` — entirely plausible, since 26.x renamed it to
+  `GuiGraphicsExtractor` — except the file being compiled had come from `main`.
+  Rebuilt on its own it was clean. **A build failure naming a class that a
+  version branch legitimately does not have is what a mixed tree looks like**,
+  not what a porting bug looks like. Same family as committing before a
+  checkout: one worktree, three branches, and nothing warns you.
+
 - **A count and the thing counted are different questions.** "36 errors"
   overstated distinct problems fourfold; `head -30` on a 36-line list under-
   reported a figure that was then quoted.
