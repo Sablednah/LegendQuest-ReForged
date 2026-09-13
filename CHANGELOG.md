@@ -82,6 +82,10 @@ does not update pack content.
   character panel could not tell the inventory screen that a mouse release was
   its own, so vanilla read it as a throw. Standards 1.8.0 added the way to say so,
   which is why this release requires it.
+- **The example skill pack never loaded on 26.1.2 or 26.2.** Its jars for those
+  versions still declared Minecraft 1.21.11, so NeoForge refused them on the
+  version they were built for. Fixed in example pack 1.0.1, attached to this
+  release.
 - **The build resolved the Standards jar with a bare wildcard**, handing the
   compiler every version of it for every Minecraft line at once. Harmless while
   the API it used happened to be identical across all of them, and not harmless
