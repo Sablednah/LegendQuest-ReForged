@@ -81,7 +81,7 @@ A skill-pack is a small jar that registers its own skill effect types and ships
 its own content, without touching LegendQuest. `SkillEffectTypes.register()` in
 your mod constructor is the entire API surface.
 
-A worked example is attached to the files page as `examplepack-1.0.0+mc<version>.jar`
+A worked example is attached to the files page as `examplepack-<version>+mc<minecraft>.jar`
 — one per Minecraft version, same as the mod. Install it beside LegendQuest to
 see custom effects in action, or read it as a template for your own. Two of its
 three effects declare themselves hostile and one deliberately does not, which
