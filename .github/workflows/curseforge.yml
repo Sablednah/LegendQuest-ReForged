@@ -147,6 +147,11 @@ jobs:
         env:
           CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
           CURSEFORGE_PROJECT_ID: ${{ vars.CURSEFORGE_PROJECT_ID }}
+          # What each uploaded file depends on, by CurseForge project ID. Standards is REQUIRED:
+          # the character sheet and skills panel are built on its inventory-panel seam, so a
+          # server without it would lose them -- a regression, not a missing extra. Declared here
+          # rather than on the website so the dependency is committed and reviewable.
+          CURSEFORGE_RELATIONS: "1670445:requiredDependency"
           RELEASE_TYPE: ${{ inputs.release_type || 'release' }}
           CURSEFORGE_DEBUG: ${{ inputs.debug && '1' || '' }}
           CURSEFORGE_MINIMAL: ${{ inputs.minimal && '1' || '' }}

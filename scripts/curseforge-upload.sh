@@ -146,6 +146,7 @@ REL="${RELEASE_VERSION:-}"
 case "$BASE_NAME" in
     legendquest-apocalypse.zip) DISPLAY_NAME="The Wasteland — genre pack${REL:+ $REL}" ;;
     legendquest-scifi.zip)      DISPLAY_NAME="Cold Frontier — genre pack${REL:+ $REL}" ;;
+    storyteller-*.jar)          DISPLAY_NAME="LegendQuest StoryTeller $(basename "$BASE_NAME" .jar | sed -n 's/^storyteller-\(.*\)$/\1/p')" ;;
     examplepack-*.jar)          DISPLAY_NAME="Example Skill Pack $(basename "$BASE_NAME" .jar | sed -n 's/^examplepack-\(.*\)$/\1/p')" ;;
     legendquest-*.jar)          DISPLAY_NAME="LegendQuest ReForged $(basename "$BASE_NAME" .jar | sed -n 's/^legendquest-\(.*\)$/\1/p')" ;;
     *)                          DISPLAY_NAME="$(basename "$BASE_NAME" .jar)" ;;
@@ -154,8 +155,13 @@ esac
 # The changelog is rewritten to avoid the constructs CurseForge's HTML sanitiser chokes on -- see
 # scripts/curseforge-changelog.py for which, and why each one is a suspect. Anything it changes is
 # printed, because quietly editing release notes would be worse than the bug it prevents.
+# Relations: what this file depends on, shown on the project page and used by the CurseForge app to
+# pull dependencies in. CURSEFORGE_RELATIONS is "id-or-slug:type,..." -- a numeric key is a projectID,
+# which the API matches exactly; anything else is a slug. Set per repo in the workflow, committed, so
+# a dependency is reviewable rather than a setting somebody clicked once on a website. A type outside
+# CurseForge's five is refused here: the API would otherwise reject the whole upload with a 400.
 METADATA="$(CHANGELOG="$CHANGELOG_FILE" DISPLAY="$DISPLAY_NAME" RTYPE="$RELEASE_TYPE" \
-    HERE="$HERE" GV="$GAME_VERSIONS" python3 -c '
+    HERE="$HERE" GV="$GAME_VERSIONS" RELATIONS="${CURSEFORGE_RELATIONS:-}" python3 -c '
 import json,os,sys,importlib.util
 # Loaded by path because the filename has a hyphen and is not importable by name.
 spec = importlib.util.spec_from_file_location(
@@ -164,13 +170,24 @@ mod = importlib.util.module_from_spec(spec); spec.loader.exec_module(mod)
 text, notes = mod.sanitise(open(os.environ["CHANGELOG"], encoding="utf-8").read())
 for n in notes:
     print(">> changelog: " + n, file=sys.stderr)
-print(json.dumps({
+allowed = {"embeddedLibrary", "incompatible", "optionalDependency", "requiredDependency", "tool"}
+projects = []
+for part in [p.strip() for p in os.environ.get("RELATIONS", "").split(",") if p.strip()]:
+    key, _, kind = part.partition(":")
+    if kind not in allowed:
+        sys.exit("!! bad relation %r: type must be one of %s" % (part, ", ".join(sorted(allowed))))
+    projects.append({"projectID": key, "type": kind} if key.isdigit() else {"slug": key, "type": kind})
+    print(">> relation: %s %s" % (kind, key), file=sys.stderr)
+meta = {
   "changelog": text,
   "changelogType": "markdown",
   "displayName": os.environ["DISPLAY"],
   "releaseType": os.environ["RTYPE"],
   "gameVersions": json.loads(os.environ["GV"]),
-}))')"
+}
+if projects:
+    meta["relations"] = {"projects": projects}
+print(json.dumps(meta))')"
 
 if [ -n "${CURSEFORGE_DEBUG:-}" ]; then
     # The metadata carries no credentials, so it is safe to print when diagnosing a rejection.

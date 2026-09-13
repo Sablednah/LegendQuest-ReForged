@@ -3,7 +3,34 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
-## 2.5.0 — unreleased
+## 2.5.0 — 2026-09-13
+
+Requires **Standards 1.8.0 or newer**. The wasteland and sci-fi genre packs
+changed in this release — download them again, since updating the jar alone
+does not update pack content.
+
+### Added
+
+- **`/roll` understands what a table actually says.** `/roll` alone is still a
+  d20. A bare number is the number of sides, because "roll a 6" never means six
+  dice: `/roll 6` is a d6. Full notation works — `2d6+3`, `4d8-2`, `d%` — and so
+  do `adv` and `dis`, which roll two dice and show both, so the table sees what
+  advantage saved them from. Name a stat and its modifier is added: `/roll str`,
+  `/roll dexterity`, `/roll cha`. Words combine in any order, so `/roll dex adv`
+  and `/roll adv dex` are the same roll. A natural 20 is only called on a single
+  unmodified d20 — a 20 showing on 3d20+5 is not one, and saying so is noise.
+- **Track: mark a creature as quarry so it cannot slip away.** A new skill effect,
+  `legendquest:track`, and a skill built on it in every setting — **Mark Quarry**
+  for the Ranger at level 6, **Tag It** for the wasteland Scout at level 5, and
+  **Tracer Tag** for the sci-fi Recon at level 5. The marked creature will not
+  despawn for five minutes and glows so it can be followed through trees and
+  dark. The mark is an expiry time, not permanent persistence: it ends by itself
+  and never counts against the world's mob cap, so hunting does not quietly
+  shrink the number of creatures the world spawns. It is a hostile effect, so
+  claims, safe zones and combat tagging apply to it.
+- **Each jar names its build in the startup log** — commit, branch and build
+  time — so a log attached to a bug report says exactly which build was running,
+  not just which version.
 
 ### Changed
 
@@ -25,8 +52,36 @@ This project follows [Semantic Versioning](https://semver.org/).
   Nothing about the panel looks or behaves differently: the gold-on-black frame,
   the tabs, the loadout dragging and the tooltips are all unchanged.
 
+- **A skill that refuses now says so in chat as well as on the action bar.** The
+  action bar is where the loadout lives, so a refusal landed on top of it, lasted
+  a couple of seconds, and was missed by anyone watching the thing they aimed at.
+  Chat can be scrolled back to when you actually ask why it did nothing.
+  Cooldown and build-up stay on the action bar only, because the loadout already
+  draws them — a chat line per keypress through a long cooldown helps nobody.
+
 ### Fixed
 
+- **Every relog cost you all your health above 20.** A character whose race and
+  class give 33 health logged out full and came back on 20, and the bar read
+  20/33 with nothing to say anything had gone. Vanilla restores your saved health
+  before LegendQuest has re-applied the bonus that raises the maximum, and clamps
+  it to 20 on the way in. Your real figure is now remembered and put back once
+  the bonus is in place — including after a kick, a dropped connection or a
+  server crash, since it is refreshed every second rather than only on the way
+  out. Changing dimension was never affected.
+- **Casting from the loadout bar hid the reason a skill did not fire.** The
+  refusal was written to the action bar and overwritten a moment later by the
+  loadout strip, leaving a coloured bar and no words — while the same skill cast
+  with `/skill use` explained itself perfectly. The strip now only appears on a
+  successful cast.
+- **Skills that consume an item only counted one stack.** Summon Wolf with
+  bones split across your inventory refused for want of bones you were
+  carrying. Consuming now counts, and takes from, everything you hold.
+- **`/roll` printed raw `&` colour codes** instead of colours.
+- **Carrying an item over to the spellbook slot dropped it on the floor.** The
+  character panel could not tell the inventory screen that a mouse release was
+  its own, so vanilla read it as a throw. Standards 1.8.0 added the way to say so,
+  which is why this release requires it.
 - **The build resolved the Standards jar with a bare wildcard**, handing the
   compiler every version of it for every Minecraft line at once. Harmless while
   the API it used happened to be identical across all of them, and not harmless

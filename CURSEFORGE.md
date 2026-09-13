@@ -45,11 +45,11 @@ them.
 
 Not samples — finished, playable content sets, each a drop-in datapack.
 
-**The Wasteland** — 8 Archetypes, 20 Roles, 61 skills, 10 Perks. Post-
+**The Wasteland** — 8 Archetypes, 20 Roles, 62 skills, 10 Perks. Post-
 apocalyptic survival. Start as a Drifter and earn your way into a specialisation:
 Scavenger, Enforcer, Doc, Scout, Labourer, and the harder roles behind them.
 
-**Cold Frontier** — 8 Species, 16 Professions, 55 skills, 10 Augments. A cold,
+**Cold Frontier** — 8 Species, 16 Professions, 56 skills, 10 Augments. A cold,
 hard sci-fi frontier. Deliberately setting-neutral: retune the vocabulary and
 the same data plays as space-western, fleet-opera or salvage-horror.
 
@@ -106,6 +106,12 @@ is the part worth copying.
   and the game reminds you on login which ones you have switched off, so a
   setting never gets mistaken for a bug. Content authors can mark a skill
   unswitchable where it is meant to be a drawback.
+- **Track your quarry** — scouts, rangers and recon can mark a creature so it
+  glows and cannot despawn mid-hunt, for five minutes, without ever counting
+  against the world's mob cap.
+- **Tabletop dice** — `/roll` takes what a table actually says: `/roll 6`,
+  `/roll 2d6+3`, `/roll d%`, `/roll adv`, `/roll str` for a d20 plus your
+  Strength modifier, in any combination. Advantage shows both dice.
 - **Item proficiency per class** — wield what your class cannot use and you
   fumble.
 - **Karma** as a real mechanic, with good and evil paths that lock each other
@@ -142,7 +148,7 @@ hostile skill, so a peaceful faction or a safe zone can refuse it.
 Standards' vanish is honoured too: hide a player and their nameplate goes with
 them, instead of hovering over empty air announcing exactly where they are.
 
-**Standards is required, and has been since 2.5.0** — the character sheet and
+**Standards 1.8.0 or newer is required, and has been since 2.5.0** — the character sheet and
 skills panel are built on its inventory-panel system, which is what lets several
 mods put a panel beside your inventory without two of them fighting over the
 same space. Install it alongside LegendQuest; both are on CurseForge and both

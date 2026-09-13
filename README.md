@@ -423,6 +423,14 @@ particles and the enderman noise. `max_range` (default 32).
 **`legendquest:summon`** — spawn entities at the looked-at block.
 `entity` (required), `count` (default 1), `target` (default `looking_at`).
 
+**`legendquest:track`** — mark a creature as quarry: it cannot despawn while
+the mark lasts, and glows so it can be followed. `duration` (ms, default
+300000), `glow` (default `true`), `target` (default `looking_at`). The mark is
+an expiry time rather than vanilla's persistence flag, which is one-way and
+would permanently remove the creature from the mob-cap count — so hunting
+would slowly starve the world of spawns. Hostile, so claims and combat tagging
+apply.
+
 **`legendquest:message`** — text to the caster, `&` colours supported.
 `text` (required), `action_bar` (default `true`; `false` = chat).
 
@@ -545,6 +553,22 @@ so the panel and handbook follow the server's genre too.
 `/karma`, `/roll`, `/bind`, `/loadout`, `/party`) are registered as aliases.
 `/skill toggle <skill>` switches a passive or triggered skill off, and on
 again; `/skill list` marks the switched-off ones.
+
+`/roll` rolls a d20 and announces it to the whole server. It also takes what a
+table actually says, in any order:
+
+| You type | You get |
+|---|---|
+| `/roll 6` | a d6 — a bare number is the number of *sides* |
+| `/roll 2d6+3` · `/roll 4d8-2` · `/roll d%` | dice notation, `d%` being a d100 |
+| `/roll adv` · `/roll dis` | two d20s, both shown, the better or worse kept |
+| `/roll str` · `/roll dexterity` · `/roll cha` | a d20 plus that stat's modifier |
+| `/roll dex adv` | any of the above combined |
+
+Odd dice are allowed on purpose (a d7 is fine); the only limits are at least
+two sides, at most 1000, and at most 100 dice. Advantage applies to the first
+die only, which is what advantage means. "Natural 20" is only announced on a
+single unmodified d20.
 Admin: `/lq admin setrace|setclass|addxp|setkarma|level` (append `force` to
 setrace/setclass to allow illegal combos). Bare names work
 everywhere — `dwarf`, not `legendquest:dwarf`.
