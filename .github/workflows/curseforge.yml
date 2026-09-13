@@ -151,7 +151,7 @@ jobs:
           # the character sheet and skills panel are built on its inventory-panel seam, so a
           # server without it would lose them -- a regression, not a missing extra. Declared here
           # rather than on the website so the dependency is committed and reviewable.
-          CURSEFORGE_RELATIONS: "1670445:requiredDependency"
+          CURSEFORGE_RELATIONS: "sablecraft-standards=1670445:requiredDependency"
           RELEASE_TYPE: ${{ inputs.release_type || 'release' }}
           CURSEFORGE_DEBUG: ${{ inputs.debug && '1' || '' }}
           CURSEFORGE_MINIMAL: ${{ inputs.minimal && '1' || '' }}

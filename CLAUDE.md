@@ -449,11 +449,13 @@ created).
   changes nothing a reader would care about can say `[no-store-update]` in the
   tag message.
 - **Dependencies are declared by the upload, not on the website.**
-  `CURSEFORGE_RELATIONS` in `curseforge.yml` (`"1670445:requiredDependency"`,
-  Standards) goes out with every file, so the project page and the CurseForge
-  app agree with `mods.toml`. A numeric key is an exact project ID; the script
-  refuses a type outside CurseForge's five rather than letting the API 400 the
-  whole upload.
+  `CURSEFORGE_RELATIONS` in `curseforge.yml`
+  (`"sablecraft-standards=1670445:requiredDependency"`) goes out with every file,
+  so the project page and the CurseForge app agree with `mods.toml`. **The slug
+  is required; the numeric ID is optional and must be an integer.** The upload
+  docs read as "slug *or* projectID", and 2.5.0's first upload was refused on
+  every file for exactly that. A 400 like that uploads nothing, so re-run the
+  workflow by hand with the tag once fixed.
 - **CurseForge rejects non-jar files** *after* returning HTTP 200. Packs ship
   from GitHub only.
 - **A 200 is acceptance, not publication.** Check the file is approved.
