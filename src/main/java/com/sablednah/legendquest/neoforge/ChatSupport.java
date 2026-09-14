@@ -56,12 +56,18 @@ public final class ChatSupport {
             /** The class title for their level — "Squire", "Lord". */
             @Override
             public Optional<String> prefix(ServerPlayer player) {
+                // No player, no character. Standards' self-test calls the seams
+                // with null (SelfTest, Chat.route(null, "hi")), and the seam's
+                // types do not promise otherwise, so answer "nothing" rather
+                // than throwing into Standards' per-seam catch.
+                if (player == null) return Optional.empty();
                 return nonBlank(CharacterService.classTitle(player)).map(title -> "&6" + title);
             }
 
             /** The karma epithet — "the saintly". */
             @Override
             public Optional<String> suffix(ServerPlayer player) {
+                if (player == null) return Optional.empty();
                 long karma = CharacterService.data(player).karma();
                 return nonBlank(CharacterService.karmaEpithet(karma)).map(word -> "&7" + word);
             }
@@ -105,7 +111,8 @@ public final class ChatSupport {
 
             @Override
             public boolean route(ServerPlayer sender, String message) {
-                return PartyChat.claim(sender, message);
+                // Nobody to have a party: not ours to claim.
+                return sender != null && PartyChat.claim(sender, message);
             }
         });
         PartyChat.setRouted(true);

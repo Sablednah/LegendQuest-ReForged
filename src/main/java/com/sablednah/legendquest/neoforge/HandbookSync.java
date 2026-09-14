@@ -40,8 +40,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class HandbookSync {
 
     public static void send(ServerPlayer player) {
-        if (player.connection == null
-                || !player.connection.hasChannel(HandbookPayload.TYPE)) return; // vanilla/fake
+        if (!Net.listening(player, HandbookPayload.TYPE)) return; // vanilla or fake player
         Net.sendIfAble(player, build(player));
     }
 
