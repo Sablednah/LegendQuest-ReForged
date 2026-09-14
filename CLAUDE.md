@@ -101,6 +101,16 @@ To actually *see* a HUD change rather than infer it: focus the client window
 `runBuddy/screenshots/`. "The code ran" and "the pixels are there" are
 different questions, and only the second one is the bug report.
 
+**In practice, look on Vivo instead.** Focusing a Windows client from WSL never
+worked reliably — `SetForegroundWindow`, `AppActivate` and `PostMessage` all
+failed, and spawning `powershell.exe` can itself steal focus and pause the game.
+Vivo (`sable@192.168.7.102`, key `~/.ssh/vivo_ed25519`) runs rigs on private
+`Xvfb` displays where `xdotool` owns the input outright, including a **26.2
+rig**, and `~/dev/rig.sh <mc> <neoforge> <game> <rcon> <display>` builds one
+for any version. Its `~/dev/README.md` is the manual: ports and displays
+already claimed, the traps, and how to type, click and screenshot a client from
+a script. LegendQuest-StoryTeller's CLAUDE.md records what the rigs measured.
+
 ### Dev-server ports — one pair per project
 
 Sable has five mods with a dev server, and they were nearly all on the vanilla
@@ -434,6 +444,12 @@ problem. Currently: the dice tray.
 - **A count and the thing counted are different questions.** "36 errors"
   overstated distinct problems fourfold; `head -30` on a 36-line list under-
   reported a figure that was then quoted.
+- **Never put backticks in an unquoted heredoc.** `<<EOF` (unquoted, needed to
+  expand a variable) makes bash run every `` `...` `` inside it as a command. A
+  Python edit script full of Markdown filenames had both its anchors collapse to
+  empty strings, `"" in s` is always true, and two edits became silent no-ops —
+  committed and pushed under a message describing edits that did not happen.
+  Quote the delimiter (`<<'EOF'`) and pass values through the environment.
 
 ## Releasing
 
@@ -459,6 +475,23 @@ created).
 - **CurseForge rejects non-jar files** *after* returning HTTP 200. Packs ship
   from GitHub only.
 - **A 200 is acceptance, not publication.** Check the file is approved.
+- **Retry ONE failed file with the workflow's `pattern` input**, never a plain
+  re-run. 2.5.0 had one jar hit a transient 500 while five siblings went up;
+  re-sending all six would have had CurseForge reject the five as duplicates,
+  in moderation, where nobody looks.
+- **`gh release create --target` needs the FULL commit SHA.** A short one is
+  HTTP 422 "target_commitish is invalid", and nothing is created.
+- **A `workflow_dispatch` straight after a push can run the previous commit.**
+  StoryTeller's re-run built the old script and failed the old way. Find the
+  run by `headSha` equal to what you pushed before believing its result.
+- **Tag the commit the jars are stamped with.** Build every release jar from a
+  clean tree; a docs commit after the 1.21.11 build means rebuilding it so the
+  stamp and the tag agree.
+- **The example pack is a separate repo and ships with every release.**
+  `../LegendQuest-SkillPack-Example`, one branch per Minecraft version like this
+  one. Read the `mods.toml` of what you attach: its 26.x jars declared
+  `minecraft [1.21.11]` and never loaded, through 2.4.1, until 2.5.0 shipped
+  1.0.1. `minecraft_version_range` has to move when `minecraft_version` does.
 - CurseForge's changelog sanitiser 500s on some Markdown — blockquotes, indented
   code blocks with pipes, angle-bracket autolinks. Keep release notes to plain
   paragraphs, lists and simple tables.
