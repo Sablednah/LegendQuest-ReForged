@@ -14,13 +14,33 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class Net {
 
     public static void sendIfAble(ServerPlayer player, CustomPacketPayload payload) {
-        // Null check courtesy of the ZombieMod session: fake players (other
-        // mods' automation, headless probes) sit in the player list with no
-        // real connection — an NPE here has the same blast radius as the
-        // original bug, from a different direction.
-        if (player.connection != null && player.connection.hasChannel(payload.type())) {
+        if (listening(player, payload.type())) {
             PacketDistributor.sendToPlayer(player, payload);
         }
+    }
+
+    /**
+     * Whether this player's client negotiated {@code type} — and whether there
+     * is a client there to ask at all.
+     *
+     * <p><b>A null check is not enough, and was the whole guard until
+     * Chronicler's self-test died on it.</b> A NeoForge {@code FakePlayer} (other
+     * mods' deployers and automation, API callers handing a fake player XP) HAS
+     * a connection: a {@code FakePlayerNetHandler} over a connection whose netty
+     * channel is null. {@code hasChannel} reads an attribute off that channel and
+     * throws a {@code NullPointerException} out of whatever event asked. So a
+     * fake player is refused by name ({@code isFakePlayer} covers subclasses),
+     * and a hand-rolled fake {@code ServerPlayer} by its connection not being
+     * connected. ZombieMod and Chronicler settled on this same shape.</p>
+     *
+     * <p>Sending to a fake player would have been harmless — its send is a
+     * no-op. Only the question throws.</p>
+     */
+    public static boolean listening(ServerPlayer player, CustomPacketPayload.Type<?> type) {
+        return player.connection != null
+                && !player.isFakePlayer()
+                && player.connection.getConnection().isConnected()
+                && player.connection.hasChannel(type);
     }
 
     private Net() {}
