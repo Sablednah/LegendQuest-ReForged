@@ -3,6 +3,24 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 2.5.1 — 2026-09-15
+
+A fixes release. Packs, config and the Standards requirement are unchanged, so
+dropping in the new jar is all there is to it.
+
+### Fixed
+
+- **Fake players from other mods no longer crash LegendQuest's networking.**
+  Deployers, automated attackers and any mod handing a fake player a character
+  update gave LegendQuest a player whose connection has nothing behind it, and
+  asking that connection which mod channels it supports threw an error out of
+  whatever was running at the time. LegendQuest now skips fake and disconnected
+  players before it asks. Reported by the Chronicler session; ZombieMod and
+  Chronicler carry the same guard.
+- **Party chat and chat rank titles cope with a message that has no player.**
+  Standards' self-test sends one, and LegendQuest's party router and rank title
+  logged an error each time. They now simply decline.
+
 ## 2.5.0 — 2026-09-13
 
 Requires **Standards 1.8.0 or newer**. The wasteland and sci-fi genre packs

@@ -58,3 +58,6 @@ repo/
 runBuddy/
 .gradle-buddy/
 .gradle-win/
+
+### Notes exchanged with the website session (local, not source) ###
+/WEBSITE.md
