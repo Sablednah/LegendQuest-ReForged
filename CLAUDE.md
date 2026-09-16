@@ -164,10 +164,26 @@ dies the moment it lazily loads a class it had not already touched
 on disk). Always confirm nothing is running first:
 
 ```bash
+# Collect the command lines, then ask about a name you ALREADY have.
 powershell.exe -NoProfile -Command "Get-CimInstance Win32_Process | \
-  Where-Object { \$_.Name -like 'java*' } | ForEach-Object { \
-  [regex]::Match(\$_.CommandLine,'Instances\\\\([^\\\\\"]+)').Groups[1].Value }"
+  Where-Object { \$_.Name -like 'java*' } | ForEach-Object { \$_.CommandLine }" \
+  | grep -F 'Instances\MobHealth - Forge\'
 ```
+
+**Do not try to read the instance name out of the command line.** Three
+patterns were tried and all three failed the same way on 2026-09-16: the
+launcher passes `--gameDir C:\...\Instances\26.2 --assetsDir C:\...`, with no
+separator after the folder, so a pattern that stops at the next backslash
+yields `26.2 --assetsDir C:` and matches no instance. The guard missed, both
+`deploy-all.sh` runs started replacing jars under a live game, and the `rm`
+failed with `Permission denied` halfway through the estate. The scripts now
+ask the question the other way round — `instance_running <name>` greps the
+collected command lines for `Instances\<name>` followed by `\`, `"` or a
+space — and that boundary is not optional: without it `26.2` also matches
+`26.2.test`. Fixed strings, not a regex: an escaping helper written for
+`grep -E` opened its bracket expression with `[.`, which POSIX reads as a
+collating symbol, so `sed` errored and **every** instance came back "not
+running" — a guard that errors must never read as safe.
 
 ### Deploying to one instance, or to all of them
 
