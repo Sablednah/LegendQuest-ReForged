@@ -90,6 +90,11 @@ for dir in "$INSTANCES"/*/; do
     mods="$dir/mods"
     ls "$mods"/legendquest-*.jar >/dev/null 2>&1 || continue
 
+    if [ -e "$dir/.sablecraft-no-deploy" ]; then
+        echo "-- $name is marked .sablecraft-no-deploy -- left alone"
+        continue
+    fi
+
     mc="$(mc_version_of "$dir")"
     jar="$(ls "$BUILT"/legendquest-*+mc"$mc".jar 2>/dev/null | head -1 || true)"
     if [ -z "$mc" ]; then

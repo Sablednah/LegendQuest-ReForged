@@ -190,6 +190,11 @@ running" — a guard that errors must never read as safe.
 `./deploy.sh` builds the current branch and copies it to one instance, routed by
 the jar's `+mc` tag. That is the mid-loop tool.
 
+**An instance holding `.sablecraft-no-deploy` is left alone by both scripts** —
+found by the scan or named explicitly. A CurseForge modpack instance (Sable's
+"LegendQuest: ZARP") must hold only released jars, because an export names
+CurseForge file ids; Chronicler and Cast honour the same marker.
+
 `./deploy-all.sh <dir-of-jars>` is the after-a-release tool: it updates **every**
 instance that already has a LegendQuest jar, from a directory holding all three
 tagged jars. It never installs the mod somewhere new.
