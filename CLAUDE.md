@@ -487,11 +487,21 @@ created).
 - **Tag the commit the jars are stamped with.** Build every release jar from a
   clean tree; a docs commit after the 1.21.11 build means rebuilding it so the
   stamp and the tag agree.
-- **The example pack is a separate repo and ships with every release.**
-  `../LegendQuest-SkillPack-Example`, one branch per Minecraft version like this
-  one. Read the `mods.toml` of what you attach: its 26.x jars declared
-  `minecraft [1.21.11]` and never loaded, through 2.4.1, until 2.5.0 shipped
-  1.0.1. `minecraft_version_range` has to move when `minecraft_version` does.
+- **The example pack is a separate repo — `../LegendQuest-SkillPack-Example`,
+  one branch per Minecraft version like this one — and it is attached to the
+  GitHub release ONLY.** Read the `mods.toml` of what you attach: its 26.x jars
+  declared `minecraft [1.21.11]` and never loaded, through 2.4.1, until 2.5.0
+  shipped 1.0.1. `minecraft_version_range` has to move when `minecraft_version`
+  does.
+- **Never upload anything but LegendQuest's own jars to its CurseForge project.**
+  The app pulls a required dependency in as that project's newest *approved* file
+  for the Minecraft version, whatever the file is called — so the example-pack
+  jars uploaded there through 2.5.0 meant a modpack installing StoryTeller got
+  the example pack INSTEAD of LegendQuest (found by Sable, 2026-09-16, while
+  2.5.1 was still in moderation). A project's file list is its identity to every
+  other mod. The workflow now uploads `legendquest-*.jar` and nothing else; the
+  stale example-pack files have to be deleted on the project page by hand,
+  because the upload API cannot remove a file.
 - CurseForge's changelog sanitiser 500s on some Markdown — blockquotes, indented
   code blocks with pipes, angle-bracket autolinks. Keep release notes to plain
   paragraphs, lists and simple tables.

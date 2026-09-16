@@ -171,9 +171,19 @@ jobs:
           TAG: ${{ github.event.release.tag_name || inputs.tag }}
         run: |
           shopt -s nullglob
-          # The mod jar first, so it lands at the top of the files list and is what the project
-          # page offers by default. The example pack is useless without it.
-          ordered=(dist/legendquest-*.jar dist/examplepack-*.jar)
+          # LegendQuest's own jars, and NOTHING ELSE.
+          #
+          # The example pack used to be uploaded here too, on the grounds that it is useless
+          # without LegendQuest. That broke dependency resolution for every mod that requires us:
+          # the CurseForge app pulls a required dependency in as the dependency project's newest
+          # APPROVED file for that Minecraft version, and it does not care what the file is called.
+          # After 2.5.0 that file was examplepack-1.0.1, so installing StoryTeller into a modpack
+          # installed the example pack INSTEAD of LegendQuest (found by Sable, 2026-09-16, while
+          # 2.5.1 was still in moderation).
+          #
+          # A project's file list is its identity to every other mod. Anything that is not this mod
+          # goes to GitHub, or to a CurseForge project of its own.
+          ordered=(dist/legendquest-*.jar)
           if [ ${#ordered[@]} -eq 0 ]; then
             echo "::error::No jars attached to the release - nothing to upload."
             exit 1
