@@ -53,6 +53,18 @@ INSTANCE="${LQ_INSTANCE:-$TARGET}"
 MODS="$INSTANCE/mods"
 NAME="$(basename "$INSTANCE")"
 
+# A modpack instance holds ONLY released CurseForge jars: an export names file
+# ids, so a locally built jar would be exported as a file that does not exist.
+# Sable marks those instances with .sablecraft-no-deploy, and Chronicler and Cast
+# honour the same file (asked for by the ZARP session, 2026-09-16). Skipping is
+# success, not failure -- nothing was ever meant to go there -- and it applies
+# whether the instance was found by the scan or named explicitly with
+# LQ_INSTANCE.
+if [ -e "$INSTANCE/.sablecraft-no-deploy" ]; then
+    echo ">> '$NAME' is marked .sablecraft-no-deploy -- leaving it alone."
+    exit 0
+fi
+
 [ -d "$MODS" ] || { echo "!! Instance mods folder not found: $MODS" >&2; exit 1; }
 
 # ---------------------------------------------------------------------------
@@ -68,15 +80,97 @@ NAME="$(basename "$INSTANCE")"
 # before, by an earlier version of this script whose comment claimed Windows
 # would refuse the write for us.
 # ---------------------------------------------------------------------------
-RUNNING="$(powershell.exe -NoProfile -Command \
-  "Get-CimInstance Win32_Process | Where-Object { \$_.Name -like 'java*' } | ForEach-Object { \
-   \$m=[regex]::Match(\$_.CommandLine,'Instances\\\\([^\\\\\"\s]+)'); if (\$m.Success) { \$m.Groups[1].Value } }" \
-  2>/dev/null | tr -d '\r' | sort -u || true)"
+# The character class must NOT exclude whitespace. Seven instances carry this
+# mod and two are named with spaces ("MobHealth - Forge", "Standards"), so a
+# \s in there truncates the name at the first space, compares "MobHealth"
+# against the folder "MobHealth - Forge", never matches, and the guard silently
+# passes while the game is running. That was the state of this script until
+# 2026-09-07; what stood in for the guard was `set -e` aborting on the rm below
+# failing with "Permission denied" -- luck, not a check. Let the name run to
+# the next backslash or quote.
+# The trailing backslash is not decoration. A running instance's own command
+# line carries "--gameDir C:\...\Instances\26.2 --assetsDir C:\..." with NO
+# separator after the folder, so a pattern that stops at the next backslash
+# swallows the rest of the argument and yields "26.2 --assetsDir C:". That never
+# equals the folder name, the guard misses, and the script tries to replace a jar
+# under a live game (which fails with "Permission denied" on the rm, mid-run --
+# seen 2026-09-16). Requiring the trailing backslash matches the deeper paths in
+# the same command line instead (natives, libraries), which DO have one, and
+# keeps names with spaces whole.
+RUNNING_CMDS="$(powershell.exe -NoProfile -Command \
+  "Get-CimInstance Win32_Process | Where-Object { \$_.Name -like 'java*' } | ForEach-Object { \$_.CommandLine }" \
+  2>/dev/null | tr -d '\r' || true)"
 
-if echo "$RUNNING" | grep -qxF "$NAME"; then
+# Ask the question the right way round: we KNOW the folder name, so look for it
+# in the running command lines rather than parsing a name out of them. Every
+# attempt to READ the name failed the same way -- the launcher's own argument is
+#   --gameDir C:\...\Instances\26.2 --assetsDir C:\...
+# with no separator after the folder, so the pattern ran on into the next
+# argument and produced "26.2 --assetsDir C:", which matches no instance. The
+# guard then missed and a deploy started under a live game (2026-09-16): the rm
+# failed with "Permission denied" halfway through the estate.
+#
+# The boundary matters as much as the name: without it "26.2" also matches
+# "26.2.test". Names with spaces ("MobHealth - Forge") stay whole either way,
+# because nothing here splits on whitespace.
+instance_running() {
+    local name="$1" padded
+    # Fixed strings, no regex: an instance name can hold dots ("26.2") and
+    # spaces ("MobHealth - Forge"), and escaping them for grep -E is how the
+    # previous attempt died -- its bracket expression opened with "[." , which
+    # POSIX reads as a collating symbol, so sed failed and EVERY instance came
+    # back "not running". A guard that errors must never read as "safe".
+    #
+    # Three boundaries are all the launcher can put after the folder name: a
+    # deeper path, a closing quote, or the end of the argument. The padding
+    # gives that last one something to match.
+    padded="$(printf '%s' "$RUNNING_CMDS" | sed 's/$/ /')"
+    printf '%s' "$padded" | grep -qF -- "Instances\\$name\\" && return 0
+    printf '%s' "$padded" | grep -qF -- "Instances\\$name\"" && return 0
+    printf '%s' "$padded" | grep -qF -- "Instances\\$name " && return 0
+    return 1
+}
+
+if instance_running "$NAME"; then
     echo "!! '$NAME' is RUNNING. Refusing to overwrite a jar underneath a live game." >&2
     echo "!! Close Minecraft and run this again." >&2
     exit 1
+fi
+
+# Say which build is being replaced, and by which. Two jars can carry the same
+# filename AND the same version and still differ -- that has happened here, and
+# the version string is no help at all when it does. The script itself cannot
+# get this wrong (it removes and copies unconditionally, with no comparison to
+# fumble); what it guards against is a PERSON, or an agent, deciding to skip a
+# deploy because "it already says 2.5.0". The stamp makes that judgement
+# checkable afterwards -- printing it here makes it visible before.
+#
+# Both helpers below are written around `set -euo pipefail`, which is hostile to
+# the two cases that matter most here. A pipeline whose FIRST element fails
+# fails the whole pipeline under pipefail, and a failed command substitution in
+# an assignment then exits the script under -e, with nothing printed. So:
+#   ls glob | head   dies when there is no jar yet -- a FIRST deploy into an
+#                    instance, the one run where this code has something to say.
+#   unzip -p | sed   dies when the jar has no build.properties -- a pre-stamp
+#                    jar, which is most of the instances right now.
+# Both are silent, and both pass every test that uses a populated instance and a
+# current jar. Caught by MobHealth's session hitting the first one; the second
+# was sitting beside it. A glob loop has no pipeline to fail, and `|| true`
+# keeps a missing entry from being fatal.
+stampof() {
+    local out
+    out=$(unzip -p "$1" legendquest/build.properties 2>/dev/null || true)
+    printf '%s' "$out" | sed -n 's/^commit=//p' | head -1 || true
+}
+OLDJAR=""
+for f in "$MODS"/legendquest-*.jar; do
+    if [ -f "$f" ]; then OLDJAR="$f"; break; fi
+done
+if [ -n "$OLDJAR" ]; then
+    OLDSTAMP=$(stampof "$OLDJAR")
+    echo ">> Replacing $(basename "$OLDJAR") [build ${OLDSTAMP:-none, predates stamps}]"
+else
+    echo ">> No existing LegendQuest jar in '$NAME' (first deploy here)"
 fi
 
 echo ">> Removing previous LegendQuest jars from '$NAME'..."
@@ -88,5 +182,5 @@ cp "$JAR" "$MODS/"
 cmp -s "$JAR" "$MODS/$JARNAME" || { echo "!! Deployed jar does not match the build." >&2; exit 1; }
 unzip -t "$MODS/$JARNAME" >/dev/null 2>&1 || { echo "!! Deployed jar is not a valid zip." >&2; exit 1; }
 
-echo ">> Deployed $JARNAME ($(stat -c%s "$JAR") bytes) to '$NAME'"
+echo ">> Deployed $JARNAME ($(stat -c%s "$JAR") bytes) [build $(stampof "$JAR")] to '$NAME'"
 echo ">> Launch that instance in CurseForge to test."
