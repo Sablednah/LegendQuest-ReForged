@@ -23,6 +23,8 @@ public final class PartyActions {
         }
         Feedback.notify(player, Lang.fmt("msg.party.created", "name", name));
         CharacterSync.send(player);
+        Parties.get(player.level().getServer()).partyOf(player.getUUID())
+                .ifPresent(party -> PartyVoice.joined(player, party));
         return true;
     }
 
@@ -79,6 +81,7 @@ public final class PartyActions {
             }
             CharacterSync.send(member);
         }
+        PartyVoice.joined(player, joined.get());
         return true;
     }
 
@@ -100,6 +103,13 @@ public final class PartyActions {
         // Before anything else they might type: capture outliving the party is
         // how a private remark ends up in public chat.
         PartyChat.partyEnded(player);
+        // And the same worry one sense over: a voice channel outliving the
+        // party is how a private remark stays audible to people you have just
+        // walked away from.
+        PartyVoice.left(player, left.get());
+        if (Parties.get(server).byName(left.get().name()).isEmpty()) {
+            PartyVoice.dissolved(left.get());
+        }
         CharacterSync.send(player);
         for (var memberId : left.get().members()) {
             ServerPlayer member = server.getPlayerList().getPlayer(memberId);
@@ -132,6 +142,7 @@ public final class PartyActions {
             Feedback.notify(member, Lang.fmt("msg.party.renamed", "old", oldName, "new", newName));
             CharacterSync.send(member);
         }
+        parties.byName(newName).ifPresent(renamed -> PartyVoice.renamed(renamed, oldName));
         return true;
     }
 
