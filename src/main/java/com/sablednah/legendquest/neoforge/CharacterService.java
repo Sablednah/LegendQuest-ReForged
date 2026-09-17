@@ -222,6 +222,10 @@ public final class CharacterService {
             Feedback.levelUp(player, after,
                     mainClass(player).map(CharClass::name).orElse(Lang.get("msg.stats.citizen")));
         }
+        // Offered on every XP change, not only on the ones that crossed a level:
+        // a milestone advancement added after a character passed it should still
+        // land, and the index check makes the no-op case cheap.
+        Achievements.levelled(player, after);
     }
 
     /** Effective stat line: rolled base + race mods + combined class mods + level bonuses. */

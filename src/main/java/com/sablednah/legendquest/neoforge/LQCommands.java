@@ -957,6 +957,9 @@ public final class LQCommands {
         long amount = LongArgumentType.getLong(ctx, "amount");
         PlayerCharacter pc = CharacterService.data(target);
         pc.addKarma(amount - pc.karma());
+        // An admin setting karma is still karma reached: the band advancements
+        // do not care how somebody got there.
+        Achievements.karma(target);
         ctx.getSource().sendSuccess(() -> Feedback.colored(Lang.fmt("msg.admin.set_karma",
                 "player", target.getName().getString(), "amount", amount)), true);
         return 1;

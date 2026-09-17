@@ -46,6 +46,7 @@ public final class CharacterActions {
         pruneUnknownSkills(player);
         CharacterService.refresh(player);
         Feedback.notify(player, Lang.fmt("msg.choose.race_done", "article", article(target.name()), "race", target.name()));
+        Achievements.raceChosen(player, raceId);
         return true;
     }
 
@@ -105,6 +106,7 @@ public final class CharacterActions {
         CharacterService.refresh(player);
         Feedback.notify(player, Lang.fmt("msg.choose.class_done", "article", article(target.name()),
                 "class", target.name(), "suffix", asSub ? " (sub)." : "."));
+        Achievements.classChosen(player, classId);
 
         // Switching main class is alarming and harmless, which is the worst
         // combination to leave unexplained: level, max health, title and skills
@@ -277,6 +279,7 @@ public final class CharacterActions {
                 "skill", SkillEngine.definition(player, skillId).map(d -> d.name()).orElse(skillId.toString()),
                 "cost", grant.cost()));
         CharacterSync.send(player);
+        Achievements.fire(player, "skill_learned", skillId.toString());
         return true;
     }
 
@@ -347,6 +350,7 @@ public final class CharacterActions {
         pc.buyFeat(featId, feat.cost());
         CharacterService.refresh(player); // boons/proficiencies apply now
         Feedback.notify(player, Lang.fmt("msg.feat.gained", "feat", feat.name(), "cost", feat.cost()));
+        Achievements.fire(player, "feat_bought", featId.toString());
         return true;
     }
 
@@ -386,6 +390,7 @@ public final class CharacterActions {
         pruneUnknownSkills(player);
         CharacterService.refresh(player);
         Feedback.notify(player, Lang.fmt("msg.respec.done", "points", refunded, "level", CharacterService.level(player)));
+        Achievements.fire(player, "respec", null);
         return true;
     }
 

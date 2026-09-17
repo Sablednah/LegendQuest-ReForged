@@ -1,0 +1,29 @@
+{
+  "parent": "legendquest:character/class",
+  "display": {
+    "icon": {
+      "id": "minecraft:enchanted_book"
+    },
+    "title": {
+      "text": "First Trick"
+    },
+    "description": {
+      "text": "Learn a skill. Spend a point, gain an ability."
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "legendquest:skill_learned": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "legendquest:skill_learned"
+    ]
+  ],
+  "sends_telemetry_event": false
+}

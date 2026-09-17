@@ -1,0 +1,29 @@
+{
+  "parent": "legendquest:party/joined",
+  "display": {
+    "icon": {
+      "id": "minecraft:ender_pearl"
+    },
+    "title": {
+      "text": "Gather the Party"
+    },
+    "description": {
+      "text": "Pull your party to you with /party tp."
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "legendquest:party_gathered": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "legendquest:party_gathered"
+    ]
+  ],
+  "sends_telemetry_event": false
+}
