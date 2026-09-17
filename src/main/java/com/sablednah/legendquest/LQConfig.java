@@ -43,6 +43,7 @@ public final class LQConfig {
     public static final ModConfigSpec.IntValue PARTY_XP_SHARE;
     public static final ModConfigSpec.BooleanValue BLOCK_PARTY_PVP;
     public static final ModConfigSpec.IntValue PARTY_TP_COOLDOWN;
+    public static final ModConfigSpec.BooleanValue PARTY_VOICE;
 
     static {
         BUILDER.comment("Character statline").push("stats");
@@ -150,6 +151,11 @@ public final class LQConfig {
         PARTY_TP_COOLDOWN = BUILDER
                 .comment("Seconds between /party tp uses (0 disables the command).")
                 .defineInRange("tpCooldownSeconds", 60, 0, 86_400);
+        PARTY_VOICE = BUILDER
+                .comment("Put party members in a shared Simple Voice Chat channel.",
+                        "Needs the Simple Voice Chat mod; without it this does nothing.",
+                        "Members hear each other at any distance and still hear players nearby.")
+                .define("voiceChannel", true);
         BUILDER.pop();
     }
 

@@ -76,3 +76,16 @@ iconBlur=true
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
+
+# Simple Voice Chat is OPTIONAL and supplies party voice channels. The range
+# exists for the case where it IS installed: an incompatible one should be a
+# refusal to load rather than a NoSuchMethodError somewhere unrelated. Declared
+# on both sides because the channel is arranged server-side and heard
+# client-side, and "optional" means a server without it loses the channel and
+# nothing else.
+[[dependencies.${mod_id}]]
+    modId="voicechat"
+    type="optional"
+    versionRange="${voicechat_version_range}"
+    ordering="AFTER"
+    side="BOTH"

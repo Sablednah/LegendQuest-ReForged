@@ -243,6 +243,19 @@ public final class Lang {
         def("msg.party.already_in_one", "&cYou are already in a {term.party}.");
         def("msg.party.name_taken", "&cA {term.party} with that name already exists.");
         def("msg.party.name_rules", "&c{term.party} names: 2-24 letters, numbers, _ or -.");
+        // Voice. New keys rather than additions to the lines above: messages.yml
+        // pins every key it already holds, so a placeholder added to a live key
+        // would never render on any server that has already run.
+        def("msg.party.voice.joined",
+                "&6You are in the &l{name}&r&6 voice channel — your {term.party} hears you at any distance.");
+        def("msg.party.voice.left", "&7You have left the {term.party} voice channel.");
+        def("msg.party.voice.rejoined", "&6Back in the &l{name}&r&6 voice channel.");
+        def("msg.party.voice.none", "&7This server has no voice chat installed.");
+        def("msg.party.voice.not_connected",
+                "&7Your voice chat is not connected. Start it, then &f/party voice&7 again.");
+        def("msg.party.voice.other_group",
+                "&7You are in another voice group, so you have been left there. "
+                        + "&f/party voice&7 moves you to your {term.party}'s channel.");
         def("msg.party.friendly_fire", "&7{name} is in your {term.party}.");
 
         def("msg.combat.dodged_you", "&aDodged!");

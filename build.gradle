@@ -24,7 +24,14 @@ sourceSets.main.resources {
 }
 
 repositories {
-    // Add additional repositories here if required by dependencies below.
+    // Simple Voice Chat's plugin API, for the party voice channel. compileOnly
+    // below and never shipped: this is a SOFT dependency, and the only class
+    // that imports it is loaded by the voice mod's own plugin scanner, so a
+    // server without the mod never touches it. See PartyVoice.
+    maven {
+        name = 'Henkelmax'
+        url = 'https://maven.maxhenkel.de/repository/public'
+    }
 }
 
 base {
@@ -140,6 +147,16 @@ dependencies {
         logger.lifecycle("Standards dependency: ${found.first().name}")
         [found.first()]
     })
+
+    // Simple Voice Chat's plugin API: party voice channels. compileOnly and NOT
+    // jarJar'd, the same reasoning as Standards above -- it is a SOFT
+    // dependency and LegendQuest must run perfectly well without the mod.
+    //
+    // A maven coordinate rather than a local jar because this one IS published,
+    // and the API artifact is the same for every Minecraft version, so it needs
+    // none of the version-matching the sibling-jar lookups above exist for. The
+    // version is pinned in gradle.properties beside the reason.
+    compileOnly "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
 }
 
 // Expand mod metadata properties into the generated neoforge.mods.toml.
@@ -178,6 +195,11 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
             mod_license            : mod_license,
             mod_version            : mod_version,
             standards_version_range: standards_version_range,
+            // Every ${...} the template uses has to be listed here, or the
+            // expansion fails the build with "Missing property" -- which is the
+            // right failure: a range that silently expanded to nothing would be
+            // a dependency declaration that promised anything.
+            voicechat_version_range: voicechat_version_range,
             mod_authors            : mod_authors,
             mod_description        : mod_description,
             build_commit           : buildCommit,
