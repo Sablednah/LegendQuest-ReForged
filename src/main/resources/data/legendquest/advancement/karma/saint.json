@@ -1,0 +1,29 @@
+{
+  "parent": "legendquest:karma/bright",
+  "display": {
+    "icon": {
+      "id": "minecraft:beacon"
+    },
+    "title": {
+      "text": "Saintly"
+    },
+    "description": {
+      "text": "Do a great deal of good, consistently, where anyone could see."
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "legendquest:karma_bright/1000": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "legendquest:karma_bright/1000"
+    ]
+  ],
+  "sends_telemetry_event": false
+}

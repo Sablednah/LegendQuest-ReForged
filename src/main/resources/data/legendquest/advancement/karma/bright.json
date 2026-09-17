@@ -1,0 +1,29 @@
+{
+  "parent": "legendquest:root",
+  "display": {
+    "icon": {
+      "id": "minecraft:glowstone_dust"
+    },
+    "title": {
+      "text": "Well Thought Of"
+    },
+    "description": {
+      "text": "Do enough good to be spoken well of."
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "legendquest:karma_bright/100": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "legendquest:karma_bright/100"
+    ]
+  ],
+  "sends_telemetry_event": false
+}

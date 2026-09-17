@@ -1,0 +1,29 @@
+{
+  "parent": "legendquest:character/level_5",
+  "display": {
+    "icon": {
+      "id": "minecraft:golden_apple"
+    },
+    "title": {
+      "text": "Known by Name"
+    },
+    "description": {
+      "text": "Reach level 10."
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "legendquest:level/10": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "legendquest:level/10"
+    ]
+  ],
+  "sends_telemetry_event": false
+}

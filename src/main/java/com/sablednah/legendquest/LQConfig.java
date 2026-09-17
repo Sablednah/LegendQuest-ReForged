@@ -44,6 +44,7 @@ public final class LQConfig {
     public static final ModConfigSpec.BooleanValue BLOCK_PARTY_PVP;
     public static final ModConfigSpec.IntValue PARTY_TP_COOLDOWN;
     public static final ModConfigSpec.BooleanValue PARTY_VOICE;
+    public static final ModConfigSpec.BooleanValue ADVANCEMENTS;
 
     static {
         BUILDER.comment("Character statline").push("stats");
@@ -156,6 +157,14 @@ public final class LQConfig {
                         "Needs the Simple Voice Chat mod; without it this does nothing.",
                         "Members hear each other at any distance and still hear players nearby.")
                 .define("voiceChannel", true);
+        BUILDER.pop();
+
+        BUILDER.comment("Advancements").push("advancements");
+        ADVANCEMENTS = BUILDER
+                .comment("Grant LegendQuest's advancements. Off, and nothing is granted and the",
+                        "tab never appears. They are plain vanilla advancements, so they work on",
+                        "an unmodded client.")
+                .define("enabled", true);
         BUILDER.pop();
     }
 

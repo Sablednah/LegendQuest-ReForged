@@ -1,0 +1,29 @@
+{
+  "parent": "legendquest:karma/dark",
+  "display": {
+    "icon": {
+      "id": "minecraft:dragon_head"
+    },
+    "title": {
+      "text": "The Villain of the Piece"
+    },
+    "description": {
+      "text": "Go a very long way down. Somebody has to be the reason for the quest."
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "legendquest:karma_dark/1000": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "legendquest:karma_dark/1000"
+    ]
+  ],
+  "sends_telemetry_event": false
+}

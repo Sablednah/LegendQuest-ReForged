@@ -1,0 +1,29 @@
+{
+  "parent": "legendquest:character/skill",
+  "display": {
+    "icon": {
+      "id": "minecraft:totem_of_undying"
+    },
+    "title": {
+      "text": "Set in Your Ways"
+    },
+    "description": {
+      "text": "Buy a feat. Some doors open only for the soul that fits them."
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "legendquest:feat_bought": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "legendquest:feat_bought"
+    ]
+  ],
+  "sends_telemetry_event": false
+}
