@@ -387,6 +387,22 @@ Decisions worth not relitigating:
 The API is `compileOnly` from `maven.maxhenkel.de` — `voicechat_api_version` in
 `gradle.properties`, pinned to the version the mod jars themselves bundle.
 
+**Seen on the 1.21.11 Vivo rig, 2026-09-17:** `[voicechat] Initialized 1
+plugin(s)`, `Registering events for 'legendquest'`, and the listener installing
+as the voice server started on 24454 — then a party created and `/party voice`
+answering *"Back in the VoiceTest voice channel."* with no exception, so the
+whole path from party to `setGroup` runs on a real server. **Whether two people
+actually hear each other is not something this session could measure** — that
+needs ears and audio devices, and is the one claim here still waiting on a human.
+
+**A connection exists for players whose client does NOT have the voice mod.**
+`getConnectionOf` returned one for a client with no Simple Voice Chat installed
+at all, and `setGroup` on it succeeded — the test above was run from exactly
+that client. So a null connection is not the test for "can hear"; that is
+`VoicechatConnection.isInstalled()`. Nothing here depends on the difference,
+but a future feature that reports who can hear must not read null-ness as the
+answer.
+
 ## Parked ideas
 
 `docs/IDEAS.md` holds things wanted but not built, written down when they were
