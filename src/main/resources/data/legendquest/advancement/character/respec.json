@@ -1,0 +1,29 @@
+{
+  "parent": "legendquest:character/skill",
+  "display": {
+    "icon": {
+      "id": "minecraft:grindstone"
+    },
+    "title": {
+      "text": "Second Thoughts"
+    },
+    "description": {
+      "text": "Respec, and buy your character back differently. Levels are the price."
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "legendquest:respec": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "legendquest:respec"
+    ]
+  ],
+  "sends_telemetry_event": false
+}

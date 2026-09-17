@@ -290,6 +290,7 @@ public final class SkillEngine {
         }
         pc.setMana(pc.mana() - costs.manaCost());
         pc.addKarma(costs.karmaReward() - costs.karmaCost());
+        Achievements.karma(player);
         return UseResult.FIRED;
     }
 

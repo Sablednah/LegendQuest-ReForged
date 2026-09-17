@@ -87,6 +87,9 @@ public final class LQServerEvents {
         sendVocab(player);
         CharacterService.refresh(player);
         restoreHealth(player);
+        // Re-offer everything this character has already earned, so nobody is
+        // asked to start again and an advancement added later still lands.
+        Achievements.login(player);
         HandbookSync.send(player);
         var pc = CharacterService.data(player);
         String race = CharacterService.race(player).map(r -> r.name()).orElse("Undecided");
@@ -321,7 +324,10 @@ public final class LQServerEvents {
         else if (victim instanceof Enemy) karma = LQConfig.KARMA_KILL_MONSTER.get();
         else if (victim instanceof Animal) karma = LQConfig.KARMA_KILL_ANIMAL.get();
         else karma = 0;
-        if (karma != 0) CharacterService.data(killer).addKarma(karma);
+        if (karma != 0) {
+            CharacterService.data(killer).addKarma(karma);
+            Achievements.karma(killer);
+        }
 
         SkillEngine.trigger(killer, TriggerSpec.Kind.KILL, victim);
     }

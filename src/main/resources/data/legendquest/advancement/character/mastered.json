@@ -1,0 +1,32 @@
+{
+  "parent": "legendquest:character/max_level",
+  "display": {
+    "icon": {
+      "id": "minecraft:netherite_ingot"
+    },
+    "title": {
+      "text": "Master of the Craft"
+    },
+    "description": {
+      "text": "Take a class all the way to the cap."
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "legendquest:class_mastered": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "legendquest:class_mastered"
+    ]
+  ],
+  "rewards": {
+    "experience": 100
+  },
+  "sends_telemetry_event": false
+}

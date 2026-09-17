@@ -403,6 +403,48 @@ that client. So a null connection is not the test for "can hear"; that is
 but a future feature that reports who can hear must not read null-ness as the
 answer.
 
+## Advancements are granted by criterion name, and there is no trigger type
+
+`neoforge/Achievements`, **lifted from ZombieMod's `neoforge/Feats`** at Sable's
+suggestion — the mechanism is identical and only the vocabulary is ours. Shipped
+advancements are data under `data/legendquest/advancement/`, every criterion is
+vanilla's `minecraft:impossible`, and the mod awards any criterion whose **name**
+starts `legendquest:`.
+
+**Do not "improve" this into a registered trigger type.** A trigger type is a
+registry entry, and the whole point is that a vanilla client is never asked
+about anything of ours. The index of names is rebuilt when
+`server.getAdvancements().tree()` changes identity, which is what `/reload` does
+to it, so there is no reload listener here to be renamed next version.
+
+- **The criterion names are public API** and the README carries the table.
+  Renaming one breaks other people's datapacks.
+- **Numbered families take any whole number** — `level/<n>`, `karma_bright/<n>`,
+  `karma_dark/<n>` — so a pack can add a step this mod never shipped and get it
+  granted with no code. Each offers every step at or below the current figure,
+  which is also what makes a milestone added later reach someone who passed it
+  long ago.
+- **Everything is re-offered at login** from saved state, so nobody is asked to
+  start again. That is the half that makes publishing the names worth anything.
+- **"All" is measured against what that player may choose**, using
+  `LQPermissions.canSelectRace/canSelectClass` — a restricted race is not held
+  against anybody. Same rule as ZombieMod's concealed genus.
+- **Titles and descriptions are literal text, not translation keys**: a vanilla
+  client has no language file of ours and would show the key. **Regenerate
+  rather than hand-edit** — `scripts/make-advancements.py`, which also asserts
+  every parent exists.
+- **`PlayerAdvancements.award` refuses anything `instanceof FakePlayer`** — a
+  NeoForge patch, and it returns false without a word. The check is on the
+  class, so overriding `isFakePlayer()` does not get round it.
+
+**"Max level in every class" needed no new state**, because `classXp` already
+decides a class's level — asking it cannot disagree with the character sheet.
+**"Played every race" did**, and `PlayerCharacter` was on RecordCodecBuilder's
+16-field ceiling, so it went into a new grouped `History` record beside
+`Purchases` and `Toggles`. A MapCodec reads sibling keys, so the saved NBT
+layout is unchanged and an older save has no `races_played` key — it is caught
+up from its current race at first login.
+
 ## Parked ideas
 
 `docs/IDEAS.md` holds things wanted but not built, written down when they were

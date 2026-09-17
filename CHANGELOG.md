@@ -29,6 +29,23 @@ it LegendQuest behaves exactly as it did.
   Simple Voice Chat has moderation of its own; a server that needs a player
   silenced in voice should silence them there.
 
+### Advancements
+
+- **LegendQuest has its own advancements tab**, 19 of them: the character line
+  (race, class, levels 5/10/20 and the cap, a first skill, a first feat, a
+  respec), karma in both directions, and parties — plus hidden and challenge
+  entries for mastering every class, playing every race, and a party whose
+  online members have all reached the cap.
+- **They are plain vanilla advancements**, so they work on an unmodded client
+  and show up in Better Advancements.
+- **Progress you already had counts.** Everything is re-offered when you log in,
+  so a character who was level 30 before this arrived gets those advancements
+  straight away.
+- Pack authors can grant them too: the criterion names are documented in the
+  README and work from any datapack, and a pack can replace a shipped one by
+  using the same id.
+- `advancements.enabled = false` switches the lot off.
+
 ## 2.5.1 — 2026-09-15
 
 A fixes release. Packs, config and the Standards requirement are unchanged, so

@@ -1,0 +1,29 @@
+{
+  "parent": "legendquest:root",
+  "display": {
+    "icon": {
+      "id": "minecraft:iron_sword"
+    },
+    "title": {
+      "text": "Take Up a Calling"
+    },
+    "description": {
+      "text": "Choose a class. What you are is decided; what you do is up to you."
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "legendquest:class_chosen": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "legendquest:class_chosen"
+    ]
+  ],
+  "sends_telemetry_event": false
+}

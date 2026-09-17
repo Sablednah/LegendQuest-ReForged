@@ -82,6 +82,9 @@ public final class PartyActions {
             CharacterSync.send(member);
         }
         PartyVoice.joined(player, joined.get());
+        // Everybody in it, not just the joiner: "be in a party with somebody
+        // else" became true for the people already standing there too.
+        Achievements.party(player, "party_joined");
         return true;
     }
 
@@ -208,6 +211,7 @@ public final class PartyActions {
                 net.minecraft.sounds.SoundEvents.ENDERMAN_TELEPORT,
                 net.minecraft.sounds.SoundSource.PLAYERS, 1.0F, 1.0F);
         Feedback.notify(player, Lang.get("msg.party.tp_done"));
+        Achievements.party(player, "party_gathered");
         return true;
     }
 

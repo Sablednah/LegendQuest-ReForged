@@ -548,6 +548,52 @@ so the panel and handbook follow the server's genre too.
 - **Milliseconds, everywhere.** `cooldown: 6` is six thousandths of a
   second, and the panel will cheerfully show you a skill with no cooldown.
 
+## Advancements
+
+LegendQuest has its own tab in the advancements screen: the character line
+(race, class, levels, a first skill, a first feat, a respec), karma in both
+directions, and parties — with hidden and challenge entries for mastering every
+class, playing every race, and a party whose online members have all reached the
+cap. They are **plain vanilla advancements**, so they work on an unmodded client
+and show up in Better Advancements. `advancements.enabled = false` switches the
+lot off.
+
+Progress you already had counts: everything is re-offered at login, so a
+character who was level 30 before this arrived gets the level advancements
+immediately, and one added by a datapack later reaches the people who had
+already earned it.
+
+**The criterion names are public API** — ship your own advancement using any of
+these and LegendQuest will grant it. Every criterion is vanilla's
+`minecraft:impossible`; the mod awards them by name.
+
+| Criterion | Granted when |
+|---|---|
+| `legendquest:race_chosen`, `…/<race id>` | a race is chosen |
+| `legendquest:races_all` | every race you may pick has been played |
+| `legendquest:class_chosen`, `…/<class id>` | a class is taken, main or sub |
+| `legendquest:level/<n>` | your level reaches `n` — **any** whole number |
+| `legendquest:max_level` | you reach this server's level cap |
+| `legendquest:class_mastered`, `…/<class id>` | a class reaches the cap |
+| `legendquest:classes_all_mastered` | every class you may pick is at the cap |
+| `legendquest:skill_learned`, `…/<skill id>` | a skill is bought |
+| `legendquest:feat_bought`, `…/<feat id>` | a feat is bought |
+| `legendquest:respec` | a respec goes through |
+| `legendquest:karma_bright/<n>` | karma reaches `+n` |
+| `legendquest:karma_dark/<n>` | karma reaches `-n` |
+| `legendquest:party_joined` | you are in a party with somebody else |
+| `legendquest:party_gathered` | your party is pulled together with `/party tp` |
+| `legendquest:party_legends` | every online party member is at the cap |
+
+The numbered families (`level/`, `karma_bright/`, `karma_dark/`) take any whole
+number, so `legendquest:level/35` works with no code changes. "All" is measured
+against what **that player** may choose, so a race or class your server has
+restricted is never held against them.
+
+A pack can replace any shipped advancement by using the same id — the datapack
+that loads last wins, as usual. The shipped set is generated:
+`python3 scripts/make-advancements.py`, which is also where their titles live.
+
 ## Commands
 `/lq` is the root; classic shorthands (`/race`, `/class`, `/skill`, `/stats`,
 `/karma`, `/roll`, `/bind`, `/loadout`, `/party`) are registered as aliases.

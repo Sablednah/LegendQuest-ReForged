@@ -75,6 +75,12 @@ public final class PlayerCharacter {
      *  granted: switch class away and back, and your preference is as you left
      *  it. */
     private final Set<String> disabledSkills = new HashSet<>();
+    /** Every race this character has ever been, including the one it is now.
+     *  Kept because {@link #raceId} is the present tense and "played them all"
+     *  is a question about the past; a character that has been three races
+     *  looks identical to one that has been one. Old saves have no entry and
+     *  are caught up from their current race the first time they log in. */
+    private final Set<String> racesPlayed = new HashSet<>();
 
     public PlayerCharacter() {}
 
@@ -121,12 +127,28 @@ public final class PlayerCharacter {
                 .apply(i, Toggles::new));
     }
 
+    /**
+     * What this character has <em>been</em>, as against what it is.
+     *
+     * <p>Grouped for exactly the reason {@link Purchases} and {@link Toggles}
+     * are: the main codec sits on RecordCodecBuilder's 16-field ceiling, and a
+     * MapCodec reads sibling keys — so the saved NBT stays the same flat layout
+     * and an older save simply has no {@code races_played} key.</p>
+     */
+    private record History(List<String> racesPlayed) {
+
+        static final MapCodec<History> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+                Codec.STRING.listOf().optionalFieldOf("races_played", List.of())
+                        .forGetter(History::racesPlayed))
+                .apply(i, History::new));
+    }
+
     private PlayerCharacter(Optional<Identifier> raceId, Optional<Identifier> mainClassId,
             Optional<Identifier> subClassId, boolean raceChanged, long karma, double mana,
             Optional<StatBlock> baseStats, Map<String, Long> classXp, Purchases purchases,
             Map<String, Long> lastUse, Map<String, String> bindings,
             List<String> loadout, int loadoutIndex, Optional<Identifier> loadoutItem,
-            Toggles toggles) {
+            Toggles toggles, History history) {
         this.raceId = raceId;
         this.mainClassId = mainClassId;
         this.subClassId = subClassId;
@@ -149,6 +171,7 @@ public final class PlayerCharacter {
         this.partySpy = toggles.partySpy();
         this.partyChatCapture = toggles.partyChatCapture();
         this.disabledSkills.addAll(toggles.disabledSkills());
+        this.racesPlayed.addAll(history.racesPlayed());
     }
 
     public static final MapCodec<PlayerCharacter> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
@@ -173,7 +196,8 @@ public final class PlayerCharacter {
             Codec.INT.optionalFieldOf("loadout_index", 0).forGetter(c -> c.loadoutIndex),
             Identifier.CODEC.optionalFieldOf("loadout_item").forGetter(c -> c.loadoutItem),
             Toggles.MAP_CODEC.forGetter(c -> new Toggles(c.nameplateHidden, c.partySpy,
-                    c.partyChatCapture, List.copyOf(c.disabledSkills))))
+                    c.partyChatCapture, List.copyOf(c.disabledSkills))),
+            History.MAP_CODEC.forGetter(c -> new History(List.copyOf(c.racesPlayed))))
             .apply(i, PlayerCharacter::new));
 
     /** True when this player has switched their own floating nameplate off. */
@@ -210,6 +234,22 @@ public final class PlayerCharacter {
     public void setRace(Identifier id, boolean locked) {
         this.raceId = Optional.of(id);
         this.raceChanged = locked;
+        this.racesPlayed.add(id.toString());
+    }
+
+    /** Has this character ever been that race? See {@link #racesPlayed}. */
+    public boolean hasPlayedRace(Identifier raceId) {
+        return racesPlayed.contains(raceId.toString());
+    }
+
+    /** Catch an older save up: its current race was played, whenever that was. */
+    public void recordRacePlayed(Identifier raceId) {
+        racesPlayed.add(raceId.toString());
+    }
+
+    /** Skill ids bought, for anything that has to walk them. */
+    public Set<String> skillIds() {
+        return Set.copyOf(purchasedSkills);
     }
 
     public void setMainClass(Identifier id) { this.mainClassId = Optional.of(id); }

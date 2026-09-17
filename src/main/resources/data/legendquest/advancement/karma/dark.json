@@ -1,0 +1,29 @@
+{
+  "parent": "legendquest:root",
+  "display": {
+    "icon": {
+      "id": "minecraft:wither_rose"
+    },
+    "title": {
+      "text": "Ill Spoken Of"
+    },
+    "description": {
+      "text": "Do enough harm that people have started to mention it."
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "legendquest:karma_dark/100": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "legendquest:karma_dark/100"
+    ]
+  ],
+  "sends_telemetry_event": false
+}
