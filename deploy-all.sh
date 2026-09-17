@@ -1,27 +1,45 @@
 #!/usr/bin/env bash
-# Put the right jar into EVERY CurseForge instance that already has one.
+# Put the right jar into EVERY CurseForge instance that already has one --
+# or, with --check, just say which ones are behind and change nothing.
 #
-# deploy.sh handles one instance from one build, which is what you want mid-loop.
-# This is the other job: after a release, bring the whole estate up to it. You
-# cannot build all three from one checkout, so this takes a directory that
-# already holds the tagged jars -- typically the release artifacts:
+# deploy.sh handles one instance from one build, which is what you want
+# mid-loop. This is the other job: after a release, bring the whole estate up
+# to it. You cannot build all three versions from one checkout, so this takes a
+# directory that already holds the tagged jars -- typically the release
+# artifacts:
 #
-#   ./deploy-all.sh /path/to/dir/with/legendquest-2.3.1+mc*.jar
+#   ./deploy-all.sh /path/to/dir/with/legendquest-*+mc*.jar
+#   ./deploy-all.sh --check /path/to/dir        # audit only, copies nothing
 #
 # Instances are chosen by "already has a legendquest jar", so this never
 # installs the mod somewhere new -- it only updates what is already there.
+#
+# --check exists because the estate can drift for days without anyone knowing,
+# while the question "is the new one everywhere?" can only be answered by hand,
+# jar by jar. An audit nobody can run is an audit nobody runs.
+#
+# KEEP IN STEP WITH StoryTeller's deploy-all.sh. The two are the same script
+# with a different mod name, and this copy was the one that fell behind: it
+# reported only filenames, which are IDENTICAL across builds of the same
+# version, so a deploy could not be told from a no-op without unzipping jars by
+# hand afterwards. Fix a problem in both repos, not one.
 set -euo pipefail
 
 INSTANCES="${LQ_INSTANCES:-/mnt/c/Users/darre/curseforge/minecraft/Instances}"
+
+CHECK=0
+if [ "${1:-}" = "--check" ]; then CHECK=1; shift; fi
 BUILT="${1:-}"
-[ -n "$BUILT" ] && [ -d "$BUILT" ] || { echo "usage: $0 <dir containing legendquest-*+mc*.jar>" >&2; exit 1; }
+[ -n "$BUILT" ] && [ -d "$BUILT" ] || {
+    echo "usage: $0 [--check] <dir containing legendquest-*+mc*.jar>" >&2; exit 1; }
 
 # ---------------------------------------------------------------------------
 # Route on the instance's OWN gameVersion, not its folder name.
 #
-# Two of the seven instances carrying LegendQuest are named after a mod
+# Two of the instances carrying LegendQuest are named after a mod
 # ("MobHealth - Forge", "Standards") rather than a Minecraft version, and
-# guessing from the name gets both wrong. minecraftinstance.json knows.
+# guessing from the name gets both wrong. And "26.2" and "26.2.test" are both
+# Minecraft 26.2, which the names only half say. minecraftinstance.json knows.
 #
 # That file is written UTF-8 WITH BOM, so it must be read as utf-8-sig; plain
 # utf-8 fails on the very first character with a json.JSONDecodeError that
@@ -36,6 +54,25 @@ try:
 except Exception:
     print('')
 " "$1/minecraftinstance.json" 2>/dev/null || true
+}
+
+# The same reading deploy.sh does, deliberately identical: one answer to "which
+# build is this jar" per repo, so the two scripts cannot disagree about it.
+#
+# Version equality is not build equality. Three instances can hold three files
+# all called legendquest-2.5.1+mc26.2.jar and only one of them be the build you
+# just made, so the filename can never settle "is this current" -- the stamp is
+# the only discriminator, and a jar old enough to have no stamp is itself an
+# answer.
+#
+# A glob loop and `|| true` rather than a pipeline: under `set -euo pipefail` a
+# pipeline whose first element fails kills the script silently, and the cases
+# that fail are a first deploy and a pre-stamp jar -- exactly the two this has
+# something to say about.
+stampof() {
+    local out
+    out=$(unzip -p "$1" legendquest/build.properties 2>/dev/null || true)
+    printf '%s' "$out" | sed -n 's/^commit=//p' | head -1 || true
 }
 
 # One process query for the whole sweep rather than one per instance. See
@@ -82,13 +119,22 @@ instance_running() {
     printf '%s' "$padded" | grep -qF -- "Instances\\$name " && return 0
     return 1
 }
+[ "$CHECK" -eq 1 ] && echo "(--check: reporting only, nothing will be copied)"
 echo
 
 fail=0
+behind=0
 for dir in "$INSTANCES"/*/; do
     name="$(basename "$dir")"
     mods="$dir/mods"
-    ls "$mods"/legendquest-*.jar >/dev/null 2>&1 || continue
+
+    # Glob loop, not `ls ... >/dev/null`: quoting a path with spaces through ls
+    # is one more thing to get wrong, and this needs the filename anyway.
+    have=""
+    for f in "$mods"/legendquest-*.jar; do
+        if [ -f "$f" ]; then have="$f"; break; fi
+    done
+    [ -n "$have" ] || continue
 
     if [ -e "$dir/.sablecraft-no-deploy" ]; then
         echo "-- $name is marked .sablecraft-no-deploy -- left alone"
@@ -96,18 +142,36 @@ for dir in "$INSTANCES"/*/; do
     fi
 
     mc="$(mc_version_of "$dir")"
-    jar="$(ls "$BUILT"/legendquest-*+mc"$mc".jar 2>/dev/null | head -1 || true)"
     if [ -z "$mc" ]; then
         echo "?? $name: could not read its Minecraft version -- SKIPPED"; fail=1; continue
     fi
+
+    jar=""
+    for f in "$BUILT"/legendquest-*+mc"$mc".jar; do
+        if [ -f "$f" ]; then jar="$f"; break; fi
+    done
     if [ -z "$jar" ]; then
         echo "?? $name: no jar for Minecraft $mc in $BUILT -- SKIPPED"; fail=1; continue
+    fi
+
+    oldstamp="$(stampof "$have")"
+    newstamp="$(stampof "$jar")"
+
+    if [ "$oldstamp" = "$newstamp" ] && [ -n "$oldstamp" ]; then
+        printf "== %-30s mc %-8s already on %s\n" "$name" "$mc" "$newstamp"
+        continue
+    fi
+    behind=$((behind + 1))
+
+    if [ "$CHECK" -eq 1 ]; then
+        printf ">> %-30s mc %-8s %s -> %s  BEHIND\n" \
+            "$name" "$mc" "${oldstamp:-unstamped}" "${newstamp:-unstamped}"
+        continue
     fi
     if instance_running "$name"; then
         echo "!! $name is RUNNING -- refusing to overwrite underneath a live game"; fail=1; continue
     fi
 
-    was="$(ls "$mods" | grep -i '^legendquest.*\.jar$' | tr '\n' ' ')"
     rm -f "$mods"/legendquest-*.jar
     cp "$jar" "$mods/"
     base="$(basename "$jar")"
@@ -115,10 +179,29 @@ for dir in "$INSTANCES"/*/; do
     # A half-written copy looks identical to a good one in a directory listing.
     cmp -s "$jar" "$mods/$base"            || { echo "!! $name: copy does not match the source"; fail=1; continue; }
     unzip -t "$mods/$base" >/dev/null 2>&1 || { echo "!! $name: deployed jar is not a valid zip"; fail=1; continue; }
-    printf ">> %-30s mc %-8s %s-> %s\n" "$name" "$mc" "$was" "$base"
+    printf ">> %-30s mc %-8s %s -> %s\n" "$name" "$mc" "${oldstamp:-unstamped}" "${newstamp:-unstamped}"
+
+    case "$newstamp" in
+        *-dirty) echo "   ^^ that jar was built from uncommitted changes. Fine mid-loop; for a"
+                 echo "      release it means the estate is running code no commit describes." ;;
+    esac
 done
 
 echo
-if [ "$fail" -eq 0 ]; then echo "All instances deployed and verified."
-else echo "Finished WITH PROBLEMS -- see above."; fi
+if [ "$CHECK" -eq 1 ]; then
+    # A skipped instance is NOT a current one. Reporting "everything is up to
+    # date" while instances were skipped for want of a jar is the failure mode
+    # this whole script exists to prevent.
+    if [ "$fail" -ne 0 ]; then
+        echo "Could not check every instance -- see ?? lines above. Nothing was copied."
+    elif [ "$behind" -eq 0 ]; then
+        echo "Every instance is already on these builds."
+    else
+        echo "$behind instance(s) behind. Re-run without --check to update them."
+    fi
+elif [ "$fail" -eq 0 ]; then
+    echo "All instances deployed and verified."
+else
+    echo "Finished WITH PROBLEMS -- see above."
+fi
 exit "$fail"

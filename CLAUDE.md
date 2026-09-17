@@ -199,6 +199,23 @@ CurseForge file ids; Chronicler and Cast honour the same marker.
 instance that already has a LegendQuest jar, from a directory holding all three
 tagged jars. It never installs the mod somewhere new.
 
+**`./deploy-all.sh --check <dir-of-jars>` audits and copies nothing**, printing
+each instance as `already on <stamp>` or `BEHIND`. Both modes report the **build
+stamp** either side of the change (`e0e33665 -> c32540ee`) rather than the
+filename, because filenames are identical across builds of the same version —
+a deploy and a no-op look the same in a directory listing, and the stamp is the
+only discriminator. A `-dirty` stamp is called out as it lands.
+
+**A skipped instance is not a current one.** `--check` reports "could not check
+every instance" when any was skipped for want of a jar, rather than
+"everything is up to date" — proven by running it against an empty directory,
+which is the shape that makes the naive version lie.
+
+**Both deploy scripts are the same script as StoryTeller's with a different mod
+name, and this repo's copy is the one that fell behind** — it had neither
+`--check` nor stamp reporting until 2026-09-17. Fix a problem in both repos,
+not one.
+
 **Route on the instance's own `gameVersion`, never its folder name.** Seven
 instances carry LegendQuest and two of them (`MobHealth - Forge`, `Standards`)
 are named after a mod rather than a version, so name-guessing gets both wrong.
