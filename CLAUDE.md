@@ -342,6 +342,51 @@ each other, so LegendQuest and Factions could previously overlap.
   is the opposite of what "exact beats wildcard" suggests. `NODES.md` has the
   worked `/perm` examples.
 
+## Simple Voice Chat — a party is a voice channel (OPTIONAL, since 2.6.0)
+
+**Asked for by Sable on 2026-09-17.** Joining a party puts you in its voice
+channel; leaving takes you out. Two classes, and the split is the whole design:
+
+| Class | Role |
+|---|---|
+| `PartyVoice` | the seam the mod talks to — loads everywhere, imports nothing |
+| `VoiceSupport` | the only class importing `de.maxhenkel.voicechat`, and the plugin |
+
+**There is no `isLoaded` check, and that is an improvement rather than an
+oversight.** Simple Voice Chat finds `VoiceSupport` by scanning mods for its own
+`@ForgeVoicechatPlugin` annotation, so the class cannot be loaded on a server
+that does not have the mod. The Standards seams need a guard *outside* the class
+because we call them; this one is never called by us at all. `PartyVoice` holds
+a no-op listener until the voice server starts and `VoiceSupport` installs
+itself — the same inward-pointing arrangement as `PartyChat.setNameStyler`.
+
+Decisions worth not relitigating:
+
+- **`Group.Type.NORMAL`, not `ISOLATED`.** Members hear each other at any
+  distance *and* still hear players nearby. Isolated would silence the tavern a
+  player is standing in, which is the wrong kind of quiet for a roleplay server.
+- **Hidden, with a random password.** A visible password-less group is joinable
+  by anyone from the voice mod's own screen, which would put strangers in a
+  party's private conversation. The cost is that a player who leaves cannot
+  rejoin from that screen, so **`/party voice`** is the door back in — the
+  remedy is named rather than the lock explained.
+- **Already in another group? They are left there**, and told how to switch.
+  Dragging somebody out of a call they joined on purpose is worse than not
+  starting one.
+- **Text mutes are not honoured in voice, deliberately.** We do not own the mute
+  (Standards does, and it has no notion of voice) and Simple Voice Chat has its
+  own moderation. Half-enforcing another mod's rule across a boundary neither
+  side models would promise what this code cannot keep.
+- **Non-persistent groups**, so a channel lives exactly as long as someone is in
+  it and a crash leaves nothing to clean up. The cache is cleared on voice
+  server start: a remembered `Group` from a previous run is a channel nobody can
+  hear.
+- **`getGroup()` reflects the connection as fetched** and does not update after
+  `setGroup`, so connections are fetched per use and never cached.
+
+The API is `compileOnly` from `maven.maxhenkel.de` — `voicechat_api_version` in
+`gradle.properties`, pinned to the version the mod jars themselves bundle.
+
 ## Parked ideas
 
 `docs/IDEAS.md` holds things wanted but not built, written down when they were
@@ -350,6 +395,32 @@ where known, what would make it hard — so the next person starts from the real
 problem. Currently: the dice tray.
 
 ## Known traps
+
+- **An OPTIONAL dependency's version range can stop this mod loading, and the
+  obvious range was unsatisfiable.** `voicechat_version_range=[2.6,3.0)` reads
+  as plainly correct and matches nothing: Simple Voice Chat's mod version on
+  1.21.11 is `1.21.11-2.6.23`, with the Minecraft version as a **prefix**. A
+  declared range is checked whenever the mod IS present, so the result was not a
+  disabled feature — FML refused to load LegendQuest at all, and took the
+  server's whole mod set down with it. Installing the optional mod broke the
+  required one.
+
+  It is worse than a one-line fix suggests: the same mod is `2.6.22+26.2` on the
+  26.x branches — version first, Minecraft version as build metadata — so the
+  two lines do not share a version scheme and **no single range could be right**.
+  The range is `[0,)`, with the protection moved to where it can work: we compile
+  against the published `voicechat-api` artifact, which is versioned sanely and
+  pinned. **Read an optional mod's actual version string before writing a range
+  against it** — `[2.6,3.0)` was written from the API's version, which is a
+  different number from the mod's.
+
+- **A log grep can answer about the previous run.** The restart check above
+  reported `SERVER-READY` from a `Done (` line that belonged to the run before
+  it: `latest.log` had not yet been replaced when the loop first read it, so the
+  probe passed a fraction of a second before the server it was asking about had
+  even failed. The server was dead and the check said ready. **Wait on
+  behaviour, not on log text** — the RCON port opening cannot be faked by a
+  stale file, and that is what the check does now.
 
 - **`/party` collides with FTB Teams**, which registers the same literal and
   gates it on "officer" rank. `/lq party ...` is unambiguous. Not fixed — FTB

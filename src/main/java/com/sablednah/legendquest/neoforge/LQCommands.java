@@ -170,6 +170,12 @@ public final class LQCommands {
                 .then(Commands.literal("decline").executes(LQCommands::partyDecline))
                 .then(Commands.literal("leave").executes(LQCommands::partyLeave))
                 .then(Commands.literal("tp").executes(LQCommands::partyTp))
+                // The way back into a voice channel somebody left from the voice
+                // mod's own screen: it is hidden and locked, so it cannot be
+                // rejoined from there.
+                .then(Commands.literal("voice")
+                        .executes(ctx -> PartyVoice.rejoin(
+                                ctx.getSource().getPlayerOrException()) ? 1 : 0))
                 .then(Commands.literal("rename")
                         .then(Commands.argument("name", com.mojang.brigadier.arguments.StringArgumentType.word())
                                 .executes(ctx -> PartyActions.rename(

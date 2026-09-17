@@ -30,33 +30,6 @@ first one.
 
 ---
 
-## Parties as Simple Voice Chat groups
-
-**Wanted:** a LegendQuest party should be a voice group, so joining a party puts
-you in your party's voice channel. Asked for by Sable on 2026-09-17, who found
-**Better Party X Simple Voice** and expects it to be the best available guide to
-"how" — it solves this exact problem for another party system.
-
-**Where it sits.** Simple Voice Chat ships a plugin API with groups as a
-first-class concept, so the work is mapping one lifecycle onto another: party
-created → group created, member joins → member moved, member leaves or party
-disbands → group torn down, and whatever the right answer is when somebody was
-already in a group of their own.
-
-**Keep it behind one class**, the rule every optional dependency here already
-follows (`ChatSupport`, `CombatSupport`, `VanishSupport`, `CharacterPane`): one
-guarded `VoiceSupport` with the `ModList.isLoaded` check *outside* it, so a
-server without Simple Voice Chat loses the feature and nothing else.
-
-**The questions worth settling first.** Does a voice group *replace* party chat
-or sit beside it — and if a player is muted in text, what happens in voice?
-LegendQuest already routes party chat through Standards' `ChatRouter` precisely
-so a muted player cannot talk to their party, and a voice channel that ignores
-that is a hole in a rule the text side enforces. Whether the group is temporary
-(dies with the party) or persistent is the other fork.
-
----
-
 ## A dice tray
 
 **Wanted:** a screen with a pool of dice down the left that can be dragged into

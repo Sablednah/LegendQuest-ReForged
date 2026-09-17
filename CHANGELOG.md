@@ -3,6 +3,32 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 2.6.0 — unreleased
+
+Standards is still required, and its version requirement is unchanged. The new
+voice feature needs **Simple Voice Chat**, which is entirely optional: without
+it LegendQuest behaves exactly as it did.
+
+### Your party is a voice channel
+
+- **Join a party and you are in its voice channel.** Members hear each other at
+  any distance — and still hear whoever is standing next to them, so the room
+  you are in does not go silent. Leaving the party leaves the channel.
+- It needs the **Simple Voice Chat** mod on the server. Without it nothing
+  changes and nothing is said about it; with it, the channel is arranged for
+  you and you are told when you are in it.
+- **`/party voice`** puts you back in your party's channel if you left it from
+  Simple Voice Chat's own screen. The channel is hidden and locked so that
+  strangers cannot wander into a party's conversation, which also means it
+  cannot be rejoined from that screen — hence the command.
+- If you are already in a voice group of your own, LegendQuest **leaves you
+  there** rather than dragging you out of a conversation you chose, and tells
+  you how to switch.
+- Turn it off with `party.voiceChannel = false` in the config.
+- **Text mutes do not apply to voice.** LegendQuest does not own the mute and
+  Simple Voice Chat has moderation of its own; a server that needs a player
+  silenced in voice should silence them there.
+
 ## 2.5.1 — 2026-09-15
 
 A fixes release. Packs, config and the Standards requirement are unchanged, so
