@@ -104,7 +104,7 @@ different questions, and only the second one is the bug report.
 **In practice, look on Vivo instead.** Focusing a Windows client from WSL never
 worked reliably — `SetForegroundWindow`, `AppActivate` and `PostMessage` all
 failed, and spawning `powershell.exe` can itself steal focus and pause the game.
-Vivo (`sable@192.168.7.102`, key `~/.ssh/vivo_ed25519`) runs rigs on private
+Vivo (key `~/.ssh/vivo_ed25519`) runs rigs on private
 `Xvfb` displays where `xdotool` owns the input outright, including a **26.2
 rig**, and `~/dev/rig.sh <mc> <neoforge> <game> <rcon> <display>` builds one
 for any version. Its `~/dev/README.md` is the manual: ports and displays

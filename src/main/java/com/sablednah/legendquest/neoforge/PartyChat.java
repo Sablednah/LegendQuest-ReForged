@@ -48,8 +48,9 @@ import net.neoforged.neoforge.event.ServerChatEvent;
  * through its {@code ChatRouter} seam, which offers a message to routers only
  * after the mute gate has already turned it away — so a muted player cannot
  * talk to their party, and {@link #claim} is never even called for them.
- * Without Standards there is no mute to honour and the listener in
- * {@link #onChat} does the routing instead. See {@code docs/CHAT-ROUTING.md}.</p>
+ * Standards is required, so that is now the only live path; the listener in
+ * {@link #onChat} is the retired alternative, kept for the reason given there.
+ * See {@code docs/CHAT-ROUTING.md}.</p>
  *
  * <p>An earlier version of this class cancelled {@code ServerChatEvent} ahead
  * of Standards and did bypass mutes — the hole {@code /pc} had carried from the
@@ -250,9 +251,10 @@ public final class PartyChat {
      * has already passed the mute gate and cleared AFK before it arrives, which
      * cancelling ahead of them could never achieve.</p>
      *
-     * <p>This remains for the plain-NeoForge case, where there is no mute to
-     * respect and nothing to collide with. Standards is a soft dependency and
-     * capture is not allowed to need it.</p>
+     * <p>Standards is a required dependency, so this path can no longer be
+     * reached. It is kept deliberately: exactly one capture path is ever live,
+     * and keeping this one proves the router is not load-bearing for
+     * correctness — party chat would still work if the seam went away.</p>
      */
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onChat(ServerChatEvent event) {

@@ -164,7 +164,11 @@ jobs:
           # the character sheet and skills panel are built on its inventory-panel seam, so a
           # server without it would lose them -- a regression, not a missing extra. Declared here
           # rather than on the website so the dependency is committed and reviewable.
-          CURSEFORGE_RELATIONS: "sablecraft-standards=1670445:requiredDependency"
+          #
+          # Simple Voice Chat is OPTIONAL (party voice channels), and carries no numeric ID on
+          # purpose: the format is slug[=projectID]:type, the slug alone is valid, and a WRONG
+          # integer is refused with a 400 that uploads nothing at all. Slug-only beats guessed.
+          CURSEFORGE_RELATIONS: "sablecraft-standards=1670445:requiredDependency,simple-voice-chat:optionalDependency"
           RELEASE_TYPE: ${{ inputs.release_type || 'release' }}
           CURSEFORGE_DEBUG: ${{ inputs.debug && '1' || '' }}
           CURSEFORGE_MINIMAL: ${{ inputs.minimal && '1' || '' }}

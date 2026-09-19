@@ -3,7 +3,7 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
-## 2.6.0 — unreleased
+## 2.6.0 — 2026-09-19
 
 Standards is still required, and its version requirement is unchanged. The new
 voice feature needs **Simple Voice Chat**, which is entirely optional: without
@@ -35,7 +35,7 @@ it LegendQuest behaves exactly as it did.
   (race, class, levels 5/10/20 and the cap, a first skill, a first feat, a
   respec), karma in both directions, and parties — plus hidden and challenge
   entries for mastering every class, playing every race, and a party whose
-  online members have all reached the cap.
+  members are all online and at the cap.
 - **They are plain vanilla advancements**, so they work on an unmodded client
   and show up in Better Advancements.
 - **Progress you already had counts.** Everything is re-offered when you log in,

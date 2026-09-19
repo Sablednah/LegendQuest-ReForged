@@ -10,25 +10,6 @@ rather than rediscovering it.
 
 ---
 
-## More achievements
-
-**Wanted:** more of them, asked for by Sable on 2026-09-17. Nothing is decided
-about which — that is the first question, not an implementation detail.
-
-**Where it sits.** Advancements are datapack JSON keyed on criteria, and this
-mod already generates a datapack. The interesting half is not the plumbing, it
-is which moments are worth marking: the ones a player would tell somebody about.
-Levelling, a first skill, a class change, a karma swing and a party's first
-quest are the obvious candidates, and "obvious" is exactly what wants checking
-against how the game is actually played before any of them are written.
-
-**The trap to expect.** An achievement for something the game does not *tell*
-the player about is an achievement they cannot aim at. Anything added here
-should already be a visible moment — the design rule is "explain at the moment
-of the change", and an advancement is a second telling of a moment, not the
-first one.
-
----
 
 ## A dice tray
 

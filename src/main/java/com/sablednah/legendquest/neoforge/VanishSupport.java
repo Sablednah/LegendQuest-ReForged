@@ -11,9 +11,9 @@ import net.neoforged.neoforge.common.NeoForge;
 /**
  * Takes the nameplate down when Standards hides a player, and puts it back.
  *
- * <p>One of three classes importing {@code com.sablednah.standards}, alongside
- * {@link ChatSupport} and {@link CombatSupport}, and loaded only through the
- * guard in {@code LegendQuest}. Everything else consults
+ * <p>One of four classes importing {@code com.sablednah.standards}
+ * (ChatSupport, CombatSupport, VanishSupport, CharacterPane), loaded through
+ * the guard in {@code LegendQuest}. Everything else consults
  * {@link PlayerVisibility}, which answers "visible" without it.</p>
  *
  * <h2>Two mechanisms, because one is not enough</h2>

@@ -61,6 +61,20 @@ MIT — link to https://github.com/Sablednah/LegendQuest-ReForged/blob/main/LICE
 CurseForge project ID **1658748** (used by `CURSEFORGE_PROJECT_ID`, see
 `.github/workflows/curseforge.yml`).
 
+## Relations to declare on the project page
+
+Nothing to set on the website: these are declared by the upload itself, through
+`CURSEFORGE_RELATIONS` in `.github/workflows/curseforge.yml`, so they go out
+with every file and stay reviewable in a commit. The format is
+`slug[=projectID]:type` — **the slug is required** and the numeric ID is an
+optional exact match, so a relation whose project ID we do not have is written
+as the slug alone rather than guessed at.
+
+| Mod | Relation |
+|---|---|
+| Standards | **Required dependency** |
+| Simple Voice Chat | Optional dependency — a party becomes a voice channel |
+
 ---
 
 ## Description

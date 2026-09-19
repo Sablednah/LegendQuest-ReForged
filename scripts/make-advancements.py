@@ -86,7 +86,7 @@ add("party/joined", "root", item("lead"), "Better Together",
 add("party/gathered", "party/joined", item("ender_pearl"), "Gather the Party",
     "Pull your party to you with /party tp.", ["party_gathered"])
 add("party/legends", "party/gathered", item("enchanted_golden_apple"), "A Party of Legends",
-    "Be in a party where every member online has reached the cap.",
+    "Be in a party where every member is online and has reached the cap.",
     ["party_legends"], frame="challenge", hidden=True, xp=500)
 
 

@@ -10,6 +10,15 @@ and there's a lot more mod than there used to be; balance and polish are in
 progress. See [PORTING.md](PORTING.md) for the live checklist and every
 architecture decision.
 
+**Requires [Standards](https://www.curseforge.com/minecraft/mc-mods/sablecraft-standards)
+1.8.0 or newer**, and has since 2.5.0 — the character sheet and skills panel are
+built on its inventory-panel system, which is what lets several mods put a panel
+beside your inventory without fighting over the space. It is also how LegendQuest
+sees combat it could not otherwise report, and how it honours a vanish.
+[Simple Voice Chat](https://www.curseforge.com/minecraft/mc-mods/simple-voice-chat)
+is **optional**: install it and a party becomes a voice channel; leave it out and
+nothing changes.
+
 ## What works today
 
 ### Content as data
@@ -20,8 +29,9 @@ human-friendly YAML in `config/legendquest/{races,classes,skills,feats}/*.yml`
 it. The complete field-by-field reference is below in
 [Writing content](#writing-content). The default pack is a trope-heavy D&D-flavoured set: ten races (Human,
 Elf, Dwarf, Orc, Hobbit, Gnome, Half-Elf, Half-Orc, Tiefling — SRD 5.1
-CC-BY-safe — plus the starting Undecided) and eight classes (Citizen,
-Fighter, Mage, Ranger, Cleric, Rogue, Barbarian, and the earned-only Warlord).
+CC-BY-safe — plus the starting Undecided) and nine classes (Citizen,
+Fighter, Mage, Ranger, Cleric, Rogue, Barbarian, Bard, and the earned-only
+Warlord).
 
 Two full genre packs ship in [`packs/`](packs/) as drop-in world datapacks,
 each with its own vocabulary snippet and a `pack.mcmeta` filter that hides
@@ -94,6 +104,16 @@ Parties (`/party create|invite|accept|leave`) with XP-sharing to nearby
 members and friendly fire blocked; permission nodes per race/class
 (`legendquest.race.<name>`, LuckPerms-friendly); a `perm:` field in a data
 file locks that entry behind its node.
+
+**A party is a voice channel** where [Simple Voice
+Chat](https://www.curseforge.com/minecraft/mc-mods/simple-voice-chat) is
+installed: joining a party puts you in its channel and leaving takes you out.
+Members hear each other at any distance and still hear whoever is standing next
+to them, so the room you are in does not go silent. The channel is hidden and
+password-locked so strangers cannot wander into it — which also means it cannot
+be rejoined from Simple Voice Chat's own screen, so **`/party voice`** is the
+door back in. Without the mod nothing changes and nothing is said about it;
+`party.voiceChannel = false` turns it off.
 
 ## Writing content
 
@@ -553,7 +573,7 @@ so the panel and handbook follow the server's genre too.
 LegendQuest has its own tab in the advancements screen: the character line
 (race, class, levels, a first skill, a first feat, a respec), karma in both
 directions, and parties — with hidden and challenge entries for mastering every
-class, playing every race, and a party whose online members have all reached the
+class, playing every race, and a party whose members are all online and at the
 cap. They are **plain vanilla advancements**, so they work on an unmodded client
 and show up in Better Advancements. `advancements.enabled = false` switches the
 lot off.
@@ -583,7 +603,7 @@ these and LegendQuest will grant it. Every criterion is vanilla's
 | `legendquest:karma_dark/<n>` | karma reaches `-n` |
 | `legendquest:party_joined` | you are in a party with somebody else |
 | `legendquest:party_gathered` | your party is pulled together with `/party tp` |
-| `legendquest:party_legends` | every online party member is at the cap |
+| `legendquest:party_legends` | every party member is online **and** at the cap |
 
 The numbered families (`level/`, `karma_bright/`, `karma_dark/`) take any whole
 number, so `legendquest:level/35` works with no code changes. "All" is measured

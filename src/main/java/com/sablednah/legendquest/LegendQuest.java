@@ -60,14 +60,14 @@ public class LegendQuest {
         NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent event) ->
                 LQCommands.register(event.getDispatcher()));
 
-        // Standards is a SOFT dependency: it supplies the chat name-decorator,
-        // chat-router and combat APIs. Without it LegendQuest decorates
-        // nothing, routes party chat through its own listener above, and
-        // reports no combat. The isLoaded check has to sit here, outside those
-        // classes, because naming one is what triggers loading it -- and they
-        // are the only two that import com.sablednah.standards. Calling them
-        // unguarded would be a NoClassDefFoundError on every server without
-        // Standards installed.
+        // Standards is a REQUIRED dependency (see the mods.toml template), so
+        // FML will not load LegendQuest without it and this guard can never be
+        // false. It is kept rather than deleted because deleting a working
+        // guard buys nothing -- but do not read it as evidence that a
+        // no-Standards path still exists. FOUR classes import
+        // com.sablednah.standards: ChatSupport, CombatSupport, VanishSupport
+        // and CharacterPane. The check still sits out here because naming one
+        // of them is what triggers loading it.
         if (net.neoforged.fml.ModList.get().isLoaded("standards")) {
             optionalIntegration("chat", com.sablednah.legendquest.neoforge.ChatSupport::register);
             optionalIntegration("combat", com.sablednah.legendquest.neoforge.CombatSupport::register);

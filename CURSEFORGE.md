@@ -120,6 +120,19 @@ is the part worth copying.
 - **Party chat** — `/pc` for a line, or `/pc` alone to send everything you type
   to your party until you switch it off. Operators can listen in only if the
   server grants it *and* they turn it on.
+- **A party is a voice channel**, where Simple Voice Chat is installed. Join a
+  party and you are in its channel; leave and you are out. Members hear each
+  other at any distance **and still hear whoever is standing next to them**, so
+  the room a player is in does not go silent on them. The channel is hidden and
+  locked so strangers cannot wander into a private conversation, and `/party
+  voice` is the door back in. Without the mod, nothing changes and nothing is
+  said about it.
+- **Its own advancements tab**, 19 of them — the character line, karma both
+  ways, and parties, with hidden and challenge entries for mastering every
+  class, playing every race, and a party who are all online and all at the cap.
+  They are plain vanilla advancements, so an unmodded client sees them, and
+  progress earned before they arrived is granted at your next login rather than
+  asking anyone to start again.
 - **Nameplates** — race, class and level above each player's head, worded from
   your own vocabulary file. It is a display entity, so unmodded clients see it,
   and it does not touch chat, the tab list, or the scoreboard team slot every

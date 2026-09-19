@@ -14,10 +14,10 @@ import com.sablednah.standards.api.groups.Claims;
  * that misses is a cancelled damage event, and a curse or a summon is no
  * damage event at all. Those are the cases this exists for.</p>
  *
- * <p><b>One of two classes importing {@code com.sablednah.standards}</b>, the
- * other being {@link ChatSupport}, and loaded only through the
- * {@code ModList.isLoaded} guard in {@code LegendQuest}. Everything else calls
- * {@link CombatTagging}, which does nothing at all without this.</p>
+ * <p><b>One of four classes importing {@code com.sablednah.standards}</b>
+ * (ChatSupport, CombatSupport, VanishSupport, CharacterPane), loaded through
+ * the {@code ModList.isLoaded} guard in {@code LegendQuest}. Everything else
+ * calls {@link CombatTagging}, which does nothing at all without this.</p>
  *
  * <p>Durations are left to the server: {@code Combat.tag} without a seconds
  * argument uses the configured value for the kind, and a kind set to 0 seconds

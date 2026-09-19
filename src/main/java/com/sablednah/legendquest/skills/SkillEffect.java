@@ -54,7 +54,7 @@ public interface SkillEffect {
      * <p><b>Defaults to false</b>, so a skill pack that has never heard of any
      * of this stays quiet rather than tagging players for buffing each other. A
      * pack whose effect really is hostile overrides it — one line, and the
-     * whole thing degrades to nothing on servers without Standards.</p>
+     * whole thing stays inert until a server's combat rules care about it.</p>
      */
     default boolean hostile() {
         return false;
