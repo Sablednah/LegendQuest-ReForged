@@ -14,9 +14,10 @@ import net.minecraft.world.entity.LivingEntity;
  *
  * <p><b>This class never mentions Standards.</b> It holds a sink that does
  * nothing until {@link CombatSupport} installs a real one, so every call here
- * is safe on a server that has never heard of it — the same shape as
- * {@link PartyChat}'s name styler, and for the same reason: naming the class
- * that imports Standards is what loads it.</p>
+ * is safe before that happens — the same shape as {@link PartyChat}'s name
+ * styler, and for the same reason: naming the class that imports Standards is
+ * what loads it, so the deferral is about load order, not about whether
+ * Standards is present.</p>
  */
 public final class CombatTagging {
 

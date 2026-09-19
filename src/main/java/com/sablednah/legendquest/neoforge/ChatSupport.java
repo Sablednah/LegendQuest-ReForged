@@ -18,13 +18,12 @@ import net.minecraft.server.level.ServerPlayer;
  *                  ^^^^                ^^^^^^^^^^^
  * </pre>
  *
- * <p><b>This class is the only one that imports {@code com.sablednah.standards}
- * anywhere in the mod</b>, and it is only ever loaded when Standards is
- * installed — see the guarded call in {@link LQServerEvents}. Standards is a
- * soft dependency: without it LegendQuest simply does not decorate chat, and
- * nothing else changes. Touching the API from a class that loads unconditionally
- * would turn that into a {@code NoClassDefFoundError} on every server that has
- * not installed it.</p>
+ * <p><b>One of four classes importing {@code com.sablednah.standards}</b>
+ * (ChatSupport, CombatSupport, VanishSupport, CharacterPane), registered from
+ * the guard in {@link LegendQuest}. Standards is a <i>required</i> dependency,
+ * so that guard can never be false; it survives because deleting a working
+ * guard buys nothing. Loading is still deferred to it, because naming this
+ * class is what pulls the API in.</p>
  *
  * <p>Registered at priority 100, the band Standards documents for
  * character-level things. Higher priority sits nearer the name, so a faction or

@@ -4,7 +4,8 @@ import net.minecraft.server.level.ServerPlayer;
 
 /**
  * Party voice, as the rest of LegendQuest sees it: four things that happen to a
- * party, and nothing here knows what answers them.
+ * party — joined, left, dissolved, renamed — plus the way back in, and nothing
+ * here knows what answers them.
  *
  * <p><b>The dependency points inwards, never out.</b> This class loads on every
  * server, so naming {@code VoiceSupport} here would load the one class that
