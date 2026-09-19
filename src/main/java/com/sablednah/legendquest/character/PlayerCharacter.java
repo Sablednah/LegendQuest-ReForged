@@ -86,9 +86,9 @@ public final class PlayerCharacter {
 
     /**
      * The skill-point ledger: what was spent, on what, and what was granted
-     * outright. Grouped so the main codec stays under RecordCodecBuilder's
-     * 16-field ceiling. A MapCodec reads sibling keys, so the saved NBT keeps
-     * the exact same flat layout as before, and an older save simply has no
+     * outright. Grouped so the main codec sits at RecordCodecBuilder's 16-field
+     * ceiling rather than over it. A MapCodec reads sibling keys, so the saved
+     * NBT keeps the exact same flat layout as before, and an older save has no
      * {@code skill_points_granted} key — which reads as zero, correctly.
      */
     private record Purchases(List<String> skills, List<String> feats,

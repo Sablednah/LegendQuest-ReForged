@@ -42,7 +42,7 @@ public final class CharacterPane implements InventoryPanel {
     /** Gold on near-black: LegendQuest's, not decoration. The host paints the
      *  frame with these two so several mods' panes share one shape without
      *  sharing a palette — every other colour in the panel stays in
-     *  {@link CharacterPanel}, where the other thirteen references live. */
+     *  {@link CharacterPanel}, where the rest of the palette lives. */
     private static final PanelTheme THEME = new PanelTheme(0xE8101018, 0xFFDAA520);
 
     private CharacterPane() {}
