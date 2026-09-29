@@ -214,13 +214,13 @@ public final class YamlConfigPack implements PackResources {
     public static Pack makePack() {
         Pack.ResourcesSupplier supplier = new Pack.ResourcesSupplier() {
             @Override
-            public PackResources openPrimary(PackLocationInfo location) {
+            public PackResources openMetadata(PackLocationInfo location) {
                 return new YamlConfigPack();
             }
 
             @Override
-            public PackResources openFull(PackLocationInfo location, Pack.Metadata metadata) {
-                return new YamlConfigPack();
+            public Stream<PackResources> openResources(PackLocationInfo location, Pack.Metadata metadata) {
+                return Stream.of(new YamlConfigPack());
             }
         };
         Pack.Metadata metadata = new Pack.Metadata(

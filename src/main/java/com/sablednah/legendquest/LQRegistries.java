@@ -7,7 +7,7 @@ import com.sablednah.legendquest.data.SkillDefinition;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.neoforged.neoforge.registries.DataPackRegistryEvent;
+import net.neoforged.neoforge.registries.NewDatapackRegistryEvent;
 
 /**
  * Registry keys owned by LegendQuest.
@@ -33,11 +33,11 @@ public final class LQRegistries {
             ResourceKey.createRegistryKey(Identifier.fromNamespaceAndPath(LegendQuest.MODID, "feat"));
 
     /** Registered on the mod event bus. */
-    static void register(DataPackRegistryEvent.NewRegistry event) {
-        event.dataPackRegistry(RACE, Race.CODEC, Race.CODEC);
-        event.dataPackRegistry(CHAR_CLASS, CharClass.CODEC, CharClass.CODEC);
-        event.dataPackRegistry(SKILL, SkillDefinition.CODEC, SkillDefinition.CODEC);
-        event.dataPackRegistry(FEAT, com.sablednah.legendquest.data.Feat.CODEC,
+    static void register(NewDatapackRegistryEvent event) {
+        event.worldRegistry(RACE, Race.CODEC, Race.CODEC);
+        event.worldRegistry(CHAR_CLASS, CharClass.CODEC, CharClass.CODEC);
+        event.worldRegistry(SKILL, SkillDefinition.CODEC, SkillDefinition.CODEC);
+        event.worldRegistry(FEAT, com.sablednah.legendquest.data.Feat.CODEC,
                 com.sablednah.legendquest.data.Feat.CODEC);
     }
 

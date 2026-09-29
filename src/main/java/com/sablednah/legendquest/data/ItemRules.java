@@ -7,7 +7,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.RegistryCodecs;
+import net.minecraft.core.registries.codec.RegistryCodecs;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 
@@ -34,17 +34,17 @@ public record ItemRules(
             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
 
     public static final MapCodec<ItemRules> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
-            RegistryCodecs.homogeneousList(Registries.ITEM).optionalFieldOf("allowed_weapons")
+            RegistryCodecs.holderSet(Registries.ITEM).optionalFieldOf("allowed_weapons")
                     .forGetter(ItemRules::allowedWeapons),
-            RegistryCodecs.homogeneousList(Registries.ITEM).optionalFieldOf("disallowed_weapons")
+            RegistryCodecs.holderSet(Registries.ITEM).optionalFieldOf("disallowed_weapons")
                     .forGetter(ItemRules::disallowedWeapons),
-            RegistryCodecs.homogeneousList(Registries.ITEM).optionalFieldOf("allowed_tools")
+            RegistryCodecs.holderSet(Registries.ITEM).optionalFieldOf("allowed_tools")
                     .forGetter(ItemRules::allowedTools),
-            RegistryCodecs.homogeneousList(Registries.ITEM).optionalFieldOf("disallowed_tools")
+            RegistryCodecs.holderSet(Registries.ITEM).optionalFieldOf("disallowed_tools")
                     .forGetter(ItemRules::disallowedTools),
-            RegistryCodecs.homogeneousList(Registries.ITEM).optionalFieldOf("allowed_armour")
+            RegistryCodecs.holderSet(Registries.ITEM).optionalFieldOf("allowed_armour")
                     .forGetter(ItemRules::allowedArmour),
-            RegistryCodecs.homogeneousList(Registries.ITEM).optionalFieldOf("disallowed_armour")
+            RegistryCodecs.holderSet(Registries.ITEM).optionalFieldOf("disallowed_armour")
                     .forGetter(ItemRules::disallowedArmour))
             .apply(i, ItemRules::new));
 

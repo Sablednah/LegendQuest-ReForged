@@ -196,9 +196,9 @@ public final class CharacterPanel {
      */
     private static void positionButtons(InventoryScreen screen) {
         int y = screen.height / 2 - 22;
-        if (recipeButton != null) recipeButton.setPosition(screen.getGuiLeft() + 104, y);
-        if (statsButton != null) statsButton.setPosition(screen.getGuiLeft() + 126, y);
-        if (skillsButton != null) skillsButton.setPosition(screen.getGuiLeft() + 148, y);
+        if (recipeButton != null) recipeButton.setPosition(screen.getLeftPos() + 104, y);
+        if (statsButton != null) statsButton.setPosition(screen.getLeftPos() + 126, y);
+        if (skillsButton != null) skillsButton.setPosition(screen.getLeftPos() + 148, y);
     }
 
     /**
@@ -206,7 +206,7 @@ public final class CharacterPanel {
      *
      * <p>Still needed with the host owning placement, because it writes
      * vanilla's own {@code leftPos} rather than drawing at an offset — so
-     * {@code getGuiLeft()} keeps telling the truth and these three keep having
+     * {@code getLeftPos()} keeps telling the truth and these three keep having
      * to follow it, for the same reason the comment below has always given.</p>
      */
     @SubscribeEvent
@@ -343,7 +343,7 @@ public final class CharacterPanel {
         double my = event.getMouseY();
         // Not the pane itself: that is the host's click to route, and cancelling
         // it here would take it away from the thing that handles it.
-        if (!inPanel(screen, mx, my) && mx < screen.getGuiLeft()) event.setCanceled(true);
+        if (!inPanel(screen, mx, my) && mx < screen.getLeftPos()) event.setCanceled(true);
     }
 
     /**
@@ -443,7 +443,7 @@ public final class CharacterPanel {
         if (drag != null) released(screen, mx, my);
 
         if (screen.getMenu().getCarried().isEmpty()) return;
-        if (!inPanel(screen, mx, my) && mx < screen.getGuiLeft()) {
+        if (!inPanel(screen, mx, my) && mx < screen.getLeftPos()) {
             event.setCanceled(true);
         }
     }
@@ -554,7 +554,7 @@ public final class CharacterPanel {
         // the panel was painting over it — your would-be spellbook seemed
         // to vanish the moment it crossed onto the panel.
         ItemStack carried = screen.getMenu().getCarried();
-        if (!carried.isEmpty() && mouseX < screen.getGuiLeft()) {
+        if (!carried.isEmpty() && mouseX < screen.getLeftPos()) {
             g.item(carried, (int) mouseX - 8, (int) mouseY - 8);
             g.itemDecorations(font, carried, (int) mouseX - 8, (int) mouseY - 8);
         }

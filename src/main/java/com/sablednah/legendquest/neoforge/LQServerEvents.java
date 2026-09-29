@@ -13,6 +13,7 @@ import java.util.UUID;
 
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -695,7 +696,7 @@ public final class LQServerEvents {
         if (best.isEmpty()) return;
         ItemStack refund = best.copyWithCount(1);
         String name = refund.getHoverName().getString();
-        player.getInventory().placeItemBackInInventory(refund);
+        player.getInventory().placeItemBackInInventory(refund, Prediction.SERVER_ONLY);
         Feedback.actionBar(player, Lang.fmt("msg.boon.refund", "item", name));
     }
 

@@ -19,6 +19,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -255,7 +256,7 @@ public final class LQEffects {
         public void apply(SkillContext ctx) {
             Vec3 look = ctx.caster().getLookAngle();
             ctx.caster().setDeltaMovement(look.x * power, lift, look.z * power);
-            ctx.caster().hurtMarked = true; // or the client never sees the launch
+            ctx.caster().syncVelocity = true; // or the client never sees the launch
         }
     }
 
@@ -522,7 +523,7 @@ public final class LQEffects {
             Player p = ctx.caster();
             ItemStack stack = new ItemStack(item, count);
             if (!p.getInventory().add(stack)) {
-                p.drop(stack, false);
+                p.drop(stack, false, Prediction.SERVER_ONLY);
             }
         }
     }

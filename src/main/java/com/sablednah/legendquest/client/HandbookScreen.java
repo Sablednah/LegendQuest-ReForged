@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
-import org.lwjgl.glfw.GLFW;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.sablednah.legendquest.network.HandbookPayload;
@@ -419,11 +418,11 @@ public final class HandbookScreen extends Screen {
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
         if (super.mouseClicked(event, doubleClick)) return true;
         // Thumb button 4 is "back" everywhere else; it should be here too.
-        if (event.button() == GLFW.GLFW_MOUSE_BUTTON_4) {
+        if (event.button() == InputConstants.MOUSE_BUTTON_4) {
             goBack();
             return true;
         }
-        if (event.button() != 0) return false;
+        if (event.button() != InputConstants.MOUSE_BUTTON_LEFT) return false;
         for (Hot hot : hotspots) {
             if (event.x() >= hot.x0() && event.x() < hot.x1()
                     && event.y() >= hot.y0() && event.y() < hot.y1()) {
