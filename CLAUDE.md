@@ -25,11 +25,12 @@ mods (CityWorld and ZombieMod reached it independently).
 | `main` | 1.21.11 | 21.11.42 | 21 | 2.0.141 |
 | `mc26.1` | 26.1.2 | 26.1.2.95 | **25** | 2.0.141 |
 | `mc26.2` | 26.2 | 26.2.0.59 | **25** | 2.0.144 |
+| `mc26.3` | 26.3 | 26.3.0.33-beta | **25** | 2.0.147 |
 
 - **Docs, workflows and scripts live on `main` only.** Version branches carry
   code, so a write-up never has to be merged three ways. `docs/VERSIONS.md` is
   the full record — read it before touching version work.
-- **Port forwards, not sideways.** `main` → `mc26.1` → `mc26.2`. 26.2 contains
+- **Port forwards, not sideways.** `main` → `mc26.1` → `mc26.2` → `mc26.3`. 26.2 contains
   the whole 26.1 rendering change, so cherry-picking the 26.1 fix commit cleared
   36 of 26.2's 53 errors. Each drop then pays only its own delta.
 - Jars carry the target (`legendquest-2.2.0+mc26.2.jar`); the version inside

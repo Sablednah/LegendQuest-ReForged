@@ -15,6 +15,7 @@ prediction the rest of it was built on.
 | today | 1.21.11 | 21.11.42 | 21 | 2.0.141 |
 | next | 26.1.2 | 26.1.2.95 | **25** | 2.0.141 |
 | next | 26.2 | 26.2.0.59 | **25** | 2.0.144 |
+| next | 26.3 | 26.3.0.33-beta | **25** | 2.0.147 |
 
 The Java bump is not optional: 26.1 ships the `java-runtime-epsilon` JRE to
 players, so a mod targeting 21 is targeting a runtime nobody has.
@@ -159,6 +160,38 @@ rather than a rename.
 - **`ChatFormatting.isFormat()` is gone**, which lands squarely in the colour-code
   fix made earlier the same week. Worth noting as a reminder that new code is not
   safer code.
+
+### 26.3: server-side this time, and none of it in the six files
+
+Measured 2026-09-29 against NeoForge `26.3.0.33-beta`: **22 errors in 9 files,
+8 distinct changes**, and only 8 of the errors are in `client/`. Standards and
+Factions had ported first. Their `CROSS-VERSION.md` predicted four of the eight.
+
+- **The datapack registry event was renamed**: `DataPackRegistryEvent.NewRegistry`
+  → `NewDatapackRegistryEvent`, `dataPackRegistry` → `worldRegistry`. 26.3 also
+  adds *reloadable* datapack registries, which would fix `/reload` not applying
+  YAML edits. We can't use them: they take no network codec, and the HUD needs
+  our definitions synced to the client.
+- `RegistryCodecs` moved to `core.registries.codec`, `homogeneousList` → `holderSet`.
+- `Pack.ResourcesSupplier` is `openMetadata` / `openResources` (a stream).
+- `drop` and `placeItemBackInInventory` take a `Prediction`. Use `SERVER_ONLY`
+  for a server-initiated drop; `PREDICTED` also compiles.
+- `hurtMarked` → `syncVelocity`; `getGuiLeft` → `getLeftPos`.
+- **GLFW is gone, replaced by SDL, and SDL numbers mouse buttons from 1.** A
+  literal `button != 0` compiles and silently breaks every click. The handbook
+  now compares against `InputConstants.MOUSE_BUTTON_*`. The character pane was
+  already correct, because Standards' `PanelHost` normalises buttons first.
+
+**The prediction below did not hold.** The six-file server set is not what
+broke: every server file 26.3 touched is new to the list. The datapack
+registry event and the pack supplier are the front door that "What would
+change the recommendation" names. A server-common tree with a compat shim
+would have needed changes to its shared half this drop, so
+**branch-per-version stands.**
+
+The content layer held again. The built-in races and classes loaded with no
+data edit, and their item rules (tag-backed `HolderSet`s) resolved under
+26.3's concurrent registry loading.
 
 ### What this changes about the plan
 
