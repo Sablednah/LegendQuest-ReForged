@@ -8,7 +8,7 @@ rolled stats, classes that gate what you can wield, skills you buy with points
 you earn, and a karma score that quietly opens some doors and closes others.
 
 It began as a Bukkit plugin years ago. This is that design rebuilt from nothing
-for NeoForge — and built for **Minecraft 1.21.11, 26.1.2 and 26.2**. Each
+for NeoForge — and built for **Minecraft 1.21.11, 26.1.2, 26.2 and 26.3**. Each
 download names the version it is for, and refuses to load on the wrong one
 rather than misbehaving quietly.
 
@@ -187,9 +187,12 @@ are free.
 | `legendquest-<version>+mc1.21.11.jar` | 1.21.11 | any 21.11 build |
 | `legendquest-<version>+mc26.1.2.jar` | 26.1.2 | any 26.1 build |
 | `legendquest-<version>+mc26.2.jar` | 26.2 | any 26.2 build |
+| `legendquest-<version>+mc26.3.jar` | 26.3 | 26.3.0.33-beta or later |
 
-Any build within the series will do — updating NeoForge does not mean waiting
-for a LegendQuest release that changes nothing else.
+Any build within the series will do, except on 26.3: NeoForge changed an API
+partway through its 26.3 betas, so that line needs 26.3.0.33-beta or newer.
+Updating NeoForge otherwise never means waiting for a LegendQuest release that
+changes nothing else.
 
 Content is read when the world loads, matching how vanilla handles data-driven
 registries — edit your JSON or YAML and restart the server; `/reload` will not

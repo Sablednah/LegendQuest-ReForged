@@ -3,6 +3,21 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 2.6.1 — 2026-09-29
+
+**Minecraft 26.3.** This release is the 26.3 line only: the same features as
+2.6.0, rebuilt for the new version. The 1.21.11, 26.1.2 and 26.2 downloads stay
+on 2.6.0 because nothing changed for them.
+
+- Needs **NeoForge 26.3.0.33-beta or later**, and **Standards 1.10.0**. Earlier
+  26.3 betas are refused at start-up with a message naming the version to
+  install. Without the floor they would have crashed.
+- Every screen answers the mouse properly on 26.3. Its new input system
+  numbers mouse buttons differently, which would otherwise have left the
+  handbook's list unclickable.
+- No content changes. Races, classes, skills, feats and the genre packs load
+  unchanged, so a world upgraded from 26.2 keeps its characters.
+
 ## 2.6.0 — 2026-09-19
 
 Standards is still required, and its version requirement is unchanged. The new
