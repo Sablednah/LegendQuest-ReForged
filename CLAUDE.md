@@ -111,6 +111,8 @@ for any version. Its `~/dev/README.md` is the manual: ports and displays
 already claimed, the traps, and how to type, click and screenshot a client from
 a script. LegendQuest-StoryTeller's CLAUDE.md records what the rigs measured.
 
+> **2026-09-24: Vivo now has a FIXED IP, `192.168.7.246`** (no longer DHCP; earlier `.102`, then `.105`). `ssh -i ~/.ssh/vivo_ed25519 sable@192.168.7.246`, then read `~/dev/README.md` there.
+
 ### Dev-server ports — one pair per project
 
 Sable has five mods with a dev server, and they were nearly all on the vanilla
