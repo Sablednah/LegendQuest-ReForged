@@ -11,8 +11,7 @@ one had gone a full three releases out of date before anybody noticed, which is
 the argument for checking it at release time rather than when it feels stale.
 
 CurseForge's description editor accepts pasted rich text and has a Markdown
-mode; headings, tables and lists survive the paste. Modrinth takes Markdown
-directly, so the same file serves both.
+mode; headings, tables and lists survive the paste.
 
 ---
 
@@ -55,7 +54,7 @@ MIT — link to https://github.com/Sablednah/LegendQuest-ReForged/blob/main/LICE
 |---|---|---|
 | GitHub | https://github.com/Sablednah/LegendQuest-ReForged | live |
 | CurseForge | https://www.curseforge.com/minecraft/mc-mods/legendquest-reforged | live — approved 2026-08-20 |
-| Modrinth | — | not listed yet; the workflow exists and skips cleanly until a project ID and token are configured |
+| Modrinth | — | not listed — Modrinth refused the project over AI-assisted content (2026-09) |
 | Website | https://sablecraft.co.uk/legendquest-reforged/ | live |
 
 CurseForge project ID **1658748** (used by `CURSEFORGE_PROJECT_ID`, see

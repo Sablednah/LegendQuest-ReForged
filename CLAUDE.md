@@ -621,10 +621,11 @@ problem. Currently: the dice tray.
 ## Releasing
 
 `CHANGELOG.md`, **`CURSEFORGE.md`**, `mod_version` on all three branches, tag,
-then a GitHub release — publishing it fires the CurseForge and Modrinth
-workflows. Modrinth skips cleanly until a project ID and token exist (still not
-created).
+then a GitHub release — publishing it fires the CurseForge workflow.
 
+- **No Modrinth.** Modrinth refused both LegendQuest and StoryTeller over
+  AI-assisted content (2026-09), so the workflow, upload script and
+  `MODRINTH_TOKEN` secret were removed. Do not add them back.
 - **The store copy is part of the release, not a chore for later.** The
   `store-copy` job fails the release when `CURSEFORGE.md` has not changed since
   the previous tag. It had drifted three releases behind before anyone noticed,

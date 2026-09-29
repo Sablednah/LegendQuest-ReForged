@@ -261,7 +261,7 @@ the substitution runs.
    82 and the pack is rejected until those old fields are added back.
 4. **CI matrix**, modelled on CityWorld's `selftest.yml`, so a version cannot
    silently rot between drops.
-5. **Release plumbing** — jar naming, and CurseForge/Modrinth uploads that
+5. **Release plumbing** — jar naming, and CurseForge uploads that
    declare the right game versions per file.
 6. **Revisit the steady state after 26.3** (~Sept 2026), with three drops of
    evidence instead of nought.
