@@ -15,8 +15,8 @@ on 2.6.0 because nothing changed for them.
 - Every screen answers the mouse properly on 26.3. Its new input system
   numbers mouse buttons differently, which would otherwise have left the
   handbook's list unclickable.
-- No content changes. Races, classes, skills, feats and the genre packs load
-  unchanged, so a world upgraded from 26.2 keeps its characters.
+- No content changes. The races, classes, skills and feats load on 26.3
+  exactly as they are.
 
 ## 2.6.0 — 2026-09-19
 
