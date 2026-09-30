@@ -45,6 +45,7 @@ public final class LQConfig {
     public static final ModConfigSpec.IntValue PARTY_TP_COOLDOWN;
     public static final ModConfigSpec.BooleanValue PARTY_VOICE;
     public static final ModConfigSpec.BooleanValue ADVANCEMENTS;
+    public static final ModConfigSpec.BooleanValue RACE_SIZE_SCALES_PLAYER;
 
     static {
         BUILDER.comment("Character statline").push("stats");
@@ -165,6 +166,15 @@ public final class LQConfig {
                         "tab never appears. They are plain vanilla advancements, so they work on",
                         "an unmodded client.")
                 .define("enabled", true);
+        BUILDER.pop();
+
+        BUILDER.comment("The player's body").push("body");
+        RACE_SIZE_SCALES_PLAYER = BUILDER
+                .comment("Scale each player to their race's size, through vanilla's scale attribute.",
+                        "A race's size is its height in blocks, and 1.8 is an ordinary player: a",
+                        "0.9 hobbit is half height and fits through a one-block gap. Works for",
+                        "vanilla clients. Off, and everybody is ordinary size.")
+                .define("raceSizeScalesPlayer", true);
         BUILDER.pop();
     }
 
