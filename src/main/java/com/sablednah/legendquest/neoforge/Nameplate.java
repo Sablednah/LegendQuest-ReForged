@@ -57,8 +57,8 @@ public final class Nameplate {
 
     /**
      * Height above an ordinary-sized player's feet. Clears a standing player's
-     * head. Multiplied by the player's scale, or a 0.9-block hobbit's name
-     * would float a block and a half above them.
+     * head. Multiplied by the player's scale, or a 1.0-block hobbit's name
+     * would float well over a block above them.
      */
     private static final double Y_OFFSET = 2.35D;
 
