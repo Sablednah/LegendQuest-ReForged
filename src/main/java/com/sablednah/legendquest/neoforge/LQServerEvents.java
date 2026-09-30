@@ -440,6 +440,16 @@ public final class LQServerEvents {
 
     // --- combat: d20 hit/dodge, weapon gate, triggers ---
 
+    /** The height everything without a race counts as, for size in combat. */
+    private static final double ORDINARY_SIZE = 1.8D;
+
+    /** A player's race size; anything else counts as ordinary. */
+    private static double combatSize(LivingEntity entity) {
+        return entity instanceof ServerPlayer p
+                ? CharacterService.race(p).map(com.sablednah.legendquest.data.Race::size).orElse(ORDINARY_SIZE)
+                : ORDINARY_SIZE;
+    }
+
     @SubscribeEvent(priority = EventPriority.LOW)
     static void onIncomingDamage(LivingIncomingDamageEvent event) {
         LivingEntity victim = event.getEntity();
@@ -478,8 +488,17 @@ public final class LQServerEvents {
             Integer dodgeMod = victim instanceof ServerPlayer p
                     ? CharacterService.statModifier(p, Stat.DEX) : null;
             if (attackMod != null || dodgeMod != null) {
+                int sizeMod = 0;
+                if (LQConfig.USE_SIZE_IN_COMBAT.get()) {
+                    // A projectile's shooter counts as ordinary: how tall the
+                    // archer is has nothing to do with whether the arrow lands.
+                    boolean direct = event.getSource().getDirectEntity() == attacker;
+                    sizeMod = Mechanics.sizeModifier(
+                            direct ? combatSize(livingAttacker) : ORDINARY_SIZE, combatSize(victim),
+                            LQConfig.SIZE_BLOCKS_PER_POINT.get(), LQConfig.SIZE_MODIFIER_MAX.get());
+                }
                 var outcome = Mechanics.opposedAttack(victim.getRandom()::nextInt,
-                        attackMod != null ? attackMod : 0,
+                        (attackMod != null ? attackMod : 0) + sizeMod,
                         dodgeMod != null ? dodgeMod : 0);
                 if (outcome == Mechanics.AttackOutcome.MISS) {
                     event.setCanceled(true);
