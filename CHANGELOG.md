@@ -3,6 +3,41 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 2.7.0 — 2026-09-30
+
+For every Minecraft version: 1.21.11, 26.1.2, 26.2 and 26.3. The requirements
+are unchanged: Standards 1.8.0 or newer, and on 26.3, NeoForge 26.3.0.33-beta
+or newer.
+
+### A race's size is the player's size
+
+- **Players are now the height of their race.** A race's size has always been
+  written in its data (1.8 blocks is an ordinary player). It now sets
+  vanilla's scale attribute, so a 1.0-block hobbit is just over half height and
+  a 1.2 dwarf is two-thirds. Unmodded clients see it too.
+- The nameplate rides at the right height for a small or large player.
+- Turn it off with `body.raceSizeScalesPlayer = false`. A change takes effect
+  at each player's next login, respawn or race change.
+
+### Size matters in a fight
+
+- **Smaller is harder to hit, bigger is easier.** The attacker's d20 roll gains
+  or loses a point for every quarter-block of height between them and their
+  target, up to 3 either way. A human attacking a hobbit is at -3, a dwarf -2;
+  the hobbit attacking back is at +3. Anything without a race, and the shooter
+  of any projectile, counts as an ordinary 1.8.
+- `combat.useSizeInCombat` was already in the config but did nothing. It is
+  now the switch for this, alongside `sizeBlocksPerPoint` (0.25) and
+  `sizeModifierMax` (3).
+
+### Fixed
+
+- **"Take Up a Calling" no longer pops the moment a new player joins.** Every
+  new character is issued the default race and class, and those were being
+  counted as choices, on every content pack. The advancement, and the
+  LegendQuest tab itself, now wait for a real choice. Anyone who already has it
+  keeps it.
+
 ## 2.6.1 — 2026-09-29
 
 **Minecraft 26.3.** This release is the 26.3 line only: the same features as

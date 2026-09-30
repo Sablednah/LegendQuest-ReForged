@@ -114,6 +114,11 @@ is the part worth copying.
   Strength modifier, in any combination. Advantage shows both dice.
 - **Item proficiency per class** — wield what your class cannot use and you
   fumble.
+- **Your race is your size.** A hobbit stands just over half as tall as a
+  human, and a dwarf is two-thirds height. It
+  is vanilla's own scale attribute, so unmodded clients see it too, and small
+  folk are harder to hit in a fight while big ones are easier. Both can be
+  switched off.
 - **Karma** as a real mechanic, with good and evil paths that lock each other
   out.
 - **Parties** — invite, rename, teleport to members, and party-wide skills.
