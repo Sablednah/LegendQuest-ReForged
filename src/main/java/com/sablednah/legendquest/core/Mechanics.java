@@ -43,5 +43,20 @@ public final class Mechanics {
                 ? AttackOutcome.HIT : AttackOutcome.MISS;
     }
 
+    /**
+     * The attacker's modifier from relative size: a bigger target is easier to
+     * hit, a smaller one harder. Sizes are heights in blocks.
+     *
+     * <p>One point per {@code blocksPerPoint} of difference, rounded to the
+     * nearest whole point (symmetrically, so a small attacker and a big one
+     * are mirror images), then held to +/-{@code max}.</p>
+     */
+    public static int sizeModifier(double attackerSize, double targetSize, double blocksPerPoint, int max) {
+        if (blocksPerPoint <= 0 || max <= 0) return 0;
+        double points = (targetSize - attackerSize) / blocksPerPoint;
+        int rounded = (int) (Math.signum(points) * Math.round(Math.abs(points)));
+        return Math.max(-max, Math.min(max, rounded));
+    }
+
     private Mechanics() {}
 }

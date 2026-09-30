@@ -21,6 +21,8 @@ public final class LQConfig {
     public static final ModConfigSpec.EnumValue<StatlineMode> STATLINE_MODE;
     public static final ModConfigSpec.BooleanValue USE_D20_COMBAT;
     public static final ModConfigSpec.BooleanValue USE_SIZE_IN_COMBAT;
+    public static final ModConfigSpec.DoubleValue SIZE_BLOCKS_PER_POINT;
+    public static final ModConfigSpec.IntValue SIZE_MODIFIER_MAX;
     public static final ModConfigSpec.IntValue XP_LEVEL_BASE;
     public static final ModConfigSpec.IntValue MAX_LEVEL;
     public static final ModConfigSpec.BooleanValue LEVEL_UP_FANFARE;
@@ -61,8 +63,17 @@ public final class LQConfig {
                 .comment("Opposed d20 DEX tests decide hit/dodge between players and mobs.")
                 .define("useD20Combat", true);
         USE_SIZE_IN_COMBAT = BUILDER
-                .comment("Race size adjusts hit difficulty (bigger = easier to hit).")
+                .comment("Race size adjusts hit difficulty (bigger = easier to hit). Added to the",
+                        "attacker's d20 roll. A player's size is their race's; anything else, and",
+                        "the shooter of a projectile, counts as an ordinary 1.8.")
                 .define("useSizeInCombat", true);
+        SIZE_BLOCKS_PER_POINT = BUILDER
+                .comment("Blocks of height difference per point of size modifier. At 0.25 a",
+                        "1.0-block hobbit is 3 harder to hit than a 1.8 human, a 1.2 dwarf 2.")
+                .defineInRange("sizeBlocksPerPoint", 0.25D, 0.05D, 5.0D);
+        SIZE_MODIFIER_MAX = BUILDER
+                .comment("The size modifier never exceeds this, either way.")
+                .defineInRange("sizeModifierMax", 3, 0, 20);
         BUILDER.pop();
 
         BUILDER.comment("Experience and levels").push("xp");
