@@ -5,15 +5,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 
 import com.sablednah.legendquest.LQConfig;
 import com.sablednah.legendquest.LQRegistries;
 import com.sablednah.legendquest.LegendQuest;
 import com.sablednah.legendquest.character.PlayerCharacter;
 import com.sablednah.legendquest.core.Leveling;
+import com.sablednah.legendquest.data.CharClass;
+import com.sablednah.legendquest.data.Race;
 
 import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -82,15 +87,32 @@ public final class Achievements {
         if (subject != null) award(player, PREFIX + event + "/" + subject);
     }
 
-    /** A race was chosen. Also settles "have they now played them all". */
+    /**
+     * A race was chosen. Also settles "have they now played them all".
+     *
+     * <p>The default race is not a choice: every new character is handed it
+     * before they have decided anything, so granting "Choose a race" for it
+     * put a toast on screen at first join, on every pack.</p>
+     */
     public static void raceChosen(ServerPlayer player, Identifier raceId) {
-        fire(player, "race_chosen", raceId.toString());
+        if (!isDefault(player, LQRegistries.RACE, raceId, Race::isDefault)) {
+            fire(player, "race_chosen", raceId.toString());
+        }
         everyRace(player);
     }
 
-    /** A class was taken, as main or sub. */
+    /** A class was taken, as main or sub. The default class is not taken; it is issued. */
     public static void classChosen(ServerPlayer player, Identifier classId) {
+        if (isDefault(player, LQRegistries.CHAR_CLASS, classId, CharClass::isDefault)) return;
         fire(player, "class_chosen", classId.toString());
+    }
+
+    private static <T> boolean isDefault(ServerPlayer player, ResourceKey<Registry<T>> registry,
+            Identifier id, Predicate<T> isDefault) {
+        return player.level().registryAccess().lookupOrThrow(registry)
+                .get(ResourceKey.create(registry, id))
+                .map(ref -> isDefault.test(ref.value()))
+                .orElse(false);
     }
 
     /**
@@ -214,9 +236,13 @@ public final class Achievements {
         // An older save has a race but no history of having played it; this is
         // where that is put right, once, for free.
         pc.raceId().ifPresent(pc::recordRacePlayed);
-        pc.raceId().ifPresent(id -> fire(player, "race_chosen", id.toString()));
-        pc.mainClassId().ifPresent(id -> fire(player, "class_chosen", id.toString()));
-        pc.subClassId().ifPresent(id -> fire(player, "class_chosen", id.toString()));
+        pc.raceId().ifPresent(id -> {
+            if (!isDefault(player, LQRegistries.RACE, id, Race::isDefault)) {
+                fire(player, "race_chosen", id.toString());
+            }
+        });
+        pc.mainClassId().ifPresent(id -> classChosen(player, id));
+        pc.subClassId().ifPresent(id -> classChosen(player, id));
         for (String skill : pc.skillIds()) fire(player, "skill_learned", skill);
         for (String feat : pc.featIds()) fire(player, "feat_bought", feat);
         levelled(player, CharacterService.level(player));
