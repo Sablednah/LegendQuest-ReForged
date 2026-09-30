@@ -55,7 +55,11 @@ public final class Nameplate {
     /** Marks our displays so they can be found again and never orphaned. */
     private static final String TAG = "legendquest.nameplate";
 
-    /** Height above the player's feet. Clears a standing player's head. */
+    /**
+     * Height above an ordinary-sized player's feet. Clears a standing player's
+     * head. Multiplied by the player's scale, or a 0.9-block hobbit's name
+     * would float a block and a half above them.
+     */
     private static final double Y_OFFSET = 2.35D;
 
     /**
@@ -128,7 +132,7 @@ public final class Nameplate {
         if (display == null) {
             display = EntityType.TEXT_DISPLAY.create(level, EntitySpawnReason.COMMAND);
             if (display == null) return;
-            display.snapTo(player.getX(), player.getY() + Y_OFFSET, player.getZ(), 0.0F, 0.0F);
+            display.snapTo(player.getX(), player.getY() + Y_OFFSET * player.getScale(), player.getZ(), 0.0F, 0.0F);
             display.addTag(TAG);
             apply(display, level, text);
             // Tracked BEFORE it joins the level, because joining fires the
@@ -172,7 +176,7 @@ public final class Nameplate {
                 clear(player);
                 continue;
             }
-            display.snapTo(player.getX(), player.getY() + Y_OFFSET, player.getZ(), 0.0F, 0.0F);
+            display.snapTo(player.getX(), player.getY() + Y_OFFSET * player.getScale(), player.getZ(), 0.0F, 0.0F);
         }
     }
 
