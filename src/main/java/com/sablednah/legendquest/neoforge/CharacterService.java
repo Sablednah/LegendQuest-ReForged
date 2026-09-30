@@ -36,8 +36,11 @@ public final class CharacterService {
 
     private static final Identifier HEALTH_ID = Identifier.fromNamespaceAndPath(LegendQuest.MODID, "health");
     private static final Identifier SPEED_ID = Identifier.fromNamespaceAndPath(LegendQuest.MODID, "speed");
+    private static final Identifier SCALE_ID = Identifier.fromNamespaceAndPath(LegendQuest.MODID, "scale");
     private static final double VANILLA_BASE_HEALTH = 20.0D;
     private static final double NORMAL_SPEED = 0.2D; // the old configs' "normal walking speed"
+    /** A race's {@code size} is a height in blocks; this is an ordinary player's. */
+    private static final double NORMAL_HEIGHT = 1.8D;
 
     /**
      * A player's character sheet.
@@ -403,6 +406,20 @@ public final class CharacterService {
                     + best(player, CharClass.Growth::speedMod);
             speed.addOrUpdateTransientModifier(new AttributeModifier(
                     SPEED_ID, multiplier, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL));
+        }
+
+        AttributeInstance scale = player.getAttribute(Attributes.SCALE);
+        if (scale != null) {
+            double size = race(player).map(Race::size).orElse(NORMAL_HEIGHT);
+            // Removed rather than set to zero when it does not apply, so an
+            // ordinary-sized player carries no modifier of ours at all and a
+            // server that turns this off is left exactly as vanilla.
+            if (LQConfig.RACE_SIZE_SCALES_PLAYER.get() && size > 0 && size != NORMAL_HEIGHT) {
+                scale.addOrUpdateTransientModifier(new AttributeModifier(
+                        SCALE_ID, size / NORMAL_HEIGHT - 1.0D, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+            } else {
+                scale.removeModifier(SCALE_ID);
+            }
         }
 
         applyBoonAttributes(player);
