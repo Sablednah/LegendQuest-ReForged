@@ -183,7 +183,7 @@ public final class LQConfig {
         RACE_SIZE_SCALES_PLAYER = BUILDER
                 .comment("Scale each player to their race's size, through vanilla's scale attribute.",
                         "A race's size is its height in blocks, and 1.8 is an ordinary player: a",
-                        "size of 0.9 is half height and fits through a one-block gap. Works for",
+                        "size of 0.9 is half height. Works for",
                         "vanilla clients. Off, and everybody is ordinary size.")
                 .define("raceSizeScalesPlayer", true);
         BUILDER.pop();
