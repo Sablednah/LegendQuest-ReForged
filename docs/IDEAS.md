@@ -100,19 +100,38 @@ D&D table:
   bodies. CityWorld already generates structures from schematics, and its
   author has generators to learn from.
 
+**Decided (Sable, 2026-10-03).**
+
+- **Its own mod, and it works without LegendQuest.** Standalone, it is a
+  roguelike dungeon. With LegendQuest installed it gains the character layer:
+  perception and disarm rolls against real stats, race and class abilities,
+  shown dice. With StoryTeller it gains a games master. That is the same
+  inward-pointing seam LegendQuest already uses for Simple Voice Chat
+  (`PartyVoice` / `VoiceSupport`): the dungeon defines a small API, and each
+  optional mod plugs into it. The dungeon never imports them directly.
+- **Interoperability is the goal**, not a LegendQuest feature: other RPG mods
+  should be able to plug into the same seam.
+- **Why it is worth doing:** there is no good roguelike dungeon crawler for
+  26.x.
+- **The generator is CityWorld's lot planner at a different scale.** Roads
+  become corridors and lots become rooms. CityWorld already plans and joins a
+  procedural layout reliably, which is the hardest part of a dungeon generator.
+
 **What would make it hard.**
 
-- **It is not a genre pack.** Packs are data, and this needs code: a dungeon
-  generator, trap logic, room state. It is a module or a companion mod that
-  *uses* the content packs, not a new pack.
+- **It is not a genre pack.** Packs are data, and this needs code: trap
+  logic, room state, actions. Hence its own mod.
 - **"Only the people who passed see the trap"** has to work on a vanilla
   client. The server can send one player a block change or a glowing marker
   that nobody else receives, so it is possible, but every such fake has to be
   undone, survive chunk reloads, and stay consistent. A shared, visible "you
   spotted it" marker is far simpler and may be enough.
-- **The generator is the big piece.** Rooms that join reliably, are always
-  completable, and scale with party level are a project of their own. Starting
-  from fixed, hand-built rooms connected at random is the cheap first version.
+- **Reusing CityWorld's planner takes work.** It was built for city blocks:
+  wide roads, big lots, open sky. Corridors are narrow, rooms are small and
+  enclosed, and a dungeon must always be completable and scale with party
+  level, which a city never had to be. Whether that is a CityWorld API, a
+  shared library, or a copy adapted for the dungeon is the first decision,
+  and it belongs with the CityWorld session.
 - **The rolls need to read well live.** A roll that resolves before anyone has
   seen it is a hidden number again. The design choice is how long the game
   waits for the dice: a beat, not a pause.
@@ -121,7 +140,8 @@ D&D table:
 
 ## A derelict-ship mission mode for the sci-fi setting
 
-*Sable, 2026-10-03.* Space Hulk is the inspiration, not the name.
+*Sable, 2026-10-03.* Space Hulk is the inspiration, not the name. **Its own
+mod** (decided the same day), built on the same generator as the dungeon.
 
 **Wanted:** the party starts aboard a ship. Taking the party to the **docking
 bay** flies them to a **randomly generated derelict**. In practice that is a
@@ -146,9 +166,9 @@ rooms from schematics.
   stragglers sent home when a party wipes, quits or disconnects mid-mission. A
   party that logs out inside a hulk has to come back to somewhere that still
   makes sense.
-- **Corridors on the fly:** same generator problem as the dungeon, with
-  tighter geometry. The two ideas should share a generator rather than each
-  growing its own.
+- **Corridors on the fly:** CityWorld's lot planner again, as for the
+  dungeon, with tighter geometry: corridors for roads, compartments for lots.
+  The two mods should share that generator rather than each growing its own.
 - **Missions need a vocabulary.** Reach a point, retrieve an item, hold a room
   for a time, escort an NPC (Cast). A small fixed set, combined at random, is
   the cheap first version.
