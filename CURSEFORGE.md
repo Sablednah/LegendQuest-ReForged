@@ -192,10 +192,12 @@ are free.
 | `legendquest-<version>+mc1.21.11.jar` | 1.21.11 | any 21.11 build |
 | `legendquest-<version>+mc26.1.2.jar` | 26.1.2 | any 26.1 build |
 | `legendquest-<version>+mc26.2.jar` | 26.2 | any 26.2 build |
-| `legendquest-<version>+mc26.3.jar` | 26.3 | 26.3.0.33-beta or later |
+| `legendquest-<version>+mc26.3.jar` | 26.3 | 26.3.0.33-beta to 26.3.0.36-beta |
 
-Any build within the series will do, except on 26.3: NeoForge changed an API
-partway through its 26.3 betas, so that line needs 26.3.0.33-beta or newer.
+Any build within the series will do, except on 26.3, where NeoForge is still in
+beta and has changed its API twice along the way. The 26.3 download runs on
+26.3.0.33-beta to 26.3.0.36-beta; a newer build is refused at start-up with a
+message saying so, and support follows once NeoForge 26.3 is stable.
 Updating NeoForge otherwise never means waiting for a LegendQuest release that
 changes nothing else.
 

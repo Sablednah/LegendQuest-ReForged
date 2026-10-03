@@ -3,6 +3,16 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 2.7.1 — 2026-10-03
+
+**Minecraft 26.3 only.** The 1.21.11, 26.1.2 and 26.2 downloads stay on 2.7.0.
+
+- **Runs on NeoForge 26.3.0.33-beta to 26.3.0.36-beta.** NeoForge 26.3.0.37-beta
+  renamed part of its config API, and 2.7.0 would crash there at start-up. 2.7.1
+  is refused instead, with a message naming the NeoForge versions it needs.
+  Support for the newer builds follows once NeoForge 26.3 has a stable release.
+- No other changes.
+
 ## 2.7.0 — 2026-09-30
 
 For every Minecraft version: 1.21.11, 26.1.2, 26.2 and 26.3. The requirements
