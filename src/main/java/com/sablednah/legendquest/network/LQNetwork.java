@@ -27,6 +27,9 @@ public final class LQNetwork {
         registrar.playToClient(NoticePayload.TYPE, NoticePayload.CODEC,
                 (payload, context) -> context.enqueueWork(() ->
                         com.sablednah.legendquest.client.ClientNotices.accept(payload)));
+        registrar.playToClient(RollResultPayload.TYPE, RollResultPayload.CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        com.sablednah.legendquest.client.DiceTray.accept(payload)));
         registrar.playToServer(SkillActionPayload.TYPE, SkillActionPayload.CODEC,
                 LQNetwork::handleSkillAction);
         registrar.playToServer(LoadoutEditPayload.TYPE, LoadoutEditPayload.CODEC,
@@ -35,6 +38,12 @@ public final class LQNetwork {
                 LQNetwork::handleChoose);
         registrar.playToServer(PartyActionPayload.TYPE, PartyActionPayload.CODEC,
                 LQNetwork::handlePartyAction);
+        registrar.playToServer(RollPayload.TYPE, RollPayload.CODEC,
+                (payload, context) -> context.enqueueWork(() -> {
+                    if (context.player() instanceof ServerPlayer player) {
+                        com.sablednah.legendquest.neoforge.DiceRolls.fromTray(player, payload.notation());
+                    }
+                }));
     }
 
     /**
