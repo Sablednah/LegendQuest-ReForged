@@ -635,6 +635,14 @@ Odd dice are allowed on purpose (a d7 is fine); the only limits are at least
 two sides, at most 1000, and at most 100 dice. Advantage applies to the first
 die only, which is what advantage means. "Natural 20" is only announced on a
 single unmodified d20.
+
+**The dice tray** is the same thing for a modded client: the die-face tab on
+the character pane (open your inventory, click **LQ**, then the die). Pick a
+stat modifier (or None) and Normal, Advantage or Disadvantage at the bottom,
+then click a die, or drag one and let go. The tray sends the roll to the server
+as `/roll` words, so it is announced to everybody exactly like a typed roll,
+and the tray shows the result when it lands. Typed rolls show there too.
+
 Admin: `/lq admin setrace|setclass|addxp|setkarma|level` (append `force` to
 setrace/setclass to allow illegal combos). Bare names work
 everywhere — `dwarf`, not `legendquest:dwarf`.

@@ -721,16 +721,8 @@ public final class LQCommands {
 
     /**
      * {@code /roll} on its own is the d20 it always was; anything after it is
-     * read as tabletop notation by {@link Dice}.
-     *
-     * <p><b>The whole roll is shown, not just the total.</b> "Sable rolls
-     * 2d6+3: [4, 2] +3 = 9" is a sentence a table can argue with; "9" is a
-     * number they have to trust. Same reason advantage prints the die it threw
-     * away — the near miss is most of the drama, and hiding it makes the
-     * feature feel like it did nothing.</p>
-     *
-     * <p>A refusal names the input rather than the rule, because somebody who
-     * typed {@code 2d6+} wants to see {@code 2d6+} back, not a grammar.</p>
+     * read as tabletop notation by {@link Dice}. The roll itself is
+     * {@link DiceRolls}, shared with the dice tray so the two cannot drift.
      */
     private static int roll(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
@@ -741,52 +733,7 @@ public final class LQCommands {
             // Bare /roll. Brigadier has no "is this argument present" for a
             // node that may not exist on this branch of the tree.
         }
-
-        Object parsed = Dice.parse(input);
-        if (parsed instanceof Dice.Failure failure) {
-            Feedback.chat(player, lc("msg.roll.unreadable", "input", failure.input()));
-            return 0;
-        }
-        Dice.Spec spec = (Dice.Spec) parsed;
-
-        // A stat roll adds that character's modifier, and says whose and what.
-        String statLabel = "";
-        if (spec.stat().isPresent()) {
-            Stat stat = spec.stat().get();
-            int mod = CharacterService.statModifier(player, stat);
-            spec = spec.withBonus(spec.bonus() + mod);
-            statLabel = lc("msg.roll.stat", "stat", Lang.get("stat." + stat.key()),
-                    "mod", (mod >= 0 ? "+" : "") + mod);
-        }
-
-        Dice.Result result = Dice.roll(spec, player.getRandom()::nextInt);
-
-        // Not when dropped > 0: a single d20 with advantage would otherwise read
-        // "13 ([13]) [adv, dropped 9]", and the ([13]) restates the number two
-        // characters to its left. The edge label already shows both dice.
-        String detail = spec.count() > 1 || spec.bonus() != 0
-                ? lc("msg.roll.detail", "dice", result.dice().toString(),
-                        "bonus", spec.bonus() == 0 ? ""
-                                : (spec.bonus() > 0 ? "+" : "") + spec.bonus())
-                : "";
-        String edge = switch (spec.edge()) {
-            case ADVANTAGE -> lc("msg.roll.advantage", "dropped", result.dropped());
-            case DISADVANTAGE -> lc("msg.roll.disadvantage", "dropped", result.dropped());
-            case NONE -> "";
-        };
-
-        ctx.getSource().getServer().getPlayerList().broadcastSystemMessage(
-                Feedback.colored(lc("msg.roll.result",
-                        "player", player.getName().getString(),
-                        "notation", spec.describe(),
-                        "stat", statLabel,
-                        "detail", detail,
-                        "edge", edge,
-                        "roll", result.total(),
-                        "flair", result.naturalTwenty() ? lc("msg.roll.nat20")
-                                : result.naturalOne() ? lc("msg.roll.nat1") : "")),
-                false);
-        return result.total();
+        return DiceRolls.roll(player, input);
     }
 
     // --- admin ---
