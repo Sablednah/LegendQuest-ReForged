@@ -67,3 +67,92 @@ physics problem.
   the honest default, since the point of rolling in the open is being seen.
 - What does clicking a stat do to dice already in the tray — add the modifier,
   or replace the tray with `d20 + modifier`?
+
+---
+
+## A roguelike dungeon for the fantasy setting
+
+*Sable, 2026-10-03.*
+
+**Wanted:** a dungeon builder in the spirit of Dungeon Crawl and the Android
+roguelike Pixel Dungeon, played as live Minecraft but run like a HeroQuest or
+D&D table:
+
+- **Traps in rooms.** Each character makes a **perception check** as they enter,
+  and whoever passes *sees* the trap. If it is triggered, a **dwarf can disarm**
+  it.
+- **The dice are shown.** The game rolls for you, on screen, so it feels like a
+  table game played live rather than a hidden number.
+- **Actions you choose:** search the room, loot a corpse, and so on, each one a
+  roll.
+- **StoryTeller integration:** a Storyteller can "pause" the dungeon for a
+  narrative beat, take over its monsters, add more, and use dungeon-specific
+  bonus presets.
+
+**What already exists to build on.**
+
+- The d20 core is in `core/Mechanics`. A perception check is `skillTest` against
+  a WIS modifier, and a disarm is a DEX check with a dwarf bonus: no new
+  mechanics, just new callers.
+- `/roll` already reports every die and broadcasts it, so "show the dice" is
+  reusing that output, or the dice tray above if it gets built.
+- StoryTeller already possesses and moves creatures. Cast already owns NPC
+  bodies. CityWorld already generates structures from schematics, and its
+  author has generators to learn from.
+
+**What would make it hard.**
+
+- **It is not a genre pack.** Packs are data, and this needs code: a dungeon
+  generator, trap logic, room state. It is a module or a companion mod that
+  *uses* the content packs, not a new pack.
+- **"Only the people who passed see the trap"** has to work on a vanilla
+  client. The server can send one player a block change or a glowing marker
+  that nobody else receives, so it is possible, but every such fake has to be
+  undone, survive chunk reloads, and stay consistent. A shared, visible "you
+  spotted it" marker is far simpler and may be enough.
+- **The generator is the big piece.** Rooms that join reliably, are always
+  completable, and scale with party level are a project of their own. Starting
+  from fixed, hand-built rooms connected at random is the cheap first version.
+- **The rolls need to read well live.** A roll that resolves before anyone has
+  seen it is a hidden number again. The design choice is how long the game
+  waits for the dice: a beat, not a pause.
+
+---
+
+## A derelict-ship mission mode for the sci-fi setting
+
+*Sable, 2026-10-03.* Space Hulk is the inspiration, not the name.
+
+**Wanted:** the party starts aboard a ship. Taking the party to the **docking
+bay** flies them to a **randomly generated derelict**. In practice that is a
+teleport to a freshly generated place where the hulk is built on the fly. There
+they explore corridors, complete a **random mission**, and fight off aliens that
+are definitely *not* xenomorphs or genestealers. The creatures want designs of
+our own, not borrowed ones.
+
+**What already exists to build on.** Parties already move together
+(`/party tp`) and share XP. The sci-fi pack already supplies the species, the
+professions, the vocabulary and the ranks. CityWorld generates corridors and
+rooms from schematics.
+
+**What would make it hard.**
+
+- **New worlds cannot be added while the server runs.** Vanilla and NeoForge
+  both fix the list of dimensions at start-up. The workable shape is **one
+  "derelicts" dimension declared up front**, with each mission given its own
+  far-apart plot and wiped afterwards. To the players it is a new hulk every
+  time.
+- **Clean-up is the real work.** A plot has to be reset, its entities removed and
+  stragglers sent home when a party wipes, quits or disconnects mid-mission. A
+  party that logs out inside a hulk has to come back to somewhere that still
+  makes sense.
+- **Corridors on the fly:** same generator problem as the dungeon, with
+  tighter geometry. The two ideas should share a generator rather than each
+  growing its own.
+- **Missions need a vocabulary.** Reach a point, retrieve an item, hold a room
+  for a time, escort an NPC (Cast). A small fixed set, combined at random, is
+  the cheap first version.
+
+**Shared with the dungeon above:** a room-and-corridor generator, temporary
+instanced space, trap and objective state, and StoryTeller as the
+"games master". Building one well builds most of the other.
