@@ -3,6 +3,19 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 2.8.0 — 2026-10-03
+
+For every Minecraft version: 1.21.11, 26.1.2, 26.2 and 26.3. The requirements
+are unchanged: Standards 1.8.0 or newer, and on 26.3, NeoForge 26.3.0.33-beta
+to 26.3.0.36-beta.
+
+- **A dice tray.** The character pane has a fourth tab, a die face beside
+  Party. Pick a stat modifier (or None) and Normal, Advantage or Disadvantage,
+  then click a die (d4 to d100), or drag one and let go, to roll it. The roll
+  is announced to the whole server exactly as `/roll` is, and the tray shows
+  the dice spinning, then landing on the result, with any dropped advantage die
+  shown. `/roll` is still the way to roll on an unmodded client.
+
 ## 2.7.1 — 2026-10-03
 
 **Minecraft 26.3 only.** The 1.21.11, 26.1.2 and 26.2 downloads stay on 2.7.0.
