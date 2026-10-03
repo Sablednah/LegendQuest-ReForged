@@ -98,6 +98,25 @@ public final class Lang {
         def("ui.rename_party_tip", "Opens chat pre-filled with /party rename");
         def("ui.open_in_handbook", "Open in the {term.handbook}");
         def("ui.right_click_handbook", "Right-click: handbook");
+        // The dice tray (the fourth tab). The rolls themselves are msg.roll.*.
+        def("ui.dice_tray", "Dice tray");
+        def("ui.dice_tray_tip", "Click or drag a die to roll it. Everyone sees the result, as with /roll.");
+        def("ui.dice_hint_1", "Click or drag a die to roll.");
+        def("ui.dice_hint_2", "Everyone sees the result.");
+        def("ui.dice_modifier", "Add a modifier");
+        def("ui.dice_none", "None");
+        def("ui.dice_none_tip", "Just the die.");
+        def("ui.dice_stat_tip", "Adds your modifier for this stat.");
+        def("ui.dice_normal", "Normal");
+        def("ui.dice_normal_tip", "Roll once.");
+        def("ui.dice_adv", "Adv");
+        def("ui.dice_adv_tip", "Advantage: roll twice, keep the higher. Both dice are shown.");
+        def("ui.dice_dis", "Disadv");
+        def("ui.dice_dis_tip", "Disadvantage: roll twice, keep the lower. Both dice are shown.");
+        def("ui.dice_rolling", "rolling…");
+        def("ui.dice_dropped", "dropped");
+        def("ui.dice_nat20", "Natural 20!");
+        def("ui.dice_nat1", "Natural 1.");
         def("ui.stat_buy_tip", "Permanently raises the stat for {cost} {term.skill_points}.");
         def("ui.stat_buy_tip_2", "Each boost bought raises the next one's price.");
         def("ui.stat_buy_tip_3", "Regret it later? /lq respec");

@@ -64,9 +64,9 @@ public final class CharacterPanel {
      * whether the pane is showing is the host's answer, and keeping a second
      * copy of it here is how the two drift apart.
      */
-    enum Tab { STATS, SKILLS, PARTY }
+    enum Tab { STATS, SKILLS, PARTY, DICE }
 
-    /** Height of the internal Stats|Skills|Party chip row. */
+    /** Height of the internal Stats|Skills|Party|dice chip row. */
     private static final int TAB_BAR = 16;
 
     private static Tab tab = Tab.STATS;
@@ -182,11 +182,12 @@ public final class CharacterPanel {
     }
 
     static boolean dragging() {
-        return drag != null;
+        return drag != null || DiceTray.dragging();
     }
 
     static void clearDrag() {
         drag = null;
+        DiceTray.clearDrag();
     }
 
     /**
@@ -250,7 +251,9 @@ public final class CharacterPanel {
         CharacterSummaryPayload s = summary();
         if (s == null) return 32;
         int h;
-        if (tab == Tab.SKILLS) {
+        if (tab == Tab.DICE) {
+            h = DiceTray.HEIGHT;
+        } else if (tab == Tab.SKILLS) {
             // pad + title + slots + hint + divider, then the list.
             h = 8 + 12 + SLOT_SIZE + 4 + 12 + 6 + s.skills().size() * ROW_HEIGHT + 8;
         } else if (tab == Tab.PARTY) {
@@ -365,6 +368,11 @@ public final class CharacterPanel {
         }
         if (button != 0) return true; // everything below is left-click; still ours
 
+        if (tab == Tab.DICE) {
+            DiceTray.clicked(mx, my, button);
+            return true;
+        }
+
         if (tab == Tab.SKILLS) {
             // Spellbook slot: click with an item on the cursor to set it,
             // click with an empty cursor to unbind.
@@ -440,7 +448,7 @@ public final class CharacterPanel {
         // drag would still be running on the next click. Calling it from both
         // sides is safe because released() clears the drag before doing
         // anything, so the second call finds nothing to do.
-        if (drag != null) released(screen, mx, my);
+        if (drag != null || DiceTray.dragging()) released(screen, mx, my);
 
         if (screen.getMenu().getCarried().isEmpty()) return;
         if (!inPanel(screen, mx, my) && mx < screen.getGuiLeft()) {
@@ -454,6 +462,11 @@ public final class CharacterPanel {
         // was running -- otherwise it reaches vanilla, which reads a release
         // outside its own bounds with a carried item as "throw it on the floor".
         boolean ours = inPanel(screen, mx, my);
+        // A die in hand is thrown wherever it is let go.
+        if (DiceTray.dragging()) {
+            DiceTray.released();
+            return ours;
+        }
         Drag d = drag;
         drag = null;
         if (d == null) return ours;
@@ -517,10 +530,13 @@ public final class CharacterPanel {
         int chipX = x + 5;
         chipX = tabChip(g, font, chipX, y + 3, ClientVocab.term("stats", "Stats"), Tab.STATS, screen);
         chipX = tabChip(g, font, chipX, y + 3, ClientVocab.term("skills", "Skills"), Tab.SKILLS, screen);
-        tabChip(g, font, chipX, y + 3, ClientVocab.term("party", "Party"), Tab.PARTY, screen);
+        chipX = tabChip(g, font, chipX, y + 3, ClientVocab.term("party", "Party"), Tab.PARTY, screen);
+        diceChip(g, font, chipX, y + 3);
 
         int cy = contentY(screen);
-        if (tab == Tab.SKILLS) {
+        if (tab == Tab.DICE) {
+            DiceTray.render(g, font, x + 8, cy, mouseX, mouseY, s);
+        } else if (tab == Tab.SKILLS) {
             renderSkillsTab(g, font, screen, s, x, cy);
         } else if (tab == Tab.PARTY) {
             renderPartyTab(g, font, s, x, cy);
@@ -596,6 +612,34 @@ public final class CharacterPanel {
             }));
         }
         return x0 + w + 3;
+    }
+
+    /**
+     * The dice tray's chip: a die face rather than a word, because a fourth
+     * word does not fit beside the handbook button at 170px.
+     */
+    private static void diceChip(GuiGraphicsExtractor g, Font font, int x0, int y0) {
+        int w = 16;
+        boolean active = tab == Tab.DICE;
+        boolean hover = mouseX >= x0 && mouseX < x0 + w && mouseY >= y0 && mouseY < y0 + 12;
+        g.fill(x0, y0, x0 + w, y0 + 12, active ? 0xFF3A2C10 : hover ? 0xFF33291E : 0xFF221A12);
+        int border = active ? 0xFFDAA520 : hover ? 0x80DAA520 : 0xFF44445A;
+        g.fill(x0, y0, x0 + w, y0 + 1, border);
+        g.fill(x0, y0 + 11, x0 + w, y0 + 12, border);
+        g.fill(x0, y0, x0 + 1, y0 + 12, border);
+        g.fill(x0 + w - 1, y0, x0 + w, y0 + 12, border);
+        DiceTray.drawFace(g, x0 + 4, y0 + 2, active ? 0xFFDAA520 : hover ? 0xFFFFFF80 : 0xFFAAAAAA);
+        if (hover) {
+            tooltip(g, font, ClientVocab.get("ui.dice_tray", "Dice tray"),
+                    ClientVocab.get("ui.dice_tray_tip",
+                            "Click or drag a die to roll it. Everyone sees the result, as with /roll."));
+        }
+        if (!active) {
+            HOTSPOTS.add(new Hot(x0, y0, x0 + w, y0 + 12, -1, () -> {
+                tab = Tab.DICE;
+                drag = null;
+            }));
+        }
     }
 
     /** The party tab: who you run with, and the buttons to change that. */
@@ -1074,7 +1118,7 @@ public final class CharacterPanel {
      */
     private static String[] pendingTooltip;
 
-    private static void tooltip(GuiGraphicsExtractor g, Font font, String title, String body) {
+    static void tooltip(GuiGraphicsExtractor g, Font font, String title, String body) {
         pendingTooltip = new String[] {title, body};
     }
 
