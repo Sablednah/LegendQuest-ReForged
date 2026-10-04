@@ -638,7 +638,8 @@ single unmodified d20.
 
 **The dice tray** is the same thing for a modded client: the die-face tab on
 the character pane (open your inventory, click **LQ**, then the die). Pick a
-stat modifier (or None) and Normal, Advantage or Disadvantage at the bottom,
+stat modifier (or None), an Extra bonus or penalty on the slider (-10 to +10),
+and Normal, Advantage or Disadvantage at the bottom,
 then click a die, or drag one and let go. The tray sends the roll to the server
 as `/roll` words, so it is announced to everybody exactly like a typed roll,
 and the tray shows the result when it lands. Typed rolls show there too.

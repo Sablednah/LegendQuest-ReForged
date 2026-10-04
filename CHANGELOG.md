@@ -3,6 +3,13 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+- **An Extra modifier on the dice tray.** A slider between the stats and
+  Normal/Advantage adds a bonus or penalty from -10 to +10, for cover, a
+  blessing or whatever the GM says. Click the number at its end to set it back
+  to 0. It is announced as part of the roll, just like typing `/roll d20 +3`.
+
 ## 2.8.0 — 2026-10-03
 
 For every Minecraft version: 1.21.11, 26.1.2, 26.2 and 26.3. The requirements
