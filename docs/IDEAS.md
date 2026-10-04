@@ -122,3 +122,56 @@ rooms from schematics.
 **Shared with the dungeon above:** a room-and-corridor generator, temporary
 instanced space, trap and objective state, and StoryTeller as the
 "games master". Building one well builds most of the other.
+
+---
+
+## A Doom WAD to Minecraft structure library
+
+*Sable, 2026-10-04.* For the sci-fi setting, but **its own standalone library
+mod**: useful to anybody on its own, and used by Sable's sci-fi pack.
+
+**Wanted:** read a Doom WAD file and build its level as a Minecraft structure.
+
+- **A command** spawns a map from a file, either at the player's position or
+  where they are looking, turned to face the way the player is facing.
+- **API calls** do the same from code, so the sci-fi pack (and Space Husk above)
+  can place a level without going through a command.
+
+**Why it maps better than it sounds.** Doom levels are 2.5D: a floor plan of
+*sectors*, each with one floor height and one ceiling height. That is a
+heightmap with a roof, which is exactly what blocks are good at. Walls come from
+*linedefs* and *sidedefs*, and what is in the level (enemies, pickups, the player
+start) comes from *things*. There are no true rooms over rooms, so nothing has to
+be guessed about overlapping space.
+
+**What would make it hard.**
+
+- **Licensing, before any code.** The commercial game data (`doom.wad`,
+  `doom2.wad`) cannot be shipped or bundled. The library has to read files the
+  user supplies, and anything shipped with the pack should come from
+  **Freedoom** (BSD-licensed) or from maps whose authors allow it.
+- **Scale.** The player is 56 Doom units tall and 1.8 blocks in Minecraft, so
+  about 32 units to a block is the natural scale. Doom's narrow ledges and thin
+  steps then round to nothing or to a full block, so the scale wants to be
+  adjustable.
+- **Textures to blocks.** Doom names its wall and floor textures (`STARTAN3`,
+  `NUKAGE1`). A data-driven table from texture name to block, with a sensible
+  fallback, keeps the look editable without code. Packs could supply their own
+  table.
+- **Rotation.** Minecraft structures turn in quarter steps, so "facing the way
+  the player looks" means snapping to the nearest of the four directions.
+- **Size.** A large map is millions of blocks. Placing it all in one tick would
+  stall the server, so it has to be built a slice per tick, with a progress
+  message to the player.
+- **What moves.** Doors, lifts and crushers are linedef specials. The cheap
+  first version builds them in one position, standing still. Working doors are a
+  separate, later job.
+- **Things to Minecraft.** Mapping Doom's monsters and pickups to mobs, chests
+  and spawners is a table again, like textures. A first version can just leave
+  them out.
+- **Format variants.** Vanilla Doom's binary map lumps are the base to support.
+  Hexen-format and UDMF (text) maps come later, if at all.
+
+**Fits with Space Husk.** Derelict decks could be hand-made Doom-style maps,
+built by this library, instead of (or alongside) layouts from CityWorld's
+planner.
