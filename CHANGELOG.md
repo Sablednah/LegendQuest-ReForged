@@ -3,7 +3,11 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 2.8.1 — 2026-10-04
+
+For every Minecraft version: 1.21.11, 26.1.2, 26.2 and 26.3. The requirements
+are unchanged: Standards 1.8.0 or newer, and on 26.3, NeoForge 26.3.0.33-beta
+to 26.3.0.36-beta.
 
 - **An Extra modifier on the dice tray.** A slider between the stats and
   Normal/Advantage adds a bonus or penalty from -10 to +10, for cover, a

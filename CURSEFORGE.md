@@ -113,8 +113,8 @@ is the part worth copying.
   `/roll 2d6+3`, `/roll d%`, `/roll adv`, `/roll str` for a d20 plus your
   Strength modifier, in any combination. Advantage shows both dice.
 - **A dice tray** on the character panel, for players with the mod installed:
-  pick a stat and advantage or disadvantage, then click or drag a die to roll
-  it. The whole server sees the roll, just as with `/roll`.
+  pick a stat, an extra bonus or penalty, and advantage or disadvantage, then
+  click or drag a die to roll it. The whole server sees the roll, just as with `/roll`.
 - **Item proficiency per class** — wield what your class cannot use and you
   fumble.
 - **Your race is your size.** A hobbit stands just over half as tall as a
