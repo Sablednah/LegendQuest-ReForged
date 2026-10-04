@@ -172,6 +172,13 @@ be guessed about overlapping space.
 - **Format variants.** Vanilla Doom's binary map lumps are the base to support.
   Hexen-format and UDMF (text) maps come later, if at all.
 
+**Test files are already in hand** (Sable, 2026-10-04): the shareware
+`doom1.wad`, so E1M1 and the rest of episode 1, plus several open-source WADs.
+E1M1 is the natural first target, because everybody knows what it should look
+like, so a wrong build is obvious at a glance. Using the shareware WAD to *test*
+is fine; shipping it inside a jar or pack is a separate question, and the
+answer above still stands: ship Freedoom or permissively licensed maps.
+
 **Fits with Space Husk.** Derelict decks could be hand-made Doom-style maps,
 built by this library, instead of (or alongside) layouts from CityWorld's
 planner.
