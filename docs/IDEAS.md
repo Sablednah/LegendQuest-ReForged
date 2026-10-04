@@ -96,6 +96,34 @@ they explore corridors, complete a **random mission**, and fight off aliens that
 are definitely *not* xenomorphs or genestealers. The creatures want designs of
 our own, not borrowed ones.
 
+**Maps from board tiles** (Sable, 2026-10-04). Sable will build the maps
+the way the board game does: **premade tiles**, corridor sections and rooms,
+that join each other at **connection points**. That is what Minecraft's jigsaw
+block already does, so the tiles can be ordinary structure templates with jigsaw
+connectors. The Space Hulk campaign book added **pits and ladders**, which in
+effect is **two boards, one above the other**, joined by a ladder. Space Husk
+does the same: two decks at a fixed height apart, and ladder or pit tiles whose
+connectors face up or down.
+
+- **Vanilla already does most of this.** `/place jigsaw` assembles a structure
+  from a template pool at runtime, not only during world generation, and
+  connectors can face up and down; the trial chambers are a vanilla structure
+  that climbs between levels this way. Whether the vanilla assembler is enough,
+  or the mod needs its own, is the first thing to find out.
+- **Limits to check before designing around it:** how many tiles deep the
+  assembler will go, and how far from its start it will build. A large hulk may
+  outgrow both.
+- **Two decks need one grid.** If every tile is a whole number of grid cells and
+  the decks sit a fixed number of blocks apart, a ladder tile on the lower deck
+  always lands on a valid spot on the upper one.
+- **The board must always be finishable.** A random assembly can close itself
+  off or leave the mission's objective unreachable, so the mod has to check the
+  layout (or retry) before the party is sent in.
+- This may replace CityWorld's lot planner for Space Husk, or sit beside it.
+  The Doom WAD library below could also produce tiles.
+- StoryTeller's roadmap already has **jigsaw-pool support** parked. If both
+  need it, it should be built once.
+
 **What already exists to build on.** Parties already move together
 (`/party tp`) and share XP. The sci-fi pack already supplies the species, the
 professions, the vocabulary and the ranks. CityWorld generates corridors and
