@@ -107,6 +107,9 @@ public final class Lang {
         def("ui.dice_none", "None");
         def("ui.dice_none_tip", "Just the die.");
         def("ui.dice_stat_tip", "Adds your modifier for this stat.");
+        def("ui.dice_extra", "Extra");
+        def("ui.dice_extra_tip", "A bonus or penalty from the moment: cover, a blessing, the GM's say. Drag from -10 to +10.");
+        def("ui.dice_extra_reset_tip", "Click to set back to 0.");
         def("ui.dice_normal", "Normal");
         def("ui.dice_normal_tip", "Roll once.");
         def("ui.dice_adv", "Adv");
