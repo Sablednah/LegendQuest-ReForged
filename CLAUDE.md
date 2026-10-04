@@ -471,8 +471,8 @@ up from its current race at first login.
 thought of rather than left in a chat log. Each entry says what the idea is and,
 where known, what would make it hard — so the next person starts from the real
 problem. Currently: a roguelike dungeon (fantasy),
-derelict-ship missions (sci-fi, working name "Space Husk") and a Doom WAD
-to structure library (sci-fi, standalone).
+derelict-ship missions (sci-fi, working name "Space Husk") and the Doom WAD
+library (started as WadCraft, its own repo).
 
 ## Known traps
 

@@ -158,6 +158,12 @@ instanced space, trap and objective state, and StoryTeller as the
 *Sable, 2026-10-04.* For the sci-fi setting, but **its own standalone library
 mod**: useful to anybody on its own, and used by Sable's sci-fi pack.
 
+**Started 2026-10-04 as WadCraft** (https://github.com/Sablednah/WadCraft,
+`../WadCraft`). 0.1.0 builds the shape, colours, open doors and lighting of
+Doom and Hexen binary maps, with `/wadcraft build` and `WadCraftApi`. Not yet:
+monsters and items, moving doors and lifts, UDMF maps. Its own CLAUDE.md is the
+record from here on.
+
 **Wanted:** read a Doom WAD file and build its level as a Minecraft structure.
 
 - **A command** spawns a map from a file, either at the player's position or
