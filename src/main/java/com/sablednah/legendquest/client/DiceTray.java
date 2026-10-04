@@ -18,8 +18,8 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 /**
  * The dice tab of the character pane: a tray that shows the last roll, a pool
- * of dice, and two selectors underneath — which stat to add, and normal,
- * advantage or disadvantage. Click a die, or drag one and let go, to throw it.
+ * of dice, and three controls underneath — which stat to add, an extra
+ * modifier on a slider, and normal, advantage or disadvantage. Click a die, or drag one and let go, to throw it.
  *
  * <p><b>A control surface over {@code /roll}, nothing more.</b> The tray sends
  * the words a player would type ("d20 str adv") and the server rolls them with
@@ -55,7 +55,8 @@ public final class DiceTray {
     private static final int DIE_H = 20;
     private static final int MOD_LABEL_Y = 106;
     private static final int MOD_Y = 117;
-    private static final int EDGE_Y = 153;
+    private static final int SLIDER_Y = 153;
+    private static final int EDGE_Y = 171;
     private static final int CHIP_H = 14;
 
     /** Content height, for the pane to size itself. */
@@ -72,6 +73,10 @@ public final class DiceTray {
     // The selectors survive the pane closing: somebody rolling DEX all evening
     // should not have to pick it again every time they open the inventory.
     private static int stat = -1; // Stat ordinal; -1 = none
+    /** The situational bonus or penalty: cover, a blessing, the GM's say. */
+    private static int extra = 0;
+    private static final int EXTRA_MAX = 10;
+    private static boolean sliding = false;
     private static Dice.Edge edge = Dice.Edge.NONE;
 
     private static int dragSides = 0; // 0 = nothing in hand
@@ -83,7 +88,7 @@ public final class DiceTray {
     private static RollResultPayload result;
     private static long landAt;
 
-    private enum Kind { DIE, STAT, EDGE }
+    private enum Kind { DIE, STAT, EDGE, SLIDER, RESET }
 
     /** {@code value}: sides for a die, stat ordinal (-1 none), or edge ordinal. */
     private record Cell(int x, int y, int w, int h, Kind kind, int value, int colour) {
@@ -123,17 +128,25 @@ public final class DiceTray {
                 }
                 case STAT -> stat = cell.value();
                 case EDGE -> edge = Dice.Edge.values()[cell.value()];
+                case SLIDER -> {
+                    sliding = true;
+                    extra = extraAt(cell, mx);
+                }
+                case RESET -> extra = 0;
             }
             return;
         }
     }
 
+    /** A die in hand or the slider's handle held: either way the host must
+     *  keep routing the drag and the release to us. */
     static boolean dragging() {
-        return dragSides != 0;
+        return dragSides != 0 || sliding;
     }
 
     static void clearDrag() {
         dragSides = 0;
+        sliding = false;
     }
 
     /**
@@ -142,11 +155,14 @@ public final class DiceTray {
      * and the screen event's) finds nothing to do.
      */
     static void released() {
+        sliding = false;
         int sides = dragSides;
         dragSides = 0;
         if (sides == 0 || cooling() || ClientCharacterState.summary() == null) return;
         StringBuilder notation = new StringBuilder("d").append(sides);
         if (stat >= 0) notation.append(' ').append(Stat.values()[stat].key());
+        // "+3" / "-2" is a bonus to /roll, so the extra needs no new grammar.
+        if (extra != 0) notation.append(' ').append(signed(extra));
         if (edge == Dice.Edge.ADVANTAGE) notation.append(" adv");
         if (edge == Dice.Edge.DISADVANTAGE) notation.append(" dis");
         ClientPacketDistributor.sendToServer(new RollPayload(notation.toString()));
@@ -176,6 +192,9 @@ public final class DiceTray {
             cells.add(new Cell(x0 + 36 + (n % 3) * 40, y0 + MOD_Y + (n / 3) * (CHIP_H + 3),
                     38, CHIP_H, Kind.STAT, n, 0));
         }
+        // The extra modifier: a "+0" reset chip at the right end of the track.
+        cells.add(new Cell(x0 + 30, y0 + SLIDER_Y, 94, CHIP_H, Kind.SLIDER, 0, 0));
+        cells.add(new Cell(x0 + 128, y0 + SLIDER_Y, 26, CHIP_H, Kind.RESET, 0, 0));
         // Worse to better, left to right.
         Dice.Edge[] edges = {Dice.Edge.DISADVANTAGE, Dice.Edge.NONE, Dice.Edge.ADVANTAGE};
         for (int i = 0; i < edges.length; i++) {
@@ -197,16 +216,22 @@ public final class DiceTray {
         g.text(font, "§7" + ClientVocab.get("ui.dice_modifier", "Add a modifier"),
                 x0, y0 + MOD_LABEL_Y, 0xFFFFFFFF);
 
+        g.text(font, "§7" + ClientVocab.get("ui.dice_extra", "Extra"),
+                x0, y0 + SLIDER_Y + 3, 0xFFFFFFFF);
+
         boolean cooling = cooling();
         for (Cell cell : cells(x0, y0)) {
-            boolean hover = cell.contains(mx, my) && dragSides == 0;
+            // Follow the cursor every frame while the handle is held, rather
+            // than waiting on drag events: the render already has the position.
+            if (sliding && cell.kind() == Kind.SLIDER) extra = extraAt(cell, mx);
+            boolean hover = cell.contains(mx, my) && dragSides == 0 && !sliding;
             switch (cell.kind()) {
                 case DIE -> {
                     drawDie(g, font, cell.x(), cell.y(), cell.w(), cell.h(), cell.value(),
                             cooling || cell.value() == dragSides ? 0xFF55555F : cell.colour(),
                             hover && !cooling);
                     if (hover) {
-                        CharacterPanel.tooltip(g, font, describe(cell.value(), stat, modifier(s, stat), edge),
+                        CharacterPanel.tooltip(g, font, describe(cell.value(), stat, modifier(s, stat), extra, edge),
                                 ClientVocab.get("ui.dice_tray_tip",
                                         "Click or drag a die to roll it. Everyone sees the result, as with /roll."));
                     }
@@ -220,6 +245,21 @@ public final class DiceTray {
                         CharacterPanel.tooltip(g, font, label, n < 0
                                 ? ClientVocab.get("ui.dice_none_tip", "Just the die.")
                                 : ClientVocab.get("ui.dice_stat_tip", "Adds your modifier for this stat."));
+                    }
+                }
+                case SLIDER -> {
+                    drawSlider(g, cell, hover || sliding);
+                    if (hover) {
+                        CharacterPanel.tooltip(g, font, ClientVocab.get("ui.dice_extra", "Extra") + " " + signed(extra),
+                                ClientVocab.get("ui.dice_extra_tip",
+                                        "A bonus or penalty from the moment: cover, a blessing, the GM's say. Drag from -10 to +10."));
+                    }
+                }
+                case RESET -> {
+                    chip(g, font, cell, signed(extra), extra != 0, hover);
+                    if (hover) {
+                        CharacterPanel.tooltip(g, font, ClientVocab.get("ui.dice_extra", "Extra") + " " + signed(extra),
+                                ClientVocab.get("ui.dice_extra_reset_tip", "Click to set back to 0."));
                     }
                 }
                 case EDGE -> {
@@ -274,7 +314,7 @@ public final class DiceTray {
         String footer;
         if (spinning) {
             int sides = waiting ? thrownSides : result.sides();
-            heading = waiting ? describe(thrownSides, stat, modifier(s, stat), edge)
+            heading = waiting ? describe(thrownSides, stat, modifier(s, stat), extra, edge)
                     : describe(result);
             // A new face every 60ms. Not random-looking on purpose: it only has
             // to read as tumbling for half a second.
@@ -326,11 +366,12 @@ public final class DiceTray {
     }
 
     /** "d20 + STR (+2), advantage" — what this die will roll, or did. */
-    private static String describe(int sides, int statOrdinal, int mod, Dice.Edge e) {
+    private static String describe(int sides, int statOrdinal, int mod, int bonus, Dice.Edge e) {
         StringBuilder sb = new StringBuilder("d").append(sides);
         if (statOrdinal >= 0) {
             sb.append(" + ").append(STAT_NAMES[statOrdinal]).append(" (").append(signed(mod)).append(')');
         }
+        if (bonus != 0) sb.append(' ').append(signed(bonus));
         if (e == Dice.Edge.ADVANTAGE) sb.append(", ").append(ClientVocab.get("ui.dice_adv", "Adv"));
         if (e == Dice.Edge.DISADVANTAGE) sb.append(", ").append(ClientVocab.get("ui.dice_dis", "Disadv"));
         return sb.toString();
@@ -341,9 +382,41 @@ public final class DiceTray {
         for (Stat st : Stat.values()) {
             if (st.key().equals(r.statKey())) statOrdinal = st.ordinal();
         }
-        String base = describe(r.sides(), statOrdinal, r.statMod(), Dice.Edge.values()[r.edge()]);
+        // The payload carries the stat's share; whatever else the total holds
+        // beyond the dice is the extra, or a typed "+3".
+        int bonus = r.total() - r.statMod();
+        for (int d : r.dice()) bonus -= d;
+        String base = describe(r.sides(), statOrdinal, r.statMod(), bonus, Dice.Edge.values()[r.edge()]);
         // A typed 4d6 is not a d6.
         return r.dice().size() > 1 ? r.dice().size() + base : base;
+    }
+
+    /** The slider's value under {@code mx}, snapped to a whole number. */
+    private static int extraAt(Cell track, double mx) {
+        double t = (mx - (track.x() + 3)) / (track.w() - 6);
+        t = Math.max(0.0, Math.min(1.0, t));
+        return (int) Math.round(t * EXTRA_MAX * 2) - EXTRA_MAX;
+    }
+
+    private static int extraX(Cell track, int value) {
+        return track.x() + 3 + (int) Math.round((value + EXTRA_MAX) * (track.w() - 6) / (EXTRA_MAX * 2.0));
+    }
+
+    /** A groove with ticks every 5, a fill from 0 to the value, and a handle. */
+    private static void drawSlider(GuiGraphicsExtractor g, Cell c, boolean active) {
+        int mid = c.y() + c.h() / 2;
+        g.fill(c.x() + 3, mid - 1, c.x() + c.w() - 3, mid + 1, 0xFF44445A);
+        for (int v = -EXTRA_MAX; v <= EXTRA_MAX; v += 5) {
+            int tx = extraX(c, v);
+            int reach = v == 0 ? 4 : 2;
+            g.fill(tx, mid - reach, tx + 1, mid + reach, v == 0 ? 0xFF8A8AA0 : 0xFF5A5A70);
+        }
+        int zero = extraX(c, 0);
+        int at = extraX(c, extra);
+        if (extra > 0) g.fill(zero, mid - 1, at, mid + 1, 0xFF5AC060);
+        if (extra < 0) g.fill(at, mid - 1, zero + 1, mid + 1, 0xFFE05A4A);
+        g.fill(at - 2, c.y() + 1, at + 3, c.y() + c.h() - 1, active ? 0xFFFFD040 : 0xFFDAA520);
+        g.fill(at - 2, c.y() + c.h() - 2, at + 3, c.y() + c.h() - 1, 0xFF6A5010);
     }
 
     private static int modifier(CharacterSummaryPayload s, int statOrdinal) {
