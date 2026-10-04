@@ -84,6 +84,11 @@ D&D table:
 *Sable, 2026-10-03.* Space Hulk is the inspiration, not the name. **Its own
 mod** (decided the same day), built on the same generator as the dungeon.
 
+**Working name: "Space Husk"** (Sable, 2026-10-04). It ties the derelict to
+Minecraft's own husk, the desert zombie, so the name points at the dried-out
+undead crew rather than at Space Hulk. The creatures are still our own designs,
+but a husk-flavoured crew that died aboard is now an obvious place to start.
+
 **Wanted:** the party starts aboard a ship. Taking the party to the **docking
 bay** flies them to a **randomly generated derelict**. In practice that is a
 teleport to a freshly generated place where the hulk is built on the fly. There

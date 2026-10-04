@@ -471,7 +471,7 @@ up from its current race at first login.
 thought of rather than left in a chat log. Each entry says what the idea is and,
 where known, what would make it hard — so the next person starts from the real
 problem. Currently: a roguelike dungeon (fantasy) and
-derelict-ship missions (sci-fi).
+derelict-ship missions (sci-fi, working name "Space Husk").
 
 ## Known traps
 
