@@ -15,6 +15,13 @@ rather than rediscovering it.
 
 *Sable, 2026-10-03.*
 
+**Started 2026-10-05 as CrawlSpace** (https://github.com/Sablednah/CrawlSpace,
+private for now, `../CrawlSpace`). Its planner and in-world builder work:
+`/crawlspace build` makes a tower, a spiral stair and themed levels of looping
+rooms and corridors. Its CLAUDE.md is the record from here on. CityWorld's
+planner was read for ideas and not reused: CityWorld is a whole-world chunk
+generator, and a dungeon has to drop into any world as a structure.
+
 **Wanted:** a dungeon builder in the spirit of Dungeon Crawl and the Android
 roguelike Pixel Dungeon, played as live Minecraft but run like a HeroQuest or
 D&D table:
