@@ -371,6 +371,9 @@ public final class Lang {
         // So changing the SHAPE of a live message means a new key. Changing its
         // wording in place is fine; adding a placeholder to it is not.
         def("msg.roll.result", "&7{player} rolls {notation}{stat}: &f{roll}&7{detail}{edge}{flair}");
+        def("msg.crawl.perceive", "&7Perception (WIS): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &aYou notice something.");
+        def("msg.crawl.disarm.ok", "&7Disarm (DEX): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &aDisarmed.");
+        def("msg.crawl.disarm.fail", "&7Disarm (DEX): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &cIt goes off!");
         def("msg.roll.detail", " &8({dice}{bonus})");
         def("msg.roll.advantage", " &a[adv, dropped {dropped}]");
         def("msg.roll.disadvantage", " &c[dis, dropped {dropped}]");
