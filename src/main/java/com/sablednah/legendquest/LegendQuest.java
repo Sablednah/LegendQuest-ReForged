@@ -70,6 +70,17 @@ public class LegendQuest {
             optionalIntegration("combat", com.sablednah.legendquest.neoforge.CombatSupport::register);
             optionalIntegration("vanish", com.sablednah.legendquest.neoforge.VanishSupport::register);
         }
+
+        // CrawlSpace's traps and secret doors, found and disarmed with our dice. By name, because
+        // CrawlSpaceSupport is left out of builds made without CrawlSpace's jar beside this repo.
+        if (net.neoforged.fml.ModList.get().isLoaded("crawlspace")) {
+            try {
+                Class.forName("com.sablednah.legendquest.neoforge.CrawlSpaceSupport").getMethod("register").invoke(null);
+            } catch (ReflectiveOperationException | LinkageError e) {
+                LOGGER.warn("CrawlSpace is installed but this build cannot use it -- perception checks are off. ({})",
+                        e.toString());
+            }
+        }
     }
 
     /**
