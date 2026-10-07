@@ -3,6 +3,17 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 2.9.0 — unreleased
+
+For every Minecraft version: 1.21.11, 26.1.2, 26.2 and 26.3. The requirements
+are unchanged. CrawlSpace is a new **optional** companion.
+
+- **CrawlSpace dungeons use your character.** With CrawlSpace installed,
+  spotting a trap or a secret door is a Wisdom check (harder deeper down), and
+  disarming a trap is a Dexterity check. Dwarves get +4 to disarm. You see the
+  roll when you notice something or try a disarm. A failed notice shows
+  nothing, so it never gives away that something was there.
+
 ## 2.8.1 — 2026-10-04
 
 For every Minecraft version: 1.21.11, 26.1.2, 26.2 and 26.3. The requirements
