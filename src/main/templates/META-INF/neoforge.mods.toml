@@ -70,6 +70,15 @@ iconBlur=true
     ordering="AFTER"
     side="BOTH"
 
+# CrawlSpace is OPTIONAL: with it, noticing its traps and secret doors and disarming its traps
+# are LegendQuest skill checks. Its version is a plain number, so a plain range is right.
+[[dependencies.${mod_id}]]
+    modId="crawlspace"
+    type="optional"
+    versionRange="[0.1.0,)"
+    ordering="NONE"
+    side="BOTH"
+
 [[dependencies.${mod_id}]]
     modId="minecraft"
     type="required"

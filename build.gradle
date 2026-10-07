@@ -148,6 +148,12 @@ dependencies {
         [found.first()]
     })
 
+    // CrawlSpace's perception API: its traps and secret doors found and disarmed with our dice.
+    // OPTIONAL, compileOnly, from the sibling repo's build, version-matched like Standards. When the
+    // jar is not there, CrawlSpaceSupport (the one class that imports it) is left out of the build
+    // below, and LegendQuest, which loads that class by name, simply runs without it.
+    compileOnly files(provider { crawlSpaceJar() == null ? [] : [crawlSpaceJar()] })
+
     // Simple Voice Chat's plugin API: party voice channels. compileOnly and NOT
     // jarJar'd, the same reasoning as Standards above -- it is a SOFT
     // dependency and LegendQuest must run perfectly well without the mod.
@@ -248,4 +254,17 @@ idea {
         downloadSources = true
         downloadJavadoc = true
     }
+}
+
+// The CrawlSpace jar for this Minecraft version, or null. See the dependency above.
+def crawlSpaceJar() {
+    def pattern = ~/crawlspace-.*\+mc${minecraft_version}\.jar/
+    def found = (file('../CrawlSpace/build/libs').listFiles() ?: [])
+            .findAll { it.name ==~ pattern }
+            .sort { -it.lastModified() }
+    return found.isEmpty() ? null : found.first()
+}
+if (crawlSpaceJar() == null) {
+    logger.lifecycle("CrawlSpace: no jar for Minecraft ${minecraft_version}; building without its perception checks.")
+    sourceSets.main.java.exclude '**/CrawlSpaceSupport.java'
 }
