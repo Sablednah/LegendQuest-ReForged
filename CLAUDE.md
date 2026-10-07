@@ -423,6 +423,36 @@ that client. So a null connection is not the test for "can hear"; that is
 but a future feature that reports who can hear must not read null-ness as the
 answer.
 
+## CrawlSpace — traps and secret doors on our dice (OPTIONAL, unreleased)
+
+`CrawlSpaceSupport` is the only class importing `com.sablednah.crawlspace`, and it
+registers a `Perception` provider:
+- Noticing is a WIS check against 10 (trap) or 12 (secret door), plus the
+  dungeon level.
+- Disarming is a DEX check against 10 plus the level, and dwarves get +4.
+- A noticed thing shows its roll. A failed notice shows **nothing**, because a
+  visible failed roll would announce that something was there.
+- A disarm the player chose to attempt always shows its roll.
+
+The jar is `compileOnly` from `../CrawlSpace/build/libs`, matched on
+`+mc<minecraft_version>`. **When it is absent, `build.gradle` excludes
+`CrawlSpaceSupport.java` from the build**, and `LegendQuest` loads the class
+by name behind `isLoaded("crawlspace")`, so a checkout without CrawlSpace still
+builds. Both shapes were built on 2026-10-07; without the jar, no class is
+emitted.
+
+**Seen on the CrawlSpace Vivo rig (1.21.11), 2026-10-07:** LegendQuest
+registered, and a dwarf got "Perception (WIS): d20 20 +2 = 22 against 10. You
+notice something." Disarming worked end to end too: "Disarm (DEX): d20 2 +5 =
+7 against 10. It goes off!" (DEX +1, plus 4 for a dwarf), and the trap fired.
+Aiming that click from a script took most of the night, for two reasons.
+Sneaking lowers the eye to 1.27, so the pitch for a tile n blocks out is
+atan(1.27/n), not atan(1.62/n). And the noticed trap was not the one `goto`
+faced, so look for the red particles.
+
+`/crawlspace perception <mode>` replaces whatever provider is registered,
+including ours, until the next restart.
+
 ## Advancements are granted by criterion name, and there is no trigger type
 
 `neoforge/Achievements`, **lifted from ZombieMod's `neoforge/Feats`** at Sable's
