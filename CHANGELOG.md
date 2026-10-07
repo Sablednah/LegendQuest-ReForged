@@ -13,6 +13,9 @@ are unchanged. CrawlSpace is a new **optional** companion.
   disarming a trap is a Dexterity check. Dwarves get +4 to disarm. You see the
   roll when you notice something or try a disarm. A failed notice shows
   nothing, so it never gives away that something was there.
+- **Mana now drops with its maximum.** Changing to a class with less mana
+  used to leave the old figure showing, such as 33/12, until you spent it. It
+  is now held to the new maximum straight away.
 
 ## 2.8.1 — 2026-10-04
 

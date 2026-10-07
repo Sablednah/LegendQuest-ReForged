@@ -399,6 +399,15 @@ public final class CharacterService {
             }
         }
 
+        // Mana is held down with the maximum the same way, here rather than in
+        // the once-a-second tick, so the client never sees 12/7 after a class
+        // change and then watches it correct itself.
+        PlayerCharacter pc = data(player);
+        double maxMana = maxMana(player);
+        if (pc.mana() > maxMana) {
+            pc.setMana(maxMana);
+        }
+
         AttributeInstance speed = player.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speed != null) {
             double raceSpeed = race(player).map(Race::baseSpeed).orElse(NORMAL_SPEED);
