@@ -3,16 +3,20 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
-## 2.9.0 — unreleased
+## 2.9.0 — 2026-10-07
 
 For every Minecraft version: 1.21.11, 26.1.2, 26.2 and 26.3. The requirements
-are unchanged. CrawlSpace is a new **optional** companion.
+are unchanged: Standards 1.8.0 or newer, and on 26.3, NeoForge 26.3.0.33-beta
+to 26.3.0.36-beta. CrawlSpace, a roguelike dungeon mod, is a new optional
+companion.
 
-- **CrawlSpace dungeons use your character.** With CrawlSpace installed,
-  spotting a trap or a secret door is a Wisdom check (harder deeper down), and
-  disarming a trap is a Dexterity check. Dwarves get +4 to disarm. You see the
-  roll when you notice something or try a disarm. A failed notice shows
-  nothing, so it never gives away that something was there.
+- **CrawlSpace dungeons use your character.** With CrawlSpace installed, a
+  trap's pressure plate or tripwire stays hidden until a Wisdom check spots
+  it, and the check is harder deeper down. Spotting it makes it appear. Breaking
+  it, or sneaking and using it, is a Dexterity check to disarm it, and failing
+  sets it off. Dwarves get +4 to disarm. Secret doors are found with Wisdom
+  too. You see the roll when you spot something or try a disarm. A failed
+  spot shows nothing, so it never gives away that something was there.
 - **Mana now drops with its maximum.** Changing to a class with less mana
   used to leave the old figure showing, such as 33/12, until you spent it. It
   is now held to the new maximum straight away.
