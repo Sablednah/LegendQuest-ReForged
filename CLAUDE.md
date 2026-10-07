@@ -443,9 +443,12 @@ emitted.
 
 **Seen on the CrawlSpace Vivo rig (1.21.11), 2026-10-07:** LegendQuest
 registered, and a dwarf got "Perception (WIS): d20 20 +2 = 22 against 10. You
-notice something." **The disarm roll has not been exercised in game.**
-Aiming a sneak-use at a trap tile from a script failed for reasons this
-session did not pin down.
+notice something." Disarming worked end to end too: "Disarm (DEX): d20 2 +5 =
+7 against 10. It goes off!" (DEX +1, plus 4 for a dwarf), and the trap fired.
+Aiming that click from a script took most of the night, for two reasons.
+Sneaking lowers the eye to 1.27, so the pitch for a tile n blocks out is
+atan(1.27/n), not atan(1.62/n). And the noticed trap was not the one `goto`
+faced, so look for the red particles.
 
 `/crawlspace perception <mode>` replaces whatever provider is registered,
 including ours, until the next restart.
