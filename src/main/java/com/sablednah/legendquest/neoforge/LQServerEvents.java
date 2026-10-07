@@ -275,6 +275,8 @@ public final class LQServerEvents {
                 double max = CharacterService.maxMana(player);
                 if (pc.mana() < max) {
                     pc.setMana(Math.min(max, pc.mana() + CharacterService.manaPerSecond(player)));
+                } else if (pc.mana() > max) {
+                    pc.setMana(max); // anything that lowered the maximum without a refresh
                 }
                 // Keep the remembered health current, not just written on the
                 // way out. PlayerLoggedOutEvent covers a quit, a kick, a
