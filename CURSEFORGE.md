@@ -135,6 +135,12 @@ is the part worth copying.
   locked so strangers cannot wander into a private conversation, and `/party
   voice` is the door back in. Without the mod, nothing changes and nothing is
   said about it.
+- **CrawlSpace dungeons use your character**, where CrawlSpace is installed.
+  A trap's pressure plate or tripwire stays hidden until a Wisdom check spots
+  it, harder the deeper you are, and disarming one is a Dexterity check, with
+  dwarves at an advantage. You see your roll when you spot something and
+  nothing when you don't, so a failed roll never gives away that something was
+  there. Without CrawlSpace, nothing changes.
 - **Its own advancements tab**, 19 of them — the character line, karma both
   ways, and parties, with hidden and challenge entries for mastering every
   class, playing every race, and a party who are all online and all at the cap.
