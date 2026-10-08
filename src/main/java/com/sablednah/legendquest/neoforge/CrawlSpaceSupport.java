@@ -55,6 +55,22 @@ public final class CrawlSpaceSupport {
             show(player, ok ? "msg.crawl.disarm.ok" : "msg.crawl.disarm.fail", roll, mod, dc);
             return ok;
         }
+
+        /**
+         * Stepping off a puzzle room's maze: an Athletics (STR) check to catch
+         * yourself on the last block you stood on. The roll always shows: the
+         * player knows they slipped. No {@code @Override}, deliberately: the
+         * method arrived in CrawlSpace 0.2.0, and without the annotation this
+         * still compiles against 0.1.0, where it is simply never called.
+         */
+        public boolean recovers(ServerPlayer player, int depth) {
+            int mod = CharacterService.statModifier(player, Stat.STR);
+            int dc = 10 + depth;
+            int roll = player.getRandom().nextInt(20) + 1;
+            boolean ok = roll == 20 || (roll != 1 && roll + mod >= dc);
+            show(player, ok ? "msg.crawl.athletics.ok" : "msg.crawl.athletics.fail", roll, mod, dc);
+            return ok;
+        }
     }
 
     private static boolean isDwarf(ServerPlayer player) {
