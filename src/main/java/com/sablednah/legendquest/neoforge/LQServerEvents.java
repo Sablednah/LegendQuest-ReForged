@@ -86,6 +86,7 @@ public final class LQServerEvents {
                     player.getName().getString(), String.join(", ", dropped));
         }
         sendVocab(player);
+        Nameplate.sendTo(player);
         CharacterService.refresh(player);
         restoreHealth(player);
         // Re-offer everything this character has already earned, so nobody is
