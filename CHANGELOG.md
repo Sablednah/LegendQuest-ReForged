@@ -10,6 +10,10 @@ This project follows [Semantic Versioning](https://semver.org/).
   (Strength) check, harder deeper down. Pass, and you catch yourself on the
   block you last stood on rather than being thrown back to the centre. The
   roll always shows.
+- **No nameplate shadows under shader packs.** With Iris and a shader pack,
+  the nameplate over each player cast a sun shadow like any entity. Modded
+  clients now leave the plate out of the shadow pass; it still shows as
+  normal. Iris stays optional.
 
 ## 2.9.0 — 2026-10-07
 
