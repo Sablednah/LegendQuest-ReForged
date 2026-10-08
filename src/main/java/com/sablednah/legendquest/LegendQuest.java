@@ -32,7 +32,9 @@ public class LegendQuest {
     public LegendQuest(IEventBus modEventBus, ModContainer modContainer) {
         LOGGER.info("LegendQuest ReForged initialising");
 
-        modContainer.registerConfig(ModConfig.Type.COMMON, LQConfig.SPEC);
+        // COMMON became LOCAL in FML 12.0.8 (NeoForge 26.3.0.37-beta). The file name is given, because the default
+        // follows the type, and "legendquest-local.toml" would leave every existing server on default settings.
+        modContainer.registerConfig(ModConfig.Type.LOCAL, LQConfig.SPEC, "legendquest-common.toml");
 
         // Mod bus: registries, attachments, and the YAML front door.
         modEventBus.addListener(LQRegistries::register);
