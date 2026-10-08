@@ -26,7 +26,7 @@ public class LegendQuestClient {
         modEventBus.addListener(LQKeyMappings::register);
         // Nameplates leave a shader pack's shadow pass; every other text display draws as vanilla.
         modEventBus.addListener((net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers e) ->
-                e.registerEntityRenderer(net.minecraft.world.entity.EntityType.TEXT_DISPLAY, PlateRenderer::new));
+                e.registerEntityRenderer(net.minecraft.world.entity.EntityTypes.TEXT_DISPLAY, PlateRenderer::new));
         NeoForge.EVENT_BUS.register(CharacterPanel.class);
         // The character sheet is a Standards inventory panel: the host places
         // it, frames it in our colours, and stands it down when another mod's
