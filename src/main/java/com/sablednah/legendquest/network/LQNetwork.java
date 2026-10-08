@@ -27,6 +27,9 @@ public final class LQNetwork {
         registrar.playToClient(NoticePayload.TYPE, NoticePayload.CODEC,
                 (payload, context) -> context.enqueueWork(() ->
                         com.sablednah.legendquest.client.ClientNotices.accept(payload)));
+        registrar.playToClient(PlatesPayload.TYPE, PlatesPayload.CODEC,
+                (payload, context) -> context.enqueueWork(() ->
+                        com.sablednah.legendquest.client.ClientPlates.accept(payload)));
         registrar.playToClient(RollResultPayload.TYPE, RollResultPayload.CODEC,
                 (payload, context) -> context.enqueueWork(() ->
                         com.sablednah.legendquest.client.DiceTray.accept(payload)));

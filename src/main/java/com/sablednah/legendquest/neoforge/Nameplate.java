@@ -141,6 +141,7 @@ public final class Nameplate {
             // reap our own the instant we made it.
             PLATES.put(player.getUUID(), display);
             level.addFreshEntity(display);
+            announce(level.getServer());
             LAST.put(player.getUUID(), text);
             return;
         }
@@ -218,11 +219,37 @@ public final class Nameplate {
         LAST.clear();
     }
 
+    /**
+     * Tells every modded client which entities are plates, so a shader pack's
+     * shadow pass can leave them out (client.PlateRenderer). The whole set,
+     * each time it changes: plates come and go a few times a minute at most.
+     */
+    static void announce(net.minecraft.server.MinecraftServer server) {
+        if (server == null) return;
+        com.sablednah.legendquest.network.PlatesPayload payload = payload();
+        for (ServerPlayer p : server.getPlayerList().getPlayers()) {
+            Net.sendIfAble(p, payload);
+        }
+    }
+
+    /** The set so far, for a player just logging in. */
+    public static void sendTo(ServerPlayer player) {
+        Net.sendIfAble(player, payload());
+    }
+
+    private static com.sablednah.legendquest.network.PlatesPayload payload() {
+        return new com.sablednah.legendquest.network.PlatesPayload(
+                PLATES.values().stream().mapToInt(Entity::getId).toArray());
+    }
+
     /** Removes the plate. Called on logout, and when it is switched off. */
     public static void clear(ServerPlayer player) {
         LAST.remove(player.getUUID());
         Display.TextDisplay tracked = PLATES.remove(player.getUUID());
-        if (tracked != null) tracked.discard();
+        if (tracked != null) {
+            tracked.discard();
+            if (player.level().getServer() != null) announce(player.level().getServer());
+        }
         // Belt and braces: any plate of ours nearby that we have lost track of.
         // A crash between spawning one and shutting down would otherwise leave
         // it floating in the world for good, and they are invisible to us once
