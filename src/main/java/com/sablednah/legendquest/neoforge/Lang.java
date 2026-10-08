@@ -374,6 +374,8 @@ public final class Lang {
         def("msg.crawl.perceive", "&7Perception (WIS): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &aYou notice something.");
         def("msg.crawl.disarm.ok", "&7Disarm (DEX): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &aDisarmed.");
         def("msg.crawl.disarm.fail", "&7Disarm (DEX): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &cIt goes off!");
+        def("msg.crawl.athletics.ok", "&7Athletics (STR): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &aYou catch yourself.");
+        def("msg.crawl.athletics.fail", "&7Athletics (STR): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &cYou fall.");
         def("msg.roll.detail", " &8({dice}{bonus})");
         def("msg.roll.advantage", " &a[adv, dropped {dropped}]");
         def("msg.roll.disadvantage", " &c[dis, dropped {dropped}]");
