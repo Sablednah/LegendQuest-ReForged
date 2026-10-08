@@ -3,13 +3,18 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
-## 2.9.1 — unreleased
+## 2.9.1 — 2026-10-08
 
-- **CrawlSpace puzzle rooms use your character.** With CrawlSpace 0.2.0 or
-  newer, stepping off a puzzle room's maze into the void is an Athletics
-  (Strength) check, harder deeper down. Pass, and you catch yourself on the
-  block you last stood on rather than being thrown back to the centre. The
-  roll always shows.
+For every Minecraft version: 1.21.11, 26.1.2, 26.2 and 26.3. **26.3 now needs
+NeoForge 26.3.0.58-beta or newer and Standards 1.10.2 or newer**; it no longer
+runs on 26.3.0.33-beta to 26.3.0.36-beta, where 2.9.0 is still the one to use.
+Your config file carries over unchanged. The other versions are unchanged:
+Standards 1.8.0 or newer.
+
+- **CrawlSpace puzzle rooms and pit traps use your character.** With CrawlSpace
+  0.2.0 or newer, stepping off a puzzle room's path, or standing on a pit as
+  it gives way, is an Athletics (Strength) check, harder deeper down. Pass,
+  and you are back on the block you last stood on. The roll always shows.
 - **No nameplate shadows under shader packs.** With Iris and a shader pack,
   the nameplate over each player cast a sun shadow like any entity. Modded
   clients now leave the plate out of the shadow pass; it still shows as

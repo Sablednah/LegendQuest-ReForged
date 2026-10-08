@@ -135,6 +135,9 @@ is the part worth copying.
   locked so strangers cannot wander into a private conversation, and `/party
   voice` is the door back in. Without the mod, nothing changes and nothing is
   said about it.
+- **Nameplates cast no shadow under shader packs.** With Iris and a pack such
+  as Complementary, the plate over each player stays visible but stays out of
+  the shadow pass.
 - **CrawlSpace dungeons use your character**, where CrawlSpace is installed.
   A trap's pressure plate or tripwire stays hidden until a Wisdom check spots
   it, harder the deeper you are, and disarming one is a Dexterity check, with
@@ -201,12 +204,12 @@ are free.
 | `legendquest-<version>+mc1.21.11.jar` | 1.21.11 | any 21.11 build |
 | `legendquest-<version>+mc26.1.2.jar` | 26.1.2 | any 26.1 build |
 | `legendquest-<version>+mc26.2.jar` | 26.2 | any 26.2 build |
-| `legendquest-<version>+mc26.3.jar` | 26.3 | 26.3.0.33-beta to 26.3.0.36-beta |
+| `legendquest-<version>+mc26.3.jar` | 26.3 | 26.3.0.58-beta or newer |
 
-Any build within the series will do, except on 26.3, where NeoForge is still in
-beta and has changed its API twice along the way. The 26.3 download runs on
-26.3.0.33-beta to 26.3.0.36-beta; a newer build is refused at start-up with a
-message saying so, and support follows once NeoForge 26.3 is stable.
+Any build within the series will do. On 26.3, where NeoForge is still in beta
+and has changed its API along the way, LegendQuest 2.9.1 and later need
+26.3.0.58-beta or newer, with Standards 1.10.2 or newer. Your settings carry
+over unchanged. For 26.3.0.33-beta to 26.3.0.36-beta, stay on LegendQuest 2.9.0.
 Updating NeoForge otherwise never means waiting for a LegendQuest release that
 changes nothing else.
 

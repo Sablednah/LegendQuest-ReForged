@@ -25,7 +25,7 @@ mods (CityWorld and ZombieMod reached it independently).
 | `main` | 1.21.11 | 21.11.42 | 21 | 2.0.141 |
 | `mc26.1` | 26.1.2 | 26.1.2.95 | **25** | 2.0.141 |
 | `mc26.2` | 26.2 | 26.2.0.59 | **25** | 2.0.144 |
-| `mc26.3` | 26.3 | 26.3.0.33-beta | **25** | 2.0.147 |
+| `mc26.3` | 26.3 | 26.3.0.58-beta (needs .58+; Standards 1.10.2+) | **25** | 2.0.147 |
 
 - **Docs, workflows and scripts live on `main` only.** Version branches carry
   code, so a write-up never has to be merged three ways. `docs/VERSIONS.md` is
