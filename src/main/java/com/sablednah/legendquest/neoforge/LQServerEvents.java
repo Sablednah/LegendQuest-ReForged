@@ -260,6 +260,7 @@ public final class LQServerEvents {
     // --- ticking: mana regen + skill engine ---
 
     private static int tickCounter = 0;
+    private static int sweepCounter = 0;
 
     @SubscribeEvent
     static void onServerTick(ServerTickEvent.Post event) {
@@ -294,6 +295,10 @@ public final class LQServerEvents {
                 penaliseDisallowedArmour(player);
                 SkillEngine.warnFadingDurations(player);
                 CharacterSync.send(player); // mana + cooldowns tick visibly on modded clients
+            }
+            if (++sweepCounter >= 5) { // every five seconds
+                sweepCounter = 0;
+                Nameplate.sweep(event.getServer());
             }
         }
     }
