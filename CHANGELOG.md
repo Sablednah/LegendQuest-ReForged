@@ -3,6 +3,13 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+- **A stuck nameplate cleans itself up.** A plate left hanging in the air,
+  seen after teleporting, an untidy quit, or creative or spectator, is now
+  removed within five seconds of anyone coming near it. Your own plate is
+  untouched.
+
 ## 2.9.1 — 2026-10-08
 
 For every Minecraft version: 1.21.11, 26.1.2, 26.2 and 26.3. **26.3 now needs
