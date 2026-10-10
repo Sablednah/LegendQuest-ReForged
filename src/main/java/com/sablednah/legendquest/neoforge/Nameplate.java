@@ -210,6 +210,40 @@ public final class Nameplate {
         display.discard();
     }
 
+    /**
+     * How far round each player {@link #sweep} looks: well past the eight
+     * blocks {@link #clear} sweeps, and past anything a player would read.
+     */
+    private static final double SWEEP_RADIUS = 48.0D;
+
+    /**
+     * Every few seconds, removes any plate of ours near a player that is not
+     * one we are tracking.
+     *
+     * <p>Sable saw a plate left hanging after a teleport, an untidy quit,
+     * creative or spectator, and still there when he logged back in
+     * (2026-10-10). On a test server none of those left one behind (a clean
+     * logout, a killed client, creative, spectator, and a server killed after
+     * a save, whose orphan {@link #reapIfOrphan} took as its chunk loaded),
+     * so whatever leaves one here is not something these paths model.</p>
+     *
+     * <p>{@link #reapIfOrphan} only sees a plate the moment it joins a level,
+     * so one that is already loaded and lost from {@link #PLATES} hangs there
+     * until its chunk unloads. This catches it however it came to be, at the
+     * cost of one small entity query per player every five seconds.</p>
+     */
+    public static void sweep(net.minecraft.server.MinecraftServer server) {
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            if (!(player.level() instanceof ServerLevel level)) continue;
+            for (Display.TextDisplay display : level.getEntities(
+                    EntityTypeTest.forClass(Display.TextDisplay.class),
+                    player.getBoundingBox().inflate(SWEEP_RADIUS),
+                    e -> e.entityTags().contains(TAG) && !PLATES.containsValue(e))) {
+                display.discard();
+            }
+        }
+    }
+
     /** Drops every plate we are holding. Called as the server stops. */
     public static void clearAll() {
         for (Display.TextDisplay display : PLATES.values()) {
