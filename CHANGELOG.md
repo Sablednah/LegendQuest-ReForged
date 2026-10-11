@@ -5,6 +5,14 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
 
+- **More of CrawlSpace on your dice** (CrawlSpace 0.3.0 or newer):
+  - Investigation (INT) spots a mimic before it bites.
+  - Sleight of Hand (DEX) draws a trapped chest's needle. Dwarves get +4.
+  - Perception (WIS) reads a trap's tell.
+  - Insight (WIS) reads a shrine's omen.
+  - Stealth (DEX) slips past a sentry.
+
+  Rolls for hidden things show only when they succeed.
 - **A stuck nameplate cleans itself up.** A plate left hanging in the air,
   seen after teleporting, an untidy quit, or creative or spectator, is now
   removed within five seconds of anyone coming near it. Your own plate is

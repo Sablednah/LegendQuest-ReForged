@@ -450,6 +450,22 @@ Sneaking lowers the eye to 1.27, so the pitch for a tile n blocks out is
 atan(1.27/n), not atan(1.62/n). And the noticed trap was not the one `goto`
 faced, so look for the red particles.
 
+**Five more checks, for CrawlSpace 0.3.0** (2026-10-11). None has an
+`@Override`, so the class still compiles against an older CrawlSpace:
+
+| Hook | Check | DC | Roll shown |
+|---|---|---|---|
+| `spotsMimic` | Investigation (INT) | 12 + level | on success |
+| `disarmsChest` | Sleight of Hand (DEX), dwarves +4 | 12 + level | always |
+| `readsTell` | Perception (WIS) | 10 + level | on success |
+| `readsOmen` | Insight (WIS) | 12 + level | on success |
+| `evades` | Stealth (DEX) | 12 + level | always |
+
+**Seen on the CrawlSpace rig** (showcase, with this jar and Standards in
+`run/mods`): Stealth failed twice ("Seen!"), Sleight of Hand passed and
+failed once each, and tells were read three times. INT and omen successes
+did not come up in that run (failures are silent).
+
 `/crawlspace perception <mode>` replaces whatever provider is registered,
 including ours, until the next restart.
 

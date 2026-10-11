@@ -376,6 +376,13 @@ public final class Lang {
         def("msg.crawl.disarm.fail", "&7Disarm (DEX): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &cIt goes off!");
         def("msg.crawl.athletics.ok", "&7Athletics (STR): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &aYou catch yourself.");
         def("msg.crawl.athletics.fail", "&7Athletics (STR): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &cYou fall.");
+        def("msg.crawl.mimic", "&7Investigation (INT): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &aSomething is wrong with this chest.");
+        def("msg.crawl.needle.ok", "&7Sleight of Hand (DEX): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &aYou feel the needle in time.");
+        def("msg.crawl.needle.fail", "&7Sleight of Hand (DEX): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &cToo late.");
+        def("msg.crawl.tell", "&7Perception (WIS): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &aYou read the signs.");
+        def("msg.crawl.omen", "&7Insight (WIS): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &aYou read the omen.");
+        def("msg.crawl.stealth.ok", "&7Stealth (DEX): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &aUnseen.");
+        def("msg.crawl.stealth.fail", "&7Stealth (DEX): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &cSeen!");
         def("msg.roll.detail", " &8({dice}{bonus})");
         def("msg.roll.advantage", " &a[adv, dropped {dropped}]");
         def("msg.roll.disadvantage", " &c[dis, dropped {dropped}]");
