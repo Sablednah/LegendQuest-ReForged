@@ -71,6 +71,45 @@ public final class CrawlSpaceSupport {
             show(player, ok ? "msg.crawl.athletics.ok" : "msg.crawl.athletics.fail", roll, mod, dc);
             return ok;
         }
+
+        // The five below arrived in CrawlSpace 0.3.0. No @Override, as with recovers: against an older
+        // CrawlSpace this still compiles, and the methods are simply never called.
+
+        /** A mimic, before it bites: Investigation (INT). Only a success shows, like noticing a trap. */
+        public boolean spotsMimic(ServerPlayer player, int depth) {
+            return check(player, Stat.INT, 0, 12 + depth, "msg.crawl.mimic", null);
+        }
+
+        /** A trapped chest's needle, as it opens: Sleight of Hand (DEX), and dwarves know a lock. */
+        public boolean disarmsChest(ServerPlayer player, int depth) {
+            return check(player, Stat.DEX, isDwarf(player) ? DWARF_DISARM : 0, 12 + depth, "msg.crawl.needle.ok", "msg.crawl.needle.fail");
+        }
+
+        /** A trap's tell, as you come near: Perception (WIS). Only a success shows. */
+        public boolean readsTell(ServerPlayer player, int depth) {
+            return check(player, Stat.WIS, 0, 10 + depth, "msg.crawl.tell", null);
+        }
+
+        /** A shrine's omen, as you come near: Insight (WIS). Only a success shows. */
+        public boolean readsOmen(ServerPlayer player, int depth) {
+            return check(player, Stat.WIS, 0, 12 + depth, "msg.crawl.omen", null);
+        }
+
+        /** A sentry's eye: Stealth (DEX). It shows either way: seen or not, the player learns it now. */
+        public boolean evades(ServerPlayer player, int depth) {
+            return check(player, Stat.DEX, 0, 12 + depth, "msg.crawl.stealth.ok", "msg.crawl.stealth.fail");
+        }
+    }
+
+    /** A d20 check: a natural 20 always passes and a 1 always fails. Shows {@code fail} only when it is given. */
+    private static boolean check(ServerPlayer player, Stat stat, int bonus, int dc, String pass, String fail) {
+        int mod = CharacterService.statModifier(player, stat) + bonus;
+        int roll = player.getRandom().nextInt(20) + 1;
+        boolean ok = roll == 20 || (roll != 1 && roll + mod >= dc);
+        if (ok || fail != null) {
+            show(player, ok ? pass : fail, roll, mod, dc);
+        }
+        return ok;
     }
 
     private static boolean isDwarf(ServerPlayer player) {
