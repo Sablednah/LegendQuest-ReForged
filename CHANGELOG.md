@@ -5,6 +5,7 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
 
+- **Levels earned before choosing a class are no longer wasted.** Leaving the starting class (Citizen, or a pack's own) for your first real class carries its experience over, and the game says so. Turn it off with `carryStartingClassXp` in the server config.
 - **More of CrawlSpace on your dice** (CrawlSpace 0.3.0 or newer):
   - Investigation (INT) spots a mimic before it bites.
   - Sleight of Hand (DEX) draws a trapped chest's needle. Dwarves get +4.
