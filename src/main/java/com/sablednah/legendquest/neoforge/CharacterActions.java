@@ -97,10 +97,22 @@ public final class CharacterActions {
                         LQConfig.XP_LEVEL_BASE.get(), LQConfig.MAX_LEVEL.get()))
                 .orElse(0);
 
+        // Levels earned before choosing are not wasted (Sable, 2026-10-12): leaving
+        // the starting class for a real one moves its XP across. Moved, not copied,
+        // so it counts once, and so going back to the starting class cannot farm it.
+        Optional<Identifier> carriedFrom = asSub || target.isDefault() || !LQConfig.CARRY_STARTING_CLASS_XP.get()
+                ? Optional.empty()
+                : leaving.filter(id -> CharacterService.charClass(player, Optional.of(id)).map(CharClass::isDefault).orElse(false));
+        long carried = carriedFrom.map(pc::xpFor).orElse(0L);
+
         if (asSub) {
             pc.setSubClass(Optional.of(classId));
         } else {
             pc.setMainClass(classId);
+        }
+        if (carried > 0) {
+            pc.setXp(classId, pc.xpFor(classId) + carried);
+            pc.setXp(carriedFrom.get(), 0L);
         }
         pruneUnknownSkills(player);
         CharacterService.refresh(player);
@@ -114,10 +126,16 @@ public final class CharacterActions {
         // exactly like having lost the character. XP is banked PER CLASS and
         // nothing ever clears a bank, so the old life is intact and one command
         // away. Say so at the moment the bar drops, not in the documentation.
-        leaving.ifPresent(id -> Feedback.notify(player, Lang.fmt("msg.choose.class_banked",
-                "class", CharacterService.charClass(player, Optional.of(id)).map(CharClass::name)
-                        .orElse(id.getPath()),
-                "level", leavingLevel, "id", id.toString())));
+        String leavingName = leaving.flatMap(id -> CharacterService.charClass(player, Optional.of(id)))
+                .map(CharClass::name).orElse(leaving.map(Identifier::getPath).orElse(""));
+        if (carried > 0) {
+            Feedback.notify(player, Lang.fmt("msg.choose.class_carried", "old", leavingName,
+                    "class", target.name(), "level", CharacterService.level(player)));
+            Achievements.levelled(player, CharacterService.level(player));
+        } else {
+            leaving.ifPresent(id -> Feedback.notify(player, Lang.fmt("msg.choose.class_banked",
+                    "class", leavingName, "level", leavingLevel, "id", id.toString())));
+        }
         return true;
     }
 
