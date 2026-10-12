@@ -26,6 +26,7 @@ public final class LQConfig {
     public static final ModConfigSpec.IntValue XP_LEVEL_BASE;
     public static final ModConfigSpec.IntValue MAX_LEVEL;
     public static final ModConfigSpec.BooleanValue LEVEL_UP_FANFARE;
+    public static final ModConfigSpec.BooleanValue CARRY_STARTING_CLASS_XP;
     public static final ModConfigSpec.IntValue MINE_XP_ORE;
     public static final ModConfigSpec.IntValue MINE_XP_BLOCK;
     public static final ModConfigSpec.IntValue SMELT_XP_ITEM;
@@ -87,6 +88,11 @@ public final class LQConfig {
                 .comment("Announce a level with a title card and the toast chime, not just a",
                         "chat line. Off leaves the chat line alone.")
                 .define("levelUpFanfare", true);
+        CARRY_STARTING_CLASS_XP = BUILDER
+                .comment("Leaving the starting (default) class for a real main class carries its",
+                        "XP over, so levels earned before choosing are not wasted. The starting",
+                        "class's bank is emptied, so the XP counts once. Off keeps each bank apart.")
+                .define("carryStartingClassXp", true);
         MINE_XP_ORE = BUILDER
                 .comment("Class XP for breaking an ore (anything tagged #c:ores, so modded",
                         "ores count). A race or class's xp_adjust_mine applies on top. 0 disables.")
