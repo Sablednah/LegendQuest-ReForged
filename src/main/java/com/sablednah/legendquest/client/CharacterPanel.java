@@ -15,6 +15,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -74,6 +75,8 @@ public final class CharacterPanel {
     private static Button statsButton;
     private static Button skillsButton;
     private static ImageButton recipeButton;
+    /** Curios' own recipe-book button, while its screen is up: ours sit beside it. */
+    private static ImageButton curiosRecipe;
 
     /** A drag in progress on the skills tab. {@code fromSlot < 0} = from the list. */
     private record Drag(String skillId, int fromSlot, double pressX, double pressY) {}
@@ -123,6 +126,10 @@ public final class CharacterPanel {
         skillsButton = null;
         recipeButton = null;
         drag = null;
+        if (event.getScreen() instanceof AbstractContainerScreen<?> other && isCurios(other)) {
+            curiosButtons(event, other);
+            return;
+        }
         if (!(event.getScreen() instanceof InventoryScreen screen)) return;
 
         // The vanilla recipe-book button: the screen's only 20×18 ImageButton.
@@ -152,6 +159,64 @@ public final class CharacterPanel {
             CharacterPane.open(pendingTab);
         }
         positionButtons(screen);
+    }
+
+    /**
+     * Curios replaces the inventory with a screen of its own while its slots
+     * are showing, so without this the LQ and skills buttons vanished the moment
+     * a player looked at their rings (seen in ZARP, Curios 16.0.0). The buttons
+     * stay, beside Curios' recipe-book button. The pane itself is a Standards
+     * panel and the host only draws on the vanilla inventory, so a click goes
+     * back there with the tab open: the container is closed properly first,
+     * so the server is not left holding Curios' menu.
+     *
+     * <p>Found by interface NAME, so there is no dependency on Curios.</p>
+     */
+    private static boolean isCurios(AbstractContainerScreen<?> screen) {
+        for (Class<?> c = screen.getClass(); c != null; c = c.getSuperclass()) {
+            for (Class<?> i : c.getInterfaces()) {
+                if (i.getName().equals("top.theillusivec4.curios.api.client.ICuriosScreen")) return true;
+            }
+        }
+        return false;
+    }
+
+    private static void curiosButtons(ScreenEvent.Init.Post event, AbstractContainerScreen<?> screen) {
+        curiosRecipe = null;
+        for (GuiEventListener listener : event.getListenersList()) {
+            if (listener instanceof ImageButton button && button.getWidth() == 20 && button.getHeight() == 18) {
+                curiosRecipe = button;
+                break;
+            }
+        }
+        statsButton = Button.builder(Component.literal("LQ"), b -> backToInventory(Tab.STATS))
+                .bounds(0, 0, 20, 18)
+                .tooltip(Tooltip.create(Component.literal(ClientVocab.get("ui.character_sheet", "Character sheet"))))
+                .build();
+        skillsButton = Button.builder(Component.literal("✦"), b -> backToInventory(Tab.SKILLS))
+                .bounds(0, 0, 20, 18)
+                .tooltip(Tooltip.create(Component.literal(ClientVocab.get("ui.skills_and_loadout", "Skills & loadout"))))
+                .build();
+        event.addListener(statsButton);
+        event.addListener(skillsButton);
+        positionCuriosButtons(screen);
+    }
+
+    /** Curios moves its own recipe button as its slot panel opens and shuts; ours follow it, or sit where vanilla's would. */
+    private static void positionCuriosButtons(AbstractContainerScreen<?> screen) {
+        int x = curiosRecipe != null ? curiosRecipe.getX() + 22 : screen.getLeftPos() + 126;
+        int y = curiosRecipe != null ? curiosRecipe.getY() : screen.height / 2 - 22;
+        if (statsButton != null) statsButton.setPosition(x, y);
+        if (skillsButton != null) skillsButton.setPosition(x + 22, y);
+    }
+
+    private static void backToInventory(Tab which) {
+        var mc = net.minecraft.client.Minecraft.getInstance();
+        if (mc.player == null) return;
+        openOnInit = true;
+        pendingTab = which;
+        mc.player.closeContainer();
+        mc.gui.setScreen(new InventoryScreen(mc.player));
     }
 
     private static void toggleTab(InventoryScreen screen, Tab which) {
@@ -212,7 +277,11 @@ public final class CharacterPanel {
      */
     @SubscribeEvent
     static void onScreenRenderPre(ScreenEvent.Render.Pre event) {
-        if (event.getScreen() instanceof InventoryScreen screen) positionButtons(screen);
+        if (event.getScreen() instanceof InventoryScreen screen) {
+            positionButtons(screen);
+        } else if (event.getScreen() instanceof AbstractContainerScreen<?> other && statsButton != null && isCurios(other)) {
+            positionCuriosButtons(other);
+        }
     }
 
     // --- geometry (pure functions of the summary; used by render AND clicks) ---
