@@ -5,6 +5,7 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
 
+- **The LQ and skills buttons stay when the Curios panel is open.** Curios shows its slots on a screen of its own, which used to make both buttons vanish. Clicking one there goes back to the inventory with that tab open.
 - **Levels earned before choosing a class are no longer wasted.** Leaving the starting class (Citizen, or a pack's own) for your first real class carries its experience over, and the game says so. Turn it off with `carryStartingClassXp` in the server config.
 - **More of CrawlSpace on your dice** (CrawlSpace 0.3.0 or newer):
   - Investigation (INT) spots a mimic before it bites.
