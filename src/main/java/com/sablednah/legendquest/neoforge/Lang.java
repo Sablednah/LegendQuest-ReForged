@@ -219,6 +219,12 @@ public final class Lang {
                 "&7Your &f{class}&7 is kept at {term.level} &f{level}&7 — "
                         + "&f/lq class choose {id}&7 goes back to it.");
 
+        // Leaving the starting class: its XP moves to the new class, so the bar
+        // should not drop at all. Said anyway, because a level appearing in a
+        // class never played is its own small puzzle.
+        def("msg.choose.class_carried",
+                "&7Your experience as &f{old}&7 carries over: you start as {term.level} &f{level}&7 &f{class}&7.");
+
         def("msg.respec.nothing", "&7Nothing to respec — no {term.skill_points} are spent.");
         def("msg.respec.offer", "&6Respec refunds &l{points}&r&6 {term.skill_points} (forgetting bought {term.skills} and stat boosts){levelcost}");
         def("msg.respec.offer_levels", " and burns &c{levels} character {term.level}(s)&6.");
