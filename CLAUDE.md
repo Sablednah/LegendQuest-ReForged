@@ -423,7 +423,12 @@ that client. So a null connection is not the test for "can hear"; that is
 but a future feature that reports who can hear must not read null-ness as the
 answer.
 
-## CrawlSpace — traps and secret doors on our dice (OPTIONAL, unreleased)
+## CrawlSpace — traps and secret doors on our dice (OPTIONAL)
+
+Shipped in LegendQuest 2.9.0 (the first checks) and 2.10.0 (the five below).
+CrawlSpace 1.0.0 (2026-10-15) lists LegendQuest as an optional dependency on
+CurseForge. Its 1.20.1 Forge line has no LegendQuest to pair with, because
+LegendQuest is NeoForge only.
 
 `CrawlSpaceSupport` is the only class importing `com.sablednah.crawlspace`, and it
 registers a `Perception` provider:
