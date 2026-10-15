@@ -3,7 +3,7 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 2.10.0 — 2026-10-15
 
 - **The LQ and skills buttons stay when the Curios panel is open.** Curios shows its slots on a screen of its own, which used to make both buttons vanish. Clicking one there goes back to the inventory with that tab open.
 - **Levels earned before choosing a class are no longer wasted.** Leaving the starting class (Citizen, or a pack's own) for your first real class carries its experience over, and the game says so. Turn it off with `carryStartingClassXp` in the server config.

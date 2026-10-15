@@ -94,7 +94,9 @@ is the part worth copying.
 - **Six rolled stats** — STR, DEX, CON, INT, WIS, CHR — feeding derived HP and
   mana, modified by race and class.
 - **Sub-classes** alongside a main class, each with its own XP bank, so
-  switching class never throws away what you earned elsewhere.
+  switching class never throws away what you earned elsewhere. Levels earned
+  before choosing a class are not wasted either: leaving the starting class for
+  your first real one carries its experience over.
 - **Real class requirements** — prerequisite classes, mastery gates, either/or
   alternatives, and group restrictions.
 - **A skill-point economy** — earn points per level, spend them on skills or
@@ -141,9 +143,11 @@ is the part worth copying.
 - **CrawlSpace dungeons use your character**, where CrawlSpace is installed.
   A trap's pressure plate or tripwire stays hidden until a Wisdom check spots
   it, harder the deeper you are, and disarming one is a Dexterity check, with
-  dwarves at an advantage. You see your roll when you spot something and
-  nothing when you don't, so a failed roll never gives away that something was
-  there. Without CrawlSpace, nothing changes.
+  dwarves at an advantage. Intelligence spots a mimic before it bites, Sleight
+  of Hand draws a trapped chest's needle, Wisdom reads a trap's tell and a
+  shrine's omen, and Stealth slips past a sentry. You see your roll when you
+  spot something and nothing when you don't, so a failed roll never gives away
+  that something was there. Without CrawlSpace, nothing changes.
 - **Its own advancements tab**, 19 of them — the character line, karma both
   ways, and parties, with hidden and challenge entries for mastering every
   class, playing every race, and a party who are all online and all at the cap.
@@ -156,7 +160,10 @@ is the part worth copying.
   other prefix mod wants. It knows when to get out of the way: no plate in
   spectator or creative, none on a corpse, none floating where a hidden player
   used to be, and none over an NPC that another mod is standing a fake player
-  in for.
+  in for. A plate ever left hanging in the air cleans itself up as soon as
+  anyone comes near.
+- **The character buttons stay on the Curios screen**, where Curios is
+  installed, and take you back to the inventory on that tab.
 - **Class ranks and karma epithets** — a Fighter climbs Squire, Man-at-Arms,
   Knight, Champion, Lord; karma earns you "the good" or "the diabolic". Both
   genre packs have their own ranks throughout.
