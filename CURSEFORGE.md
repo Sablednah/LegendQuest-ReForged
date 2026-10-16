@@ -111,6 +111,11 @@ is the part worth copying.
 - **Track your quarry** — scouts, rangers and recon can mark a creature so it
   glows and cannot despawn mid-hunt, for five minutes, without ever counting
   against the world's mob cap.
+- **Pick pockets** — a rogue can open another player's pack, see how hard each
+  thing in it is to lift, and try for one of them on a Sleight of Hand roll.
+  Bread is easy; a named, enchanted sword is not. One reach per cast, and the
+  mark is told when you fail. It is an ordinary chest screen, so it works
+  without the mod, and safe zones and peaceful factions are honoured.
 - **Tabletop dice** — `/roll` takes what a table actually says: `/roll 6`,
   `/roll 2d6+3`, `/roll d%`, `/roll adv`, `/roll str` for a d20 plus your
   Strength modifier, in any combination. Advantage shows both dice.

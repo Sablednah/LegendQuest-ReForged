@@ -3,7 +3,7 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
-## Unreleased
+## 2.11.0 — 2026-10-16
 
 - **Rogues can pick pockets.** At rogue level 10, look at a player within three blocks and use Pick Pocket. Their pack opens as a chest; click one thing and roll Sleight of Hand (d20 + DEX). Bread is easy. A named, enchanted sword is not, and every item's tooltip shows how hard it is. Pass or fail, the pocket closes, and if you fail they are told. Works for players without the mod.
 - **New skill effect, `legendquest:pick_pocket`**, for pack authors. The pack is always in reach; the hotbar, armour, off hand and the item in hand can each be allowed. The README lists the fields and the difficulty rules. Asked for in issue #1.
