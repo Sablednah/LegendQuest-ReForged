@@ -88,6 +88,7 @@ public final class LQEffects {
         SkillEffectTypes.register(ParticleLine.TYPE, ParticleLine.CODEC);
         SkillEffectTypes.register(ProjectileEffect.TYPE, ProjectileEffect.CODEC);
         SkillEffectTypes.register(RunCommand.TYPE, RunCommand.CODEC);
+        SkillEffectTypes.register(PickPocket.TYPE, PickPocket.CODEC);
     }
 
     /** Magic damage to the target. The old Hurt/MightyBlow backbone. */
@@ -763,6 +764,68 @@ public final class LQEffects {
                 UNDOS.remove(undo);
                 runAs(player, undo.command());
             }
+        }
+    }
+
+    /**
+     * Pick the pocket of the player you are looking at: their inventory opens
+     * as a chest, and one click is one Sleight of Hand (DEX) check against
+     * {@code dc} plus the worth of the thing and where it is kept. Pass or
+     * fail, the pocket closes. The pack is always in reach; hotbar, armour,
+     * off hand and the item in their hand each have to be allowed. A failure
+     * tells the mark unless {@code alert} is false. See {@code neoforge.PickPocket}.
+     */
+    public record PickPocket(int dc, boolean hotbar, boolean armour, boolean offhand,
+            boolean mainHand, boolean alert, TargetSpec target) implements SkillEffect {
+        public static final Identifier TYPE = id("pick_pocket");
+        public static final MapCodec<PickPocket> CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+                Codec.INT.optionalFieldOf("dc", 10).forGetter(PickPocket::dc),
+                Codec.BOOL.optionalFieldOf("allow_hotbar", false).forGetter(PickPocket::hotbar),
+                Codec.BOOL.optionalFieldOf("allow_armour", false).forGetter(PickPocket::armour),
+                Codec.BOOL.optionalFieldOf("allow_offhand", false).forGetter(PickPocket::offhand),
+                Codec.BOOL.optionalFieldOf("allow_main_hand", false).forGetter(PickPocket::mainHand),
+                Codec.BOOL.optionalFieldOf("alert", true).forGetter(PickPocket::alert),
+                TargetSpec.CODEC.optionalFieldOf("target",
+                        new TargetSpec(TargetSpec.Kind.LOOKING_AT, 3.0D, 4.0D)).forGetter(PickPocket::target))
+                .apply(i, PickPocket::new));
+
+        @Override public Identifier type() { return TYPE; }
+
+        /** Robbery is aggression even when nobody bleeds. */
+        @Override public boolean hostile() { return true; }
+
+        @Override
+        public String describe() {
+            StringBuilder also = new StringBuilder();
+            if (hotbar) also.append(fx("hb.fx.pick_pocket.hotbar"));
+            if (armour) also.append(fx("hb.fx.pick_pocket.armour"));
+            if (offhand) also.append(fx("hb.fx.pick_pocket.offhand"));
+            if (mainHand) also.append(fx("hb.fx.pick_pocket.main_hand"));
+            return fx("hb.fx.pick_pocket", "range", num(target.range()), "dc", dc, "also", also);
+        }
+
+        @Override
+        public void apply(SkillContext ctx) {
+            net.minecraft.server.level.ServerPlayer mark = null;
+            for (LivingEntity e : target.resolveEntities(ctx)) {
+                if (e instanceof net.minecraft.server.level.ServerPlayer p && p != ctx.caster()) {
+                    mark = p;
+                    break;
+                }
+            }
+            if (mark == null) {
+                Feedback.actionBar(ctx.caster(), com.sablednah.legendquest.neoforge.Lang.get("msg.pickpocket.none"));
+                Feedback.chat(ctx.caster(), com.sablednah.legendquest.neoforge.Lang.get("msg.pickpocket.none"));
+                return;
+            }
+            var refused = CombatTagging.refuses(ctx.caster(), mark);
+            if (refused.isPresent()) {
+                Feedback.actionBar(ctx.caster(), refused.get());
+                return;
+            }
+            com.sablednah.legendquest.neoforge.PickPocket.open(ctx.caster(), mark, dc,
+                    new com.sablednah.legendquest.neoforge.PickPocket.Reach(hotbar, armour, offhand, mainHand),
+                    target.range(), alert);
         }
     }
 

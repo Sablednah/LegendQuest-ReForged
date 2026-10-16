@@ -1,0 +1,16 @@
+{
+  "name": "Pick Pocket",
+  "description": "Reach into a stranger's pack and see what comes away. Bread is easy; an enchanted heirloom with a name is not.",
+  "icon": "minecraft:iron_nugget",
+  "type": "active",
+  "cooldown": 20000,
+  "delay": 500,
+  "mana_cost": 4,
+  "karma_reward": -1,
+  "effects": [
+    {
+      "type": "legendquest:pick_pocket",
+      "dc": 10
+    }
+  ]
+}
