@@ -389,6 +389,16 @@ public final class Lang {
         def("msg.crawl.omen", "&7Insight (WIS): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &aYou read the omen.");
         def("msg.crawl.stealth.ok", "&7Stealth (DEX): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &aUnseen.");
         def("msg.crawl.stealth.fail", "&7Stealth (DEX): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &cSeen!");
+        def("msg.pickpocket.none", "&7No pockets within reach. Look at the player you mean to rob, close enough to touch.");
+        def("msg.pickpocket.title", "{target}'s pockets");
+        def("msg.pickpocket.dc", "&7Sleight of Hand: &f{dc}");
+        def("msg.pickpocket.out_of_reach", "Out of reach");
+        def("msg.pickpocket.in_hand", "In their hand");
+        def("msg.pickpocket.out_of_reach_refused", "&7You cannot reach that. Pick something from their pack.");
+        def("msg.pickpocket.in_hand_refused", "&7It is in their hand. They would notice. Pick something else.");
+        def("msg.pickpocket.ok", "&7Sleight of Hand (DEX): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &aYou lift {item}.");
+        def("msg.pickpocket.fail", "&7Sleight of Hand (DEX): d20 &f{roll}&7{mod} = &f{total}&7 against {dc}. &c{target} feels your hand.");
+        def("msg.pickpocket.caught", "&c{thief} just tried to take your {item}!");
         def("msg.roll.detail", " &8({dice}{bonus})");
         def("msg.roll.advantage", " &a[adv, dropped {dropped}]");
         def("msg.roll.disadvantage", " &c[dis, dropped {dropped}]");
@@ -502,6 +512,11 @@ public final class Lang {
         def("hb.fx.projectile", "Launches {entity}.");
         def("hb.fx.run_command", "Runs a command on the server.");
         def("hb.fx.run_command_timed", "Runs a command on the server, undone {time}s later.");
+        def("hb.fx.pick_pocket", "Opens the pockets of the player you are looking at, within {range} blocks, and lets you try to take one thing: Sleight of Hand (DEX) against {dc}, harder for rare, enchanted, named or lore-bearing things and big stacks. Pass or fail, the pocket closes. Reaches their pack{also}.");
+        def("hb.fx.pick_pocket.hotbar", ", hotbar (+2)");
+        def("hb.fx.pick_pocket.armour", ", armour (+5)");
+        def("hb.fx.pick_pocket.offhand", ", off hand (+5)");
+        def("hb.fx.pick_pocket.main_hand", ", even the hand (+10)");
         def("hb.size", "Size");
         def("hb.karma_needs_at_least", "{term.karma}: needs at least {value}");
         def("hb.karma_needs_at_most", "{term.karma}: needs at most {value}");
