@@ -26,14 +26,14 @@ effects:
   - { type: "legendquest:sound", sound: "minecraft:entity.blaze.shoot" }
 ```
 
-Built-in effect types (`legendquest:` namespace), all 14: `damage`, `heal`,
+Built-in effect types (`legendquest:` namespace), all 16: `damage`, `heal`,
 `potion_effect`, `leap`, `teleport`, `lightning`, `summon`, `message`,
-`ignite`, `give_item`, `sound`, `particle_line`, `projectile`,
-`run_command`.
+`ignite`, `give_item`, `track`, `sound`, `particle_line`, `projectile`,
+`run_command`, `pick_pocket`.
 
 The list that cannot go stale is `SkillEffectTypes.register(...)` in
 `LQEffects.java` — count it there rather than trusting this paragraph, which
-had drifted to 11 before.
+had drifted to 11 before, and then left out `track`.
 
 Targets: `self`, `looking_at` (with `range`), `nearby` (with `radius`),
 `trigger` (the other party of a triggered skill's event).

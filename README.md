@@ -489,6 +489,18 @@ name. Temp flight is exactly `command` + `undo_command` + `duration`. An
 undo whose player logged off waits for their return; pending undos don't
 survive a restart.
 
+**`legendquest:pick_pocket`** — the player you are looking at (within
+`target.range`, default 3) has their inventory opened to you as a chest. Click
+one thing and roll Sleight of Hand: d20 + DEX against `dc` (default 10), plus
++2/+4/+6 for an uncommon/rare/epic item, +1 per enchantment level, +3 if it
+has a custom name, +1 per lore line (up to 3) and +1 for every 16 in the
+stack. Each item's tooltip shows its difficulty. Pass or fail, the pocket
+closes. A natural 20 always passes and a 1 always fails. The pack is always in
+reach. `allow_hotbar` (+2), `allow_armour` (+5), `allow_offhand` (+5) and
+`allow_main_hand` (+10) open the rest, and all default to false. A failure
+tells the mark unless `alert` is false. Claims and peaceful factions are
+honoured through Standards. Works for vanilla clients.
+
 New effect types come from **skill-pack mods** — a tiny jar that registers
 a codec and ships skill JSONs. See [docs/SKILL-PACKS.md](docs/SKILL-PACKS.md)
 and the worked example at
