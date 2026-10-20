@@ -57,6 +57,17 @@ public final class SkillEngine {
 
     private static final List<Pending> PENDING = new CopyOnWriteArrayList<>();
 
+    /**
+     * Forget everything held in memory for this server: a cast still winding
+     * up, and which fading-skill warnings were given. In single player the
+     * game outlives the world, and the next world's player has the same UUID,
+     * so a cast paid for in one world would otherwise go off in the next.
+     */
+    public static void forgetSession() {
+        PENDING.clear();
+        DURATION_WARNED.clear();
+    }
+
     // --- grants ---
 
     /**

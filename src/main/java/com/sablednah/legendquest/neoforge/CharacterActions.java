@@ -377,6 +377,11 @@ public final class CharacterActions {
     private static final java.util.Map<java.util.UUID, Long> RESPEC_OFFERS =
             new java.util.HashMap<>();
 
+    /** The server is stopping: an offer made in one world is not accepted in the next. */
+    public static void forgetSession() {
+        RESPEC_OFFERS.clear();
+    }
+
     /** Two-step: first call quotes the price, second within 30s pays it. */
     public static boolean respec(ServerPlayer player) {
         PlayerCharacter pc = CharacterService.data(player);

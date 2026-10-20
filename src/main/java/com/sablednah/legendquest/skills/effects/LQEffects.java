@@ -570,6 +570,11 @@ public final class LQEffects {
             }
         }
 
+        /** The server is stopping: nothing is left to stop. */
+        public static void forgetSession() {
+            STOPS.clear();
+        }
+
         /** Called from SkillEngine.tick: the needle lifts when the song ends. */
         public static void tickStops(net.minecraft.server.MinecraftServer server) {
             if (STOPS.isEmpty()) return;
@@ -752,6 +757,23 @@ public final class LQEffects {
                                     .LevelBasedPermissionSet.GAMEMASTER)
                             .withSuppressedOutput(),
                     expanded);
+        }
+
+        /**
+         * The server is stopping: undo now for everyone still here, early,
+         * rather than leave the effect on them in this world's save for ever
+         * (the queue is in memory and does not survive). Anything left for
+         * someone offline is dropped, so it can never be run on the same
+         * player in the next world opened in this game.
+         */
+        public static void forgetSession(net.minecraft.server.MinecraftServer server) {
+            for (DelayedUndo undo : UNDOS) {
+                var player = server.getPlayerList().getPlayer(undo.player());
+                if (player != null) {
+                    runAs(player, undo.command());
+                }
+            }
+            UNDOS.clear();
         }
 
         /** Called from SkillEngine.tick. Undos wait for offline players. */
