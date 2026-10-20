@@ -34,6 +34,11 @@ public final class DiceRolls {
     private static final long TRAY_COOLDOWN_MS = 750;
     private static final Map<UUID, Long> LAST_TRAY_ROLL = new HashMap<>();
 
+    /** The server is stopping: last world's cooldown is not this one's. */
+    public static void forgetSession() {
+        LAST_TRAY_ROLL.clear();
+    }
+
     /** The tray's door in. Silently drops a roll inside the cooldown. */
     public static void fromTray(ServerPlayer player, String notation) {
         if (notation.length() > MAX_TRAY_INPUT) return;

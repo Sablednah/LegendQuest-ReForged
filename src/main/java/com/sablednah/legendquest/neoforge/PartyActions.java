@@ -153,6 +153,11 @@ public final class PartyActions {
 
     private static final java.util.Map<java.util.UUID, Long> TP_LAST = new java.util.HashMap<>();
 
+    /** The server is stopping: last world's cooldown is not this one's. */
+    public static void forgetSession() {
+        TP_LAST.clear();
+    }
+
     public static boolean teleport(ServerPlayer player) {
         int cooldown = LQConfig.PARTY_TP_COOLDOWN.get();
         if (cooldown <= 0) {
