@@ -3,6 +3,10 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 2.11.1 — 2026-10-20
+
+- **A second world in the same game starts clean.** In single player, quitting to the title and opening another world used to keep a few things from the first: a skill still winding up could go off there unpaid, a `run_command` skill's undo could run on you there, and a respec offer, party invite or cooldown could carry over. They are now forgotten when a world closes, and timed undos run before it does, so their effect is not left on you in the old world's save either.
+
 ## 2.11.0 — 2026-10-16
 
 - **Rogues can pick pockets.** At rogue level 10, look at a player within three blocks and use Pick Pocket. Their pack opens as a chest; click one thing and roll Sleight of Hand (d20 + DEX). Bread is easy. A named, enchanted sword is not, and every item's tooltip shows how hard it is. Pass or fail, the pocket closes, and if you fail they are told. Works for players without the mod.
