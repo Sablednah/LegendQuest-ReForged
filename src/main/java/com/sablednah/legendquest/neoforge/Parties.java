@@ -50,6 +50,15 @@ public final class Parties extends SavedData {
     /** Invitee → lowercased party name. In-memory by design. */
     private static final Map<UUID, String> INVITES = new HashMap<>();
 
+    /**
+     * The server is stopping. Invites are in memory but parties are saved per
+     * world, so an invite left over would let the same player into a party of
+     * that name in the next world opened in this game.
+     */
+    public static void forgetSession() {
+        INVITES.clear();
+    }
+
     private Parties() {
         this.parties = new LinkedHashMap<>();
     }

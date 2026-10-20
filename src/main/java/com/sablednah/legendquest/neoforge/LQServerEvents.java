@@ -157,6 +157,18 @@ public final class LQServerEvents {
     @SubscribeEvent
     static void onServerStopping(net.neoforged.neoforge.event.server.ServerStoppingEvent event) {
         Nameplate.clearAll();
+        // In single player the game outlives the world: quitting to the title
+        // and opening another keeps every static, and the player there has the
+        // same UUID. Anything held per player in memory goes now, or it acts on
+        // them in the next world (ZARP's quests stalled this way in another mod).
+        com.sablednah.legendquest.skills.effects.LQEffects.RunCommand.forgetSession(event.getServer());
+        com.sablednah.legendquest.skills.effects.LQEffects.Sound.forgetSession();
+        SkillEngine.forgetSession();
+        CharacterActions.forgetSession();
+        Parties.forgetSession();
+        DiceRolls.forgetSession();
+        PartyActions.forgetSession();
+        lastBindFire.clear();
     }
 
     /**
