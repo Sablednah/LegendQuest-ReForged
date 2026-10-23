@@ -21,6 +21,7 @@ public final class LQConfig {
     public static final ModConfigSpec.EnumValue<StatlineMode> STATLINE_MODE;
     public static final ModConfigSpec.BooleanValue USE_D20_COMBAT;
     public static final ModConfigSpec.BooleanValue USE_SIZE_IN_COMBAT;
+    public static final ModConfigSpec.BooleanValue USE_PROFICIENCY;
     public static final ModConfigSpec.DoubleValue SIZE_BLOCKS_PER_POINT;
     public static final ModConfigSpec.IntValue SIZE_MODIFIER_MAX;
     public static final ModConfigSpec.IntValue XP_LEVEL_BASE;
@@ -61,13 +62,21 @@ public final class LQConfig {
 
         BUILDER.comment("Combat").push("combat");
         USE_D20_COMBAT = BUILDER
-                .comment("Opposed d20 DEX tests decide hit/dodge between players and mobs.")
+                .comment("Opposed d20 tests decide hit/dodge between players and mobs. The attacker",
+                        "rolls d20 + STR in melee, DEX with a projectile, or the better of the two with",
+                        "a finesse weapon (#legendquest:finesse) or a thrown one (#legendquest:thrown);",
+                        "the same modifier is added to the damage. The defender rolls d20 + DEX.")
                 .define("useD20Combat", true);
         USE_SIZE_IN_COMBAT = BUILDER
                 .comment("Race size adjusts hit difficulty (bigger = easier to hit). Added to the",
                         "attacker's d20 roll. A player's size is their race's; anything else, and",
                         "the shooter of a projectile, counts as an ordinary 1.8.")
                 .define("useSizeInCombat", true);
+        USE_PROFICIENCY = BUILDER
+                .comment("Add D&D's proficiency bonus to a player's attack roll: +2 at level 1 up to",
+                        "+6 at the level cap, D&D's 1-20 spread over this server's levels. Not for a",
+                        "weapon the character's class cannot use (that is a fumble).")
+                .define("useProficiency", true);
         SIZE_BLOCKS_PER_POINT = BUILDER
                 .comment("Blocks of height difference per point of size modifier. At 0.25 a",
                         "1.0-block hobbit is 3 harder to hit than a 1.8 human, a 1.2 dwarf 2.")
