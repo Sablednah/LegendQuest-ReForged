@@ -606,7 +606,7 @@ public final class LQServerEvents {
         int str = CharacterService.statModifier(p, Stat.STR);
         int dex = CharacterService.statModifier(p, Stat.DEX);
         if (ranged(source)) {
-            return direct != null && direct.getType().is(THROWN) ? Math.max(str, dex) : dex;
+            return direct != null && net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.wrapAsHolder(direct.getType()).is(THROWN) ? Math.max(str, dex) : dex;
         }
         if (direct == p) {
             return p.getMainHandItem().is(FINESSE) ? Math.max(str, dex) : str;
