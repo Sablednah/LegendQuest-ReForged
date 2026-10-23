@@ -5,7 +5,7 @@ This project follows [Semantic Versioning](https://semver.org/).
 
 ## Unreleased
 
-- **Attacks use the right ability, the D&D way.** Melee rolls STR to hit, not DEX; projectiles roll DEX; finesse weapons (every sword, and anything a pack adds to `#legendquest:finesse`) and thrown projectiles (the trident, and anything in `#legendquest:thrown`) take the better of STR and DEX. The same modifier now adds to the damage of projectiles as well as melee, where only melee got STR before.
+- **Attacks use the right ability, the D&D way.** Melee rolls STR to hit, not DEX; projectiles roll DEX; finesse weapons (every sword, and anything a pack adds to `#legendquest:finesse`) and thrown projectiles (the trident, and anything in `#legendquest:thrown`) take the better of STR and DEX. The same modifier now adds to the damage of projectiles as well as melee, where only melee got STR before. Damage of any type in `#minecraft:is_projectile` counts as a shot, so hit-scan guns roll DEX once their mod puts its damage types there.
 - **Proficiency bonus.** A player's attack roll adds D&D's proficiency bonus, +2 at level 1 rising to +6 at the level cap (at the default 150: +3 from 33, +4 from 64, +5 from 96, +6 from 127). Not with a weapon your class cannot use. On by default; `useProficiency` in the server config turns it off.
 
 ## 2.11.1 — 2026-10-20

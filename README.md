@@ -70,7 +70,7 @@ damage:
 |---|---|
 | Melee (axes, maces, fists...) | STR |
 | A finesse weapon, `#legendquest:finesse` (all swords by default) | the better of STR and DEX |
-| A projectile (arrows, bolts...) | DEX |
+| A projectile (arrows, bolts, and any damage type in `#minecraft:is_projectile`, which is how a hit-scan gun counts as a shot) | DEX |
 | A thrown projectile, `#legendquest:thrown` (the trident by default) | the better of STR and DEX |
 
 Other mods' weapons join by adding to those two tags. **Proficiency** follows
