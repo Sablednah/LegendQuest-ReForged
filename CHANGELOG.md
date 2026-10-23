@@ -3,6 +3,11 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+- **Attacks use the right ability, the D&D way.** Melee rolls STR to hit, not DEX; projectiles roll DEX; finesse weapons (every sword, and anything a pack adds to `#legendquest:finesse`) and thrown projectiles (the trident, and anything in `#legendquest:thrown`) take the better of STR and DEX. The same modifier now adds to the damage of projectiles as well as melee, where only melee got STR before.
+- **Proficiency bonus.** A player's attack roll adds D&D's proficiency bonus, +2 at level 1 rising to +6 at the level cap (at the default 150: +3 from 33, +4 from 64, +5 from 96, +6 from 127). Not with a weapon your class cannot use. On by default; `useProficiency` in the server config turns it off.
+
 ## 2.11.1 — 2026-10-20
 
 - **A second world in the same game starts clean.** In single player, quitting to the title and opening another world used to keep a few things from the first: a skill still winding up could go off there unpaid, a `run_command` skill's undo could run on you there, and a respec offer, party invite or cooldown could carry over. They are now forgotten when a world closes, and timed undos run before it does, so their effect is not left on you in the old world's save either.
