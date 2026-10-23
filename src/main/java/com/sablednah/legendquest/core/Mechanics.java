@@ -58,5 +58,19 @@ public final class Mechanics {
         return Math.max(-max, Math.min(max, rounded));
     }
 
+    /**
+     * D&D's proficiency bonus (+2 at levels 1-4, +3 at 5-8 ... +6 at 17-20),
+     * spread over this server's level range: level 1 is D&D's 1, the cap is
+     * D&D's 20, and everything between is scaled. Level 0 counts as 1.
+     */
+    public static int proficiency(int level, int maxLevel) {
+        if (maxLevel <= 1) {
+            return 2;
+        }
+        int l = Math.max(1, Math.min(level, maxLevel));
+        int dnd = 1 + (int) Math.floor((l - 1) * 19.0 / (maxLevel - 1));
+        return 2 + (dnd - 1) / 4;
+    }
+
     private Mechanics() {}
 }
