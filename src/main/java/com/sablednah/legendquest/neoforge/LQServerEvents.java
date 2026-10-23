@@ -517,7 +517,7 @@ public final class LQServerEvents {
                 if (LQConfig.USE_SIZE_IN_COMBAT.get()) {
                     // A projectile's shooter counts as ordinary: how tall the
                     // archer is has nothing to do with whether the arrow lands.
-                    boolean direct = event.getSource().getDirectEntity() == attacker;
+                    boolean direct = melee(event.getSource(), attacker);
                     sizeMod = Mechanics.sizeModifier(
                             direct ? combatSize(livingAttacker) : ORDINARY_SIZE, combatSize(victim),
                             LQConfig.SIZE_BLOCKS_PER_POINT.get(), LQConfig.SIZE_MODIFIER_MAX.get());
@@ -557,8 +557,7 @@ public final class LQServerEvents {
         }
 
         // Triggered skills, after the hit is real.
-        if (attacker instanceof ServerPlayer p && !event.isCanceled()
-                && event.getSource().getDirectEntity() == attacker) {
+        if (attacker instanceof ServerPlayer p && !event.isCanceled() && melee(event.getSource(), attacker)) {
             SkillEngine.trigger(p, TriggerSpec.Kind.MELEE_HIT, victim);
         }
         if (victim instanceof ServerPlayer p && !event.isCanceled()) {
@@ -578,8 +577,24 @@ public final class LQServerEvents {
 
     /** A blow or a shot from this attacker: its own swing, or a projectile it loosed. */
     private static boolean attacks(net.minecraft.world.damagesource.DamageSource source, net.minecraft.world.entity.Entity attacker) {
-        var direct = source.getDirectEntity();
-        return direct == attacker || direct instanceof net.minecraft.world.entity.projectile.Projectile;
+        return melee(source, attacker) || ranged(source);
+    }
+
+    /**
+     * A shot: a projectile entity, or damage of a type in
+     * {@code #minecraft:is_projectile}. The second covers hit-scan guns, which
+     * have no projectile: their shooter is the direct entity, so without it a
+     * gunshot passed for a punch and rolled STR (ZARP, 2026-10-23). A gun mod
+     * joins by putting its damage types in that vanilla tag.
+     */
+    private static boolean ranged(net.minecraft.world.damagesource.DamageSource source) {
+        return source.getDirectEntity() instanceof net.minecraft.world.entity.projectile.Projectile
+                || source.is(net.minecraft.tags.DamageTypeTags.IS_PROJECTILE);
+    }
+
+    /** A blow struck by the attacker's own hand: it is the direct entity, and it is not a shot. */
+    private static boolean melee(net.minecraft.world.damagesource.DamageSource source, net.minecraft.world.entity.Entity attacker) {
+        return source.getDirectEntity() == attacker && !ranged(source);
     }
 
     /**
@@ -591,11 +606,11 @@ public final class LQServerEvents {
         var direct = source.getDirectEntity();
         int str = CharacterService.statModifier(p, Stat.STR);
         int dex = CharacterService.statModifier(p, Stat.DEX);
+        if (ranged(source)) {
+            return direct != null && direct.getType().is(THROWN) ? Math.max(str, dex) : dex;
+        }
         if (direct == p) {
             return p.getMainHandItem().is(FINESSE) ? Math.max(str, dex) : str;
-        }
-        if (direct instanceof net.minecraft.world.entity.projectile.Projectile) {
-            return direct.getType().is(THROWN) ? Math.max(str, dex) : dex;
         }
         return null;
     }
