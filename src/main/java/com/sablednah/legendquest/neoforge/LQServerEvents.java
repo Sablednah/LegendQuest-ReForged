@@ -485,10 +485,12 @@ public final class LQServerEvents {
         }
 
         // Weapon gate: a disallowed weapon hits like a fist.
+        boolean fumbled = false;
         if (attacker instanceof ServerPlayer playerAttacker) {
             ItemStack weapon = playerAttacker.getMainHandItem();
             if (!RestrictionEngine.isAllowed(playerAttacker, ItemRules.Slot.WEAPON, weapon)) {
                 event.setAmount(Math.min(event.getAmount(), 1.0F));
+                fumbled = true;
                 Feedback.actionBar(playerAttacker, Lang.fmt("msg.combat.fumble", "item", weapon.getHoverName().getString()));
                 indicate(playerAttacker, victim, CombatIndicatorPayload.FUMBLE);
             }
@@ -500,11 +502,14 @@ public final class LQServerEvents {
         boolean trueStrike = event.getSource()
                 .is(net.minecraft.world.damagesource.DamageTypes.INDIRECT_MAGIC);
 
-        // Opposed d20 DEX test between players/mobs when enabled.
+        // Opposed d20 test between players/mobs when enabled: the attacker's
+        // ability (+ proficiency) against the defender's DEX.
         if (!trueStrike && LQConfig.USE_D20_COMBAT.get()
                 && attacker instanceof LivingEntity livingAttacker) {
-            Integer attackMod = attacker instanceof ServerPlayer p
-                    ? CharacterService.statModifier(p, Stat.DEX) : null;
+            Integer ability = attacker instanceof ServerPlayer p ? attackAbility(p, event.getSource()) : null;
+            Integer attackMod = ability == null ? null
+                    : ability + (LQConfig.USE_PROFICIENCY.get() && !fumbled ? Mechanics.proficiency(
+                            CharacterService.level((ServerPlayer) attacker), LQConfig.MAX_LEVEL.get()) : 0);
             Integer dodgeMod = victim instanceof ServerPlayer p
                     ? CharacterService.statModifier(p, Stat.DEX) : null;
             if (attackMod != null || dodgeMod != null) {
@@ -545,10 +550,9 @@ public final class LQServerEvents {
                     }
                 }
             }
-            // STR bonus for player melee (direct hits only: attacker == direct entity).
-            if (attacker instanceof ServerPlayer p && event.getSource().getDirectEntity() == attacker) {
-                int strMod = CharacterService.statModifier(p, Stat.STR);
-                if (strMod != 0) event.setAmount(Math.max(0.0F, event.getAmount() + strMod));
+            // The ability that aimed the blow adds to its damage: melee and projectiles alike.
+            if (ability != null && ability != 0 && attacks(event.getSource(), attacker)) {
+                event.setAmount(Math.max(0.0F, event.getAmount() + ability));
             }
         }
 
@@ -561,6 +565,39 @@ public final class LQServerEvents {
             SkillEngine.trigger(p, TriggerSpec.Kind.HURT,
                     attacker instanceof LivingEntity la ? la : null);
         }
+    }
+
+    /** Swords, rapiers and the like: the better of STR and DEX, to hit and to damage. */
+    static final net.minecraft.tags.TagKey<net.minecraft.world.item.Item> FINESSE = net.minecraft.tags.TagKey.create(
+            net.minecraft.core.registries.Registries.ITEM,
+            net.minecraft.resources.Identifier.fromNamespaceAndPath(com.sablednah.legendquest.LegendQuest.MODID, "finesse"));
+    /** Projectiles thrown by arm rather than shot (a trident): the better of STR and DEX. */
+    static final net.minecraft.tags.TagKey<net.minecraft.world.entity.EntityType<?>> THROWN = net.minecraft.tags.TagKey.create(
+            net.minecraft.core.registries.Registries.ENTITY_TYPE,
+            net.minecraft.resources.Identifier.fromNamespaceAndPath(com.sablednah.legendquest.LegendQuest.MODID, "thrown"));
+
+    /** A blow or a shot from this attacker: its own swing, or a projectile it loosed. */
+    private static boolean attacks(net.minecraft.world.damagesource.DamageSource source, net.minecraft.world.entity.Entity attacker) {
+        var direct = source.getDirectEntity();
+        return direct == attacker || direct instanceof net.minecraft.world.entity.projectile.Projectile;
+    }
+
+    /**
+     * The D&D ability modifier for this attack: STR in melee, DEX with a
+     * projectile, the better of the two with a finesse weapon or a thrown
+     * projectile. Null for damage that is neither (fire, a fall).
+     */
+    private static Integer attackAbility(ServerPlayer p, net.minecraft.world.damagesource.DamageSource source) {
+        var direct = source.getDirectEntity();
+        int str = CharacterService.statModifier(p, Stat.STR);
+        int dex = CharacterService.statModifier(p, Stat.DEX);
+        if (direct == p) {
+            return p.getMainHandItem().is(FINESSE) ? Math.max(str, dex) : str;
+        }
+        if (direct instanceof net.minecraft.world.entity.projectile.Projectile) {
+            return direct.getType().is(THROWN) ? Math.max(str, dex) : dex;
+        }
+        return null;
     }
 
     /** Floating combat word above the victim, for the attacker's eyes.

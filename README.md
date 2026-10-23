@@ -50,6 +50,26 @@ stone and iron stay open to everyone, and picking up clutter never fumbles.
 Wrong weapon hits like a fist, wrong tools dig slow, unfamiliar armour slows
 and tires you (never confiscated).
 
+**Combat is a d20 roll, the D&D way.** When a player is in the fight, the
+attacker rolls d20 + an ability modifier + proficiency against the defender's
+d20 + DEX. Ties go to the attacker, and a player's natural 20 is a critical
+hit for half as much again. The ability that aims the blow also adds to its
+damage:
+
+| Attack | Ability |
+|---|---|
+| Melee (axes, maces, fists...) | STR |
+| A finesse weapon, `#legendquest:finesse` (all swords by default) | the better of STR and DEX |
+| A projectile (arrows, bolts...) | DEX |
+| A thrown projectile, `#legendquest:thrown` (the trident by default) | the better of STR and DEX |
+
+Other mods' weapons join by adding to those two tags. **Proficiency** follows
+D&D's +2 to +6, spread across the level range; at the default cap of 150 it is
++2 at levels 1-32, +3 at 33-63, +4 at 64-95, +5 at 96-126 and +6 from 127. A
+weapon your class cannot use gets no proficiency (and hits like a fist).
+Spells never miss. Mobs roll a plain d20. `useProficiency`, `useD20Combat` and
+`useSizeInCombat` in the server config switch the parts off.
+
 **Skill points are choices.** Buy skills, buy permanent +1 stat boosts at an
 escalating price, or buy **feats** — data-defined bundles of passives,
 proficiencies and skills, gated by level, feat chains and lineage
