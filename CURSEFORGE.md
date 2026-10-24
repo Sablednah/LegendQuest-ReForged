@@ -122,6 +122,7 @@ is the part worth copying.
 - **A dice tray** on the character panel, for players with the mod installed:
   pick a stat, an extra bonus or penalty, and advantage or disadvantage, then
   click or drag a die to roll it. The whole server sees the roll, just as with `/roll`.
+- **Combat on the d20, the D&D way.** Melee rolls STR, bows and guns roll DEX, and finesse weapons (every sword) and thrown ones (the trident) take the better of the two, against the target's d20 + DEX. The same modifier adds to the damage, a natural 20 hits half again as hard, and a proficiency bonus from +2 to +6 grows with your level. Other mods' weapons join through two tags, and a gun mod's shots count as shots through vanilla's projectile damage tag.
 - **Item proficiency per class** — wield what your class cannot use and you
   fumble.
 - **Your race is your size.** A hobbit stands just over half as tall as a
