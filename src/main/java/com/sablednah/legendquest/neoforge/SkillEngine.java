@@ -68,6 +68,11 @@ public final class SkillEngine {
         DURATION_WARNED.clear();
     }
 
+    /** A player has left: their fading-skill warnings go with them. */
+    public static void forget(java.util.UUID player) {
+        DURATION_WARNED.remove(player);
+    }
+
     // --- grants ---
 
     /**
@@ -369,7 +374,7 @@ public final class SkillEngine {
 
     // --- ticking (pending casts + passives) ---
 
-    private static long lastPassiveRun = 0;
+    private static int passiveTicks = 0;
 
     public static void tick(MinecraftServer server) {
         long now = System.currentTimeMillis();
@@ -397,9 +402,13 @@ public final class SkillEngine {
             }
         }
 
-        if (now - lastPassiveRun >= LQConfig.PASSIVE_TICK_MS.get()) {
-            lastPassiveRun = now;
-            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+        // Each player on their own tick within the period, by UUID, rather than
+        // everyone on one tick: the same cadence per player, without a server
+        // with many players paying for all their passives in a single tick.
+        int period = (int) Math.max(1, LQConfig.PASSIVE_TICK_MS.get() / 50);
+        int phase = Math.floorMod(++passiveTicks, period);
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            if (Math.floorMod(player.getUUID().hashCode(), period) == phase) {
                 passiveTick(player);
             }
         }
