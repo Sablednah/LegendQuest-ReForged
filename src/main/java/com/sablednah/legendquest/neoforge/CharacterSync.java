@@ -25,11 +25,63 @@ import net.neoforged.neoforge.network.PacketDistributor;
  */
 public final class CharacterSync {
 
+    /** Players owed a sync at the end of this tick; identity, so a respawned player object is a new entry. */
+    private static final java.util.Set<ServerPlayer> SOON =
+            java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<>());
+
+    /**
+     * Players whose last summary had nothing counting down: no cooldown, no
+     * active skill. Weak, so a player object that is gone is forgotten.
+     */
+    private static final java.util.Map<ServerPlayer, Boolean> QUIET = new java.util.WeakHashMap<>();
+
+    /** Seconds between summaries for a player with nothing counting down and full mana. */
+    private static final int HEARTBEAT_SECONDS = 5;
+
+    /**
+     * A sync at the end of this tick rather than now: any number of changes
+     * in one tick (two hundred blocks felled at once) cost one summary.
+     */
+    public static void sendSoon(ServerPlayer player) {
+        SOON.add(player);
+    }
+
+    /** Sends what {@link #sendSoon} queued. Every tick, from the server tick. */
+    public static void flush() {
+        if (SOON.isEmpty()) return;
+        List<ServerPlayer> due = new ArrayList<>(SOON);
+        SOON.clear();
+        for (ServerPlayer player : due) {
+            if (!player.isRemoved()) send(player);
+        }
+    }
+
+    /**
+     * The once-a-second sync. It exists so mana and cooldowns tick visibly;
+     * when neither is moving, there is nothing to tick, and rebuilding the
+     * whole summary for every player every second was the largest steady
+     * cost the mod had. Such a player gets one every few seconds instead
+     * (staggered, so they do not all land on one tick) -- a heartbeat for
+     * anything that changed without calling {@link #send}.
+     *
+     * @param second a counter that advances once a second
+     * @param manaMoving whether mana is regenerating (or was just clamped)
+     */
+    public static void perSecond(ServerPlayer player, int second, boolean manaMoving) {
+        boolean quiet = Boolean.TRUE.equals(QUIET.get(player));
+        if (quiet && !manaMoving && !SOON.contains(player)
+                && Math.floorMod(second + player.getUUID().hashCode(), HEARTBEAT_SECONDS) != 0) {
+            return;
+        }
+        send(player);
+    }
+
     public static void send(ServerPlayer player) {
         // Guarded here as well as in CharacterService.refresh, because a dozen
         // callers reach this directly. A fake player has no client to receive
         // the summary and no business wearing a nameplate.
         if (!CharacterService.isRealPlayer(player)) return;
+        SOON.remove(player);
         Net.sendIfAble(player, summarize(player));
         // Every meaningful character change already funnels through here, so
         // this is where the plate stays honest. refresh() no-ops unless the
@@ -45,6 +97,7 @@ public final class CharacterSync {
         for (Stat stat : Stat.values()) statArray[stat.ordinal()] = stats.get(stat);
 
         long now = System.currentTimeMillis();
+        boolean[] ticking = {false};
         List<CharacterSummaryPayload.SkillEntry> skills = new ArrayList<>();
         SkillEngine.grants(player).entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
@@ -67,6 +120,7 @@ public final class CharacterSync {
                                 ? Lang.fmt("msg.karma.needs_min", "value", grant.karmaMin())
                                 : Lang.fmt("msg.karma.needs_max", "value", grant.karmaMax());
                     }
+                    if (waitMs > 0 || activeFor > 0) ticking[0] = true;
                     skills.add(new CharacterSummaryPayload.SkillEntry(
                             id.toString(),
                             def.get().name(),
@@ -85,6 +139,7 @@ public final class CharacterSync {
                             pc.skillEnabled(id),
                             SkillEngine.toggleable(def.get())));
                 });
+        QUIET.put(player, !ticking[0]);
 
         return new CharacterSummaryPayload(
                 CharacterService.race(player).map(Race::name).orElse(Lang.get("msg.stats.undecided")),

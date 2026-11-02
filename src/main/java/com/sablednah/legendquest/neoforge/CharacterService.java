@@ -219,15 +219,25 @@ public final class CharacterService {
      * @param before the level read <em>before</em> the XP moved
      */
     public static void afterXpChange(ServerPlayer player, int before) {
-        refresh(player);
         int after = level(player);
+        if (after == before) {
+            // XP within a level changes nothing a refresh would apply -- no
+            // attribute, no title, no milestone -- only the bar. A full refresh
+            // here cost a summary rebuild, the registry walk in applyModifiers
+            // and a mastery check over every class per XP gain, which is every
+            // block mined: a vein-miner felling 200 blocks in one tick paid it
+            // 200 times. The bar is carried by one sync at the end of the tick.
+            CharacterSync.sendSoon(player);
+            return;
+        }
+        refresh(player);
         if (after > before) {
             Feedback.levelUp(player, after,
                     mainClass(player).map(CharClass::name).orElse(Lang.get("msg.stats.citizen")));
         }
-        // Offered on every XP change, not only on the ones that crossed a level:
-        // a milestone advancement added after a character passed it should still
-        // land, and the index check makes the no-op case cheap.
+        // Only when the level moved. A milestone advancement added after a
+        // character passed it still lands: Achievements.login re-offers
+        // every step at login.
         Achievements.levelled(player, after);
     }
 

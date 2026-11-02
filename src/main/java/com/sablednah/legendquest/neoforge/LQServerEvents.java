@@ -130,6 +130,11 @@ public final class LQServerEvents {
     static void onLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         if (!(event.getEntity() instanceof ServerPlayer player)) return;
         Nameplate.clear(player);
+        // Per-player memory that would otherwise last until the server stops.
+        // Not the teleport and dice cooldowns: forgetting those would let a
+        // relog skip them.
+        SkillEngine.forget(player.getUUID());
+        lastBindFire.remove(player.getUUID());
         // Remember the real figure before it is lost. See LQAttachments.LAST_HEALTH:
         // the saved Health is clamped on the way back IN, not on the way out, so
         // this is the last moment the true value exists.
@@ -273,6 +278,7 @@ public final class LQServerEvents {
 
     private static int tickCounter = 0;
     private static int sweepCounter = 0;
+    private static int secondCounter = 0;
 
     @SubscribeEvent
     static void onServerTick(ServerTickEvent.Post event) {
@@ -281,12 +287,14 @@ public final class LQServerEvents {
         // has to be moved to stay over its owner's head, and a walking player
         // outruns a once-a-second update by whole blocks.
         Nameplate.follow(event.getServer());
+        CharacterSync.flush(); // syncs owed from this tick's XP, one per player however many changes
 
         if (++tickCounter >= 20) { // once a second
             tickCounter = 0;
             for (ServerPlayer player : event.getServer().getPlayerList().getPlayers()) {
                 PlayerCharacter pc = CharacterService.data(player);
                 double max = CharacterService.maxMana(player);
+                boolean manaMoving = pc.mana() != max;
                 if (pc.mana() < max) {
                     pc.setMana(Math.min(max, pc.mana() + CharacterService.manaPerSecond(player)));
                 } else if (pc.mana() > max) {
@@ -306,8 +314,10 @@ public final class LQServerEvents {
                 }
                 penaliseDisallowedArmour(player);
                 SkillEngine.warnFadingDurations(player);
-                CharacterSync.send(player); // mana + cooldowns tick visibly on modded clients
+                // Mana and cooldowns tick visibly on modded clients; idle players get a slower heartbeat.
+                CharacterSync.perSecond(player, secondCounter, manaMoving);
             }
+            secondCounter++;
             if (++sweepCounter >= 5) { // every five seconds
                 sweepCounter = 0;
                 Nameplate.sweep(event.getServer());
@@ -494,6 +504,17 @@ public final class LQServerEvents {
                 Feedback.actionBar(playerAttacker, Lang.fmt("msg.combat.fumble", "item", weapon.getHoverName().getString()));
                 indicate(playerAttacker, victim, CombatIndicatorPayload.FUMBLE);
             }
+        }
+
+        // Inside the victim's invulnerability frames vanilla throws the hit
+        // away (or keeps only what it exceeds the last one by), and this event
+        // fires BEFORE that check. Rolling, showing HIT or CRIT and firing HURT
+        // skills for it reported blows that did nothing, and a player standing
+        // in lava or fire fired their HURT skills every tick. The two gates
+        // above still apply: a party member's bigger blow must not get through.
+        if (victim.getInvulnerableTime() > 10
+                && !event.getSource().is(net.minecraft.tags.DamageTypeTags.BYPASSES_COOLDOWN)) {
+            return;
         }
 
         // Skill damage (indirect magic) is a true strike: Magic Missile
