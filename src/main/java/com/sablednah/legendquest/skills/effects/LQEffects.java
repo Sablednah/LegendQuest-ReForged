@@ -99,6 +99,7 @@ public final class LQEffects {
                 .apply(i, Damage::new));
 
         @Override public Identifier type() { return TYPE; }
+        @Override public java.util.Optional<TargetSpec> aim() { return java.util.Optional.of(target); }
 
         /** Dealing damage is the plainest act of aggression there is. */
         @Override public boolean hostile() { return true; }
@@ -126,6 +127,7 @@ public final class LQEffects {
                 .apply(i, Heal::new));
 
         @Override public Identifier type() { return TYPE; }
+        @Override public java.util.Optional<TargetSpec> aim() { return java.util.Optional.of(target); }
 
         @Override
         public String describe() {
@@ -160,6 +162,7 @@ public final class LQEffects {
                 .apply(i, Potion::new));
 
         @Override public Identifier type() { return TYPE; }
+        @Override public java.util.Optional<TargetSpec> aim() { return java.util.Optional.of(target); }
 
         @Override
         public String describe() {
@@ -375,6 +378,7 @@ public final class LQEffects {
                 .apply(i, Message::new));
 
         @Override public Identifier type() { return TYPE; }
+        @Override public boolean cosmetic() { return true; }
 
         @Override
         public String describe() {
@@ -397,6 +401,7 @@ public final class LQEffects {
                 .apply(i, Ignite::new));
 
         @Override public Identifier type() { return TYPE; }
+        @Override public java.util.Optional<TargetSpec> aim() { return java.util.Optional.of(target); }
 
         /** Setting somebody alight is an act of aggression. */
         @Override public boolean hostile() { return true; }
@@ -460,6 +465,7 @@ public final class LQEffects {
                 .apply(i, Track::new));
 
         @Override public Identifier type() { return TYPE; }
+        @Override public java.util.Optional<TargetSpec> aim() { return java.util.Optional.of(target); }
 
         @Override public boolean hostile() { return true; }
 
@@ -549,6 +555,7 @@ public final class LQEffects {
                 new java.util.concurrent.CopyOnWriteArrayList<>();
 
         @Override public Identifier type() { return TYPE; }
+        @Override public boolean cosmetic() { return true; }
 
         @Override
         public String describe() {
@@ -627,6 +634,7 @@ public final class LQEffects {
                 .apply(i, ParticleLine::new));
 
         @Override public Identifier type() { return TYPE; }
+        @Override public boolean cosmetic() { return true; }
 
         @Override
         public String describe() {

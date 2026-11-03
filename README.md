@@ -400,9 +400,18 @@ target: { kind: looking_at, range: 20 }
 |------|---------|
 | `self` | The caster. |
 | `looking_at` | The living entity in the crosshair, within `range` (default 16). |
+| `looking_at_or_self` | The living entity in the crosshair, or the caster when there is none. For heals and blessings that mean "them, or me": nobody can look at themselves, so `looking_at` alone never reaches the caster. |
 | `nearby` | Every living entity within `radius` (default 4) of the caster, not the caster. |
 | `trigger` | The other party of the trigger event — the mob you hit, the thing that hurt you. |
 | `party` | The caster AND party members within `range` — defaulting to the party XP-share range, so songs and blessings reach exactly as far as shared glory does. No party = just the caster. |
+
+**An active skill aimed at an empty crosshair is refused before anything is
+spent.** When every effect that matters targets `looking_at` (or `trigger`)
+and nobody is there, the player is told to look at a target within range, and
+keeps their mana and cooldown. Sounds, particles and messages do not count
+as the skill doing something; one effect that lands regardless (a leap, a
+summon) lets the cast go ahead. A charged skill (with `buildup` or `delay`)
+picks its target when it fires, so it is not checked up front.
 
 ### Effects
 

@@ -33,6 +33,13 @@ public record TargetSpec(Kind kind, double range, double radius) {
         SELF,
         /** The living entity the caster is looking at (within range). */
         LOOKING_AT,
+        /**
+         * Whoever the caster is looking at, or the caster when nobody is in
+         * the crosshair. For mending and blessings that mean "them, or me":
+         * nobody can look at themselves, so plain LOOKING_AT can never reach
+         * the caster at all.
+         */
+        LOOKING_AT_OR_SELF,
         /** Every living entity within radius of the caster (not the caster). */
         NEARBY,
         /** For triggered skills: the other party of the trigger event. */
@@ -63,6 +70,7 @@ public record TargetSpec(Kind kind, double range, double radius) {
         return switch (kind) {
             case SELF -> com.sablednah.legendquest.neoforge.Lang.get("hb.fx.at.self");
             case LOOKING_AT -> com.sablednah.legendquest.neoforge.Lang.get("hb.fx.at.looking_at");
+            case LOOKING_AT_OR_SELF -> com.sablednah.legendquest.neoforge.Lang.get("hb.fx.at.looking_at_or_self");
             case TRIGGER -> com.sablednah.legendquest.neoforge.Lang.get("hb.fx.at.trigger");
             case NEARBY -> com.sablednah.legendquest.neoforge.Lang.fmt(
                     "hb.fx.at.nearby", "radius", num(radius));
@@ -90,6 +98,10 @@ public record TargetSpec(Kind kind, double range, double radius) {
             case LOOKING_AT -> {
                 if (ctx.triggerTarget() != null) yield List.of(ctx.triggerTarget());
                 yield lookedAt(ctx).map(List::<LivingEntity>of).orElse(List.of());
+            }
+            case LOOKING_AT_OR_SELF -> {
+                if (ctx.triggerTarget() != null) yield List.of(ctx.triggerTarget());
+                yield List.of(lookedAt(ctx).orElse(ctx.caster()));
             }
             case NEARBY -> {
                 List<LivingEntity> out = new ArrayList<>();
@@ -119,6 +131,17 @@ public record TargetSpec(Kind kind, double range, double radius) {
                 yield out;
             }
         };
+    }
+
+    /**
+     * True when this target needs somebody in the crosshair and there is
+     * nobody, so an effect aimed this way would do nothing at all. Only the
+     * crosshair kinds can come up empty like that: SELF and LOOKING_AT_OR_SELF
+     * always have the caster, PARTY always includes them, and an empty NEARBY
+     * is a fact about the surroundings rather than a missed aim.
+     */
+    public boolean missed(SkillContext ctx) {
+        return (kind == Kind.LOOKING_AT || kind == Kind.TRIGGER) && resolveEntities(ctx).isEmpty();
     }
 
     /** Resolve to a block position (the looked-at block, or under the target/caster). */
