@@ -12,7 +12,7 @@ setlocal
 rem The buddy lives in its OWN worktree so its gradle build never fights
 rem the main repo's jar builds or the WSL server worktree over artifacts.
 cd /d "%~dp0..\LegendQuest-ReForged-buddy"
-set "JAVA_HOME=%USERPROFILE%\curseforge\minecraft\Install\runtime\java-runtime-delta\windows-x64\java-runtime-delta"
+set "JAVA_HOME=D:\Minecraft\Install\runtime\java-runtime-delta\windows-x64\java-runtime-delta"
 if not exist "%JAVA_HOME%\bin\java.exe" (
     echo Could not find CurseForge's JDK 21 at %JAVA_HOME%
     echo Edit JAVA_HOME in this file to point at any JDK 21.

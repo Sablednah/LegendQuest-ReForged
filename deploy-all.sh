@@ -25,7 +25,7 @@
 # hand afterwards. Fix a problem in both repos, not one.
 set -euo pipefail
 
-INSTANCES="${LQ_INSTANCES:-/mnt/c/Users/darre/curseforge/minecraft/Instances}"
+INSTANCES="${LQ_INSTANCES:-/mnt/d/Minecraft/Instances}"
 
 CHECK=0
 if [ "${1:-}" = "--check" ]; then CHECK=1; shift; fi

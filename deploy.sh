@@ -13,7 +13,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
-INSTANCES="/mnt/c/Users/darre/curseforge/minecraft/Instances"
+INSTANCES="/mnt/d/Minecraft/Instances"
 
 # 26.x needs Java 25 and 1.21.11 needs 21, but the gradle toolchain provisions
 # whatever the build asks for, so any JDK that can launch gradle will do.
