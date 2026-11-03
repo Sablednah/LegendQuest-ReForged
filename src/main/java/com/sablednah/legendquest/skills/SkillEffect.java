@@ -56,6 +56,31 @@ public interface SkillEffect {
      * pack whose effect really is hostile overrides it — one line, and the
      * whole thing stays inert until a server's combat rules care about it.</p>
      */
+    /**
+     * The target this effect cannot work without: the entities it acts on.
+     * Effects that land somewhere regardless (a leap, a summon at your feet, a
+     * bolt striking the block you face) leave this empty.
+     *
+     * <p>Used to refuse a cast, <em>before</em> anything is charged, when every
+     * real effect is aimed at a crosshair that holds nobody. Without it a Heal
+     * cast at empty air spent its mana, started its cooldown, played its sound
+     * and healed no one, and nothing said why. Defaults to empty, so a pack
+     * effect that has never heard of this is never refused because of it.</p>
+     */
+    default java.util.Optional<TargetSpec> aim() {
+        return java.util.Optional.empty();
+    }
+
+    /**
+     * True for effects that only dress a cast up: a sound, particles, a line
+     * of text. They never count as the skill having done something, so a cast
+     * whose every real effect missed its target is refused even though its
+     * sound could still have played. Defaults to false.
+     */
+    default boolean cosmetic() {
+        return false;
+    }
+
     default boolean hostile() {
         return false;
     }

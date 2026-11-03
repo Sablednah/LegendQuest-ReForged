@@ -35,8 +35,11 @@ The list that cannot go stale is `SkillEffectTypes.register(...)` in
 `LQEffects.java` — count it there rather than trusting this paragraph, which
 had drifted to 11 before.
 
-Targets: `self`, `looking_at` (with `range`), `nearby` (with `radius`),
-`trigger` (the other party of a triggered skill's event).
+Targets: `self`, `looking_at` (with `range`), `looking_at_or_self` (the
+crosshair, or the caster when it is empty: use it for heals that say "or
+yourself"), `nearby` (with `radius`), `party`, `trigger` (the other party of a
+triggered skill's event). An instant cast whose every real effect is aimed at
+an empty `looking_at` crosshair is refused before mana or cooldown is spent.
 
 Triggered skills add a trigger block:
 

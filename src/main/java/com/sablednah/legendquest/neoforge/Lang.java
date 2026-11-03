@@ -169,6 +169,7 @@ public final class Lang {
         def("msg.skill.phase_wait", "&c{skill} is {phase} — ready in {sec}s");
         def("msg.skill.building", "&d{skill} building up...");
         def("msg.skill.no_mana", "&9Not enough {term.mana} for {skill} ({have}/{need}).");
+        def("msg.skill.no_target", "&e{skill} needs a target: look at one within {range} blocks. Nothing was spent.");
         def("msg.skill.needs_item", "&c{skill} needs {qty}x {item}.");
         def("msg.skill.not_virtuous", "&cYou are not virtuous enough for {skill}.");
         def("msg.skill.not_wicked", "&cYou are not wicked enough for {skill}.");
@@ -495,6 +496,7 @@ public final class Lang {
         def("hb.fx.unknown", "{type} — no description offered");
         def("hb.fx.at.self", "you");
         def("hb.fx.at.looking_at", "your target");
+        def("hb.fx.at.looking_at_or_self", "your target, or you");
         def("hb.fx.at.trigger", "whoever set it off");
         def("hb.fx.at.nearby", "everything within {radius} blocks");
         def("hb.fx.at.party", "you and your {term.party}");
