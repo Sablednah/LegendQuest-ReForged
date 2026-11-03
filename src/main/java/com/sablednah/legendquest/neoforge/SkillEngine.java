@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -40,7 +41,7 @@ public final class SkillEngine {
     /** Why a cast fired or fizzled — lets callers colour their feedback. */
     public enum UseResult {
         FIRED, NOT_KNOWN, NOT_LOADED, NOT_ACTIVE, LEVEL_LOCKED, NOT_PURCHASED,
-        NOT_READY, KARMA_BLOCKED, NO_MANA, NO_ITEM;
+        NOT_READY, KARMA_BLOCKED, NO_MANA, NO_ITEM, NO_TARGET;
 
         public boolean fired() {
             return this == FIRED;
@@ -239,11 +240,22 @@ public final class SkillEngine {
             return UseResult.NOT_READY;
         }
 
+        long fireAt = now + def.timing().buildupMs() + def.timing().delayMs();
+        // Only a cast that fires now can be aimed now: a charged one picks its
+        // target when it goes off, and the player may well turn to face it.
+        if (fireAt <= now) {
+            OptionalDouble missedRange = missedEverything(player, def);
+            if (missedRange.isPresent()) {
+                refuse(player, Lang.fmt("msg.skill.no_target", "skill", def.name(),
+                        "range", com.sablednah.legendquest.skills.TargetSpec.num(missedRange.getAsDouble())));
+                return UseResult.NO_TARGET;
+            }
+        }
+
         UseResult paid = payCosts(player, pc, def.costs(), def.name());
         if (paid != UseResult.FIRED) return paid;
 
         pc.stampUse(skillId, now);
-        long fireAt = now + def.timing().buildupMs() + def.timing().delayMs();
         if (fireAt <= now) {
             fire(player, skillId, def);
         } else {
@@ -258,6 +270,27 @@ public final class SkillEngine {
             PENDING.add(new Pending(player.getUUID(), skillId, fireAt));
         }
         return UseResult.FIRED;
+    }
+
+    /**
+     * The reach to name when every real effect of {@code def} is aimed at a
+     * crosshair with nobody in it, so firing would cost mana and a cooldown and
+     * do nothing; empty when the cast would do something. Cosmetic effects
+     * (sounds, particles, text) neither count nor rescue it, and one effect
+     * that lands regardless (a leap, a summon) means the cast goes ahead.
+     */
+    private static OptionalDouble missedEverything(ServerPlayer player, SkillDefinition def) {
+        SkillContext ctx = SkillContext.of(player, CharacterService.level(player));
+        double range = 0;
+        boolean anyReal = false;
+        for (SkillEffect effect : def.effects()) {
+            if (effect.cosmetic()) continue;
+            anyReal = true;
+            var aim = effect.aim();
+            if (aim.isEmpty() || !aim.get().missed(ctx)) return OptionalDouble.empty();
+            range = Math.max(range, aim.get().range());
+        }
+        return anyReal ? OptionalDouble.of(range) : OptionalDouble.empty();
     }
 
     private static UseResult payCosts(ServerPlayer player, PlayerCharacter pc, SkillCosts costs, String name) {
