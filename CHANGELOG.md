@@ -3,6 +3,14 @@
 All notable changes to LegendQuest ReForged are documented here.
 This project follows [Semantic Versioning](https://semver.org/).
 
+## 2.13.0 — 2026-11-03
+
+- **Heal can heal you.** Its description always said "or yourself", but it only ever reached whoever was in your crosshair, so a cleric could not heal themselves at all. Now it heals whoever you are looking at, or you when you are looking at nobody. Reported on CurseForge.
+- **A skill aimed at nobody costs nothing.** Casting a skill that needs a target (Holy Light, Magic Missile, Darkness, Mark Quarry) at empty air used to spend its mana and start its cooldown and do nothing, without a word. It is now refused with a message naming how close the target has to be, and nothing is spent. Skills that charge up first, like Smite, still choose their target when they go off.
+- **New target kind, `looking_at_or_self`**, for pack authors: the crosshair, or the caster when it is empty. Use it for heals and blessings meant for "them, or me".
+- **Less server load.** Gaining XP without levelling up no longer rebuilds the whole character, and XP updates go out at most once a tick. The once-a-second character update is skipped for players with no cooldown running and full mana, apart from a check every five seconds. Passive skills are spread across ticks instead of all running on the same one. Damage that vanilla is going to ignore (a hit during the brief invulnerability after the last one) no longer rolls dice and runs skill triggers first.
+- Modded clients need this version to join a server running it, because of the new target kind. Vanilla clients are unaffected.
+
 ## 2.12.0 — 2026-10-25
 
 - **Attacks use the right ability, the D&D way.** Melee rolls STR to hit, not DEX; projectiles roll DEX; finesse weapons (every sword, and anything a pack adds to `#legendquest:finesse`) and thrown projectiles (the trident, and anything in `#legendquest:thrown`) take the better of STR and DEX. The same modifier now adds to the damage of projectiles as well as melee, where only melee got STR before. Damage of any type in `#minecraft:is_projectile` counts as a shot, so hit-scan guns roll DEX once their mod puts its damage types there.

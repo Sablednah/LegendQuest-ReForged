@@ -102,7 +102,8 @@ is the part worth copying.
 - **A skill-point economy** — earn points per level, spend them on skills or
   stat boosts, respec when you change your mind.
 - **A five-slot loadout bar** with drag-and-drop, cooldown readouts and cast
-  feedback, plus binding a skill to a held item so right-click casts it.
+  feedback, plus binding a skill to a held item so right-click casts it. A
+  skill aimed at nobody tells you to pick a target, and costs nothing.
 - **Passives you can switch off** — night vision is a gift until you install a
   shader pack. `/skill toggle` silences any always-on skill and brings it back,
   and the game reminds you on login which ones you have switched off, so a
