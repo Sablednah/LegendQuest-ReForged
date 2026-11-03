@@ -717,6 +717,7 @@ public final class LQServerEvents {
             case FIRED -> "&a";                    // green: away it goes
             case NO_MANA -> "&9";                  // blue: mana problem
             case NO_ITEM -> "&b";                  // cyan: missing reagent
+            case NO_TARGET -> "&e";                // yellow: nobody in the crosshair
             case NOT_READY -> "&c";                // red: cooldown/phase
             default -> "&c";
         };

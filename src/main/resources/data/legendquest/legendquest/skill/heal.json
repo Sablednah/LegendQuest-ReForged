@@ -12,7 +12,7 @@
       "type": "legendquest:heal",
       "amount": 6.0,
       "target": {
-        "kind": "looking_at",
+        "kind": "looking_at_or_self",
         "range": 12
       }
     },
