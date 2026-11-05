@@ -118,7 +118,7 @@ public record TargetSpec(Kind kind, double range, double radius) {
                         : com.sablednah.legendquest.LQConfig.PARTY_RANGE.get();
                 var parties = com.sablednah.legendquest.neoforge.Parties
                         .get(ctx.level().getServer());
-                parties.partyOf(ctx.caster().getUUID()).ifPresent(party -> {
+                parties.playingIn(ctx.level().getServer(), ctx.caster().getUUID()).ifPresent(party -> {
                     for (var memberId : party.members()) {
                         if (memberId.equals(ctx.caster().getUUID())) continue;
                         var member = ctx.level().getServer().getPlayerList().getPlayer(memberId);

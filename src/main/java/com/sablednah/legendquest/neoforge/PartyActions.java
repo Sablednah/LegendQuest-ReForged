@@ -99,7 +99,7 @@ public final class PartyActions {
         var server = player.level().getServer();
         var left = Parties.get(server).remove(player.getUUID());
         if (left.isEmpty()) {
-            Feedback.notify(player, Lang.get("msg.party.not_in_one"));
+            notInOne(player);
             return false;
         }
         Feedback.notify(player, Lang.fmt("msg.party.left", "name", left.get().name()));
@@ -126,7 +126,7 @@ public final class PartyActions {
         var parties = Parties.get(server);
         var party = parties.partyOf(player.getUUID());
         if (party.isEmpty()) {
-            Feedback.notify(player, Lang.get("msg.party.not_in_one"));
+            notInOne(player);
             return false;
         }
         if (!party.get().owner().equals(player.getUUID())) {
@@ -149,6 +149,21 @@ public final class PartyActions {
         return true;
     }
 
+    /**
+     * "Not in a party", unless what they are in is a Standards group standing
+     * in as one: then it is managed with /group, and saying "you are in no
+     * party" while their party tab shows one would be a lie.
+     */
+    private static void notInOne(ServerPlayer player) {
+        var server = player.level().getServer();
+        var playing = Parties.get(server).playingIn(server, player.getUUID());
+        if (playing.isPresent() && playing.get().fromGroup()) {
+            Feedback.notify(player, Lang.fmt("msg.party.group_managed", "name", playing.get().name()));
+        } else {
+            Feedback.notify(player, Lang.get("msg.party.not_in_one"));
+        }
+    }
+
     // --- teleport (the old party gather) ---
 
     private static final java.util.Map<java.util.UUID, Long> TP_LAST = new java.util.HashMap<>();
@@ -165,7 +180,7 @@ public final class PartyActions {
             return false;
         }
         var server = player.level().getServer();
-        var party = Parties.get(server).partyOf(player.getUUID());
+        var party = Parties.get(server).playingIn(server, player.getUUID());
         if (party.isEmpty()) {
             Feedback.notify(player, Lang.get("msg.party.not_in_one"));
             return false;

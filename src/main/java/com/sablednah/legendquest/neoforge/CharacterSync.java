@@ -171,13 +171,13 @@ public final class CharacterSync {
     // --- party section ---
 
     private static String partyName(ServerPlayer player) {
-        return Parties.get(player.level().getServer())
-                .partyOf(player.getUUID()).map(Parties.Party::name).orElse("");
+        var server = player.level().getServer();
+        return Parties.get(server).playingIn(server, player.getUUID()).map(Parties.Party::name).orElse("");
     }
 
     private static List<CharacterSummaryPayload.PartyMember> partyMembers(ServerPlayer player) {
         var server = player.level().getServer();
-        var party = Parties.get(server).partyOf(player.getUUID());
+        var party = Parties.get(server).playingIn(server, player.getUUID());
         if (party.isEmpty()) return List.of();
         List<CharacterSummaryPayload.PartyMember> out = new ArrayList<>();
         for (var memberId : party.get().members()) {

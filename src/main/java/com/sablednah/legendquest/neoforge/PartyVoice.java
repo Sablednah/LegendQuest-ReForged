@@ -100,9 +100,15 @@ public final class PartyVoice {
      * cheaper than explaining the lock.</p>
      */
     public static boolean rejoin(ServerPlayer player) {
-        var party = Parties.get(player.level().getServer()).partyOf(player.getUUID());
+        var server = player.level().getServer();
+        var party = Parties.get(server).partyOf(player.getUUID());
         if (party.isEmpty()) {
-            Feedback.notify(player, Lang.get("msg.party.not_in_one"));
+            // A Standards group standing in as a party gets no channel: LegendQuest
+            // cannot see anyone leave it, so the channel would outlive the group.
+            var playing = Parties.get(server).playingIn(server, player.getUUID());
+            Feedback.notify(player, playing.isPresent()
+                    ? Lang.fmt("msg.party.voice.group", "name", playing.get().name())
+                    : Lang.get("msg.party.not_in_one"));
             return false;
         }
         if (!available()) {

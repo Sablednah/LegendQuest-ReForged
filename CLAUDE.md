@@ -315,7 +315,7 @@ should:
 | Class | Seam |
 |---|---|
 | `ChatSupport` | `api.chat` — decorators, router |
-| `CombatSupport` | `api.combat`, `api.groups` — combat tagging, claim checks |
+| `CombatSupport` | `api.combat`, `api.groups` — combat tagging, claim checks, a `standards:group` as a party |
 | `VanishSupport` | `api.vanish` — hide the nameplate with the player |
 | `CharacterPane` | `client.panels` — the inventory-panel seam |
 

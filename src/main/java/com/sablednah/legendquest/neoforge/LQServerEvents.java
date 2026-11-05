@@ -370,7 +370,7 @@ public final class LQServerEvents {
 
             // Party XP share: nearby members get a cut, full price for the killer.
             var parties = Parties.get(killer.level().getServer());
-            parties.partyOf(killer.getUUID()).ifPresent(party -> {
+            parties.playingIn(killer.level().getServer(), killer.getUUID()).ifPresent(party -> {
                 int share = LQConfig.PARTY_XP_SHARE.get();
                 if (share <= 0) return;
                 int range = LQConfig.PARTY_RANGE.get();
@@ -487,7 +487,7 @@ public final class LQServerEvents {
         // No friendly fire inside a party.
         if (LQConfig.BLOCK_PARTY_PVP.get()
                 && attacker instanceof ServerPlayer pa && victim instanceof ServerPlayer pv
-                && Parties.get(pa.level().getServer()).sameParty(pa.getUUID(), pv.getUUID())) {
+                && Parties.get(pa.level().getServer()).playTogether(pa.level().getServer(), pa.getUUID(), pv.getUUID())) {
             event.setCanceled(true);
             Feedback.actionBar(pa, Lang.fmt("msg.party.friendly_fire", "name", pv.getName().getString()));
             return;

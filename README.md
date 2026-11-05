@@ -135,6 +135,15 @@ be rejoined from Simple Voice Chat's own screen, so **`/party voice`** is the
 door back in. Without the mod nothing changes and nothing is said about it;
 `party.voiceChannel = false` turns it off.
 
+**A Standards group can stand in as the party.** With
+`party.partyFromStandardsGroup = true` (off by default), a player with no party
+of their own counts as partied with the other members of their Standards
+`/group` who have none either: shared XP within range, no friendly fire, `/pc`,
+`/party tp`, party-targeted skills and the party tab. It suits a server that
+puts everyone in one crew with Standards' `serverGroup`. A real party always
+comes first, and `/party create` is the way out of the group's party. The group
+is managed with `/group`, not `/party`, and it gets no voice channel.
+
 ## Writing content
 
 Everything below is data. There are two front doors with one schema:

@@ -1,10 +1,13 @@
 package com.sablednah.legendquest.neoforge;
 
+import java.util.List;
+
 import com.sablednah.legendquest.LegendQuest;
 import com.sablednah.standards.api.combat.Combat;
 import com.sablednah.standards.api.combat.CombatKind;
 import com.sablednah.standards.api.combat.Harm;
 import com.sablednah.standards.api.groups.Claims;
+import com.sablednah.standards.api.groups.Groups;
 
 /**
  * Reports LegendQuest's acts of combat to Standards.
@@ -48,6 +51,13 @@ public final class CombatSupport {
         // server gets the chance to refuse it.
         CombatTagging.setGuard(Harm::forbidden);
         CombatTagging.setPlaceGuard(Claims::pvpAllowed);
+        // A player's own Standards group (the server group on a server that
+        // sets one), for partyFromStandardsGroup. Asked through the public
+        // groups API by kind id, so a Standards without that kind simply has
+        // nothing to offer.
+        Parties.setGroupSource(player -> Groups.kind("standards:group")
+                .flatMap(kind -> Groups.primary(player, kind))
+                .map(group -> new Parties.Party(group.name(), Parties.NO_OWNER, List.copyOf(group.members()))));
         LegendQuest.LOGGER.info("Reporting combat to Standards, and asking it before doing harm");
     }
 
