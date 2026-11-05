@@ -371,8 +371,8 @@ public final class LQCommands {
                 "name", p.name()));
         for (var memberId : p.members()) {
             ServerPlayer online = ctx.getSource().getServer().getPlayerList().getPlayer(memberId);
-            String name = online != null ? online.getName().getString()
-                    : memberId.toString().substring(0, 8) + "… " + lc("msg.list.offline");
+            String name = Parties.memberName(ctx.getSource().getServer(), memberId)
+                    + (online != null ? "" : " " + lc("msg.list.offline"));
             sb.append("\n §7-§r ").append(online != null ? "§a" : "§8").append(name);
             if (memberId.equals(p.owner())) sb.append(" §6").append(lc("msg.list.leader"));
         }
