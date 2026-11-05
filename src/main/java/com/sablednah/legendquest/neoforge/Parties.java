@@ -36,6 +36,25 @@ public final class Parties extends SavedData {
         public boolean isMember(UUID id) {
             return members.contains(id);
         }
+
+        /** True for a Standards group standing in as a party: nobody leads it, and /group manages it. */
+        public boolean fromGroup() {
+            return owner.equals(NO_OWNER);
+        }
+    }
+
+    /** The owner of a party that is really a Standards group: nobody, so nobody gets leader controls. */
+    public static final UUID NO_OWNER = new UUID(0L, 0L);
+
+    /**
+     * Where a player's Standards group comes from, as a party-shaped record
+     * owned by {@link #NO_OWNER}. Empty until {@code CombatSupport} installs
+     * the real one, the same inward-pointing hook as {@code CombatTagging}.
+     */
+    private static java.util.function.Function<ServerPlayer, Optional<Party>> groupSource = p -> Optional.empty();
+
+    static void setGroupSource(java.util.function.Function<ServerPlayer, Optional<Party>> source) {
+        groupSource = source;
     }
 
     private static final Codec<Parties> CODEC = Party.CODEC.listOf()
@@ -85,6 +104,37 @@ public final class Parties extends SavedData {
 
     public boolean sameParty(UUID a, UUID b) {
         return partyOf(a).map(p -> p.isMember(b)).orElse(false);
+    }
+
+    /**
+     * The party a player <em>plays</em> in: their own, or, when
+     * {@code partyFromStandardsGroup} is on and they have none, their Standards
+     * group. Asked for ZARP, which plays as one crew in one server group and
+     * found LegendQuest's party tab empty.
+     *
+     * <p><b>For reading only</b>: XP share, friendly fire, party chat, party
+     * skills, the tab. Anything that changes a party uses {@link #partyOf},
+     * because LegendQuest cannot change a Standards group.</p>
+     *
+     * <p>A real party always wins, and the group counts only the members who
+     * have none, so every player is in exactly one party and the answer is the
+     * same from either side: two players are partied with each other or they
+     * are not. Online players only, because Standards' groups API is.</p>
+     */
+    public Optional<Party> playingIn(MinecraftServer server, UUID player) {
+        Optional<Party> own = partyOf(player);
+        if (own.isPresent() || !com.sablednah.legendquest.LQConfig.PARTY_FROM_STANDARDS_GROUP.get()) return own;
+        ServerPlayer online = server.getPlayerList().getPlayer(player);
+        if (online == null) return Optional.empty();
+        return groupSource.apply(online)
+                .map(group -> new Party(group.name(), NO_OWNER,
+                        group.members().stream().filter(m -> partyOf(m).isEmpty()).toList()))
+                .filter(party -> party.isMember(player));
+    }
+
+    /** {@link #sameParty}, counting a Standards group as {@link #playingIn} does. */
+    public boolean playTogether(MinecraftServer server, UUID a, UUID b) {
+        return playingIn(server, a).map(p -> p.isMember(b)).orElse(false);
     }
 
     // --- mutations (all mark dirty) ---
