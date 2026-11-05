@@ -48,6 +48,7 @@ public final class LQConfig {
     public static final ModConfigSpec.BooleanValue BLOCK_PARTY_PVP;
     public static final ModConfigSpec.IntValue PARTY_TP_COOLDOWN;
     public static final ModConfigSpec.BooleanValue PARTY_VOICE;
+    public static final ModConfigSpec.BooleanValue PARTY_FROM_STANDARDS_GROUP;
     public static final ModConfigSpec.BooleanValue ADVANCEMENTS;
     public static final ModConfigSpec.BooleanValue RACE_SIZE_SCALES_PLAYER;
 
@@ -184,6 +185,13 @@ public final class LQConfig {
                         "Needs the Simple Voice Chat mod; without it this does nothing.",
                         "Members hear each other at any distance and still hear players nearby.")
                 .define("voiceChannel", true);
+        PARTY_FROM_STANDARDS_GROUP = BUILDER
+                .comment("Count a player's Standards group as their party when they have no party of",
+                        "their own: XP share, no friendly fire, /pc, /party tp, party skills and the",
+                        "party tab. Meant for a server that puts everyone in one group with Standards'",
+                        "serverGroup setting. A real party still comes first. The voice channel stays",
+                        "with real parties. Manage the group with /group, not /party.")
+                .define("partyFromStandardsGroup", false);
         BUILDER.pop();
 
         BUILDER.comment("Advancements").push("advancements");

@@ -335,6 +335,9 @@ public final class Lang {
         def("msg.party.info_invited", "&6You are invited to &l{name}&r&6 — /party accept or /party decline.");
         def("msg.party.info_none", "&7Not in a {term.party}. /party create <name> to start one.");
         def("msg.party.info_header", "&6{term.party} &l{name}&r&6 — members:");
+        def("msg.party.info_header_group", "&6{name} &7(a Standards group: manage it with &f/group&7)&6 — members:");
+        def("msg.party.voice.group", "&7Voice channels are for parties made with &f/party create&7.");
+        def("msg.party.group_managed", "&e{name} is managed with &f/group&e. &f/party create&e makes a party of your own.");
 
         def("msg.list.races_header", "&6{term.races}:&r");
         def("msg.list.classes_header", "&6{term.classes}:&r");

@@ -69,7 +69,7 @@ public final class PartyChat {
         if (server == null) return false;
 
         Parties parties = Parties.get(server);
-        Party party = parties.partyOf(sender.getUUID()).orElse(null);
+        Party party = parties.playingIn(server, sender.getUUID()).orElse(null);
         if (party == null) {
             Feedback.chat(sender, Lang.get("msg.party.chat.no_party"));
             return false;
@@ -175,7 +175,7 @@ public final class PartyChat {
     public static boolean setCapture(ServerPlayer player, boolean on) {
         if (on) {
             MinecraftServer server = player.level().getServer();
-            if (server == null || Parties.get(server).partyOf(player.getUUID()).isEmpty()) {
+            if (server == null || Parties.get(server).playingIn(server, player.getUUID()).isEmpty()) {
                 Feedback.chat(player, Lang.get("msg.party.chat.no_party"));
                 return false;
             }
@@ -217,7 +217,7 @@ public final class PartyChat {
         if (!capturing(player)) return false;
 
         MinecraftServer server = player.level().getServer();
-        if (server == null || Parties.get(server).partyOf(player.getUUID()).isEmpty()) {
+        if (server == null || Parties.get(server).playingIn(server, player.getUUID()).isEmpty()) {
             // The party went away by a route partyEnded did not see. Let the
             // line go public -- swallowing it would be worse -- but never
             // silently: they are owed the knowledge that this one was heard.
