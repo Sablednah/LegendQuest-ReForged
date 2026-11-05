@@ -356,7 +356,7 @@ public final class LQCommands {
     private static int partyInfo(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         var parties = Parties.get(ctx.getSource().getServer());
-        var party = parties.partyOf(player.getUUID());
+        var party = parties.playingIn(ctx.getSource().getServer(), player.getUUID());
         if (party.isEmpty()) {
             var invite = parties.pendingInvite(player.getUUID());
             if (invite.isPresent()) {
@@ -367,7 +367,8 @@ public final class LQCommands {
             return 0;
         }
         var p = party.get();
-        StringBuilder sb = new StringBuilder(lc("msg.party.info_header", "name", p.name()));
+        StringBuilder sb = new StringBuilder(lc(p.fromGroup() ? "msg.party.info_header_group" : "msg.party.info_header",
+                "name", p.name()));
         for (var memberId : p.members()) {
             ServerPlayer online = ctx.getSource().getServer().getPlayerList().getPlayer(memberId);
             String name = online != null ? online.getName().getString()
