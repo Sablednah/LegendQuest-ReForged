@@ -131,6 +131,19 @@ public final class Parties extends SavedData {
                 .filter(party -> party.isMember(player));
     }
 
+    /**
+     * What to call a member: their name while online, else the name NeoForge
+     * last saw them use, else the start of their UUID. A UUID fragment is a
+     * last resort, and with a whole server in one group, offline crewmates
+     * are the common case.
+     */
+    public static String memberName(MinecraftServer server, UUID member) {
+        ServerPlayer online = server.getPlayerList().getPlayer(member);
+        if (online != null) return online.getName().getString();
+        String known = net.neoforged.neoforge.common.UsernameCache.getLastKnownUsername(member);
+        return known != null ? known : member.toString().substring(0, 8) + "…";
+    }
+
     /** {@link #sameParty}, counting a Standards group as {@link #playingIn} does. */
     public boolean playTogether(MinecraftServer server, UUID a, UUID b) {
         return playingIn(server, a).map(p -> p.isMember(b)).orElse(false);

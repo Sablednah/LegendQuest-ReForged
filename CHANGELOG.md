@@ -6,6 +6,7 @@ This project follows [Semantic Versioning](https://semver.org/).
 ## Unreleased
 
 - **A Standards group can count as your party.** `party.partyFromStandardsGroup` in the server config, off by default. When it is on, a player with no LegendQuest party plays as partied with the other members of their Standards `/group`: shared XP within range, no friendly fire, `/pc`, `/party tp`, party skills and the party tab all follow it. A real party still comes first, so `/party create` takes a player out of the group's party and into their own. Leaving or renaming it is done with `/group`, which `/party leave` now says. Group parties get no voice channel. Asked for by ZARP, which puts everyone in one Standards server group.
+- Offline party members are shown by name in the party tab and `/lq party`, where they used to appear as the start of their UUID.
 
 ## 2.13.0 — 2026-11-03
 

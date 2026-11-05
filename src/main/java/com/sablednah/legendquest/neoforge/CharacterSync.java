@@ -182,8 +182,7 @@ public final class CharacterSync {
         List<CharacterSummaryPayload.PartyMember> out = new ArrayList<>();
         for (var memberId : party.get().members()) {
             ServerPlayer online = server.getPlayerList().getPlayer(memberId);
-            String name = online != null ? online.getName().getString()
-                    : memberId.toString().substring(0, 8) + "…";
+            String name = Parties.memberName(server, memberId);
             out.add(new CharacterSummaryPayload.PartyMember(name, online != null,
                     memberId.equals(party.get().owner()), memberId.equals(player.getUUID())));
         }
