@@ -134,6 +134,10 @@ is the part worth copying.
 - **Karma** as a real mechanic, with good and evil paths that lock each other
   out.
 - **Parties** — invite, rename, teleport to members, and party-wide skills.
+- **A Standards group can be your party.** Switch on
+  `party.partyFromStandardsGroup` and everyone in a Standards `/group` plays as
+  one party with no invites to send: shared XP, no friendly fire, `/pc`,
+  teleports and party skills. A party you make yourself still comes first.
 - **Party chat** — `/pc` for a line, or `/pc` alone to send everything you type
   to your party until you switch it off. Operators can listen in only if the
   server grants it *and* they turn it on.
